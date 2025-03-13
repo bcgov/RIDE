@@ -4,19 +4,12 @@ EXPOSE 8080
 
 RUN apk add gcompat bash curl tar gzip caddy
 
-WORKDIR /tmp/
-RUN curl -O https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz && \
-tar xvzf ./openshift-client-linux-amd64-rhel9.tar.gz && \
-rm ./openshift-client-linux-amd64-rhel9.tar.gz
+RUN curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz \
+| tar xvzf - -C /usr/local/bin \
+&& chmod +x /usr/local/bin/oc
 
-USER root
-
-RUN mv oc /usr/local/bin && \
-    mv kubectl /usr/local/bin
-RUN mkdir /.kube && \
-    chmod 0777 /.kube
-
-ARG DEBUG_BUILD=true
+ENV KUBECONFIG=/tmp/.kube/config
+ARG DEBUG_BUILD=false
 
 # Add debugging tools into builds if enabled
 RUN if [ ${DEBUG_BUILD} = true ]; then \
