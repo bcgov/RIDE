@@ -10,5 +10,5 @@
 }
 
 :8080 {
-        respond "server ok!" 200
+        respond "server up" 200
 }
