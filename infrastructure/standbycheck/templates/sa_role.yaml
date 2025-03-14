@@ -1,0 +1,16 @@
+{{ if .Values.serviceaccount.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-postgresclusters-metadata
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - postgres-operator.crunchydata.com
+  resources:
+  - postgresclusters
+  verbs:
+  - get
+  - list
+  - read
+{{ end }}

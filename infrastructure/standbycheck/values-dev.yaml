@@ -1,0 +1,39 @@
+fullnameOverride: dev-ride-standbycheck
+nameOverride: dev-ride-standbycheck
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/uhelm/ride-standbycheck
+  tag: latest
+
+release:
+
+# deploy the standbycheck control pod in the primary cluster
+controller:
+  enabled: true
+
+# deploy the role and serviceaccount in the standby cluster
+serviceaccount:
+  enabled: false
+
+deployment:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 50Mi
+  env:
+    secret: dev-ride-standbycheck
+
+autoscaling:
+  enabled: false
+
+route:
+  host: dev-ride.apps.gold.devops.gov.bc.ca
+  path: /lbhealth/
+  iprestricted: true # Set to true if you want to limit IP's the the addresses in the ipallowlist below
+  ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 # The first 4 ranges are GOV IP's, the last one is for OXD external IP
+
+podDisruptionBudget: 
+  enabled: false # If you have more than 1 replica, you can set this to true.
+  minAvailable: 1 
