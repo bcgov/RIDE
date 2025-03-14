@@ -10,5 +10,5 @@
 }
 
 :8080 {
-		respond "server down!" 503
+	respond "server down" 503
 }
