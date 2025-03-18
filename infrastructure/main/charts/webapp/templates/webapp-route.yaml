@@ -1,51 +1,51 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}
+  name: {{ template "app.fullname" . }}
   labels: {{ include "app.labels" . | nindent 4 }}
-{{ if .Values.webapp.route.iprestricted }}
+{{ if .Values.route.iprestricted }}
   annotations:
     haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
 {{ end }}
 spec:
   to:
     kind: Service
-    name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}
+    name: {{ template "app.fullname" . }}
   port:
     targetPort: 80-tcp
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None
-  host: {{ .Values.webapp.route.host  }}
+  host: {{ .Values.route.host  }}
   path: /
 
 
 ---
-{{- if .Values.webapp.route.vanityurl }}
-{{- $routeExists := lookup "route.openshift.io/v1" "Route" .Release.Namespace (printf "%s-%s-vanityurl" (include "app.fullname" .) .Values.webapp.component) }}
+{{- if .Values.route.vanityurl }}
+{{- $routeExists := lookup "route.openshift.io/v1" "Route" .Release.Namespace (printf "%s-vanityurl" (include "app.fullname" .)) }}
 {{- if not $routeExists }}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}-vanityurl
+  name: {{ template "app.fullname" . }}-vanityurl
   labels: {{ include "app.labels" . | nindent 4 }}
   annotations:
     "helm.sh/resource-policy": keep
-    {{ if .Values.webapp.route.iprestricted }}
+    {{ if .Values.route.iprestricted }}
     haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
     {{ end }}
 spec:
   to:
     kind: Service
-    name: {{ template "app.fullname" . }}-{{ .Values.webapp.component }}
+    name: {{ template "app.fullname" . }}
   port:
     targetPort: 80-tcp
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None
-  host: {{ .Values.webapp.route.vanityurlhost  }}
+  host: {{ .Values.route.vanityurlhost  }}
   path: /
 {{- end }}
 {{- end }}

@@ -48,9 +48,4 @@ Selector labels
 {{- define "app.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- range $key, $val := .Values }}
-{{- if and (kindIs "map" $val) (hasKey $val "component") }}
-app.kubernetes.io/component: {{ $val.component }}
-{{- end }}
-{{- end }}
 {{- end }}

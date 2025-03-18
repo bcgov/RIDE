@@ -11,8 +11,9 @@ global:
   release: # This is set by Github actions for the prod release. Do not change this value.
 
 webapp:
-  component: webapp # Used for the selector label as well as appended to the nameOverride and fullnameOverride in various components
-  allowExternalIngress: true # Set to false if you do not want external traffic to reach the app
+  enabled: true
+  nameOverride: test-ride-webapp
+  fullnameOverride: test-ride-webapp
   replicaCount: 1 # Number of replicas to deploy
 
   image:
