@@ -1,0 +1,11 @@
+fullnameOverride: dev-ride-standbycheck
+nameOverride: dev-ride-standbycheck
+
+# deploy the standbycheck control pod in the primary cluster
+controller:
+  enabled: false
+
+# deploy the role and serviceaccount in the standby cluster
+serviceaccount:
+  enabled: true
+  name: dev-ride-standbycheck
