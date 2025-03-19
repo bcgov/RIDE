@@ -22,11 +22,13 @@ spec:
             requests:
               cpu: {{ .Values.deployment.resources.requests.cpu  }}
               memory: {{ .Values.deployment.resources.requests.memory  }}
+            limits:
+              memory: {{ .Values.deployment.resources.limits.memory  }}
           name: {{ include "app.fullname" . }}
           ports:
             - containerPort: 8080
               protocol: TCP
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           image: >-
             {{ .Values.image.repository  }}:{{ .Values.image.tag  }}
           env:
@@ -61,4 +63,7 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: {{ template "app.name" . }}
+  spec:
+    strategy:
+      type: RollingUpdate
 {{ end }}                  

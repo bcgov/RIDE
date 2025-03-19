@@ -1,13 +1,13 @@
 fullnameOverride: dev-ride-standbycheck
 nameOverride: dev-ride-standbycheck
 
-replicaCount: 2
+replicaCount: 3
+
+cluster: gold # can be gold or golddr
 
 image:
-  repository: ghcr.io/uhelm/ride-standbycheck
+  repository: ghcr.io/bcgov/ride-standbycheck
   tag: latest
-
-release:
 
 # deploy the standbycheck control pod in the primary cluster
 controller:
@@ -22,11 +22,10 @@ deployment:
     requests:
       cpu: 50m
       memory: 50Mi
+    limits:
+      memory: 100Mi
   env:
     secret: dev-ride-standbycheck
-
-autoscaling:
-  enabled: false
 
 route:
   host: dev-ride.apps.gold.devops.gov.bc.ca
@@ -35,5 +34,5 @@ route:
   ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 # The first 4 ranges are GOV IP's, the last one is for OXD external IP
 
 podDisruptionBudget: 
-  enabled: false # If you have more than 1 replica, you can set this to true.
+  enabled: true # If you have more than 1 replica, you can set this to true.
   minAvailable: 1 

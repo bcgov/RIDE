@@ -1,6 +1,6 @@
 apiVersion: v2
 name: standbycheck
-description: A Helm chart for Kubernetes
+description: A system to allow the GSLB to monitor which OpenShift cluster is active.
 
 # A chart can be either an 'application' or a 'library' chart.
 #

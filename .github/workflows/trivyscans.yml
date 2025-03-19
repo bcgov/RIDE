@@ -13,7 +13,7 @@ permissions:
 
 jobs:
 
-  imagescan-static:
+  imagescan-webapp:
     name: Scan latest-test Webapp Image
     runs-on: ubuntu-latest
     steps:
@@ -23,6 +23,28 @@ jobs:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
         with:
           image-ref: 'ghcr.io/bcgov/ride-webapp:latest-test'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          limit-severities-for-sarif: true
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  imagescan-standbycheck:
+    name: Scan latest Standbycheck Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.29.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
+        with:
+          image-ref: 'ghcr.io/bcgov/ride-standbycheck:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
           ignore-unfixed: true

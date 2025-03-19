@@ -21,6 +21,13 @@ echodate() {
     echo `date +%Y/%m/%d\ %H:%M:%S`:: $*
 }
 
+# if the cluster is golddr, we should always return OK
+if [[ "${CLUSTER}" == "golddr" ]]; then
+    echodate "[NOTICE] Gold DR Cluster, returning OK as always."
+    caddy_reload_config ${caddy_200_conf}
+    exit 0
+fi
+
 standby_status() {
     output=$(oc -n ${l_namespace} get postgrescluster ${l_cluster_name} -o jsonpath="{.spec.standby.enabled}")
     

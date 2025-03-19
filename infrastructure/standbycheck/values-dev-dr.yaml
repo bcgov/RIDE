@@ -1,6 +1,8 @@
 fullnameOverride: dev-ride-standbycheck
 nameOverride: dev-ride-standbycheck
 
+cluster: golddr # can be gold or golddr
+
 # deploy the standbycheck control pod in the primary cluster
 controller:
   enabled: false
