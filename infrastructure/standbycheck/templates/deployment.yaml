@@ -1,4 +1,4 @@
-{{ if .Values.controller.enabled }}
+
 {{- $deploymentTag := .Values.image.tag | default .Chart.AppVersion -}}
 {{- $deploymentTime := now | date "2006-01-02 15:04:05.000000" -}}
 
@@ -36,9 +36,13 @@ spec:
               value: {{ $deploymentTag | quote }}
             - name: DEPLOYMENT_TIME
               value: {{ $deploymentTime | quote }}
+            - name: CLUSTER
+              value: {{ .Values.cluster }}
+          {{ if .Values.controller.enabled }}
           envFrom:
             - secretRef:
                 name: {{ .Values.deployment.env.secret }}
+          {{ end }}  
           securityContext:
             seccompProfile:
               type: RuntimeDefault
@@ -66,4 +70,4 @@ spec:
   spec:
     strategy:
       type: RollingUpdate
-{{ end }}                  
+                
