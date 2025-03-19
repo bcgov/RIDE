@@ -56,7 +56,8 @@ jobs:
           build-args:
             DEBUG_BUILD=true
 
-  update-openshift:
+  update-openshift-gold:
+    needs: build-and-push-standbycheck
     runs-on: ubuntu-latest
     name: Deploy Latest Helm Chart to ${{ github.event.inputs.environment }} in Gold
     environment:
@@ -83,6 +84,24 @@ jobs:
         helm upgrade ${{ github.event.inputs.environment }}-ride-standbycheck -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}.yaml ./infrastructure/standbycheck --set image.tag="sha-${{ github.sha }}"
 
   
+
+
+
+  update-openshift-golddr:
+    needs: build-and-push-standbycheck
+    runs-on: ubuntu-latest
+    name: Deploy Latest Helm Chart to ${{ github.event.inputs.environment }} in GoldDR
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 
+
+    - name: Install CLI tools from OpenShift Mirror
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        oc: "4"
+
     - name: Authenticate and set context for GoldDR
       uses: redhat-actions/oc-login@v1
       with:
