@@ -1,21 +1,12 @@
 # This workflow is to update the GSLB Monitoring Pods using Github actions.
 
-name: Build standbycheck
+name: Build and Deploy Standbycheck on the selected Environment
 
 on:
   workflow_dispatch:
     inputs:
       environment:
         type: environment
-      cluster:
-        type: choice
-        description: OpenShift Cluster
-        options: 
-        - gold
-        - golddr
-
-
-# Based on: https://docs.github.com/en/actions/use-cases-and-examples/publishing-packages/publishing-docker-images
 
 env:
   REGISTRY: ghcr.io
@@ -67,7 +58,7 @@ jobs:
 
   update-openshift:
     runs-on: ubuntu-latest
-    name: Deploy Latest Helm Chart to ${{ github.event.inputs.cluster }} on ${{ github.event.inputs.environment }}
+    name: Deploy Latest Helm Chart to ${{ github.event.inputs.environment }} in Gold
     environment:
       name: ${{ github.event.inputs.environment }}
     steps:
@@ -80,7 +71,6 @@ jobs:
         oc: "4"
           
     - name: Authenticate and set context for Gold
-      if: ${{ github.event.inputs.cluster == 'gold' }}
       uses: redhat-actions/oc-login@v1
       with:
         openshift_server_url: ${{ vars.OPENSHIFT_GOLD_SERVER }}
@@ -90,19 +80,17 @@ jobs:
 
     - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
       run: |
-#        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-${{ github.event.inputs.cluster }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
+        helm upgrade ${{ github.event.inputs.environment }}-ride-standbycheck -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}.yaml ./infrastructure/standbycheck --set image.tag="sha-${{ github.sha }}"
 
-
+  
     - name: Authenticate and set context for GoldDR
-      if: ${{ github.event.inputs.cluster == 'golddr' }}
       uses: redhat-actions/oc-login@v1
       with:
         openshift_server_url: ${{ vars.OPENSHIFT_GOLDDR_SERVER }}
         openshift_token: ${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}
         namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
         insecure_skip_tls_verify: true
-
+  
     - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
       run: |
-#        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-gold.yaml -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-golddr.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
-
+        helm upgrade ${{ github.event.inputs.environment }}-ride-standbycheck-dr -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}.yaml -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}-dr.yaml ./infrastructure/standbycheck --set image.tag="sha-${{ github.sha }}" 
