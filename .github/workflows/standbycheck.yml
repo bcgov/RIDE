@@ -114,4 +114,4 @@ jobs:
   
     - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
       run: |
-        helm upgrade ${{ github.event.inputs.environment }}-ride-standbycheck-dr -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}.yaml -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}-dr.yaml ./infrastructure/standbycheck --set image.tag="sha-${{ github.sha }}" 
+        helm upgrade ${{ github.event.inputs.environment }}-ride-standbycheck -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}.yaml -f ./infrastructure/standbycheck/values-${{ github.event.inputs.environment }}-dr.yaml ./infrastructure/standbycheck --set image.tag="sha-${{ github.sha }}" 
