@@ -9,6 +9,8 @@ metadata:
   labels: {{ include "app.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       {{ include "app.selectorLabels" . | nindent 6 }}
@@ -67,7 +69,5 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: {{ template "app.name" . }}
-  spec:
-    strategy:
-      type: RollingUpdate
+
                 

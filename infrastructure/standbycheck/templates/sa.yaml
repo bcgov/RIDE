@@ -1,7 +1,9 @@
 {{ if .Values.serviceaccount.enabled }}
+{{- if not (lookup "v1" "ServiceAccount" .Release.Namespace .Values.serviceaccount.name) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Values.serviceaccount.name }}
   namespace: {{ .Release.Namespace }}
-{{ end }}
+{{- end }}
+{{- end }}

@@ -21,22 +21,6 @@ echodate() {
     echo `date +%Y/%m/%d\ %H:%M:%S`:: $*
 }
 
-caddy_reload_config() {
-    caddy reload -c $1 > /dev/null 2>&1
-    ret=$?
-    if [[ $ret -eq 0 ]]; then
-        echodate "[NOTICE] Reloaded caddy configuration with: $1"
-    else
-        echodate "[CRITICAL] Unable to reload caddy configuration with: $1. Returned error code $ret"
-    fi
-}
-
-# if the cluster is golddr, we should always return OK
-if [[ "${CLUSTER}" == "golddr" ]]; then
-    echodate "[NOTICE] Gold DR Cluster, returning OK as always."
-    caddy_reload_config ${caddy_200_conf}
-fi
-
 standby_status() {
     output=$(oc -n ${l_namespace} get postgrescluster ${l_cluster_name} -o jsonpath="{.spec.standby.enabled}")
     
@@ -54,6 +38,16 @@ shutdown_status() {
         echo $output
     else
         echo "unknown"
+    fi
+}
+
+caddy_reload_config() {
+    caddy reload -c $1 > /dev/null 2>&1
+    ret=$?
+    if [[ $ret -eq 0 ]]; then
+        echodate "[NOTICE] Reloaded caddy configuration with: $1"
+    else
+        echodate "[CRITICAL] Unable to reload caddy configuration with: $1. Returned error code $ret"
     fi
 }
 

@@ -62,6 +62,7 @@ jobs:
     name: Deploy Latest Helm Chart to ${{ github.event.inputs.environment }} in Gold
     environment:
       name: ${{ github.event.inputs.environment }}
+      url: https://dev-ride.apps.gold.devops.gov.bc.ca/lbhealth/
     steps:
     - name: Checkout code
       uses: actions/checkout@v4 
@@ -93,6 +94,7 @@ jobs:
     name: Deploy Latest Helm Chart to ${{ github.event.inputs.environment }} in GoldDR
     environment:
       name: ${{ github.event.inputs.environment }}
+      url: https://dev-ride.apps.golddr.devops.gov.bc.ca/lbhealth/
     steps:
     - name: Checkout code
       uses: actions/checkout@v4 

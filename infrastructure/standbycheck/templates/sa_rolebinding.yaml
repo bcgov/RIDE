@@ -1,4 +1,5 @@
 {{ if .Values.serviceaccount.enabled }}
+{{- if not (lookup "rbac.authorization.k8s.io/v1" "RoleBinding" .Release.Namespace "read-postgresclusters-metadata-users") }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -12,4 +13,5 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Values.serviceaccount.name }}
   namespace: {{ .Release.Namespace }}
-{{ end }}
+{{- end }}
+{{- end }}
