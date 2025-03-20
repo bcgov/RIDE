@@ -7,6 +7,8 @@ on:
     branches: [ "main" ]
     paths-ignore:
     - '.github/**'
+    - '.infrastructure/standbycheck/**'
+    - '.infrastructure/crunchy-postgres/**'
   workflow_dispatch:
 
 env:

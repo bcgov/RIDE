@@ -1,9 +1,8 @@
-{{ if .Values.serviceaccount.enabled }}
-{{- if not (lookup "rbac.authorization.k8s.io/v1" "Role" .Release.Namespace "read-postgresclusters-metadata") }}
+{{- if and .Values.serviceaccount.enabled (not .Release.IsUpgrade) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: read-postgresclusters-metadata
+  name: {{ template "app.fullname" . }}
   namespace: {{ .Release.Namespace }}
 rules:
 - apiGroups:
@@ -14,5 +13,4 @@ rules:
   - get
   - list
   - read
-{{- end }}
 {{- end }}

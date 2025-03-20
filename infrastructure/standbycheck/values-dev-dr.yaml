@@ -10,4 +10,3 @@ controller:
 # deploy the role and serviceaccount in the standby cluster
 serviceaccount:
   enabled: true
-  name: dev-ride-standbycheck

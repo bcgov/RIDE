@@ -1,4 +1,7 @@
+
+
 webapp:
+  replicaCount: 0 # TEMPORARY WHILE WE WAIT FOR A DB FIX
   vault:
     authPath: auth/k8s-golddr # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 

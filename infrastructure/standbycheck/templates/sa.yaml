@@ -1,9 +1,7 @@
-{{ if .Values.serviceaccount.enabled }}
-{{- if not (lookup "v1" "ServiceAccount" .Release.Namespace .Values.serviceaccount.name) }}
+{{- if and .Values.serviceaccount.enabled (not .Release.IsUpgrade) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Values.serviceaccount.name }}
+  name: {{ template "app.fullname" . }}
   namespace: {{ .Release.Namespace }}
-{{- end }}
 {{- end }}
