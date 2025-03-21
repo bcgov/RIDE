@@ -68,5 +68,6 @@ Simply follow these steps:
     oc delete serviceaccount ENV-ride-standbycheck
     oc delete secret ENV-ride-standbycheck
     ```
+1. On Gold run this command `oc delete secret ENV-ride-standbycheck`
 
 We need to delete those components manually because Github actions is using an OpenShift service account that doesn't have permissions on all those objects so we had to set a few to be generated on initial install but not touched on upgrades.

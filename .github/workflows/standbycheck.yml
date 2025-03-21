@@ -54,7 +54,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args:
-            DEBUG_BUILD=true
+            DEBUG_BUILD=false
 
   update-openshift-gold:
     needs: build-and-push-standbycheck
