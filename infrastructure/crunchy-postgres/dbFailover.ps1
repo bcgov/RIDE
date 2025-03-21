@@ -69,7 +69,7 @@ function Get-Variables {
 function Disable-GoldDB {
     Test-OnGoldCluster
 
-    helm upgrade "$ENV-ride-db" -f "./values-$ENV-gold.yaml" "./" `
+    helm upgrade "$ENV-ride-db" -f "./values-$ENV.yaml" "./" `
         --set crunchy.pgBackRest.s3.bucket="$BUCKET" `
         --set crunchy.pgBackRest.s3.endpoint="$ENDPOINT" `
         --set crunchy.shutdown=true
@@ -78,7 +78,7 @@ function Disable-GoldDB {
 # Step 2: Set Gold DR as the Primary DB
 function Set-GoldDRPrimary {
     Test-OnGoldDRCluster
-    helm upgrade "$ENV-ride-db" -f "./values-$ENV-gold.yaml" -f "./values-$ENV-golddr.yaml" "./" `
+    helm upgrade "$ENV-ride-db" -f "./values-$ENV.yaml" -f "./values-$ENV-dr.yaml" "./" `
         --set crunchy.pgBackRest.s3.bucket="$BUCKET" `
         --set crunchy.pgBackRest.s3.endpoint="$ENDPOINT" `
         --set crunchy.standby.enabled=false
@@ -101,7 +101,7 @@ function Remove-GoldDB {
 # Step 4: Rebuild Gold DB as a Standby
 function Restore-GoldStandby {
     Test-OnGoldCluster
-    helm install "$ENV-ride-db" -f "./values-$ENV-gold.yaml" "./" `
+    helm install "$ENV-ride-db" -f "./values-$ENV.yaml" "./" `
         --set crunchy.pgBackRest.s3.bucket="$BUCKET" `
         --set crunchy.pgBackRest.s3.endpoint="$ENDPOINT" `
         --set crunchy.pgBackRest.s3.accessKey="$ACCESS_KEY" `
@@ -113,7 +113,7 @@ function Restore-GoldStandby {
 # Step 5: Shutdown the DB in Gold DR to prepare for making Gold Primary again
 function Disable-GoldDRDB {
     Test-OnGoldDRCluster
-    helm upgrade "$ENV-ride-db" -f "./values-$ENV-gold.yaml" -f "./values-$ENV-golddr.yaml" "./" `
+    helm upgrade "$ENV-ride-db" -f "./values-$ENV.yaml" -f "./values-$ENV-dr.yaml" "./" `
         --set crunchy.pgBackRest.s3.bucket="$BUCKET" `
         --set crunchy.pgBackRest.s3.endpoint="$ENDPOINT" `
         --set crunchy.standby.enabled=false `
@@ -123,7 +123,7 @@ function Disable-GoldDRDB {
 # Step 6: Set Gold as the Primary DB
 function Set-GoldPrimary {
     Test-OnGoldCluster
-    helm upgrade "$ENV-ride-db" -f "./values-$ENV-gold.yaml" "./" `
+    helm upgrade "$ENV-ride-db" -f "./values-$ENV.yaml" "./" `
         --set crunchy.pgBackRest.s3.bucket="$BUCKET" `
         --set crunchy.pgBackRest.s3.endpoint="$ENDPOINT" `
         --set crunchy.standby.enabled=false
@@ -148,7 +148,7 @@ function Remove-GoldDRDB {
 # Step 8: Rebuild Gold DR as a Standby
 function Restore-GoldDRStandby {
     Test-OnGoldDRCluster
-    helm install "$ENV-ride-db" -f "./values-$ENV-gold.yaml" -f "./values-$ENV-golddr.yaml" "./" `
+    helm install "$ENV-ride-db" -f "./values-$ENV.yaml" -f "./values-$ENV-dr.yaml" "./" `
         --set crunchy.pgBackRest.s3.bucket="$BUCKET" `
         --set crunchy.pgBackRest.s3.endpoint="$ENDPOINT" `
         --set crunchy.pgBackRest.s3.accessKey="$ACCESS_KEY" `
