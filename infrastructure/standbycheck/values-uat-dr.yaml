@@ -9,4 +9,4 @@ serviceaccount:
   enabled: true # Set to true if deploying to Gold DR, false if deploying to Gold
 
 route:
-  host: dev-ride.apps.golddr.devops.gov.bc.ca
+  host: uat-ride.apps.golddr.devops.gov.bc.ca

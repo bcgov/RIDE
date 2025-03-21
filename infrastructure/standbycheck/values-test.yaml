@@ -1,5 +1,5 @@
-fullnameOverride: dev-ride-standbycheck
-nameOverride: dev-ride-standbycheck
+fullnameOverride: test-ride-standbycheck
+nameOverride: test-ride-standbycheck
 
 replicaCount: 3 # How many replicas of the standbycheck pod to run
 
@@ -26,7 +26,7 @@ deployment:
       memory: 100Mi
 
 route:
-  host: dev-ride.apps.gold.devops.gov.bc.ca # Hostname for the route
+  host: test-ride.apps.gold.devops.gov.bc.ca # Hostname for the route
   path: /lbhealth/ # Path for the route
   iprestricted: true # Set to true if you want to limit IP's the the addresses in the ipallowlist below
   ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 # The first 4 ranges are GOV IP's, the last one is for OXD external IP

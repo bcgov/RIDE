@@ -43,7 +43,7 @@ spec:
           {{ if .Values.controller.enabled }}
           envFrom:
             - secretRef:
-                name: {{ .Values.deployment.env.secret }}
+                name: {{ template "app.fullname" . }}
           {{ end }}  
           securityContext:
             seccompProfile:
