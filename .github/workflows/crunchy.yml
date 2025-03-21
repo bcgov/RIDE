@@ -1,6 +1,6 @@
 # This workflow is to update Crunchy using Github actions
 
-name: Crunchy DB Update
+name: Crunchy - Deploy Updated Crunchy Helm Chart to OpenShift
 
 on:
   workflow_dispatch:
@@ -40,7 +40,7 @@ jobs:
 
     - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
       run: |
-        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-${{ github.event.inputs.cluster }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
+        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
 
 
     - name: Authenticate and set context for GoldDR
@@ -54,5 +54,5 @@ jobs:
 
     - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
       run: |
-        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-gold.yaml -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-golddr.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
+        helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}.yaml -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-dr.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
 

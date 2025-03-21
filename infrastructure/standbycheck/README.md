@@ -61,3 +61,12 @@ Simply follow these steps:
 1. Login to the correct project
 1. `helm list` to confirm your helm release is there
 1. `helm uninstall ENV-ride-standbycheck`
+1. On GoldDR also run these
+    ```
+    oc delete rolebinding ENV-ride-standbycheck
+    oc delete role ENV-ride-standbycheck
+    oc delete serviceaccount ENV-ride-standbycheck
+    oc delete secret ENV-ride-standbycheck
+    ```
+
+We need to delete those components manually because Github actions is using an OpenShift service account that doesn't have permissions on all those objects so we had to set a few to be generated on initial install but not touched on upgrades.

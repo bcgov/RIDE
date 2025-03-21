@@ -1,0 +1,4 @@
+crunchy: 
+  standby:
+    enabled: true
+    repoName: repo2 # Always use the S3 repo for standby bootstrapping
