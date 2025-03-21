@@ -1,4 +1,4 @@
-{{- if .Values.crunchy.enabled}}
+{{- if .Values.crunchy.enabled }}
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
@@ -7,14 +7,14 @@ metadata:
 spec:
   metadata:
     labels: {{ include "crunchy-postgres.labels" . | nindent 6 }}
-  imagePullPolicy: {{.Values.crunchy.imagePullPolicy}}
+  imagePullPolicy: {{ .Values.crunchy.imagePullPolicy }}
   postgresVersion: {{ .Values.crunchy.postgresVersion }}
   {{ if .Values.crunchy.postGISVersion }}
   postGISVersion: {{ .Values.crunchy.postGISVersion | quote }}
   {{ end }}
   {{- if and .Values.crunchy.clone .Values.crunchy.clone.enabled }} # enabled when cloning from s3
   dataSource:
-    {{- if .Values.crunchy.clone.s3.enabled}}
+    {{- if .Values.crunchy.clone.s3.enabled }}
     pgbackrest:
       stanza: {{ .Values.crunchy.instances.name }}
       configuration:
@@ -29,20 +29,20 @@ spec:
           bucket: {{ .Values.crunchy.clone.bucket }}
           endpoint: {{ .Values.crunchy.clone.endpoint }}
           region: "ca-central-1"
-    {{- end}}
-    {{- if .Values.crunchy.clone.pvc.enabled}}
+    {{- end }}
+    {{- if .Values.crunchy.clone.pvc.enabled }}
     postgresCluster:
       clusterName: {{ template "crunchy-postgres.fullname" . }}
       repoName: repo1
-    {{- end}}
-  {{- end}}
+    {{- end }}
+  {{- end }}
   {{- if .Values.crunchy.pgmonitor.enabled }}
   monitoring:
     pgmonitor:
       # this stuff is for the "exporter" container in the "postgres-cluster-ha" set of pods
       exporter:
-        {{ if .Values.crunchy.pgmonitor.exporter.image}}
-        image: {{ .Values.crunchy.pgmonitor.exporter.image}}
+        {{ if .Values.crunchy.pgmonitor.exporter.image }}
+        image: {{ .Values.crunchy.pgmonitor.exporter.image }}
         {{ end }}
         resources:
           requests:
@@ -127,7 +127,7 @@ spec:
     {{- if .Values.crunchy.pgBackRest.enabled }}
   backups:
     pgbackrest:
-      {{- if .Values.crunchy.pgBackRest.s3.enabled}}
+      {{- if .Values.crunchy.pgBackRest.s3.enabled }}
       configuration:
         - secret:
             name: {{ .Release.Name }}-s3-secret
@@ -135,10 +135,10 @@ spec:
       global:
         repo1-retention-full: {{ .Values.crunchy.pgBackRest.pvc.retention | quote }}
         repo1-retention-full-type: {{ .Values.crunchy.pgBackRest.pvc.retentionFullType }}
-        {{- if .Values.crunchy.pgBackRest.s3.enabled}}
+        {{- if .Values.crunchy.pgBackRest.s3.enabled }}
         repo2-retention-full: {{ .Values.crunchy.pgBackRest.s3.retention | quote }}
         repo2-retention-full-type: {{ .Values.crunchy.pgBackRest.retentionFullType }}
-        repo2-path: '{{ .Values.crunchy.pgBackRest.backupPath }}/{{ .Values.crunchy.pgBackRest.clusterCounter}}'
+        repo2-path: '{{ .Values.crunchy.pgBackRest.backupPath }}/{{ .Values.crunchy.pgBackRest.clusterCounter }}'
         repo2-s3-uri-style: path
         {{- end }}
       repos:
@@ -154,7 +154,7 @@ spec:
                 requests:
                   storage: {{ .Values.crunchy.pgBackRest.pvc.volume.storage }}
               storageClassName: {{ .Values.crunchy.pgBackRest.pvc.volume.storageClassName }}
-      {{- if .Values.crunchy.pgBackRest.s3.enabled}}
+      {{- if .Values.crunchy.pgBackRest.s3.enabled }}
         - name: repo2
           schedules:
             full: {{ .Values.crunchy.pgBackRest.s3.fullBackupSchedule }}

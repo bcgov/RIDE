@@ -13,7 +13,7 @@ RUN apk add --no-cache \
     gzip \
     tar
 
-RUN curl -sSL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz \
+RUN curl --proto "=https" -sSL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-amd64-rhel9.tar.gz \
 | tar xvzf - -C /usr/local/bin \
 && chmod +x /usr/local/bin/oc
 
