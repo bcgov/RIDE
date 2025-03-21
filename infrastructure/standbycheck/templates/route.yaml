@@ -14,7 +14,7 @@ spec:
     kind: Service
     name: {{ template "app.fullname" . }}
   port:
-    targetPort: 80-tcp
+    targetPort: 8080
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
