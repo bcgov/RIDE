@@ -27,9 +27,11 @@ deployment:
 
 route:
   host: prod-ride.apps.gold.devops.gov.bc.ca # Hostname for the route
-  path: /lbhealth/ # Path for the route
+  path: /lbhealth # Path for the route
   iprestricted: true # Set to true if you want to limit IP's the the addresses in the ipallowlist below
   ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 # The first 4 ranges are GOV IP's, the last one is for OXD external IP
+  vanityurl: true # Set to true if you want to use a vanity URL
+  vanityurlhost: ride.th.gov.bc.ca # The vanity URL to use
 
 podDisruptionBudget: 
   enabled: true # If you have more than 1 replica, you can set this to true.
