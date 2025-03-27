@@ -157,3 +157,7 @@ crunchy:
   user:
     customPassword: true # set to true or false
     password:  # DO NOT UPLOAD TO GITHUB
+
+# Temporary till operator fix. See DBC22-3706
+pgbackrestLogCleanup:
+  enabled: false
