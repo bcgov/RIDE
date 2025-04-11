@@ -14,7 +14,6 @@ environ.Env.read_env(BASE_DIR / '.env', overwrite=True)
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG') == 'True'
 
-
 ALLOWED_HOSTS = []
 
 # Paths and urls
@@ -37,21 +36,40 @@ SECURE_SSL_REDIRECT = env.bool('DJANGO_SECURE_SSL_REDIRECT')
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+LOGIN_REDIRECT_URL = FRONTEND_BASE_URL
+LOGIN_URL = FRONTEND_BASE_URL
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.gis',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    "allauth",
+    "allauth.account",
+    'allauth.socialaccount',
+    "allauth.socialaccount.providers.openid_connect",
+    "allauth.usersessions",
+
     'debug_toolbar',
+
     'apps.ride',
     'apps.events',
     'apps.users',
+
+    'django.contrib.admin',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +81,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
 ]
 
 TEMPLATES = [

@@ -280,3 +280,24 @@ a.active {
 	text-decoration: underline;
 }
 
+.user ul li {
+	display: inline-block;
+	margin-left: 1rem;
+}
+
+.user ul li form {
+	display: inline-block;
+	margin-block-end: 0;
+}
+
+.user ul li form button {
+	border: none;
+	background: none;
+	color: #1A5A96;
+	cursor: pointer;
+}
+
+.needs-auth {
+	width: fit-content;
+	margin: 1in auto;
+}

@@ -15,20 +15,38 @@
 <body>
   <header>
     <h1><a href="/" class="{% if request.path == '/' %}active{% endif %}">RIDE</a></h1>
+{% if request.user.is_authenticated %}
+
     <ul>
       <li><a href="/events/" class="{% if '/events/' in request.path %}active{% endif %}">Events</a></li>
-      {% comment %} <li><a href="/cameras/" class="{% if '/cameras/' in request.path %}active{% endif %}">Cameras</a></li> {% endcomment %}
-      <li class="disabled">Cameras</li>
-      <li class="disabled">DMS</li>
-      <li class="disabled">VSLS</li>
-      <li class="disabled">Ferries</li>
+      <li><a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a></li>
     </ul>
     <div class="user">
       <ul>
         <li><a href="/profile/" class="{% if '/profile/' in request.path %}active{% endif %}">Profile</a></li>
+        <li>
+          <form method="POST" action="/accounts/logout/">
+            {% csrf_token %}
+            <button>Log out</button>
+          </form>
+        </li>
       </ul>
     </div>
+{% endif %}
   </header>
-  <main>{% block main %}{% endblock %}</main>
+  <main>
+{% block main %}
+  {% if request.user.is_authenticated %}
+  {% else %}
+    <div class="needs-auth">
+      <p>To access RIDE, you need to authenticate with an IDIR account.</p>
+      <form method="POST" action="/accounts/oidc/idir/login/?process=login&next={{request.GET.next}}&auth_params=kc_idp_hint=azureidir">
+        {% csrf_token %}
+        <p><button>Log in with IDIR</button></p>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}
+  </main>
 </body>
 </html>
