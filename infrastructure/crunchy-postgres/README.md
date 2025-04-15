@@ -35,7 +35,7 @@ If you are setting up Crunchy in Active-Standby configuration you will also need
 1. If it doesn't exist yet, have a simple golddr file with only the differences you want between clusters. (Ie `crunchy.standby.enabled=true` and save)ve
 1. Trigger a manual backup on the cluster in Gold using this command `oc annotate -n NAMESPACE postgrescluster ENV-ride-db-crunchy --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="$(date)"` and wait for the backup to complete
 1. Login to the GoldDR cluster using `oc`
-1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres`
+1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV.yaml -f .\crunchy-postgres\values-ENV-dr.yaml .\crunchy-postgres`
 1. Check that it's running as a standby.
 
 Due to how the clusters are setup, you will need to update the password for `ccp_monitoring` for the Standby cluster based on this documentation: https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/backups-disaster-recovery/disaster-recovery#monitoring-a-standby-cluster
@@ -53,8 +53,8 @@ stringData:
 
 ## Changes after initial install
 Changes can be made easily once the Crunchy Cluster is already installed. Simply run the following commands on the appropriate OpenShift Cluster
-- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT>`
-- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml -f .\crunchy-postgres\values-ENV-golddr.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT>`
+- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT>`
+- `helm upgrade ENV-ride-db -f .\crunchy-postgres\values-ENV.yaml -f .\crunchy-postgres\values-ENV-dr.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT>`
 
 One challenge you may run into is that the Github repo doesn't contain the S3 information or custom password for the default user. Few things to note
 - If `crunchy.user.password` is blank, then it won't update it.
