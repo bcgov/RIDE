@@ -9,6 +9,11 @@ env = environ.Env()
 environ.Env.read_env(BASE_DIR / '.env', overwrite=True)
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True,
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True,
+SOCIALACCOUNT_STORE_TOKENS = True,
+SOCIALACCOUNT_ADAPTER = 'config.adapter.DbcSocialAdapter'
+ACCOUNT_ADAPTER = 'config.adapter.DbcAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     'openid_connect': {
@@ -26,5 +31,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'kc_idp_hint': 'azureidir',
         },
+        'EMAIL_AUTHENTICATION_AUTO_CONNECT': True,
+        'EMAIL_AUTHENTICATION': True,
+        'STORE_TOKENS': True,
     },
 }
