@@ -22,7 +22,7 @@ echodate() {
 }
 
 standby_status() {
-    output=$(curl -k -s \
+    output=$(curl -s \
         -H "Authorization: Bearer $l_serviceaccount_token" \
         -H 'Accept: application/json' \
         "${l_ocp_api_server}/apis/postgres-operator.crunchydata.com/v1beta1/namespaces/${l_namespace}/postgresclusters/${l_cluster_name}" \
@@ -36,7 +36,7 @@ standby_status() {
 }
 
 shutdown_status() {
-    output=$(curl -k -s \
+    output=$(curl -s \
         -H "Authorization: Bearer $l_serviceaccount_token" \
         -H 'Accept: application/json' \
         "${l_ocp_api_server}/apis/postgres-operator.crunchydata.com/v1beta1/namespaces/${l_namespace}/postgresclusters/${l_cluster_name}" \
