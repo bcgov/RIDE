@@ -42,15 +42,15 @@ crunchy:
         prometheus.io/scrape: 'true' # enable prometheus scraping so you monitor the cluster in Sysdig
         prometheus.io/port: '9187'
     dataVolumeClaimSpec:
-      storage: 1000Mi
+      storage: 1Gi
       storageClassName: netapp-block-standard
-      walStorage: 1000Mi
+      walStorage: 1Gi
 
     requests:
       cpu: 50m
-      memory: 256Mi
+      memory: 350Mi
     limits:
-      memory: 512Mi
+      memory: 750Mi
     replicaCertCopy:
       requests:
         cpu: 1m
@@ -146,7 +146,7 @@ crunchy:
       image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
       requests:
         cpu: 10m
-        memory: 128Mi # Seems to require 128Mi to run properly. If I set to 64Mi then I don't see any metrics in Sysdig
+        memory: 64Mi 
       limits:
         memory: 256Mi
 

@@ -44,13 +44,13 @@ crunchy:
     dataVolumeClaimSpec:
       storage: 1Gi
       storageClassName: netapp-block-standard
-      walStorage: 1Gi
+      walStorage: 2Gi
 
     requests:
       cpu: 50m
-      memory: 256Mi
+      memory: 400Mi
     limits:
-      memory: 512Mi
+      memory: 1Gi
     replicaCertCopy:
       requests:
         cpu: 1m
@@ -146,7 +146,7 @@ crunchy:
       image: # it's not necessary to specify an image as the images specified in the Crunchy Postgres Operator will be pulled by default
       requests:
         cpu: 10m
-        memory: 128Mi # Seems to require 128Mi to run properly. If I set to 64Mi then I don't see any metrics in Sysdig
+        memory: 64Mi
       limits:
         memory: 256Mi
 

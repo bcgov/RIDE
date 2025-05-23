@@ -19,11 +19,10 @@ Assumptions:
 - Your folder structure is `C:\Data\DriveBC.ca` and you have the latest version of repo copied to that location (You can use a different location if you like)
 
 1. Login to `oc` 
-1. Set all the values including `crunchy.pgBackRest.s3.bucket`, `crunchy.pgBackRest.s3.endpoint`, `crunchy.pgBackRest.s3.accessKey`, `crunchy.pgBackRest.s3.secretKey`, `crunchy.user.password` (if required)
+1. Confirm the values are correct in the appropriate `values-ENV.yaml` file (DR file too) 
 1. Confirm you are in the correct namespace and cluster by entering `oc project`
 1. Run `cd C:\Data\RIDE\infrastructure`
-1. Confirm the values file has all values set inclu
-1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV-gold.yaml .\crunchy-postgres`
+1. Complete and run `helm install dev-ride-db -f .\crunchy-postgres\values-dev.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.pgBackRest.s3.accessKey=<ACCESS_KEY> --set crunchy.pgBackRest.s3.secretKey=<SECRET_KEY> --set crunchy.user.password=<PASSWORD>`
 1. Confirm everything has installed as expected
 1. Run these commands to set DB owner in the primary pod like this
     1. `oc exec -it $(oc get pods -l "postgres-operator.crunchydata.com/role=master" -o jsonpath='{.items[0].metadata.name}') -- /bin/bash`
@@ -35,7 +34,7 @@ If you are setting up Crunchy in Active-Standby configuration you will also need
 1. If it doesn't exist yet, have a simple golddr file with only the differences you want between clusters. (Ie `crunchy.standby.enabled=true` and save)ve
 1. Trigger a manual backup on the cluster in Gold using this command `oc annotate -n NAMESPACE postgrescluster ENV-ride-db-crunchy --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="$(date)"` and wait for the backup to complete
 1. Login to the GoldDR cluster using `oc`
-1. Run `helm install ENV-ride-db -f .\crunchy-postgres\values-ENV.yaml -f .\crunchy-postgres\values-ENV-dr.yaml .\crunchy-postgres`
+1. Run `helm install dev-ride-db -f .\crunchy-postgres\values-dev.yaml -f .\crunchy-postgres\values-dev-dr.yaml .\crunchy-postgres --set crunchy.pgBackRest.s3.bucket=<BUCKET> --set crunchy.pgBackRest.s3.endpoint=<ENDPOINT> --set crunchy.pgBackRest.s3.accessKey=<ACCESS_KEY> --set crunchy.pgBackRest.s3.secretKey=<SECRET_KEY> --set crunchy.user.password=<PASSWORD>`
 1. Check that it's running as a standby.
 
 Due to how the clusters are setup, you will need to update the password for `ccp_monitoring` for the Standby cluster based on this documentation: https://access.crunchydata.com/documentation/postgres-operator/latest/tutorials/backups-disaster-recovery/disaster-recovery#monitoring-a-standby-cluster
