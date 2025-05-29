@@ -76,6 +76,7 @@ jobs:
       uses: redhat-actions/openshift-tools-installer@v1
       with:
         oc: "4"
+        skip_cache: true
       
     - name: Authenticate and set context
       uses: redhat-actions/oc-login@v1
@@ -104,6 +105,7 @@ jobs:
       uses: redhat-actions/openshift-tools-installer@v1
       with:
         oc: "4"
+        skip_cache: true
      
     - name: Authenticate and set context
       uses: redhat-actions/oc-login@v1
