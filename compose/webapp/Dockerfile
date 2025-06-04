@@ -1,9 +1,15 @@
 # Use an official Python runtime as a parent image
-FROM python:3.13
+FROM python:3.13-slim
 
 # Install Python Package Libraries
-RUN apt-get update && apt-get upgrade -y && apt-get autoremove && apt-get autoclean
-RUN apt-get install -y binutils libproj-dev gdal-bin
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove && apt-get autoclean \
+ && apt-get install -y \
+      binutils \
+      libproj-dev \
+      gdal-bin \
+      curl \
+      ca-certificates \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Adding webapp directory to make absolute filepaths consistent across services
 WORKDIR /app/webapp
