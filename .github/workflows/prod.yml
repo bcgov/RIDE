@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions: 
+  contents: read
+  packages: write
+
 env:
   REGISTRY: ghcr.io
   WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp

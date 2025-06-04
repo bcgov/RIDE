@@ -8,6 +8,10 @@ on:
       environment:
         type: environment
 
+permissions: 
+  contents: read
+  packages: write   
+
 env:
   REGISTRY: ghcr.io
   STANDBY_IMAGE_NAME: ${{ github.repository }}-standbycheck

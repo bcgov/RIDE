@@ -3,6 +3,10 @@ name: 3. Build & Deploy to UAT
 on:
   workflow_dispatch:
 
+permissions: 
+  contents: read
+  packages: write   
+
 env:
   REGISTRY: ghcr.io
   WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
