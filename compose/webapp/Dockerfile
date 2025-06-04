@@ -15,7 +15,7 @@ WORKDIR /app/webapp
 
 # Install Python dependencies
 COPY ./src/webapp/requirements /app/webapp/requirements
-RUN pip install -r requirements/base.txt
+RUN pip install --no-cache-dir -r requirements/base.txt
 
 COPY ./compose/webapp/entrypoint /
 RUN sed -i 's/\r$//g' /entrypoint && chmod +x /entrypoint
