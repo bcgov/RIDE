@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import 'ol/ol.css';
+/* @import "./styles/variables"; */
+
+.mapContainer {
+  flex: 1;
+  .ol-scale-line {
+    background: var(--ol-partial-background-color);
+    border-radius: 4px;
+    left: auto;
+    right: 1rem;
+    bottom: 4rem;
+    padding: 2px;
+    position: absolute;
+
+    @media (min-width: 576px) {
+      right: 1rem;
+      bottom: 1rem;
+    }
+
+    @media (min-width: 992px) {
+      right: 4rem;
+      bottom: 1rem;
+    }
+  }
+
+  .ol-scale-line-inner {
+    border: 1px solid var(--ol-subtle-foreground-color);
+    border-top: none;
+    color: var(--ol-foreground-color);
+    font-size: 0.75rem;
+    text-align: center;
+    font-family: 'BC Sans';
+    margin: 1px;
+    will-change: contents, width;
+    transition: all 0.25s;
+  }
+
+}

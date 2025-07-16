@@ -1,0 +1,200 @@
+.form {
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+
+  .hidden {
+    display: none !important;
+  }
+  .form-body {
+    flex: 1;
+    overflow: auto;
+    height: 100%;
+  }
+
+  input, select, textbox {
+    border: solid 1px #999;
+    margin: 1px;
+  }
+  textbox {
+    display: block;
+  }
+
+  form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .section {
+    border: solid 1px black;
+    padding: 0.25rem;
+    margin-bottom: 0.5rem;
+
+    &.form-header {
+      flex: 0;
+      border: none;
+    }
+
+    .title {
+      display: flex;
+      justify-content: space-between;
+      padding-left: 0.25rem;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+
+      div {
+        flex: 1;
+      }
+    }
+
+    .input {
+      display: block !important;
+      label {
+        display: block;
+        font-size: 0.675rem;
+      }
+
+      input, select {
+        width: 100%;
+      }
+
+      .inline {
+        display: flex;
+        justify-content: flex-start;
+        input, select {
+          width: fit-content;
+          flex: 0;
+        }
+      }
+    }
+
+    .handle {
+      flex: 0; cursor: pointer; user-select: none;
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 0 0.25rem;
+      display: grid;
+      align-items: center;
+
+      &.delete {
+        color: red;
+      }
+
+      &.inactive {
+        color: #ccc;
+        cursor: default;
+      }
+    }
+
+    .draggable {
+      display: flex;
+      margin-bottom: 1rem;
+
+      .control {
+
+        &.column {
+          flex-direction: column;
+        }
+
+        display: flex;
+        flex: 1;
+        select { flex: 1 }
+        > div { display: flex; }
+      }
+
+      .select-fill {
+        flex: 1;
+          select {
+            flex:1;
+          }
+        > div {
+          flex: 1;
+          display: flex;
+        }
+        .input {
+          display: block;
+          label {
+            display: block;
+          }
+        }
+      }
+    }
+
+    &.location {
+      .toggleable {
+        display: flex;
+
+        .toggled {
+          flex: 1;
+        }
+      }
+    }
+
+    &.impacts, &.conditions {
+      .draggable {
+        .control {
+          flex-direction: column;
+        }
+      }
+    }
+
+    .restriction {
+      display: flex;
+
+      input, select { flex: 1; width: 100%; }
+
+    }
+
+    &.additional {
+      textarea {
+        width: 100%;
+        height: 7rem;
+        border: solid 1px #ccc;
+        padding: 0.25rem 0.5rem;
+
+        &:focus {
+          outline: 0;
+        }
+      }
+      .bold {
+        font-weight: bold;
+        color: red;
+      }
+    }
+
+    &.internal {
+      .table {
+        display: grid;
+        grid-template-columns: 50% 25% 25%;
+
+        div {
+          border: none;
+          margin: 0;
+        }
+
+        .created, .updated {
+          font-size: 0.85rem;
+        }
+
+        .header {
+          font-size: 0.675rem;
+          text-transform: uppercase;
+          .created, .updated {
+            font-size: 0.675rem !important;
+          }
+        }
+
+        .attribution {
+          grid-column-start: span 3;
+          font-style: italic;
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+}

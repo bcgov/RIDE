@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+.events-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+
+  section {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .events-home {
+    height: 100%;
+    display: flex;
+    align-items: stretch;
+    border-top: solid 1px black;
+    overflow: hidden;
+
+    .panel {
+      min-width: 500px;
+      padding: 0.25rem 1rem;
+      border-right: solid 1px black;
+      overflow: hidden;
+    }
+  }
+}
