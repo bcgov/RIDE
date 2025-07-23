@@ -6,6 +6,8 @@
 *.pyc
 *.pyo
 *.whl
+.react-router/
+node_modules/
 
 # IDE config files
 .idea
