@@ -1,17 +1,18 @@
 import Select from 'react-select';
 
 import { IncidentsList } from "./references";
+import { selectStyle } from '../components/Map/helpers';
 
-export default function Details() {
+export default function Details({ errors, severity, setSeverity }) {
   return <>
     <div className="title">
       <p><strong>Details</strong></p>
     </div>
     <div className="row">
-      <div className="input">
+      <div className={`input ${errors.direction ? 'error' : ''}`}>
         <label>Direction</label>
-        <select>
-          <option></option>
+        <select name="direction">
+          <option>Both</option>
           <option>North</option>
           <option>East</option>
           <option>South</option>
@@ -19,26 +20,23 @@ export default function Details() {
         </select>
       </div>
 
-      <div className="input">
+      <div className={`input ${errors.severity ? 'error' : ''}`}>
         <label>Severity</label>
-        <select>
-          <option></option>
-          <option>Major (30+ minute delay)</option>
+        <select name="severity" defaultValue={severity} onChange={(e) => setSeverity(e.target.value)}>
           <option>Minor (30- minute delay)</option>
+          <option>Major (30+ minute delay)</option>
+          <option>Closed</option>
         </select>
       </div>
     </div>
-    <div className="input">
+    <div className={`input ${errors.situation ? 'error' : ''}`}>
       <label>Situation</label>
       <Select
         name="situation"
         options={ IncidentsList.map((item, ii) => (
           { value: item.id, label: item.label }
         ))}
-        styles={{
-          control: (css) => ({ ...css, width: '100%', }),
-          container: (css) => ({ ...css, flex: 1, }),
-        }}
+        styles={selectStyle}
       />
     </div>
   </>;

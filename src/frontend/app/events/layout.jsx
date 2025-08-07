@@ -1,12 +1,12 @@
 import { NavLink, Outlet } from 'react-router';
 
+import './events.css';
+
 export default function Layout() {
   return (
     <div className="events-page">
       <header>
-        <NavLink to="/events/create">Create Event</NavLink>
-        <NavLink to="/events/list">List Events</NavLink>
-        <NavLink to="/events/test">Test</NavLink>
+        <input type="text" name="geo-search" />
       </header>
       <section>
         <Outlet/>

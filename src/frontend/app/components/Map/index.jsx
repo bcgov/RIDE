@@ -2,10 +2,10 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { transform } from 'ol/proj';
 
-import { click, createMap, MapContext, pointerMove } from './helpers.js';
+import { click, createMap, Drag, MapContext, pointerMove } from './helpers.js';
 import './map.css';
 
-export default function Map({ children, parentClickHandler }) {
+export default function Map({ children, parentClickHandler, parentContextHandler }) {
 
   let creatingMap = false;
 
@@ -22,6 +22,7 @@ export default function Map({ children, parentClickHandler }) {
     map.setTarget(elementRef.current);
     map.on('pointermove', pointerMove);
     map.on('click', clickHandler);
+    map.on('contextmenu', parentContextHandler);
     setMap(map);
   }, []);
   window.map = map;

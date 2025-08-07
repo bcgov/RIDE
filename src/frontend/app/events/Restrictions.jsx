@@ -4,6 +4,8 @@ import Select from 'react-select';
 
 import { RestrictionsList } from './references';
 import { DraggableRows } from './shared';
+import { selectStyle } from '../components/Map/helpers';
+
 
 function Restriction({ id, source, item, change, update, current, }) {
   return (
@@ -16,10 +18,7 @@ function Restriction({ id, source, item, change, update, current, }) {
           )).map((item, ii) => ({ value: item.id, label: item.label }))
         }
         key={`restriction ${id}`}
-        styles={{
-          control: (css) => ({ ...css, width: '100%', }),
-          container: (css) => ({ ...css, flex: 1, }),
-        }}
+        styles={selectStyle}
         onChange={(changed) => { change(id, changed.value); }}
       />
       <input
@@ -35,7 +34,7 @@ function Restriction({ id, source, item, change, update, current, }) {
   );
 }
 
-export default function Restrictions() {
+export default function Restrictions({ errors }) {
   return (
     <DraggableRows
       label="Restrictions"
@@ -43,6 +42,7 @@ export default function Restrictions() {
       itemsSource={RestrictionsList}
       Child={Restriction}
       initial={[]}
+      errors={errors}
     />
   );
 }

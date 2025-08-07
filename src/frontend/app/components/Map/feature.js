@@ -11,16 +11,27 @@ export default class RideFeature extends Feature {
   constructor(...args) {
     super(...args);
     const props = args[0] || {};
-    this.setStyle(normalStyle);
+
+    this.normal = props.normalStyle || normalStyle;
+    this.hover = props.hoverStyle || hoverStyle;
+    this.active = props.activeStyle || activeStyle;
+
+    this.setStyle(this.normal);
+  }
+
+  addText(text) {
+    this.normal.getText().setText(text);
+    this.active.getText().setText(text);
+    this.hover.getText().setText(text);
   }
 
   updateStyle() {
     if (this.selected) {
-      this.setStyle(activeStyle);
+      this.setStyle(this.active);
     } else if (this.hovered) {
-      this.setStyle(hoverStyle);
+      this.setStyle(this.hover);
     } else {
-      this.setStyle(normalStyle);
+      this.setStyle(this.normal);
     }
   }
 }

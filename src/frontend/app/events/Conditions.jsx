@@ -4,6 +4,7 @@ import Select from 'react-select';
 
 import { RoadConditions } from './references';
 import { DraggableRows } from './shared';
+import { selectStyle } from '../components/Map/helpers';
 
 function Condition({ id, source, item, change, update, current, }) {
   return (
@@ -15,14 +16,14 @@ function Condition({ id, source, item, change, update, current, }) {
             item.id !== id && !current.includes(item.id)
           )).map((item, ii) => ({ value: item.id, label: item.label }))
         }
-        styles={{ control: (css) => ({ ...css, width: '100%', }) }}
+        styles={selectStyle}
         onChange={(changed) => { change(id, changed.value) }}
       ></Select>
     </>
   );
 }
 
-export default function Conditions() {
+export default function Conditions({ errors }) {
   return (
     <DraggableRows
       label="Conditions"
@@ -30,6 +31,7 @@ export default function Conditions() {
       itemsSource={RoadConditions}
       Child={Condition}
       initial={[]}
+      errors={errors}
     />
   );
 }

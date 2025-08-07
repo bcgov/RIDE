@@ -29,6 +29,8 @@ export default function Layer(props) {
             source: new VectorSource({ format: new GeoJSON() }),
             style: () => null
           });
+          layer.listenForHover = true;
+          layer.listenForClicks = true;
           map.addLayer(layer);
           map.set('majorEvents', layer);
         }
@@ -36,7 +38,6 @@ export default function Layer(props) {
         const source = map.get('majorEvents').getSource();
         window.s = source; window.vl = map.get('majorEvents');
 
-        // console.log(map);
         data.forEach((event) => {
           if (event.display_category !== 'majorEvents') { return; }
 
@@ -49,7 +50,6 @@ export default function Layer(props) {
           });
           pointFeature.getGeometry().transform('EPSG:4326', map.getView().getProjection().getCode());
           source.addFeature(pointFeature);
-          window.f = pointFeature;
         });
       })
   }, [map]);

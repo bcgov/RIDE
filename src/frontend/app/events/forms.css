@@ -4,6 +4,7 @@
   flex-direction: column;
   overflow: hidden;
   height: 100%;
+  width: 500px;
 
   .hidden {
     display: none !important;
@@ -15,8 +16,9 @@
   }
 
   input, select, textbox {
-    border: solid 1px #999;
-    margin: 1px;
+    border: solid 1px #000;
+    border-radius: 4px;
+    /* margin: 1px; */
   }
   textbox {
     display: block;
@@ -27,9 +29,11 @@
     display: flex;
     flex-direction: column;
   }
+
   .section {
     border: solid 1px black;
-    padding: 0.25rem;
+    border-radius: 8px;
+    padding: 0.5rem;
     margin-bottom: 0.5rem;
 
     &.form-header {
@@ -37,26 +41,43 @@
       border: none;
     }
 
-    .title {
+    .title, .subtitle {
       display: flex;
       justify-content: space-between;
-      padding-left: 0.25rem;
+      margin-bottom: 0.5rem;
+
+      &.error {
+        color: red;
+
+        .error-message {
+          display: inline-block;
+          font-size: 80%;
+          margin-left: 3rem;
+        }
+      }
     }
     .row {
       display: flex;
       justify-content: space-between;
       gap: 0.5rem;
+      margin-bottom: 0.5rem;
 
       div {
         flex: 1;
       }
     }
 
+    .toggleable {
+      .toggle {
+        padding: 0 0.5rem 0 0.25rem;
+      }
+    }
     .input {
       display: block !important;
       label {
         display: block;
         font-size: 0.675rem;
+        margin-bottom: 0.25rem;
       }
 
       input, select {
@@ -69,6 +90,16 @@
         input, select {
           width: fit-content;
           flex: 0;
+        }
+      }
+
+      &.error {
+        label {
+          color: red;
+          font-weight: bold;
+        }
+        select {
+          border-color: red;
         }
       }
     }
@@ -93,7 +124,7 @@
 
     .draggable {
       display: flex;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
 
       .control {
 
@@ -128,9 +159,20 @@
     &.location {
       .toggleable {
         display: flex;
+        margin-bottom: 0.25rem;
+        &:last-child {
+          margin-bottom: 0;
+        }
 
         .toggled {
           flex: 1;
+
+          div {
+            margin-bottom: 0.25rem;
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
         }
       }
     }
@@ -143,11 +185,38 @@
       }
     }
 
-    .restriction {
-      display: flex;
+    &.delays {
+      input {
+        margin-right: 0.5rem;
+        padding-left: 0.5rem;
+      }
+    }
 
-      input, select { flex: 1; width: 100%; }
+    &.restrictions {
 
+      .draggable {
+        .control {
+          gap: 0.5rem;
+          > div, input {
+            flex: 1;
+          }
+        }
+      }
+    }
+
+    &.timing {
+      .row {
+        display: block;
+
+        input[type=datetime-local] {
+          width: fit-content;
+          margin-right: 0.5rem;
+          padding-left: 0.25rem;
+        }
+        select {
+          width: fit-content;
+        }
+      }
     }
 
     &.additional {
@@ -169,30 +238,61 @@
 
     &.internal {
       .table {
-        display: grid;
-        grid-template-columns: 50% 25% 25%;
+        display: flex;
+        flex-direction: column;
 
         div {
           border: none;
           margin: 0;
         }
 
-        .created, .updated {
-          font-size: 0.85rem;
-        }
+        .note {
 
-        .header {
-          font-size: 0.675rem;
-          text-transform: uppercase;
-          .created, .updated {
-            font-size: 0.675rem !important;
+          textarea {
+            width: 100%;
+            field-sizing: content;
+            min-height: 4rem;
+            border: solid 1px #ccc;
+            padding: 0.25rem 0.5rem;
+
+            &:focus {
+              outline: 0;
+            }
           }
-        }
+          margin-bottom: 1rem;
+          &:last-child { margin-bottom: 0rem }
 
-        .attribution {
-          grid-column-start: span 3;
-          font-style: italic;
-          font-size: 0.85rem;
+          .body {
+            white-space: pre-line;
+            p {
+              margin-bottom: 1rem;
+              &:last-child {
+                margin-bottom: 0rem;
+              }
+            }
+          }
+
+          .header {
+            display: flex;
+            align-items: baseline;
+            font-size: 0.675rem;
+            text-transform: uppercase;
+            div { margin-right: 2rem; }
+
+            .attribution {
+              /* width: 50%; */
+            }
+
+            .buttons {
+              text-align: right;
+              /* width: 25%; */
+            }
+
+            .updated {
+              font-size: 0.675rem;
+              /* width: 25%; */
+            }
+          }
         }
       }
     }

@@ -76,7 +76,7 @@ function DraggableRow({ children, id, isDraggable, remove }) {
  * mainly of an ordered set of elements with an id and label, and optional extra
  * data fields.  It provides the state-changing callbacks to children as props.
  */
-export function DraggableRows({ label, limit=5, itemsSource, Child, initial }) {
+export function DraggableRows({ label, limit=5, itemsSource, Child, initial, errors }) {
   if (!Array.isArray(initial)) { initial = []; }
   if (initial.length === 0) { initial.push({ id: 0, label: '' }); }
   const [items, setItems] = useState(initial)
@@ -142,8 +142,11 @@ export function DraggableRows({ label, limit=5, itemsSource, Child, initial }) {
 
   return (
     <div>
-      <div className="title">
-        <p><strong>{label}</strong></p>
+      <div className={`title ${errors[label] ? 'error' : ''}`}>
+        <p>
+          <strong>{label}</strong>
+          <span className="error-message">{errors[label]}</span>
+        </p>
         {/* <button>+ Add traffic impact</button> */}
       </div>
 

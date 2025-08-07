@@ -4,18 +4,19 @@ import Select from 'react-select';
 
 import { TrafficImpacts } from './references';
 import { DraggableRows } from './shared';
+import { selectStyle } from '../components/Map/helpers';
 
 function Impact({ id, source, item, change, update, current, }) {
   return (
     <>
       <Select
-        name={`impact ${id}`}
+        name={`impact`}
         value={[{ value: id, label: source.label }]}
         options={ TrafficImpacts.filter((item) => (
             item.id !== id && !current.includes(item.id)
           )).map((item, ii) => ({ value: item.id, label: item.label }))
         }
-        styles={{ control: (css) => ({ ...css, width: '100%', }) }}
+        styles={selectStyle}
         onChange={(changed) => { change(id, changed.value) }}
       ></Select>
 
@@ -34,7 +35,7 @@ function Impact({ id, source, item, change, update, current, }) {
             />
             <select
               name={`${source.label} unit ${id}`}
-              style={{width: 'fit-content'}}
+              style={{...selectStyle, width: 'fit-content' }}
               onChange={(e) => update(id, {unit: e.target.value}) }
               value={item.unit}
               key={`${source.label} unit ${id}`}
@@ -51,7 +52,7 @@ function Impact({ id, source, item, change, update, current, }) {
   );
 }
 
-export default function Impacts() {
+export default function Impacts({ errors }) {
   return (
     <DraggableRows
       label="Traffic Impacts"
@@ -59,6 +60,7 @@ export default function Impacts() {
       itemsSource={TrafficImpacts}
       Child={Impact}
       initial={[]}
+      errors={errors}
     />
   );
 }
