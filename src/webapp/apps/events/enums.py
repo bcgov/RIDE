@@ -33,6 +33,7 @@ class Status(models.TextChoices):
 
 
 class Severity(models.TextChoices):
+    CLOSURE = 'CLOSURE'
     MINOR = 'MINOR'
     MAJOR = 'MAJOR'
 

@@ -33,6 +33,27 @@ export const activeStyle = new Style({
   }),
 });
 
+export const dotStyle = new Style({
+  image: new Circle({
+    fill: new Fill({ color: 'rgba(230, 148, 24, 1)' }),
+    radius: 2,
+  }),
+});
+
+export const dotStyle2 = new Style({
+  image: new Circle({
+    fill: new Fill({ color: 'rgba(230, 0, 24, 1)' }),
+    radius: 3,
+  }),
+});
+
+export const lineStyle = new Style({
+  stroke: new Stroke({
+    color: [100, 64, 10, 1],
+    width: 4,
+  })
+});
+
 const startTextStyle = new Text({
   font: '9pt Arial',
   fill: new Fill({ color: '#fff' }),
@@ -140,4 +161,15 @@ export const routeActiveStyle = new Style({
     color: [0, 154, 255, 0.95],
     width: 10,
   })
-})
+});
+
+export default {
+  pin: {
+    start: {
+      normal: pinStartNormalStyle, active: pinStartActiveStyle, hover: pinStartHoverStyle,
+    },
+    end: {
+      normal: pinEndNormalStyle, active: pinEndActiveStyle, hover: pinEndHoverStyle,
+    },
+  }
+};

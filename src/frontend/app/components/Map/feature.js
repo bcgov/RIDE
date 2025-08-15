@@ -1,6 +1,6 @@
 import { Feature } from 'ol';
 
-import { normalStyle, hoverStyle, activeStyle } from './styles';
+import Styles, { normalStyle, hoverStyle, activeStyle } from './styles';
 
 
 export default class RideFeature extends Feature {
@@ -11,15 +11,34 @@ export default class RideFeature extends Feature {
   constructor(...args) {
     super(...args);
     const props = args[0] || {};
-
-    this.normal = props.normalStyle || normalStyle;
-    this.hover = props.hoverStyle || hoverStyle;
-    this.active = props.activeStyle || activeStyle;
-
+    if (props.style) {
+      this.normal = Styles.pin[props.style].normal;
+      this.active = Styles.pin[props.style].active;
+      this.hover = Styles.pin[props.style].hover;
+    } else {
+      this.normal = props.normalStyle || normalStyle;
+      this.hover = props.hoverStyle || hoverStyle;
+      this.active = props.activeStyle || activeStyle;
+    }
     this.setStyle(this.normal);
   }
 
-  addText(text) {
+  updateInfobox(map) {
+    if (this.ref.current) {
+      const xy = map.getPixelFromCoordinate(this.getGeometry().getCoordinates());
+      this.ref.current.style.left = (xy[0] + 16) + 'px';
+      this.ref.current.style.top = (xy[1] - 30) + 'px';
+      if (!this.dra?.properties) {
+        this.ref.current.style.visibility = 'hidden';
+      } else {
+        this.ref.current.style.visibility = 'unset';
+      }
+    }
+  }
+
+  setText(text) {
+    this.text = text;
+    if (!this.normal.getText()) { return; }
     this.normal.getText().setText(text);
     this.active.getText().setText(text);
     this.hover.getText().setText(text);

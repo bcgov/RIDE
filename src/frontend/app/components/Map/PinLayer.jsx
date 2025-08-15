@@ -18,7 +18,7 @@ window.circular = circular;
 import { Drag, MapContext } from './helpers.js';
 import RideFeature from './feature.js';
 
-export default function PinLayer({ upCallback }) {
+export default function PinLayer({ upCallback, menuRef }) {
   const { map } = useContext(MapContext);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function PinLayer({ upCallback }) {
       map.addLayer(layer);
       map.pins = layer;
       map.set('pins', layer);
-      map.getInteractions().extend([new Drag({ upCallback })]);
+      map.getInteractions().extend([new Drag({ upCallback, menuRef })]);
       map.route = new RideFeature({
         normalStyle: routeNormalStyle,
         activeStyle: routeActiveStyle,

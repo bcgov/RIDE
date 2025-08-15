@@ -7,7 +7,9 @@ import { transform } from 'ol/proj';
 import Map from '../components/Map';
 import Layer from '../components/Map/Layer';
 import PinLayer from '../components/Map/PinLayer';
-import { MapContext, getCoords, getDRA, fetchRoute } from '../components/Map/helpers.js';
+import {
+  MapContext, getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped,
+} from '../components/Map/helpers.js';
 import RideFeature from '../components/Map/feature';
 import {
   pinStartNormalStyle, pinStartHoverStyle, pinStartActiveStyle,
@@ -16,7 +18,10 @@ import {
 
 import './home.css';
 
+import ContextMenu from './ContextMenu';
 import EventForm from './forms';
+import InfoBox from './InfoBox';
+
 
 export function meta() {
   return [
@@ -27,41 +32,103 @@ export function meta() {
 export default function Home() {
 
   const mapRef = useRef();
+  const menuRef = useRef();
+  const startRef = useRef();
+  const endRef = useRef();
 
   const [ map, setMap ] = useState(null);
   const [ start, setStart ] = useState(false);
   const [ end, setEnd ] = useState(false);
   const [ selected, setSelected] = useState(false);
+  const [ contextMenu, setContextMenu] = useState([]);
 
-  const clickHandler = async (e) => {
+
+  const clickHandler = useCallback((e) => {
+    if (menuRef.current.classList.contains('open')) {
+      setContextMenu([]);
+      return;
+    }
     const feature = e.map.getFeaturesAtPixel(e.pixel,{
       layerFilter: (layer) => layer.listenForClicks,
     })[0];
     if (!feature) {
+      const coords = getSnapped(e);
+      // console.log(coords);
       if (!e.map.start) {
-        e.map.start = new RideFeature({
-          normalStyle: pinStartNormalStyle,
-          hoverStyle: pinStartHoverStyle,
-          activeStyle: pinStartActiveStyle,
-          geometry: new Point(e.coordinate)
-        });
-        e.map.pins.getSource().addFeature(e.map.start);
+        e.map.start = new RideFeature({ style: 'start', geometry: new Point(coords) });
         e.map.start.setFunc = setStart;
+        e.map.start.ref = startRef;
+        e.map.pins.getSource().addFeature(e.map.start);
+
         endHandler(e, e.map.start);
       } else if (!e.map.end) {
-        e.map.end = new RideFeature({
-          normalStyle: pinEndNormalStyle,
-          hoverStyle: pinEndHoverStyle,
-          activeStyle: pinEndActiveStyle,
-          geometry: new Point(e.coordinate)
-        });
+        e.map.end = new RideFeature({ style: 'end', geometry: new Point(coords) });
         e.map.pins.getSource().addFeature(e.map.end);
         e.map.end.setFunc = setEnd;
+        e.map.end.ref = endRef;
         endHandler(e, e.map.end);
         updateRoute(e.map);
       }
+    } else if (e.originalEvent.shiftKey) {
+      removePin(feature, e.map);
     }
+  }, [contextMenu]);
+
+  const removePin = (feature, map) => {
+    if (feature.ref.current) {
+      feature.ref.current.style.visibility = 'hidden';
+    }
+    if (feature === map.start) {
+      map.pins.getSource().removeFeature(map.start);
+      map.start = null;
+      if (map.end) {
+        map.start = map.end;
+        map.start.setFunc = setStart;
+        map.start.ref = startRef;
+        map.end = null;
+        startRef.current.style.top = endRef.current.style.top;
+        startRef.current.style.left = endRef.current.style.left;
+        endRef.current.style.visibility = 'hidden';
+        startRef.current.style.visibility = '';
+        setStart({ ...map.start.dra.properties, nearby: map.start.nearby });
+        setEnd(null)
+        map.start.normal = pinStartNormalStyle.clone();
+        map.start.hover = pinStartHoverStyle.clone();
+        map.start.active = pinStartActiveStyle.clone();
+        map.start.updateStyle();
+      } else {
+        setStart(null);
+      }
+    } else if (feature === map.end) {
+      map.pins.getSource().removeFeature(map.end);
+      map.end = null;
+      setEnd(null);
+    }
+    updateRoute(map);
   }
+
+  const endHandler = async (e, point) => {
+    // const cc = getCoords(e.map, point);
+    const cc = getSnapped(e);
+    point.setFunc({ pending: true, nearbyPending: false });
+    point.getGeometry().setCoordinates(cc);
+    point.updateInfobox(e.map);
+
+    point.dra = await getDRA(cc, point, e.map);
+    point.setFunc({... point.dra.properties, nearbyPending: true, pending: false });
+    if (point.dra.closest) {
+      const coords = ll2g(point.dra.closest.geometry.coordinates);
+      point.getGeometry().setCoordinates(coords);
+    }
+    if (point.dra?.properties) {
+      point.nearby = await getNearby(g2ll(point.getGeometry().getCoordinates()));
+      point.setFunc({... point.dra.properties, nearbyPending: false, pending: false, nearby: point.nearby });
+    }
+    point.updateInfobox(e.map);
+
+    updateRoute(e.map);
+  };
+
 
   const updateRoute = async (map) => {
     const currentProjection = map.getView().getProjection().getCode();
@@ -92,75 +159,53 @@ export default function Home() {
     }
   }
 
-  const contextHandler = useCallback((e) => {
+  const contextHandler = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const feature = e.map.getFeaturesAtPixel(e.pixel,{
+    const feature = e.map.getFeaturesAtPixel(e.pixel, {
       layerFilter: (layer) => layer.listenForClicks,
     })[0];
+
+    menuRef.current.style.left = e.pixel[0] + 'px';
+    menuRef.current.style.top = e.pixel[1] + 'px';
+    menuRef.current.style.visibility = undefined;
     if (feature) {
-      if (feature === e.map.start) {
-        e.map.pins.getSource().removeFeature(e.map.start);
-        e.map.start = null;
-        setStart(null);
-        if (e.map.end) {
-          e.map.start = e.map.end;
-          e.map.start.setFunc = setStart;
-          e.map.end = null;
-          setEnd(null)
-          setStart({ dra: e.map.start.get('dra'), nearby: e.map.start.get('nearby') });
-          const texts = e.map.start.getStyle().getText().getText();
-          e.map.start.normal = pinStartNormalStyle;
-          e.map.start.normal.getText().setText(texts);
-          e.map.start.hover = pinStartHoverStyle;
-          e.map.start.hover.getText().setText(texts);
-          e.map.start.active = pinStartActiveStyle;
-          e.map.start.active.getText().setText(texts);
-          e.map.start.updateStyle();
-        }
-      } else if (feature === e.map.end) {
-        e.map.pins.getSource().removeFeature(e.map.end);
-        e.map.end = null;
-        setEnd(null);
-      }
+      if (feature === e.map.route) { return; }
+      const map = e.map
+      setContextMenu([
+        {
+          label: 'Remove pin',
+          action: (e) => {
+            e.stopPropagation();
+            removePin(feature, map);
+            setContextMenu([]);
+          }
+        },
+      ]);
     }
-    updateRoute(e.map);
-  }, [end]);
-
-  const endHandler = useCallback(async (e, point) => {
-    console.log('endhandler');
-    const cc = getCoords(e.map, point);
-    const dra = await getDRA(cc, point, e.map.getView().getResolution());
-    point.setFunc(dra);
-
-    if (e.map.selectedFeature) {
-      e.map.selectedFeature.selected = false;
-      e.map.selectedFeature.updateStyle();
-    }
-    e.map.selectedFeature = point;
-    e.map.start.selected = true;
-    e.map.start.updateStyle();
-    setSelected(e.map.selectedFeature)
-    updateRoute(e.map);
-  }, []);
+  };
 
   mapRef.current = map;
 
   return (
     <div className="events-home">
-      { selected &&
+      { start &&
         <div className="panel">
           <EventForm start={start} end={end} map={mapRef.current} />
         </div>
       }
+
       <MapContext.Provider value={{ map, setMap }}>
         <Map parentClickHandler={clickHandler} parentContextHandler={contextHandler}>
-          <PinLayer
-            upCallback={endHandler}
-          />
+          <PinLayer upCallback={endHandler} menuRef={menuRef} />
           <Layer name='events' />
+          <InfoBox className="startInfo" ref={startRef} point={start} />
+          <InfoBox className="endInfo" ref={endRef} point={end} />
+          <ContextMenu ref={menuRef} options={contextMenu}></ContextMenu>
         </Map>
       </MapContext.Provider>
+      {/* <div className="map-container">
+      </div> */}
     </div>
   );
 }

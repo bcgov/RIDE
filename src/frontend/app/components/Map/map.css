@@ -2,7 +2,7 @@
 @import 'ol/ol.css';
 /* @import "./styles/variables"; */
 
-.mapContainer {
+.map-container {
   flex: 1;
   .ol-scale-line {
     background: var(--ol-partial-background-color);

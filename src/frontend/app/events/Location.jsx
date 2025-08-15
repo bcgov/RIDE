@@ -1,4 +1,6 @@
 import { useCallback, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import "react-loading-skeleton/dist/skeleton.css";
 
 import Tooltip from './Tooltip';
 
@@ -12,19 +14,19 @@ const REF_LOC_TEXT = `Sorted by population class, then by distance.
 6. Locality (<50, uninc.)`;
 
 export default function Location({ start, end }) {
-  const startName = start?.dra?.ROAD_NAME_FULL;
+  const startName = start?.ROAD_NAME_FULL;
   const startAliases = [
-    start?.dra?.ROAD_NAME_ALIAS1,
-    start?.dra?.ROAD_NAME_ALIAS2,
-    start?.dra?.ROAD_NAME_ALIAS3,
-    start?.dra?.ROAD_NAME_ALIAS4,
+    start?.ROAD_NAME_ALIAS1,
+    start?.ROAD_NAME_ALIAS2,
+    start?.ROAD_NAME_ALIAS3,
+    start?.ROAD_NAME_ALIAS4,
   ].filter(el => el);
-  const endName = end?.dra?.ROAD_NAME_FULL;
+  const endName = end?.ROAD_NAME_FULL;
   const endAliases = [
-    end?.dra?.ROAD_NAME_ALIAS1,
-    end?.dra?.ROAD_NAME_ALIAS2,
-    end?.dra?.ROAD_NAME_ALIAS3,
-    end?.dra?.ROAD_NAME_ALIAS4,
+    end?.ROAD_NAME_ALIAS1,
+    end?.ROAD_NAME_ALIAS2,
+    end?.ROAD_NAME_ALIAS3,
+    end?.ROAD_NAME_ALIAS4,
   ].filter(el => el);
 
   const [hasEnd, setHasEnd] = useState(false);
@@ -64,7 +66,7 @@ export default function Location({ start, end }) {
       </div>
 
       <div className="toggled">
-        <div>{startName}</div>
+        <div>{ startName || 'Greenfield'}</div>
         <input type="hidden" name="start name" value={startName} />
         <input type="hidden" name="start aliases" value={JSON.stringify(startAliases)} />
 
@@ -81,6 +83,7 @@ export default function Location({ start, end }) {
         }
 
         <input type="hidden" name="start nearby options" value={JSON.stringify(start?.nearby)} />
+        { !start?.nearby && startName && <Skeleton width={120} height={20} />}
         { start?.nearby?.length > 0 &&
           <div>
             <div>

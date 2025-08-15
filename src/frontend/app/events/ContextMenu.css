@@ -1,0 +1,27 @@
+.context-menu {
+  position: absolute;
+  visibility: hidden;
+  top: 10rem;
+  left: 10rem;
+  background: white;
+  border: solid 1px black;
+  border-radius: 4px;
+  padding: 0.25rem 0.25rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+
+  &.open {
+    visibility: visible;
+  }
+
+  .context-option {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0rem 0.25rem 0.1rem 0.25rem;
+
+    &:hover {
+      background: blue;
+      color: white;
+    }
+  }
+}

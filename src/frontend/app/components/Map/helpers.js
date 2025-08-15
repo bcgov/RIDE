@@ -6,7 +6,7 @@ import Map from 'ol/Map';
 import MVT from 'ol/format/MVT.js';
 import { ScaleLine } from 'ol/control.js';
 import { circular } from 'ol/geom/Polygon';
-import { Point } from 'ol/geom';
+import { Point, LineString, MultiLineString } from 'ol/geom';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
 import { transform, getTransform } from 'ol/proj';
@@ -17,6 +17,8 @@ import * as turf from '@turf/turf';
 
 import overrides from './overrides.js';
 import RideFeature from './feature.js';
+
+import { dotStyle, dotStyle2, lineStyle } from './styles.js';
 
 window.BASE_MAP = 'https://tiles.arcgis.com/tiles/ubm4tcTYICKBpist/arcgis/rest/services/BC_BASEMAP_20240307/VectorTileServer/tile/{z}/{y}/{x}.pbf';
 window.MAP_STYLE = 'https://www.arcgis.com/sharing/rest/content/items/b1624fea73bd46c681fab55be53d96ae/resources/styles/root.json';
@@ -53,6 +55,7 @@ export function pointerMove(evt) {
     feature.hovered = true;
     feature.updateStyle();
   }
+  if (evt.map.start) { evt.map.start.updateInfobox(evt.map); }
 }
 
 export function click(evt) {
@@ -119,6 +122,7 @@ export function createMap() {
     extent: transformedExtent,
     enableRotation: false
   });
+  window.view = view;
 
   // Apply the basemap style from the arcgis resource
   fetch(window.MAP_STYLE, {
@@ -144,6 +148,7 @@ export function createMap() {
         )),
       };
 
+      // console.log(glStyle);
       applyStyle(vectorLayer, glStyle, 'esri');
       applyStyle(symbolLayer, symbolsStyle, 'esri');
     });
@@ -173,6 +178,7 @@ export class Drag extends PointerInteraction {
     });
     options = options || {};
     this.upCallback = options.upCallback || (() => {});
+    this.menuRef = options.menuRef;
 
     /**
      * @type {import('ol/coordinate.js').Coordinate}
@@ -205,7 +211,18 @@ export class Drag extends PointerInteraction {
  * @return {boolean} `true` to start the drag sequence.
  */
 function handleDownEvent(evt) {
+  // only drag for left mouse
+  if (evt.originalEvent.button > 0) {
+    this.menuRef.current.style.visibility = '';
+    return false;
+
+  }
+
   const map = evt.map;
+  if (this.menuRef.current) {
+    // this.menuRef.current.classList.remove('open');
+    this.menuRef.current.style.visibility = 'hidden';
+  }
 
   const feature = map.getFeaturesAtPixel(evt.pixel, {
     layerFilter: (layer) => layer.canDragFeatures,
@@ -213,7 +230,9 @@ function handleDownEvent(evt) {
 
   if (feature) {
     this.coordinate_ = evt.coordinate;
+    feature.getGeometry().setCoordinates(evt.coordinate);
     this.feature_ = feature;
+    if (feature.ref.current) { feature.ref.current.style.visibility = 'hidden'; }
   }
 
   return !!feature;
@@ -285,13 +304,17 @@ export const ll2bc = (coords) => proj4('EPSG:4326', 'EPSG:3005', coords);
 export const bc2g = (coords) => proj4('EPSG:3005', 'EPSG:3857', coords);
 export const g2bc = (coords) => proj4('EPSG:3857', 'EPSG:3005', coords);
 
+import { Feature } from 'ol';
 
-export function getDRA(coords, point, resolution) {
+export function getDRA(coords, point, map) {
   /* Resolution is projection unit per pixel.  For EPSG:3857, the unit is
    * meter; if the resolution is 30, then one pixel represents 30m.
    */
-  console.log('dra');
-  const polygon = circular(coords, resolution * 50, 8); // 100 pixel circle
+  // const p = new Feature({ geometry: new Point(coords) });
+  // p.setStyle(dotStyle2);
+  // map.pins.getSource().addFeature(p);
+  const polygon = circular(g2ll(coords), map.getView().getResolution() * 20, 8); // 50 pixel circle
+  // const polygon = circular(coords, 100, 8); // 50 pixel circle
   const actual = [];
   for (let ii = 0; ii < polygon.flatCoordinates.length; ii += 2) {
     const coords = [polygon.flatCoordinates[ii], polygon.flatCoordinates[ii + 1]];
@@ -303,63 +326,52 @@ export function getDRA(coords, point, resolution) {
     request: 'GetFeature',
     typeNames: 'pub:WHSE_BASEMAPPING.DRA_DGTL_ROAD_ATLAS_MPAR_SP',
     outputFormat: 'application/json',
-    count: 25,
+    count: 200,
     srsName: 'EPSG:4326',
-    cql_filter: `ROAD_SURFACE = 'paved' AND INTERSECTS(GEOMETRY, POLYGON((${actual.join(', ')})))`,
+    // cql_filter: `ROAD_SURFACE = 'paved' AND INTERSECTS(GEOMETRY, POLYGON((${actual.join(', ')})))`,
+    cql_filter: `INTERSECTS(GEOMETRY, POLYGON((${actual.join(', ')})))`,
   });
+  const point2 = turf.point(g2ll(coords));
   return fetch('https://openmaps.gov.bc.ca/geo/wfs?' + params, {'mode': 'cors'})
     .then((body) => body.json())
     .then((data) => {
-      let closest, feature;
+      let closest, feature, line;
       (data.features || []).forEach((feat) => {
-        const line = turf.lineString(feat.geometry.coordinates);
-        const point = turf.point(coords);
-        var snapped = turf.nearestPointOnLine(line, point, { units: "meters" });
-        if (!closest || snapped.properties.dist < closest.properties.dist) {
-          closest = snapped;
-          feature = feat;
+        try {
+          line = turf.lineString(feat.geometry.coordinates);
+          const snapped = turf.nearestPointOnLine(line, point2, { units: "meters" });
+          // if (feat.properties.ROAD_NAME_FULL === 'Quilchena Ave') {
+            // console.log(snapped.properties.dist, feat.properties.ROAD_NAME_FULL, feat, snapped)
+            // const p = new Feature({
+            //   geometry: new Point(ll2g(snapped.geometry.coordinates))
+            // });
+            // p.setStyle(dotStyle);
+            // map.pins.getSource().addFeature(p);
+          // }
+          if (!closest || snapped.properties.dist < closest.properties.dist) {
+            closest = snapped;
+            feature = feat;
+          }
+          // const q = new Feature({
+          //   geometry: new LineString(feature.geometry.coordinates.map(c => ll2g(c))),
+          // });
+          // q.setStyle(lineStyle);
+          // map.pins.getSource().addFeature(q);
+
+        } catch (ex) {
+          console.error(ex);
+          console.log(closest, feature, line, point2);
         }
       });
       if (closest) {
-        point.getGeometry().setCoordinates(ll2g(closest.geometry.coordinates));
         point.set('dra', feature.properties);
-        let streetName = feature.properties.ROAD_NAME_FULL;
-        if (streetName) {
-          if (feature.properties.ROAD_NAME_ALIAS1) {
-            streetName += ` (${feature.properties.ROAD_NAME_ALIAS1})`;
-          }
-        } else {
-          streetName = feature.properties.ROAD_CLASS;
-        }
-        return streetName;
+        point.set('closest', closest)
+        return {properties: feature.properties, closest };
       }
-      return 'undefined'
-    })
-    .then(async (name) => {
-      const nearby = await getNearby(coords);
-      point.set('nearby', nearby);
-      const texts = nearby.reduce((acc, curr) => {
-        acc.push(curr.phrase);
-        acc.push(`${getSize(curr.priority)}pt Arial`, '\n', '');
-        return acc;
-      }, [name, 'bold 13pt Arial', '\n', '']);
-      point.getStyle().getText().setText(texts);
-      point.changed();
-      return {dra: point.get('dra'), nearby };
+      return {};
     });
 }
 
-function getSize(priority) {
-  switch (priority) {
-    case 6:
-    case 5:
-      return '12';
-    case 4:
-      return '11';
-    default:
-      return '10';
-  }
-}
 const PopulationCenterTypes = [
   // 'Locality', // < 50
   // 'Community', // > 50, unincorporated
@@ -403,7 +415,7 @@ async function filterByTypes(features, types, coords) {
   return results;
 };
 
-async function getNearby(coords) {
+export async function getNearby(coords) {
   const baseUrl = "https://apps.gov.bc.ca/pub/bcgnws/names/near";
   const params = {
     featureClass: 1,
@@ -448,8 +460,7 @@ export async function fetchRoute(points) {
 
   try {
     const response = await fetch(apiUrl, {mode: 'cors'});
-    const data = await response.json();
-    return data;
+    return response.json();
   } catch (error) {
     console.error("Failed to fetch route:", error);
     return null;
@@ -498,3 +509,75 @@ export const selectStyle = {
   indicatorSeparator: (css) => ({ ...css, display: 'none', }),
   valueContainer: (css) => ({ ...css, padding: '0px 3px', }),
 };
+
+export function getSnapped(e) {
+  const point = turf.point(g2ll(e.coordinate));
+  // console.log(point, e.coordinate);
+  const layer = e.map.getAllLayers()[0];
+  const resolution = e.map.getView().getResolution();
+  let closest;
+  const features = e.map.getFeaturesAtPixel(e.pixel, { hitTolerance: 50 })
+    .filter((f) => f.get('mvt:layer')?.startsWith('DRA Roads'))
+    .map((f) => {
+      const line = turf.multiLineString(multi(f.getFlatCoordinates(), f.getEnds().map(a => a), g2ll));
+      f.snapped = turf.nearestPointOnLine(line, point, { units: "meters" });
+      f.closest = !closest || f.snapped.properties.dist < closest.dist;
+      if (f.closest) {
+        if (closest) closest.closest = false;
+        closest = f;
+      }
+      f.dist = f.snapped.properties.dist;
+      return f;
+    });
+  if (closest) {
+    e.map.pins.getSource().getFeatures().forEach((f) => {
+      if (f.ol_uid === e.map.start?.ol_uid || f.ol_uid === e.map.end?.ol_uid) { return; }
+      e.map.pins.getSource().removeFeature(f);
+    })
+    // const p = new Feature({
+    //   geometry: new Point(ll2g(closest.snapped.geometry.coordinates))
+    // });
+    // p.setStyle(dotStyle);
+    // e.map.pins.getSource().addFeature(p);
+    // const ll = multi(closest.getFlatCoordinates(), closest.getEnds().map(a => a));
+    // const flat = closest.getFlatCoordinates();
+    // for (let ii = 0; ii < flat.length; ii += 2) {
+    //   const p = new Feature({
+    //     geometry: new Point([flat[ii], flat[ii + 1]])
+    //   });
+    //   p.setStyle(dotStyle2);
+    //   e.map.pins.getSource().addFeature(p);
+    // }
+    // console.log(closest, ll, closest.getEnds());
+    // const q = new Feature({
+    //   geometry: new MultiLineString(ll),
+    // });
+    // q.setStyle(lineStyle);
+    // e.map.pins.getSource().addFeature(q);
+  }
+  return closest ? ll2g(closest.snapped.geometry.coordinates) : e.coordinate;
+}
+
+function unflatten(l) {
+  const paired = [];
+  for (let ii = 0; ii < l.length; ii += 2) {
+    paired.push(g2ll([l[ii], l[ii + 1]]));
+  }
+  return paired;
+}
+
+const fun = (a) => a;
+function multi(l, ends, func = fun) {
+  let curr = [];
+  let end = ends.shift();
+  const all = [curr];
+  for (let ii = 0; ii < l.length; ii += 2) {
+    if (ii === end) {
+      all.push(curr);
+      curr = [];
+      end = ends.shift();
+    }
+    curr.push(func([l[ii], l[ii + 1]]));
+  }
+  return all;
+}

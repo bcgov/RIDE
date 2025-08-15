@@ -11,7 +11,7 @@ from django.utils import timezone
 from .enums import EventType, EventSubtype, Severity, Status
 
 
-class EventManager(models.Manager):
+class VersionedManager(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(latest=True)
@@ -26,36 +26,37 @@ class RelatedEventManager(models.Manager):
         return super().get_queryset()
 
 
-EXCLUDED = ['_state', 'uuid', 'id', 'version', 'latest', 'created', 'last_updated', 'user']
+EXCLUDED = [
+    '_state', 'uuid', 'id', 'version', 'latest', 'created', 'last_updated', 'user',
+]
 
-class Event(models.Model):
+
+class VersionedModel(models.Model):
+    '''
+    A versioned model keeps a history of all changes.
+
+    The model has an ID field uniquely identifying the entity (but not the row),
+    and an incrementing version number.  A UUID uniquely identifies each row;
+    A unique identifier for the entity is the combination of ID and version
+    number.
+
+    The latest version of the record is complete.  The created timestamp is
+    carried forward unchanged through each.  Entities are soft deleted.
+
+    The user recorded for the version is the user causing that version to be
+    saved.
+    '''
 
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     id = models.CharField(max_length=20, blank=True, null=True)
     version = models.IntegerField(default=0)
     latest = models.BooleanField(default=False)
-
     created = models.DateTimeField(default=timezone.now, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     user = models.CharField(max_length=100, blank=True, null=True)
-    metadata = models.JSONField(default=dict, encoder=DjangoJSONEncoder, editable=False)
+    deleted = models.BooleanField(default=False)
 
-    event_type = models.CharField(max_length=30, choices=EventType, blank=True, null=True)
-    event_subtype = models.CharField(max_length=30, choices=EventSubtype, blank=True, null=True)
-
-    status = models.CharField(max_length=20, choices=Status, blank=True, null=True)
-    severity = models.CharField(max_length=20, choices=Severity.choices, blank=True, null=True)
-    is_closure = models.BooleanField(default=False)
-
-    geometry = gis.GeometryField(blank=True, null=True)
-    # tlids = models.JSONField(default=list, null=True)
-
-    headline = models.CharField(max_length=100, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-
-    objects = models.Manager()
-    current = EventManager()
-    relations = RelatedEventManager()
+    current = VersionedManager()
 
     class Meta:
         ordering = ['id', 'version']
@@ -143,17 +144,22 @@ class Event(models.Model):
         return self if self.latest else Event.current.get(id=self.id)
 
 
-class RelatedManager(models.Manager):
+class Event(VersionedModel):
 
-    def get_queryset(self):
-        # print('in related manager')
-        return super().get_queryset()
+    event_type = models.CharField(max_length=30, choices=EventType, blank=True, null=True)
+    event_subtype = models.CharField(max_length=30, choices=EventSubtype, blank=True, null=True)
+
+    status = models.CharField(max_length=20, choices=Status, blank=True, null=True)
+    severity = models.CharField(max_length=20, choices=Severity.choices, blank=True, null=True)
+    is_closure = models.BooleanField(default=False)
+
+    geometry = gis.GeometryField(blank=True, null=True)
+    # tlids = models.JSONField(default=list, null=True)
+
+    headline = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
 
-class Related(models.Model):
+class Comment(VersionedModel):
 
-    name = models.TextField(blank=True, null=True)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-
-    objects = RelatedManager()
-
+    text = models.TextField(blank=True)

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { transform } from 'ol/proj';
 
-import { click, createMap, Drag, MapContext, pointerMove } from './helpers.js';
+import { click, createMap, MapContext, pointerMove } from './helpers.js';
 import './map.css';
 
 export default function Map({ children, parentClickHandler, parentContextHandler }) {
@@ -23,6 +23,17 @@ export default function Map({ children, parentClickHandler, parentContextHandler
     map.on('pointermove', pointerMove);
     map.on('click', clickHandler);
     map.on('contextmenu', parentContextHandler);
+    map.on('movestart', (e) => {
+      if (e.map.start) { e.map.start.ref.current.style.visibility = 'hidden'; }
+      if (e.map.end) { e.map.end.ref.current.style.visibility = 'hidden'; }
+    })
+    map.on('moveend', (e) => {
+      e.map.start?.updateInfobox(e.map);
+      e.map.end?.updateInfobox(e.map);
+    })
+    map.on('change', (e) => {
+      console.log(e);
+    })
     setMap(map);
   }, []);
   window.map = map;
@@ -35,7 +46,7 @@ export default function Map({ children, parentClickHandler, parentContextHandler
   }
 
   return (
-    <div ref={elementRef} className="mapContainer">
+    <div ref={elementRef} className="map-container">
       {children}
     </div>
   );

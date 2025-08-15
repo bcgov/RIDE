@@ -11,6 +11,9 @@ import InternalNotes from './Internal.jsx';
 import Location from './Location.jsx';
 import Restrictions from './Restrictions.jsx';
 import AdditionalMessaging from './Additional.jsx';
+import {
+  CONDITIONS_FORMS, DELAYS_FORMS, DETAILS_FORMS, FORMS, IMPACTS_FORMS, RESTRICTIONS_FORMS
+} from './references.js';
 
 import './forms.css';
 
@@ -19,7 +22,7 @@ export default function EventForm({ start, end, map }) {
 
   const [errors, setErrors] = useState({});
   const [severity, setSeverity] = useState('Minor');
-  const [formType, setFormType] = useState('Incident')
+  const [formType, setFormType] = useState('Incident');
 
   const transform = getTransform(map.getView().getProjection().getCode(), 'EPSG:4326');
 
@@ -50,6 +53,7 @@ export default function EventForm({ start, end, map }) {
           other: '',
         },
       },
+      route: [],
       impacts: [],
       restrictions: [],
       conditions: [],
@@ -95,21 +99,26 @@ export default function EventForm({ start, end, map }) {
       form.end.nearby.other = formData.get('end other');
     }
 
-    form.impacts = formData.getAll("impact").filter((i) => i !== '0');
-    const impacts = formData.getAll('impact').filter((el) => el !== '0');
-    if (impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'}
+    if (formType !== 'condition') {
+      if (!formData.get('direction')) { err.direction = true; } else { form.direction = formData.get('direction'); }
+      if (!formData.get('severity')) { err.severity = true; } else { form.severity = formData.get('severity'); }
+      if (!formData.get('category')) { err.category = true; } else { form.situation = formData.get('category'); }
+      if (!formData.get('situation')) { err.situation = true; } else { form.situation = formData.get('situation'); }
 
-    form.delay.amount = formData.get('delay time');
-    form.delay.unit = formData.get('delay unit');
+      form.impacts = formData.getAll("impact").filter((i) => i !== '0');
+      const impacts = formData.getAll('impact').filter((el) => el !== '0');
+      if (impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'}
 
-    form.restrictions = formData.getAll("restrictions").filter((i) => i !== '0');
-    form.conditions = formData.getAll("conditions").filter((i) => i !== '0');
+      form.delay.amount = formData.get('delay time');
+      form.delay.unit = formData.get('delay unit');
+
+      form.restrictions = formData.getAll("restrictions").filter((i) => i !== '0');
+    } else {
+      form.conditions = formData.getAll("conditions").filter((i) => i !== '0');
+    }
+
 
     form.additional = formData.get('additional');
-
-    if (!formData.get('direction')) { err.direction = true; } else { form.direction = formData.get('direction'); }
-    if (!formData.get('severity')) { err.severity = true; } else { form.severity = formData.get('severity'); }
-    if (!formData.get('situation')) { err.situation = true; } else { form.situation = formData.get('situation'); }
 
     if (!formData.get('next update time') && !formData.get('end time')) {
       err['Manage Timing By'] = 'Must set one or both';
@@ -118,14 +127,13 @@ export default function EventForm({ start, end, map }) {
     form.timing.end = formData.get('end time');
 
     form.additional = formData.get('additional');
+    form.route = map.route.getGeometry().getCoordinates();
 
     setErrors(err);
     console.log(form);
   }
 
-  const getLabel = () => {
-    return severity.startsWith('Minor') ? 'Publish' : 'Submit';
-  }
+  const getLabel = () => severity.startsWith('Minor') ? 'Publish' : 'Submit';
 
   return (
     <div className="form">
@@ -134,11 +142,9 @@ export default function EventForm({ start, end, map }) {
           <div className="title">
 
           <h4>
-            Create
-            <select name="formType">
-              <option value="incident">Incident</option>
-              <option value="planned">Planned</option>
-              <option value="condition">Road Condition</option>
+            Create&nbsp;
+            <select name="formType" onChange={(e) => setFormType(e.target.value)} defaultValue={formType}>
+              {FORMS.map((form) => (<option key={form}>{form}</option>))}
             </select>
           </h4>
           <button type="submit">{getLabel()}</button>
@@ -152,45 +158,53 @@ export default function EventForm({ start, end, map }) {
               <Location start={start} end={end} />
             </div>
 
-            <div className="section details">
-              <Details errors={errors} severity={severity} setSeverity={setSeverity} />
-            </div>
-
-            { formType !== 'conditions' &&
-              <div className="section impacts">
-                <Impacts errors={errors} />
+            { DETAILS_FORMS.includes(formType) &&
+              <div className="section details">
+                <Details formType={formType} errors={errors} severity={severity} setSeverity={setSeverity} />
               </div>
             }
 
-            { formType !== 'conditions' &&
+            { IMPACTS_FORMS.includes(formType) &&
+              <div className="section impacts">
+                <Impacts formType={formType} errors={errors} />
+              </div>
+            }
+
+            { DELAYS_FORMS.includes(formType) &&
               <div className="section delays">
                 <Delays errors={errors} />
               </div>
             }
 
-            { formType !== 'conditions' &&
+            { RESTRICTIONS_FORMS.includes(formType) &&
               <div className="section restrictions">
                 <Restrictions errors={errors} />
               </div>
             }
 
-            { formType === 'conditions' &&
+            { CONDITIONS_FORMS.includes(formType) &&
               <div className="section conditions">
                 <Conditions errors={errors} />
               </div>
             }
 
-            <div className="section timing">
-              <EventTiming errors={errors} severity={severity} formType={formType} />
-            </div>
+            { formType &&
+              <div className="section timing">
+                <EventTiming errors={errors} severity={severity} formType={formType} />
+              </div>
+            }
 
-            <div className="section additional">
-              <AdditionalMessaging />
-            </div>
+            { formType &&
+              <div className="section additional">
+                <AdditionalMessaging />
+              </div>
+            }
 
-            <div className="section internal">
-              <InternalNotes />
-            </div>
+            { formType &&
+              <div className="section internal">
+                <InternalNotes />
+              </div>
+            }
           </> }
         </div>
       </form>
