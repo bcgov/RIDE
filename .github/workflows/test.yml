@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Generate Incremental Tag
       id: generate_tag
@@ -68,7 +68,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
     
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -114,7 +114,7 @@ jobs:
       url: https://test-ride.apps.gold.devops.gov.bc.ca
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Install CLI tools from OpenShift Mirror
       uses: redhat-actions/openshift-tools-installer@v1
       with:
@@ -142,7 +142,7 @@ jobs:
       url: https://test-ride.apps.golddr.devops.gov.bc.ca
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install CLI tools from OpenShift Mirror
       uses: redhat-actions/openshift-tools-installer@v1
