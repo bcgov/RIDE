@@ -4,6 +4,8 @@
 
 .map-container {
   flex: 1;
+  overflow: hidden;
+
   .ol-scale-line {
     background: var(--ol-partial-background-color);
     border-radius: 4px;

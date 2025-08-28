@@ -5,11 +5,10 @@ import Select from 'react-select';
 import { FORM_CATEGORIES, FORM_CATEGORY_PHRASE, FORM_PHRASES, FORM_PHRASE_CATEGORY } from "./references";
 import { selectStyle } from '../components/Map/helpers';
 
-export default function Details({ formType, errors, severity, setSeverity }) {
-  const [category, setCategory] = useState('');
-  const [situation, setSituation] = useState('');
-  const sitRef = useRef();
+export default function Details({ errors, event, dispatch }) {
+
   const catRef = useRef();
+  const sitRef = useRef();
 
   return <>
     <div className="title">
@@ -18,37 +17,46 @@ export default function Details({ formType, errors, severity, setSeverity }) {
     <div className="row">
       <div className={`input ${errors.direction ? 'error' : ''}`}>
         <label>Direction</label>
-        <select name="direction">
-          <option>Both</option>
-          <option>North</option>
-          <option>East</option>
-          <option>South</option>
-          <option>West</option>
+        <select
+         name="direction"
+         onChange={(e) => dispatch({ type: 'set', value: { section: 'details', direction: e.target.value }})}
+        >
+          <option>Both directions</option>
+          <option>Northbound</option>
+          <option>Eastbound</option>
+          <option>Southbound</option>
+          <option>Westbound</option>
         </select>
       </div>
 
       <div className={`input ${errors.severity ? 'error' : ''}`}>
         <label>Severity</label>
-        <select name="severity" defaultValue={severity} onChange={(e) => setSeverity(e.target.value)}>
-          <option>Minor (30- minute delay)</option>
-          <option>Major (30+ minute delay)</option>
-          <option>Closed</option>
+        <select
+          name="severity"
+          defaultValue={event.details.severity}
+          onChange={(e) => {
+            if (e.target.value === event.details.severity) { return; }
+            dispatch({ type: 'set severity', value: e.target.value })
+          }}
+        >
+          <option value="Minor">Minor (30- minute delay)</option>
+          <option value="Major">Major (30+ minute delay)</option>
         </select>
       </div>
     </div>
 
-    <div className={`input ${errors.category ? 'error' : ''}`}>
+    <div className={`input ${errors.category ? 'error' : ''}`} style={{marginBottom: '0.5rem'}}>
       <label>Category</label>
       <Select
-        name="category"
         ref={catRef}
-        onChange={(changed, { action }) => {
-          if (category !== changed.value && action === 'select-option') {
-            sitRef.current.setValue('');
-          }
-          setCategory(changed.value);
+        value={[{ value: event.details.category, label: event.details.category }]}
+        onChange={(changed, action) => {
+          console.log(changed, action);
+          if (action.action === 'clear' || changed.value === event.details.category) { return; }
+          sitRef.current.clearValue();
+          dispatch({ type: 'set category', value: changed.value });
         }}
-        options={FORM_CATEGORIES[formType].map((cat) => ({
+        options={FORM_CATEGORIES[event.type].map((cat) => ({
           value: cat, label: cat,
         }))}
         styles={selectStyle}
@@ -58,16 +66,15 @@ export default function Details({ formType, errors, severity, setSeverity }) {
     <div className={`input ${errors.situation ? 'error' : ''}`}>
       <label>Situation</label>
       <Select
-        ref={sitRef}
         name="situation"
-        onChange={(changed) => {
-          setSituation(changed.value);
-          if (!category) {
-            const cat = FORM_PHRASE_CATEGORY[formType][changed.value];
-            catRef.current.setValue({ id: cat, label: cat}, 'set-value')
-          }
+        ref={sitRef}
+        defaultValue={event.details.situation}
+        placeholder=""
+        onChange={(changed, action) => {
+          if (action.action === 'clear') { return; }
+          dispatch({ type: 'set situation', value: changed.value, previous: event.details.situation })
         }}
-        options={(FORM_CATEGORY_PHRASE[formType][category] || FORM_PHRASES[formType]).map((item, ii) => (
+        options={(FORM_CATEGORY_PHRASE[event.type][event.details.category] || FORM_PHRASES[event.type]).map((item, ii) => (
           { value: item.id, label: item.phrase }
         ))}
         styles={selectStyle}

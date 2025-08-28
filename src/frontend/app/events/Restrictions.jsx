@@ -7,42 +7,44 @@ import { DraggableRows } from './shared';
 import { selectStyle } from '../components/Map/helpers';
 
 
-function Restriction({ id, source, item, change, update, current, }) {
+function Restriction({ id, item, change, update, current, }) {
   return (
     <>
       <Select
         name={`restriction ${id}`}
-        value={[{ value: id, label: source.label }]}
+        value={[{ value: id, label: item.label }]}
         options={ RestrictionsList.filter((item) => (
             item.id !== id && !current.includes(item.id)
           )).map((item, ii) => ({ value: item.id, label: item.label }))
         }
         key={`restriction ${id}`}
         styles={selectStyle}
-        onChange={(changed) => { change(id, changed.value); }}
+        onChange={(changed) => { change(id, { id: changed.value, label: changed.label }) }}
       />
       <input
-        name={`${source.label} text ${id}`}
-        key={`${source.label} text ${id}`}
+        // name={`${item.label} text ${id}`}
+        key={`${item.label} text ${id}`}
         type="text"
         defaultValue={item.text}
         disabled={id === 0}
-        onChange={(e) => update(id, {text: e.target.value}) }
+        onBlur={(e) => update(id, {text: e.target.value}) }
         autoComplete="off"
       />
     </>
   );
 }
 
-export default function Restrictions({ errors }) {
+export default function Restrictions({ errors, event, dispatch }) {
   return (
     <DraggableRows
       label="Restrictions"
-      limit={10}
+      appended="(optional)"
       itemsSource={RestrictionsList}
       Child={Restriction}
-      initial={[]}
+      items={event.restrictions || []}
+      section='restrictions'
       errors={errors}
+      dispatch={dispatch}
     />
   );
 }

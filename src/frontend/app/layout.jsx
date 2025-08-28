@@ -4,7 +4,7 @@ export default function Layout() {
   return (
     <>
       <header>
-        <NavLink to="/">RIDE</NavLink>
+        <NavLink to="/"><img src='/ride-logo.svg' /></NavLink>
         <NavLink to="/events/">Events</NavLink>
         <NavLink to="/cameras/">Cameras</NavLink>
       </header>

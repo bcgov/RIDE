@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function AdditionalMessaging() {
+export default function AdditionalMessaging({ event, dispatch }) {
   const [text, setText] = useState('');
 
   const change = (e) => {
@@ -11,13 +11,14 @@ export default function AdditionalMessaging() {
 
   return <>
     <div className="title">
-      <p><strong>Additional Messaging</strong></p>
+      <p><strong>Additional Messaging</strong> (optional)</p>
       <p className={text.length === 200 ? 'bold' : ''}>{text.length}/200</p>
     </div>
     <textarea
       name="additional"
-      value={text}
       onChange={change}
+      onBlur={(e) => dispatch({ type: 'set additional', value: e.target.value })}
+      defaultValue={event.additional}
     />
   </>;
 }

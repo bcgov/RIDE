@@ -76,10 +76,14 @@ function DraggableRow({ children, id, isDraggable, remove }) {
  * mainly of an ordered set of elements with an id and label, and optional extra
  * data fields.  It provides the state-changing callbacks to children as props.
  */
-export function DraggableRows({ label, limit=5, itemsSource, Child, initial, errors }) {
-  if (!Array.isArray(initial)) { initial = []; }
-  if (initial.length === 0) { initial.push({ id: 0, label: '' }); }
-  const [items, setItems] = useState(initial)
+export function DraggableRows({
+  label, limit=5, itemsSource, Child, errors, callback, dispatch, section,
+  appended, items=[] }) {
+
+  const itemsByKey = itemsSource.reduce((acc, curr) => {
+    acc[curr.id] = curr;
+    return acc;
+  }, {});
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -89,66 +93,39 @@ export function DraggableRows({ label, limit=5, itemsSource, Child, initial, err
   );
 
   // change the selected value
-  const change = useCallback((oldId, newId) => {
-    setItems((oldItems) => {
-      let hasNewline = false;
-      const newItems = oldItems.reduce((acc, curr, ii) => {
-        acc.push(curr);
-        if (curr.id === oldId) { curr.id = newId; }
-        if (curr.id === 0) { hasNewline = true; }
-        return acc;
-      }, []);
-      if (!hasNewline && newItems.length < limit) {
-        newItems.push({ id: 0 });
-      }
-      return newItems;
-    })
-  });
+  const change = (oldId, newValue) => {
+    dispatch({ type: 'update list', section, id: oldId, value: newValue });
+  };
 
   // update the item with extra information
-  const update = useCallback((id, updates) => {
-    setItems((oldItems) => {
-      return oldItems.reduce((acc, curr, ii) => {
-        acc.push(curr);
-        if (id === curr.id) { Object.assign(curr, updates); }
-        return acc;
-      }, []);
-    });
-  }, [])
-
-  // remove the item from the list
-  const remove = useCallback((id) => {
-    if (id === 0) { return; } // don't remove the empty row
-    setItems((oldItems) => {
-      const newItems = oldItems.filter((item) => item.id !== id && item.id !== 0);
-      if (newItems.length < limit) {
-        newItems.push({ id: 0 });
-      }
-      return newItems;
-    });
-  });
+  const update = (id, updates) => {
+    dispatch( { type: 'update item', section, id, value: updates })
+  };
 
   function handleDragEnd(event) {
-    const {active, over} = event;
-
-    if (active.id !== over.id) {
-      setItems((items) => {
-        const oldIndex = items.findIndex((el) => el.id === active.id);
-        const newIndex = items.findIndex((el) => el.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+    if (event.active.id !== event.over.id) {
+      const oldIndex = items.findIndex((el) => el.id === event.active.id);
+      const newIndex = items.findIndex((el) => el.id === event.over.id);
+      dispatch({ type: 'change order', section, value: arrayMove(items, oldIndex, newIndex) });
     }
   }
+
+  const current = items.map((item) => item.id);
 
   return (
     <div>
       <div className={`title ${errors[label] ? 'error' : ''}`}>
         <p>
-          <strong>{label}</strong>
+          <strong>{label}</strong> {appended}
           <span className="error-message">{errors[label]}</span>
         </p>
-        {/* <button>+ Add traffic impact</button> */}
       </div>
+
+      { (items || []).reduce((acc, item) => acc || itemsByKey[item.id]?.closed, false) && (
+        <div className="is-closure">
+          This event will display as a <strong>closure</strong>
+        </div>
+      )}
 
       <div>
         <DndContext
@@ -158,23 +135,41 @@ export function DraggableRows({ label, limit=5, itemsSource, Child, initial, err
           modifiers={[restrictToVerticalAxis, restrictToParentElement]}
         >
           <SortableContext items={items} strategy={verticalListSortingStrategy}>
+            {/* current items */}
             {items.map((item, i) => (
               <DraggableRow
                 id={item.id}
-                isDraggable={item.id !== 0}
-                remove={remove}
+                isDraggable={true}
+                remove={(e) => dispatch({ type: 'remove from list', section, id: item.id })}
                 key={`${label} row ${i}`}
               >
                 <Child
                   id={item.id}
-                  source={itemsSource[item.id]}
-                  item={items[i]}
+                  item={{ ...item, value: item.id, label: item.label }}
                   change={change}
                   update={update}
-                  current={items.map((item) => item.id)}
+                  current={current}
                 />
               </DraggableRow>
             ))}
+
+            {/* empty row if more allowed */}
+            { items.length < limit &&
+              <DraggableRow
+                id={0}
+                isDraggable={false}
+                remove={() => null}
+                key={`empty row`}
+              >
+                <Child
+                  id={0}
+                  item={{id: 0, label: ''}}
+                  change={change}
+                  update={update}
+                  current={current}
+                />
+              </DraggableRow>
+            }
           </SortableContext>
         </DndContext>
       </div>

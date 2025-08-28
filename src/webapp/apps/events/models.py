@@ -65,6 +65,7 @@ class VersionedModel(models.Model):
             UniqueConstraint(fields=['id', 'version'], name='id_version'),
         ]
         base_manager_name = 'relations'
+        abstract = True
 
     def __str__(self):
         return f'{self.id} ({self.version})'
@@ -144,22 +145,201 @@ class VersionedModel(models.Model):
         return self if self.latest else Event.current.get(id=self.id)
 
 
+class LocationField(models.JSONField):
+    '''
+    Field for holding a GeoJSON location with supplementary information, and
+    validating it.
+    '''
+
+
+class OrderedListField(models.JSONField):
+    '''
+    Field for holding a list of keys, or objects with key values relating to
+    another model or contained extra data.  Order is always preserved.
+    '''
+
+
 class Event(VersionedModel):
 
-    event_type = models.CharField(max_length=30, choices=EventType, blank=True, null=True)
-    event_subtype = models.CharField(max_length=30, choices=EventSubtype, blank=True, null=True)
+    meta = models.JSONField()
+    event_type = models.CharField(choices=EventType, blank=True, null=True)
+    status = models.CharField(choices=Status, blank=True, null=True)
 
-    status = models.CharField(max_length=20, choices=Status, blank=True, null=True)
+    start = LocationField()
+    end = LocationField()
+    geometry = gis.GeometryCollectionField(blank=True, null=True)
+
+    # detail
     severity = models.CharField(max_length=20, choices=Severity.choices, blank=True, null=True)
-    is_closure = models.BooleanField(default=False)
+    category = models.CharField(max_length=30, choices=EventSubtype, blank=True, null=True)
+    phrase = models.PositiveIntegerField()
 
-    geometry = gis.GeometryField(blank=True, null=True)
+    impacts = OrderedListField()
+    restrictions = OrderedListField()
+    conditions = OrderedListField()
+
+    delay_amount = models.PositiveIntegerField(default=0)
+    delay_unit = models.CharField()
+
+    next_update = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
+
+    direction = models.CharField()
+
+    additional = models.TextField(blank=True, null=True)
+    # is_closure = models.BooleanField(default=False)
     # tlids = models.JSONField(default=list, null=True)
-
-    headline = models.CharField(max_length=100, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
 
 
 class Comment(VersionedModel):
 
     text = models.TextField(blank=True)
+
+
+class Choice(models.Model):
+
+    label = models.CharField(max_length=20)
+    order = models.PositiveSmallIntegerField()
+
+    class Meta:
+        abstract = True
+
+
+class EventType(Choice):
+    pass
+
+
+class Category(Choice):
+    pass
+
+
+class TrafficImpact(Choice):
+    pass
+
+
+class Restriction(Choice):
+    pass
+
+
+sample = '''{
+  "type": "Incident",
+  "start": {
+    "location": [
+      -120.69816026633748,
+      50.09734902191738
+    ],
+    "name": "Hwy 97C",
+    "alias": "Hwy 5A",
+    "aliases": [
+      "Hwy 5A",
+      "Merritt-Princeton Hwy 5A"
+    ],
+    "nearby": {
+      "options": [
+        {
+          "source": "BCGNWS",
+          "name": "Merritt",
+          "type": "City",
+          "coordinates": [
+            -120.788333334,
+            50.1124999965
+          ],
+          "distance": 15.431,
+          "direction": "E",
+          "priority": 6,
+          "phrase": "15.4km E of Merritt"
+        },
+        {
+          "source": "BCGNWS",
+          "name": "Kamloops",
+          "type": "City",
+          "coordinates": [
+            -120.3394444447,
+            50.6758333294
+          ],
+          "distance": 98.428,
+          "direction": "S",
+          "priority": 6,
+          "phrase": "98.4km S of Kamloops"
+        },
+        {
+          "source": "BCGNWS",
+          "name": "Logan Lake",
+          "type": "District Municipality (1)",
+          "coordinates": [
+            -120.8133333333,
+            50.4944444401
+          ],
+          "distance": 63.998,
+          "direction": "S",
+          "priority": 5,
+          "phrase": "64km S of Logan Lake"
+        },
+        {
+          "source": "BCGNWS",
+          "name": "Peachland",
+          "type": "District Municipality (1)",
+          "coordinates": [
+            -119.7363888889,
+            49.7738888844
+          ],
+          "distance": 108.016,
+          "direction": "NW",
+          "priority": 5,
+          "phrase": "108km NW of Peachland"
+        },
+        {
+          "source": "BCGNWS",
+          "name": "Princeton",
+          "type": "Town",
+          "coordinates": [
+            -120.5089678006,
+            49.4590345969
+          ],
+          "distance": 82.293,
+          "direction": "N",
+          "priority": 4,
+          "phrase": "82.3km N of Princeton"
+        }
+      ],
+      "picked": [
+        0,
+        2
+      ],
+      "other": ""
+    }
+  },
+  "end": {
+    "location": "",
+    "route": "",
+    "name": null,
+    "alias": "",
+    "aliases": null,
+    "nearby": {
+      "options": null,
+      "picked": [],
+      "other": ""
+    }
+  },
+  "route": [],
+  "impacts": [
+    "1",
+    "4",
+    "3"
+  ],
+  "restrictions": [],
+  "conditions": [],
+  "delay": {
+    "amount": "20",
+    "unit": "hours"
+  },
+  "timing": {
+    "nextUpdate": "2025-08-22T13:04",
+    "end": ""
+  },
+  "additional": "Additional Messaging",
+  "direction": "Both",
+  "severity": "Minor (30- minute delay)",
+  "situation": "92"
+}'''
+

@@ -9,10 +9,41 @@
   .hidden {
     display: none !important;
   }
+
+  .form-header {
+    button {
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      border: solid 1px transparent;
+      font-weight: bold;
+
+      background: none;
+      color: #666;
+
+      svg {
+        display: inline-block;
+        vertical-align: text-bottom;
+        margin-right: 0.5rem;
+      }
+
+      &:hover {
+        border-color: #666;
+      }
+
+      &:active {
+        border-color: black;
+        color: black;
+        background: #eee;
+      }
+    }
+  }
+
   .form-body {
     flex: 1;
     overflow: auto;
     height: 100%;
+    scrollbar-color: #999 #f3f2f1;
   }
 
   input, select, textbox {
@@ -34,11 +65,14 @@
     border: solid 1px black;
     border-radius: 8px;
     padding: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin: 0.5rem;
+    background: white;
 
     &.form-header {
       flex: 0;
       border: none;
+      border-radius: 0;
+      margin: 0;
     }
 
     .title, .subtitle {
@@ -56,6 +90,15 @@
         }
       }
     }
+
+    .is-closure {
+      background: red;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
     .row {
       display: flex;
       justify-content: space-between;
@@ -74,6 +117,7 @@
     }
     .input {
       display: block !important;
+
       label {
         display: block;
         font-size: 0.675rem;
@@ -157,11 +201,37 @@
     }
 
     &.location {
+      .go-to {
+        cursor: pointer;
+      }
       .toggleable {
         display: flex;
         margin-bottom: 0.25rem;
         &:last-child {
           margin-bottom: 0;
+        }
+        .toggle {
+          .unfold {
+            display: none;
+          }
+        }
+
+        &.folded {
+          .toggle {
+            .fold { display: none; }
+            .unfold { display: inline-block; }
+          }
+          .toggled {
+            > div:not(:first-child) {
+              display: none;
+            }
+          }
+        }
+
+        .toggle {
+          svg {
+            cursor: pointer;
+          }
         }
 
         .toggled {
@@ -205,6 +275,11 @@
     }
 
     &.timing {
+
+      svg {
+        cursor: pointer;
+      }
+
       .row {
         display: block;
 
@@ -279,10 +354,6 @@
             text-transform: uppercase;
             div { margin-right: 2rem; }
 
-            .attribution {
-              /* width: 50%; */
-            }
-
             .buttons {
               text-align: right;
               /* width: 25%; */
@@ -292,6 +363,55 @@
               font-size: 0.675rem;
               /* width: 25%; */
             }
+          }
+        }
+      }
+    }
+
+    &.buttons {
+      display: flex;
+      justify-content: space-between;
+      border-color: white;
+      margin: 0.5rem 0 0 0;
+      border-radius: 0;
+
+      button {
+        background: black;
+        border-radius: 4px;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+        border: solid 1px transparent;
+        font-weight: bold;
+
+        svg {
+          display: inline-block;
+          vertical-align: text-bottom;
+          margin-right: 0.5rem;
+        }
+
+        &:hover {
+          border-color: 333;
+          background: #333;
+        }
+
+        &:active {
+          border-color: 999;
+          background: #999;
+        }
+
+        &.cancel {
+          background: none;
+          color: #666;
+
+          &:hover {
+            border-color: #666;
+          }
+
+          &:active {
+            border-color: black;
+            color: black;
+            background: #eee;
           }
         }
       }

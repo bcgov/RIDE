@@ -8,9 +8,10 @@
   padding: 0.25rem 0.5rem;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
   z-index: 1;
+  width: max-content;
 
   &:hover {
-    z-index: 1000;
+    z-index: 10;
   }
 
   &.open {

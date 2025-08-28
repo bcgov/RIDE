@@ -1,5 +1,6 @@
 .events-page {
   header {
+    padding-left: 0.5rem;
     input {
       border: solid 1px black;
       border-radius: 4px;

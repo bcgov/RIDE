@@ -2,14 +2,14 @@ export const TrafficImpacts = [
   { id: 0, label: '' },
   { id: 1, label: 'All lanes blocked' },
   { id: 2, label: 'Assessment in progress' },
-  { id: 3, label: 'Bridge closed' },
+  { id: 3, label: 'Bridge closed', closed: true },
   { id: 4, label: 'Centre lane blocked' },
   { id: 5, label: 'Centre lane closed' },
   { id: 6, label: 'Centre lane closed in both directions' },
-  { id: 7, label: 'Closed' },
-  { id: 8, label: 'Closed ahead' },
-  { id: 9, label: 'Closed for repairs' },
-  { id: 10, label: 'Closed for the season' },
+  { id: 7, label: 'Closed', closed: true },
+  { id: 8, label: 'Closed ahead', closed: true },
+  { id: 9, label: 'Closed for repairs', closed: true },
+  { id: 10, label: 'Closed for the season', closed: true },
   { id: 11, label: 'Closed intermittently' },
   { id: 12, label: 'Closed to all traffic except emergency vehicles' },
   { id: 13, label: 'Detour in effect' },
@@ -354,10 +354,11 @@ export const IMPACTS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
 export const RESTRICTIONS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
 export const CONDITIONS_FORMS = ['Road condition'];
 
-export const FORMS = [];
-export const FORM_CATEGORIES = {};
-export const FORM_PHRASES = {};
-export const FORM_PHRASE_CATEGORY = {};
+export const FORMS = []; window.FORMS = FORMS;
+export const FORM_CATEGORIES = {}; window.FORM_CATEGORIES = FORM_CATEGORIES;
+export const FORM_PHRASES = {}; window.FORM_PHRASES = FORM_PHRASES;
+export const FORM_PHRASE_CATEGORY = {}; window.FORM_PHRASE_CATEGORY = FORM_PHRASE_CATEGORY;
+export const PHRASES_LOOKUP = {}; window.PHRASES_LOOKUP = PHRASES_LOOKUP;
 export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
   const form = row[0];
   const category = row[1];
@@ -378,6 +379,7 @@ export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
   acc[form][category].push({ id, phrase });
   FORM_PHRASES[form].push({ id, phrase });
   FORM_PHRASE_CATEGORY[form][id] = category;
+  PHRASES_LOOKUP[id] = phrase;
   return acc;
-}, {});
+}, {}); window.FORM_CATEGORY_PHRASE = FORM_CATEGORY_PHRASE
 

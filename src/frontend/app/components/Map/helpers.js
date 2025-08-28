@@ -55,7 +55,7 @@ export function pointerMove(evt) {
     feature.hovered = true;
     feature.updateStyle();
   }
-  if (evt.map.start) { evt.map.start.updateInfobox(evt.map); }
+  // if (evt.map.start) { evt.map.start.updateInfobox(evt.map); }
 }
 
 export function click(evt) {
@@ -215,7 +215,6 @@ function handleDownEvent(evt) {
   if (evt.originalEvent.button > 0) {
     this.menuRef.current.style.visibility = '';
     return false;
-
   }
 
   const map = evt.map;
@@ -232,7 +231,10 @@ function handleDownEvent(evt) {
     this.coordinate_ = evt.coordinate;
     feature.getGeometry().setCoordinates(evt.coordinate);
     this.feature_ = feature;
-    if (feature.ref.current) { feature.ref.current.style.visibility = 'hidden'; }
+    if (feature.ref.current) {
+      feature.ref.current.style.visibility = 'hidden';
+      feature.ref.current.querySelectorAll('.near').forEach((el) => el.style.display = 'none');
+    }
   }
 
   return !!feature;
@@ -279,6 +281,10 @@ function handleMoveEvent(evt) {
  */
 function handleUpEvent(e) {
   if (e.originalEvent?.button > 0) { return false; } // right or middle click
+  // if (this.feature_.ref.current) {
+  //   this.feature_.ref.current.querySelectorAll('.near').forEach((el) => el.style.visibility = 'hidden');
+  // }
+
   this.upCallback(e, this.feature_);
   this.coordinate_ = null;
   this.feature_ = null;
@@ -531,7 +537,11 @@ export function getSnapped(e) {
     });
   if (closest) {
     e.map.pins.getSource().getFeatures().forEach((f) => {
-      if (f.ol_uid === e.map.start?.ol_uid || f.ol_uid === e.map.end?.ol_uid) { return; }
+      if (
+        f.ol_uid === e.map.start?.ol_uid ||
+        f.ol_uid === e.map.end?.ol_uid ||
+        f.ol_uid === e.map.route?.ol_uid
+      ) { return; }
       e.map.pins.getSource().removeFeature(f);
     })
     // const p = new Feature({
