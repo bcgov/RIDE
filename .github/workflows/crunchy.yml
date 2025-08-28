@@ -26,7 +26,7 @@ jobs:
       name: ${{ github.event.inputs.environment }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4 
+      uses: actions/checkout@v5 
 
     - name: Install CLI tools from OpenShift Mirror
       uses: redhat-actions/openshift-tools-installer@v1
