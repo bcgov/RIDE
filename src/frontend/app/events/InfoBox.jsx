@@ -6,11 +6,13 @@ import './InfoBox.css';
 const classify = (text) => text.replace(/[()0-9]/g, '').trim().replace(/\s/g, '-').toLowerCase();
 
 export default function InfoBox({ className, point, ref }) {
-    let streetName = point?.ROAD_NAME_FULL;
-    if (!streetName) {
-      streetName = point?.ROAD_CLASS;
-    }
-    const alias = point?.ROAD_NAME_ALIAS1;
+  let streetName = point?.ROAD_NAME_FULL;
+  if (!streetName) {
+    streetName = point?.ROAD_CLASS;
+  }
+  const alias = point?.ROAD_NAME_ALIAS1;
+
+  if (!streetName) { return null; }
 
   return (
     <div className={`infobox ${className} ${ point?.name && 'open' }`} ref={ref}>

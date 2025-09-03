@@ -171,5 +171,8 @@ export default {
     end: {
       normal: pinEndNormalStyle, active: pinEndActiveStyle, hover: pinEndHoverStyle,
     },
-  }
+    route: {
+        normal: routeNormalStyle, active: routeActiveStyle, hover: routeHoverStyle,
+    }
+  },
 };

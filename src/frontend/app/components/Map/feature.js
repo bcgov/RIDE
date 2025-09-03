@@ -21,6 +21,9 @@ export default class RideFeature extends Feature {
       this.active = props.activeStyle || activeStyle;
     }
     this.setStyle(this.normal);
+
+    this.action = props.action;
+    this.ref = props.ref;
   }
 
   updateInfobox(map) {
@@ -36,12 +39,11 @@ export default class RideFeature extends Feature {
     }
   }
 
-  setText(text) {
-    this.text = text;
-    if (!this.normal.getText()) { return; }
-    this.normal.getText().setText(text);
-    this.active.getText().setText(text);
-    this.hover.getText().setText(text);
+  resetStyle(key) {
+    this.normal = Styles.pin[key].normal.clone();
+    this.active = Styles.pin[key].active.clone();
+    this.hover = Styles.pin[key].hover.clone();
+    this.updateStyle();
   }
 
   updateStyle() {
@@ -52,5 +54,13 @@ export default class RideFeature extends Feature {
     } else {
       this.setStyle(this.normal);
     }
+  }
+
+  clear() { // used by the route feature on the map
+    this.getGeometry().setCoordinates([]);
+  }
+
+  upHandler(e) {
+    this.updateInfobox(e.map);
   }
 }

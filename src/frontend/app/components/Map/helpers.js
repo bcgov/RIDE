@@ -55,7 +55,6 @@ export function pointerMove(evt) {
     feature.hovered = true;
     feature.updateStyle();
   }
-  // if (evt.map.start) { evt.map.start.updateInfobox(evt.map); }
 }
 
 export function click(evt) {
@@ -177,8 +176,9 @@ export class Drag extends PointerInteraction {
       handleUpEvent: handleUpEvent,
     });
     options = options || {};
-    this.upCallback = options.upCallback || (() => {});
+    this.endHandler = options.endHandler || (() => {});
     this.menuRef = options.menuRef;
+    this.resetContextMenu = options.resetContextMenu
 
     /**
      * @type {import('ol/coordinate.js').Coordinate}
@@ -213,14 +213,12 @@ export class Drag extends PointerInteraction {
 function handleDownEvent(evt) {
   // only drag for left mouse
   if (evt.originalEvent.button > 0) {
-    this.menuRef.current.style.visibility = '';
     return false;
   }
 
   const map = evt.map;
   if (this.menuRef.current) {
-    // this.menuRef.current.classList.remove('open');
-    this.menuRef.current.style.visibility = 'hidden';
+    this.resetContextMenu();
   }
 
   const feature = map.getFeaturesAtPixel(evt.pixel, {
@@ -228,6 +226,7 @@ function handleDownEvent(evt) {
   })[0];
 
   if (feature) {
+    map.route?.clear();
     this.coordinate_ = evt.coordinate;
     feature.getGeometry().setCoordinates(evt.coordinate);
     this.feature_ = feature;
@@ -285,8 +284,9 @@ function handleUpEvent(e) {
   //   this.feature_.ref.current.querySelectorAll('.near').forEach((el) => el.style.visibility = 'hidden');
   // }
 
-  this.upCallback(e, this.feature_);
+  this.endHandler(e, this.feature_);
   this.coordinate_ = null;
+  if (this.feature_.upHandler) { this.feature_.upHandler(e) }
   this.feature_ = null;
   return false;
 }
@@ -311,6 +311,10 @@ export const bc2g = (coords) => proj4('EPSG:3005', 'EPSG:3857', coords);
 export const g2bc = (coords) => proj4('EPSG:3857', 'EPSG:3005', coords);
 
 import { Feature } from 'ol';
+
+function eq(a, b) {
+  return a[0] === b[0] && a[1] === b[1];
+}
 
 export function getDRA(coords, point, map) {
   /* Resolution is projection unit per pixel.  For EPSG:3857, the unit is
@@ -345,7 +349,21 @@ export function getDRA(coords, point, map) {
       (data.features || []).forEach((feat) => {
         try {
           line = turf.lineString(feat.geometry.coordinates);
-          const snapped = turf.nearestPointOnLine(line, point2, { units: "meters" });
+          let snapped;
+          try {
+            snapped = turf.nearestPointOnLine(line, point2, { units: "meters" });
+          } catch (ex) {
+            /* ITN linestrings sometimes contain duplicate coordinates in
+             * sequence; this causes turf's function to throw the error below.
+             * Retry the segment after filtering out sequential duplicates
+             */
+            if (ex.message === 'coordinates must contain numbers') {
+              line = turf.lineString(
+                feat.geometry.coordinates.filter((cc, i, list) => i < 1 || !eq(cc, list[i - 1]))
+              );
+              snapped = turf.nearestPointOnLine(line, point2, { units: "meters" });
+            }
+          }
           // if (feat.properties.ROAD_NAME_FULL === 'Quilchena Ave') {
             // console.log(snapped.properties.dist, feat.properties.ROAD_NAME_FULL, feat, snapped)
             // const p = new Feature({

@@ -1,8 +1,7 @@
 .infobox {
   visibility: hidden;
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: -1000px;
   border: solid 1px black;
   border-radius: 4px;
   padding: 0.25rem 0.5rem;
