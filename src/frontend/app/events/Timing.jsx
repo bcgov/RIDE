@@ -3,6 +3,14 @@ import Tooltip from './Tooltip';
 
 let idc = 0;
 
+function getTz(datetime) {
+  if (!datetime) { return undefined; }
+  datetime = new Date(datetime);
+  if (isNaN(datetime.valueOf())) { return undefined; }
+  return datetime.toLocaleString(['en-CA'], { timeZoneName: 'short' }).slice(-3);
+}
+
+
 export default function EventTiming({ errors, event, dispatch }) {
 
   const id = ++idc;
@@ -35,15 +43,7 @@ export default function EventTiming({ errors, event, dispatch }) {
           onBlur={(e) => dispatch({ type: 'set', section: 'timing', value: [{ nextUpdate: e.target.value, section: 'timing' }, { nextUpdateIsDefault: false, section: 'timing' }]})}
         />
 
-        <select
-          name="next update timezone"
-          onChange={(e) => dispatch({ type: 'set', value: { nextUpdateTZ: e.target.value, section: 'timing' }})}
-          defaultValue={event.timing.nextUpdateTZ}
-        >
-          <option></option>
-          <option>PST</option>
-          <option>MST</option>
-        </select>&nbsp;&nbsp;
+        <span className="timezone">{getTz(event.timing.nextUpdate)}</span>
 
         <Tooltip text="Clear datetime">
           <svg
@@ -69,10 +69,7 @@ export default function EventTiming({ errors, event, dispatch }) {
           onBlur={(e) => dispatch({ type: 'set', section: 'timing', value: [{ endTime: e.target.value, section: 'timing' }]})}
         />
 
-        <select name="end timezone">
-          <option>PST</option>
-          <option>MST</option>
-        </select>&nbsp;&nbsp;
+        <span className="timezone">{getTz(event.timing.endTime)}</span>
 
         <Tooltip text="Clear datetime">
           <svg

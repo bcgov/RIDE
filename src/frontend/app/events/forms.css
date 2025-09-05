@@ -280,6 +280,11 @@
         cursor: pointer;
       }
 
+      .timezone {
+        display: inline-block;
+        width: 3rem;
+      }
+
       .row {
         display: block;
 

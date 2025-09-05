@@ -38,11 +38,18 @@ export function eventReducer(event, action) {
     case 'set': {
       if (!Array.isArray(action.value)) { action.value = [action.value]; }
       action.value.forEach((value) => {
+        if (value.section) {
         event[value.section] = {
           ...event[value.section],
           ...value,
         }
         delete event[value.section].section;
+        } else {
+          event = {
+            ...event,
+            ...value,
+          }
+        }
       });
       return Object.assign({}, event);
     }
@@ -205,9 +212,6 @@ export function getInitialEvent() {
 export default function EventForm({ map, preview, cancel, event, dispatch, goToFunc }) {
 
   const [errors, setErrors] = useState({});
-  const [severity, setSeverity] = useState('Minor');
-  const [category, setCategory] = useState();
-  const [formType, setFormType] = useState('Incident');
 
   const transform = getTransform(map.getView().getProjection().getCode(), 'EPSG:4326');
 
@@ -215,27 +219,40 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
     e.preventDefault();
     const err = {};
 
-    if (formType !== 'condition') {
-      if (!event.details.direction) { err.direction = true; }
-      if (!event.details.severity) { err.severity = true; }
-      if (!event.details.category) { err.category = true; }
-      if (!event.details.situation) { err.situation = true; }
+    const form = structuredClone(event);
 
-      if (event.impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'; }
+    if (!form.location.end.name) {
+      form.location.end = null;
     }
 
-    if (!event.timing.nextUpdate && !event.timing.endTime) {
+    if (form.type !== 'condition') {
+      if (!form.details.direction) { err.direction = true; }
+      if (!form.details.severity) { err.severity = true; }
+      if (!form.details.category) { err.category = true; }
+      if (!form.details.situation) { err.situation = true; }
+
+      if (form.impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'; }
+    }
+
+    if (!form.timing.nextUpdate && !form.timing.endTime) {
       err['Manage Timing By'] = 'Must set one or both';
+    } else {
+      if (form.timing.nextUpdate) {
+        form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+      }
+      if (form.timing.endTime) {
+        form.timing.endTime = new Date(form.timing.endTime).toISOString();
+      }
     }
     setErrors(err);
-    console.log(event);
+    console.log(form);
 
     if (Object.keys(err).length === 0) {
       // post form to backend
     }
   }
 
-  const getLabel = () => severity.startsWith('Minor') ? 'Publish' : 'Submit';
+  const getLabel = () => event.details.severity.startsWith('Minor') ? 'Publish' : 'Submit';
 
   return (
     <div className="form">
@@ -245,7 +262,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
 
           <h4>
             Create&nbsp;
-            <select name="formType" onChange={(e) => setFormType(e.target.value)} defaultValue={formType}>
+            <select onChange={(e) => dispatch({ type: 'set', value: { type: e.target.value }})} defaultValue={event.type}>
               {FORMS.map((form) => (<option key={form}>{form}</option>))}
             </select>
           </h4>
@@ -263,61 +280,55 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
               <Location event={event} dispatch={dispatch} goToFunc={goToFunc} />
             </div>
 
-            { DETAILS_FORMS.includes(formType) &&
+            { DETAILS_FORMS.includes(event.type) &&
               <div className="section details">
                 <Details errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 
-            { IMPACTS_FORMS.includes(formType) &&
+            { IMPACTS_FORMS.includes(event.type) &&
               <div className="section impacts">
                 <Impacts errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 
-            { DELAYS_FORMS.includes(formType) &&
+            { DELAYS_FORMS.includes(event.type) &&
               <div className="section delays">
                 <Delays errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 
-            { RESTRICTIONS_FORMS.includes(formType) &&
+            { RESTRICTIONS_FORMS.includes(event.type) &&
               <div className="section restrictions">
                 <Restrictions errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 
-            { CONDITIONS_FORMS.includes(formType) &&
+            { CONDITIONS_FORMS.includes(event.type) &&
               <div className="section conditions">
                 <Conditions errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 
-            { formType &&
+            { event.type &&
               <div className="section timing">
-                <EventTiming
-                  errors={errors}
-                  severity={severity}
-                  formType={formType}
-                  event={event}
-                  dispatch={dispatch}
-                />
+                <EventTiming errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 
-            { formType &&
+            { event.type &&
               <div className="section additional">
                 <AdditionalMessaging event={event} dispatch={dispatch} />
               </div>
             }
 
-            { formType &&
+            { event.type &&
               <div className="section external">
                 <External event={event} dispatch={dispatch} />
               </div>
             }
 
-            { formType &&
+            { event.type &&
               <div className="section internal">
                 <InternalNotes />
               </div>

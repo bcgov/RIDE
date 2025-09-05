@@ -56,15 +56,13 @@ class VersionedModel(models.Model):
     user = models.CharField(max_length=100, blank=True, null=True)
     deleted = models.BooleanField(default=False)
 
+    objects = models.Manager()
     current = VersionedManager()
 
     class Meta:
         ordering = ['id', 'version']
         get_latest_by = ['id', 'version']
-        constraints = [
-            UniqueConstraint(fields=['id', 'version'], name='id_version'),
-        ]
-        base_manager_name = 'relations'
+        # base_manager_name = 'relations'
         abstract = True
 
     def __str__(self):
@@ -95,7 +93,7 @@ class VersionedModel(models.Model):
 
         with transaction.atomic():
             if not kwargs.get('force_update'):
-                history = Event.objects.filter(id=self.id).order_by('version')
+                history = type(self).objects.filter(id=self.id).order_by('version')
 
                 # propogate created timestamp to all versions
                 first = history.first()
@@ -105,11 +103,11 @@ class VersionedModel(models.Model):
                 # get latest prior version for calculating new version number
                 last = history.last()
 
-                if self.unchanged_since(last):
-                    return
+                # if self.unchanged_since(last):
+                #     return
 
                 if last:
-                    Event.objects.filter(id=self.id).update(latest=False)
+                    type(self).objects.filter(id=self.id).update(latest=False)
                     self.version = last.version + 1
 
                 self.pk = None  # ensure INSERT over UPDATE
@@ -161,30 +159,29 @@ class OrderedListField(models.JSONField):
 
 class Event(VersionedModel):
 
-    meta = models.JSONField()
-    event_type = models.CharField(choices=EventType, blank=True, null=True)
-    status = models.CharField(choices=Status, blank=True, null=True)
+    meta = models.JSONField(default=dict)
+    event_type = models.CharField(blank=True, null=True)
+    status = models.CharField(default='Active')
 
-    start = LocationField()
-    end = LocationField()
+    start = LocationField(default=dict)
+    end = LocationField(default=dict, null=True)
     geometry = gis.GeometryCollectionField(blank=True, null=True)
 
     # detail
-    severity = models.CharField(max_length=20, choices=Severity.choices, blank=True, null=True)
-    category = models.CharField(max_length=30, choices=EventSubtype, blank=True, null=True)
-    phrase = models.PositiveIntegerField()
+    direction = models.CharField(blank=True, null=True)
+    severity = models.CharField(blank=True, null=True)
+    category = models.CharField(blank=True, null=True)
+    situation = models.PositiveIntegerField(default=0)
 
     impacts = OrderedListField()
     restrictions = OrderedListField()
     conditions = OrderedListField()
 
     delay_amount = models.PositiveIntegerField(default=0)
-    delay_unit = models.CharField()
+    delay_unit = models.CharField(default='minutes')
 
     next_update = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
-
-    direction = models.CharField()
 
     additional = models.TextField(blank=True, null=True)
     # is_closure = models.BooleanField(default=False)
@@ -196,29 +193,29 @@ class Comment(VersionedModel):
     text = models.TextField(blank=True)
 
 
-class Choice(models.Model):
+# class Choice(models.Model):
 
-    label = models.CharField(max_length=20)
-    order = models.PositiveSmallIntegerField()
+#     label = models.CharField(max_length=20)
+#     order = models.PositiveSmallIntegerField()
 
-    class Meta:
-        abstract = True
-
-
-class EventType(Choice):
-    pass
+#     class Meta:
+#         abstract = True
 
 
-class Category(Choice):
-    pass
+# class EventType(Choice):
+#     pass
 
 
-class TrafficImpact(Choice):
-    pass
+# class Category(Choice):
+#     pass
 
 
-class Restriction(Choice):
-    pass
+# class TrafficImpact(Choice):
+#     pass
+
+
+# class Restriction(Choice):
+#     pass
 
 
 sample = '''{

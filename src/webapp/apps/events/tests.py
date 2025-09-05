@@ -247,8 +247,8 @@ e = {
 }
 
 e2 = {
-    "id": None,
-    "type": "Incident",
+    "id": 'DBC-100001',
+    "event_type": "Incident",
     "waypoints": [],
     "location": {
         "start": {
@@ -356,15 +356,7 @@ e2 = {
             "SE_ANNO_CAD_DATA": None,
             "FEATURE_LENGTH_M": 881.5946
         },
-        "end": {
-            "name": None,
-            "alias": None,
-            "aliases": [],
-            "useAlias": True,
-            "other": None,
-            "useOther": False,
-            "nearby": []
-        }
+        "end": None,
     },
     "details": {
         "direction": "Both directions",
@@ -399,14 +391,16 @@ e2 = {
     ],
     "conditions": [],
     "timing": {
-        "nextUpdate": "2025-09-05T14:25",
+        "nextUpdate": "2025-09-12T16:20:00.000Z",
         "nextUpdateTZ": "PST",
         "nextUpdateIsDefault": True,
         "endTime": None,
         "endTimeTZ": None
     },
-    "additional": "",
+    "additional": "lorem\n\nipsum",
     "external": {
         "url": ""
     }
 }
+
+
