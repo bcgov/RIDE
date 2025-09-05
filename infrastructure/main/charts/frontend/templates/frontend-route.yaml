@@ -18,8 +18,7 @@ spec:
     insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None
   host: {{ .Values.route.host  }}
-  path: /api
-
+  path: /
 
 ---
 {{- if .Values.route.vanityurl }}
@@ -46,6 +45,6 @@ spec:
     insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None
   host: {{ .Values.route.vanityurlhost  }}
-  path: /api
+  path: /
 {{- end }}
 {{- end }}

@@ -4,3 +4,7 @@ webapp:
 
   route:
     host: test-ride.apps.golddr.devops.gov.bc.ca # The host name for the route. Ensure set to golddr for the Gold DR cluster.
+
+frontend:
+  route:
+    host: test-ride-frontend.apps.golddr.devops.gov.bc.ca # The host name for the route. Ensure set to golddr for the Gold DR cluster.

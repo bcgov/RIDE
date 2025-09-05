@@ -4,3 +4,7 @@ webapp:
 
   route:
     host: uat-ride.apps.golddr.devops.gov.bc.ca
+
+frontend:
+  route:
+    host: uat-ride-frontend.apps.golddr.devops.gov.bc.ca # The host name for the route. Ensure set to golddr for the Gold DR cluster.

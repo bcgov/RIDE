@@ -1,0 +1,27 @@
+# Stage 1: Build stage with all deps
+FROM node:20-alpine AS build-env
+WORKDIR /app
+
+# Copy package files
+COPY ./src/frontend/package.json ./src/frontend/package-lock.json ./
+RUN npm ci
+
+# Copy the entire frontend folder
+COPY ./src/frontend ./
+
+# Run React Router build
+RUN npm run build
+
+# Stage 2: Production image
+FROM node:20-alpine
+WORKDIR /app
+
+# Copy package files and install production deps + serve
+COPY ./src/frontend/package.json ./src/frontend/package-lock.json ./
+RUN npm ci --omit=dev && npm install -g serve
+
+# Copy the build output (only client exists)
+COPY --from=build-env /app/build ./build
+
+# Start static file server
+CMD ["npm", "run", "start"]
