@@ -1,0 +1,32 @@
+FROM node:24-alpine AS development-dependencies-env
+
+COPY ./src/frontend/ /app/
+
+# vite creates temporary files in /app
+RUN chmod 0777 /app
+#RUN find /app -type f -exec chmod 0644 {} \;
+
+ARG FONTAWESOME_PACKAGE_TOKEN
+ARG DEBUG_BUILD=false
+
+WORKDIR /app
+ENV NODE_ENV=development
+RUN npm ci --include=dev
+
+RUN mkdir /app/node_modules/.vite/
+RUN chmod 0777 /app/node_modules/.vite/
+RUN chmod -R 0777 /app
+
+COPY ./compose/frontend/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+RUN echo "DEBUG_BUILD=${DEBUG_BUILD}" && \
+    if [ "${DEBUG_BUILD}" = "true" ]; then \
+        apk add --no-cache jq vim procps less curl; \
+    else \
+        echo "Skipping debug tools..."; \
+    fi
+
+EXPOSE 5173
+
+ENTRYPOINT ["/entrypoint.sh"]

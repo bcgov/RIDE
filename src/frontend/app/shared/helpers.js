@@ -38,19 +38,44 @@ const DEFAULT_HEADERS = {
 };
 
 const request = (url, params={}, headers={}, include_credentials=true, method="GET") => {
-  // caller submitted headers overwrite defaults when present
-  headers = {
-    ...DEFAULT_HEADERS,
-    ...(headers || {})
-  };
-
-  if (URL.parse(url).hostname === location.hostname) {
-    headers['X-CSRFToken'] = getCookie('csrftoken');
+  // Check if this is an external API call
+  const isExternalAPI = url.startsWith('http') && !url.includes(window.location.hostname);
+  
+  // For external APIs, use minimal headers
+  if (isExternalAPI) {
+    headers = {
+      'Accept': 'application/json',
+      ...(headers || {})  // This will include your apiKey
+    };
+  } else {
+    // For internal APIs, use default headers
+    headers = {
+      ...DEFAULT_HEADERS,
+      ...(headers || {})
+    };
   }
 
-  const options = { headers, method, };
+  // Remove Content-Type for GET requests (not needed and causes CORS issues)
+  if (method === "GET") {
+    delete headers['Content-Type'];
+  }
 
-  if (include_credentials) {
+  // Only add CSRF token for same-origin requests
+  if (!isExternalAPI) {
+    try {
+      const parsedUrl = new URL(url, window.location.origin);
+      if (parsedUrl.hostname === window.location.hostname) {
+        headers['X-CSRFToken'] = getCookie('csrftoken');
+      }
+    } catch (e) {
+      headers['X-CSRFToken'] = getCookie('csrftoken');
+    }
+  }
+
+  const options = { headers, method };
+
+  // Don't send credentials to external APIs
+  if (include_credentials && !isExternalAPI) {
     options.credentials = 'include';
   }
 

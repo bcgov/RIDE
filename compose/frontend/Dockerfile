@@ -1,4 +1,5 @@
-FROM node:20-alpine AS development-dependencies-env
+@ -1,39 +0,0 @@
+FROM node:24-alpine AS development-dependencies-env
 
 COPY ./src/frontend/.npmrc /app/
 COPY ./src/frontend/package.json /app/
