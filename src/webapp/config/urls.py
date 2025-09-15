@@ -14,7 +14,7 @@ admin.site.login = secure_admin_login(admin.site.login)
 urlpatterns = [
     path("admin/logout/", logout),
     path('admin/', admin.site.urls),
-    path('events/', include((event_urls, 'events'), namespace='events')),
+    path('api/', include((event_urls, 'events'), namespace='events')),
     path('cameras/', cameras),
     path('accounts/', include('allauth.urls')),
     path('', home),

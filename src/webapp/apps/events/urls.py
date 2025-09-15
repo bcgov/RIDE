@@ -1,11 +1,9 @@
 from django.urls import path
+from rest_framework import routers
 
-from .views import home, ListView, CreateView, UpdateView
+from .views import Events
 
+router = routers.SimpleRouter(trailing_slash=False)
+router.register('events', Events)
 
-urlpatterns = [
-    path('list', ListView.as_view(), name='list'),
-    path('create', CreateView.as_view(), name='create'),
-    path('<slug:slug>', UpdateView.as_view(), name='update'),
-    path('', home),
-]
+urlpatterns = router.urls

@@ -17,7 +17,7 @@ DEBUG = env('DEBUG') == 'True'
 ALLOWED_HOSTS = []
 
 # Paths and urls
-APPEND_SLASH = True
+APPEND_SLASH = False
 ROOT_URLCONF = 'config.urls'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(SRC_DIR, 'static')
@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     "allauth.socialaccount.providers.openid_connect",
     "allauth.usersessions",
+
+    'rest_framework',
 
     'debug_toolbar',
 

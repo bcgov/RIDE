@@ -62,7 +62,6 @@ class VersionedModel(models.Model):
     class Meta:
         ordering = ['id', 'version']
         get_latest_by = ['id', 'version']
-        # base_manager_name = 'relations'
         abstract = True
 
     def __str__(self):
