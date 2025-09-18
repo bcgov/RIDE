@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+
 import environ
 
 # Base dir and env
@@ -36,3 +38,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'STORE_TOKENS': True,
     },
 }
+
+# On windows, GDAL and GEOS require explicit paths to the dlls
+if os.name == "nt":
+    GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")
+    GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")

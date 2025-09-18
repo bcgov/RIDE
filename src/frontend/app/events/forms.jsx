@@ -16,7 +16,11 @@ import {
   CONDITIONS_FORMS, DELAYS_FORMS, DETAILS_FORMS, FORM_PHRASE_CATEGORY,
   FORMS, IMPACTS_FORMS, RESTRICTIONS_FORMS,
 } from './references.js';
-import { convertToDateTimeLocalString as convert } from "../components/Map/helpers";
+import {
+  convertToDateTimeLocalString as convert,
+  g2ll,
+} from "../components/Map/helpers";
+import { addEvent } from '../components/Map/Layer.jsx';
 
 import './forms.css';
 
@@ -39,11 +43,11 @@ export function eventReducer(event, action) {
       if (!Array.isArray(action.value)) { action.value = [action.value]; }
       action.value.forEach((value) => {
         if (value.section) {
-        event[value.section] = {
-          ...event[value.section],
-          ...value,
-        }
-        delete event[value.section].section;
+          event[value.section] = {
+            ...event[value.section],
+            ...value,
+          }
+          delete event[value.section].section;
         } else {
           event = {
             ...event,
@@ -155,7 +159,13 @@ export function eventReducer(event, action) {
     }
 
     case 'reset form': {
-      return getInitialEvent();
+      if (action.value) {
+        const event = structuredClone(action.value);
+        event.showPreview = !!action.showPreview;
+        return event;
+      } else {
+        return getInitialEvent();
+      }
     }
 
     default: {
@@ -176,6 +186,8 @@ const LOCATION_BLANK = {
 
 export function getInitialEvent() {
   return {
+    showPreview: true,
+    showForm: true,
     id: null,
     type: 'Incident',
     waypoints: [],
@@ -213,17 +225,37 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
 
   const [errors, setErrors] = useState({});
 
-  const transform = getTransform(map.getView().getProjection().getCode(), 'EPSG:4326');
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const err = {};
 
     const form = structuredClone(event);
 
+    form.location.start.coords = g2ll(form.location.start.coords);
+    const geometries = [{
+      type: "Point",
+      coordinates: form.location.start.coords,
+    }];
+
     if (!form.location.end.name) {
       form.location.end = null;
+    } else {
+      form.location.end.coords = g2ll(form.location.end.coords);
+      geometries.push({
+        type: "Point",
+        coordinates: form.location.start.coords,
+      });
+      const route = map.route.getGeometry().getCoordinates();
+
+      geometries.push({
+        type: "Linestring",
+        coordinates: route,
+      });
     }
+    form.geometry = {
+      type: "GeometryCollection",
+      geometries,
+    };
 
     if (form.type !== 'condition') {
       if (!form.details.direction) { err.direction = true; }
@@ -248,7 +280,17 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
     console.log(form);
 
     if (Object.keys(err).length === 0) {
-      // post form to backend
+      fetch('http://localhost:8000/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      }).then(response => response.json())
+        .then(data => {
+          cancel();
+          addEvent(data, map);
+        });
     }
   }
 
@@ -328,7 +370,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
               </div>
             }
 
-            { event.type &&
+            { event.type && false &&
               <div className="section internal">
                 <InternalNotes />
               </div>

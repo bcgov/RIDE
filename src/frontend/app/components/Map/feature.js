@@ -1,6 +1,8 @@
 import { Feature } from 'ol';
 
 import Styles, { normalStyle, hoverStyle, activeStyle } from './styles';
+import * as eStyles from '../../events/featureStyleDefinitions';
+import { get } from './helpers';
 
 
 export default class RideFeature extends Feature {
@@ -19,6 +21,13 @@ export default class RideFeature extends Feature {
       this.normal = props.normalStyle || normalStyle;
       this.hover = props.hoverStyle || hoverStyle;
       this.active = props.activeStyle || activeStyle;
+    }
+
+    if (props.feat) {
+      const style = get(eStyles, props.feat);
+      this.normal = style.static;
+      this.active = style.active;
+      this.hover = style.hover;
     }
     this.setStyle(this.normal);
 
@@ -49,10 +58,23 @@ export default class RideFeature extends Feature {
   updateStyle() {
     if (this.selected) {
       this.setStyle(this.active);
+      if (this.paired) {
+        this.paired.selected = true;
+        this.paired.setStyle(this.paired.active);
+      }
     } else if (this.hovered) {
       this.setStyle(this.hover);
+      if (this.paired) {
+        this.paired.hovered = true;
+        this.paired.setStyle(this.paired.hover);
+      }
     } else {
       this.setStyle(this.normal);
+      if (this.paired) {
+        this.paired.selected = false;
+        this.paired.hovered = false;
+        this.paired.setStyle(this.paired.normal);
+      }
     }
   }
 

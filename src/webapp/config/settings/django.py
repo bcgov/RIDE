@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "allauth.usersessions",
 
     'rest_framework',
+    'rest_framework_gis',
 
     'debug_toolbar',
 
@@ -76,6 +77,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

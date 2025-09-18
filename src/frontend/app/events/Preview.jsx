@@ -1,31 +1,44 @@
 import './Preview.css';
 import { PHRASES_LOOKUP, TrafficImpacts } from './references';
 
+import closure from '../../public/images/mapIcons/closure-static.png';
+import major from '../../public/images/mapIcons/incident-major-static.png';
+import minor from '../../public/images/mapIcons/incident-minor-static.png';
+
 const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   acc[curr.id] = curr;
   return acc;
 }, {});
 
-export default function Preview({ event, preview }) {
+function getEventIcon(event) {
+  const is_closure = event.impacts.reduce((val, key) => val || key.id === 7, false)
+  if (is_closure || event.is_closure) {
+    return closure;
+  } else if (event.details.severity === 'Major') {
+    return major;
+  }
+  return minor;
+}
 
-  const start = event.location.start;
-  const end = event.location.end;
+
+export default function Preview({ event, dispatch }) {
+  const start = event.location.start || {};
+  const end = event.location.end || {};
   const isLinear = !!end.name;
   let startNearbies = start.nearby.filter((loc) => loc.include).map((loc) => loc.phrase);
   if (start.other && start.useOther) { startNearbies.push(start.other); }
   let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase);
   if (end.other && end.useOther) { endNearbies.push(end.other); }
 
+  const icon = getEventIcon(event);
+
   return (
     <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'}`}>
       <div className="header">
         <div className="icons">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="40" height="40">
-            <path fill="white" d="M279 81L81 279C70.1 289.9 64 304.6 64 320C64 335.4 70.1 350.1 81 361L279 559C289.9 569.9 304.6 576 320 576C335.4 576 350.1 569.9 361 559L559 361C569.9 350.1 576 335.4 576 320C576 304.6 569.9 289.9 559 279L361 81C350.1 70.1 335.4 64 320 64C304.6 64 289.9 70.1 279 81z"/>
-            <path fill="currentColor" d="M279 81L81 279C70.1 289.9 64 304.6 64 320C64 335.4 70.1 350.1 81 361L279 559C289.9 569.9 304.6 576 320 576C335.4 576 350.1 569.9 361 559L559 361C569.9 350.1 576 335.4 576 320C576 304.6 569.9 289.9 559 279L361 81C350.1 70.1 335.4 64 320 64C304.6 64 289.9 70.1 279 81zM320 200C333.3 200 344 210.7 344 224L344 336C344 349.3 333.3 360 320 360C306.7 360 296 349.3 296 336L296 224C296 210.7 306.7 200 320 200zM293.3 416C292.7 406.1 297.6 396.7 306.1 391.5C314.6 386.4 325.3 386.4 333.8 391.5C342.3 396.7 347.2 406.1 346.6 416C347.2 425.9 342.3 435.3 333.8 440.5C325.3 445.6 314.6 445.6 306.1 440.5C297.6 435.3 292.7 425.9 293.3 416z"/>
-          </svg>
+          <img src={icon} />
 
-          <svg className="close" onClick={preview} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
+          <svg className="close" onClick={() => dispatch({ type: 'reset form' })} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
             <path strokeWidth="30" stroke="currentColor" d="M135.5 169C126.1 159.6 126.1 144.4 135.5 135.1C144.9 125.8 160.1 125.7 169.4 135.1L320.4 286.1L471.4 135.1C480.8 125.7 496 125.7 505.3 135.1C514.6 144.5 514.7 159.7 505.3 169L354.3 320L505.3 471C514.7 480.4 514.7 495.6 505.3 504.9C495.9 514.2 480.7 514.3 471.4 504.9L320.4 353.9L169.4 504.9C160 514.3 144.8 514.3 135.5 504.9C126.2 495.5 126.1 480.3 135.5 471L286.5 320L135.5 169z"/>
           </svg>
         </div>
@@ -35,18 +48,18 @@ export default function Preview({ event, preview }) {
 
       <div className="body">
         <h3 className="alert">
-          {event.details.direction} on&nbsp;
-          {event.location?.start?.name}
-          {isLinear && event.location.end.name !== event.location.start.name &&
-            <>&nbsp;to {event.location.end.name}</>
+          {event.details?.direction} on&nbsp;
+          {start.name}
+          {isLinear && end.name !== start.name &&
+            <>&nbsp;to {end.name}</>
           }
         </h3>
 
-        { event.location.start.useAlias &&
+        { start.useAlias &&
           <p className="alert">
-            {event.location.start.alias}
-            {event.location.end.alias && event.location.end.useAlias && event.location.end.alias !== event.location.start.alias &&
-              <>&nbsp;to {event.location.end.alias}</>
+            {start.alias}
+            {end.alias && end.useAlias && end.alias !== start.alias &&
+              <>&nbsp;to {end.alias}</>
             }
           </p>
         }
@@ -124,13 +137,13 @@ export default function Preview({ event, preview }) {
           </>
         }
 
-        { (event.additional || event.external.url) &&
+        { (event.additional || event?.external?.url) &&
           <>
             <h5>Additional Information</h5>
             { event.additional &&
               <div className="additional">{event.additional}</div>
             }
-            { event.external.url &&
+            { event?.external?.url &&
               <div className="more-info">
                 <a href={event.external.url}>
                   More information
@@ -161,9 +174,12 @@ export default function Preview({ event, preview }) {
           </div>
         </div>
       </div>
-      <div className="footer">
-        Reference ID: DBC-21455
-      </div>
+
+      { event.id &&
+        <div className="footer" onClick={() => console.log(event)}>
+          Reference ID: { event.id }
+        </div>
+      }
     </div>
   )
 }

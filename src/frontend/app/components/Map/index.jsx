@@ -5,12 +5,11 @@ import { transform } from 'ol/proj';
 import { click, createMap, MapContext, pointerMove } from './helpers.js';
 import './map.css';
 
-export default function Map({ children, parentClickHandler, parentContextHandler }) {
+export default function Map({ children, dispatch }) {
 
   let creatingMap = false;
 
   const elementRef = useRef();
-  // const mapRef = useRef();
 
   const { map, setMap } = useContext(MapContext);
 
@@ -21,7 +20,7 @@ export default function Map({ children, parentClickHandler, parentContextHandler
     const map = createMap();
     map.setTarget(elementRef.current);
     map.on('pointermove', pointerMove);
-    map.on('click', click);
+    map.on('click', (e) => click(e, dispatch));
     map.on('movestart', (e) => {
       if (e.map.start?.ref?.current) { e.map.start.ref.current.style.visibility = 'hidden'; }
       if (e.map.end?.ref?.current) { e.map.end.ref.current.style.visibility = 'hidden'; }

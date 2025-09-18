@@ -57,17 +57,19 @@ export function pointerMove(evt) {
   }
 }
 
-export function click(evt) {
+export function click(evt, dispatch) {
   const feature = evt.map.getFeaturesAtPixel(evt.pixel,{
     layerFilter: (layer) => layer.listenForClicks,
   })[0];
   if (!feature || !feature.styleState) {
-    if (evt.map.selectedFeature) {
+    if (evt.map.selectedFeature) {  // deselect existing selection
       evt.map.selectedFeature.selected = false;
       evt.map.selectedFeature.updateStyle();
       evt.map.selectedFeature = null;
+      evt.stopPropagation();  // prevent placing a start pin
+      dispatch({ type: 'reset form' });
     }
-  } else {
+  } else {  // new selection
     if (evt.map.selectedFeature && evt.map.selectedFeature !== feature) {
       evt.map.selectedFeature.selected = false;
       evt.map.selectedFeature.updateStyle();
@@ -77,6 +79,7 @@ export function click(evt) {
       feature.selected = true;
       feature.updateStyle();
     }
+    dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true })
   }
 }
 
@@ -155,7 +158,8 @@ export function createMap() {
 
   // create map
   const map = new Map({
-    layers: [vectorLayer, symbolLayer],
+    // layers: [vectorLayer, symbolLayer],
+    layers: [vectorLayer],
     view: view,
     moveTolerance: 7,
     controls: [new ScaleLine({ units: 'metric' })],
@@ -303,8 +307,8 @@ function getPoint(coords) {
   return new RideFeature({ geometry: new Point(coords)})
 }
 
-export const g2ll = getTransform('EPSG:3857', 'EPSG:4326');
-export const ll2g = getTransform('EPSG:4326', 'EPSG:3857');
+export const g2ll = getTransform('EPSG:3857', 'EPSG:4326'); window.g2ll = g2ll;
+export const ll2g = getTransform('EPSG:4326', 'EPSG:3857'); window.ll2g = ll2g;
 export const bc2ll = (coords) => proj4('EPSG:3005', 'EPSG:4326', coords);
 export const ll2bc = (coords) => proj4('EPSG:4326', 'EPSG:3005', coords);
 export const bc2g = (coords) => proj4('EPSG:3005', 'EPSG:3857', coords);
@@ -609,3 +613,14 @@ function multi(l, ends, func = fun) {
   }
   return all;
 }
+
+
+export function get(obj, path, defaultValue=undefined) {
+  const travel = regexp =>
+    String.prototype.split
+      .call(path, regexp)
+      .filter(Boolean)
+      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+  const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+  return result === undefined || result === obj ? defaultValue : result;
+};

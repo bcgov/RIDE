@@ -38,7 +38,7 @@ export default function Home() {
   const mapRef = useRef();
 
   const [ map, setMap ] = useState(null);
-  const [ preview, setPreview ] = useState(false);
+  const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
 
   const centerMap = (coords) => {
@@ -57,6 +57,7 @@ export default function Home() {
   const cancel = () => {
     map.pins.getSource().removeFeature(map.start);
     map.pins.getSource().removeFeature(map.end);
+    map.route.getGeometry().setCoordinates([]);
     map.start = map.end = null;
     dispatch({ type: 'reset form' });
   }
@@ -65,7 +66,7 @@ export default function Home() {
 
   return (
     <div className="events-home">
-      { event.location.start.name &&
+      { !event.id && event.location.start.name &&
         <div className="panel">
           <EventForm
             map={mapRef.current}
@@ -79,14 +80,14 @@ export default function Home() {
       }
 
       <MapContext.Provider value={{ map, setMap }}>
-        <Map>
+        <Map dispatch={dispatch}>
           <PinLayer event={event} dispatch={dispatch} />
           <Layer name='events' />
         </Map>
       </MapContext.Provider>
 
-      { event.location.start.name && preview &&
-        <Preview preview={() => setPreview(!preview)} event={event} />
+      { event.location.start.name && event.showPreview &&
+        <Preview dispatch={dispatch} event={event} />
       }
     </div>
   );

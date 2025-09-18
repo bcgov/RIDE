@@ -95,8 +95,6 @@ export default function PinLayer({ event, dispatch }) {
         endHandler(e, e.map.end);
         updateRoute(e.map);
       }
-    } else if (e.originalEvent.shiftKey) {
-      removePin(feature, e.map);
     }
   };
 

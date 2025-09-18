@@ -69,8 +69,11 @@ class KeyMoveSerializer(BaseSerializer):
     class Meta:
         keys_to_move = {}  # <source>: <target>
 
-
+from rest_framework_gis.fields import GeometryField
 class EventSerializer(KeyMoveSerializer, ModelSerializer):
+
+    geometry = GeometryField()
+    is_closure = fields.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -90,19 +93,49 @@ class EventSerializer(KeyMoveSerializer, ModelSerializer):
             'timing.endTime': 'end_time',
         }
 
+    def get_is_closure(self, obj):
+        return len([i for i in obj.impacts if i['id'] == 7]) > 0
+
     def to_internal_value(self, data):
         validated = super().to_internal_value(data)
 
-        if validated['id'] is None:
+        if validated.get('id') is None:
             validated['id'] = self.get_id()
         return validated
 
     def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        del rep['meta']
-        del rep['latest']
-        del rep['deleted']
-        return rep
+        data = super().to_representation(instance)
+        del data['meta']
+        del data['latest']
+        del data['deleted']
+
+        # reverse the ingestion key movement
+        for source, target in self.Meta.keys_to_move.items():
+
+            if source == '__orig__':
+                continue
+            else:
+                actual = data
+                for key in target.split('.'):
+                    parent = actual
+                    if key in actual:
+                        actual = actual[key]
+                    else:
+                        actual = None
+                        break
+                del parent[key]
+
+            current = data
+            path = source.split('.')
+            for key in path[:-1]:
+                if key not in current:
+                    current[key] = {}
+                current = current[key]
+
+            current[path[-1]] = actual
+
+
+        return data
 
     def get_id(self):
         e = Event.current.distinct('id').order_by('-id').first()
