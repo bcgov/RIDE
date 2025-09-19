@@ -13,6 +13,8 @@ import * as ol from 'ol';
 import { MapContext, ll2g, g2ll } from './helpers.js';
 import RideFeature from './feature.js';
 
+import { API_HOST } from '../../env.js';
+
 export function addEvent(event, map) {
   const source = map.get('majorEvents').getSource();
   let coords = event.location.start.coords;
@@ -90,7 +92,7 @@ export default function Layer(props) {
   useEffect(() => {
     if (!map) { return; }
 
-    fetch('http://localhost:8000/api/events', {
+    fetch(`${API_HOST}/api/events`, {
       headers: { 'Accept': 'application/json' },
       credentials: "include",
     }).then((response) => response.json())

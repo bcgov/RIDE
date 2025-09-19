@@ -4,6 +4,7 @@ import devtoolsJson from 'vite-plugin-devtools-json';
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  envDir: '../../',
   plugins: [
     reactRouter(),
     tailwindcss(),
