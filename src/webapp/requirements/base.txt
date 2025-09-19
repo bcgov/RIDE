@@ -4,5 +4,6 @@ django-cors-headers==4.7.0
 django-debug-toolbar==5.1.0
 django-environ==0.12.0
 djangorestframework==3.16.0
+djangorestframework_gis
 gunicorn==23.0.0
 psycopg[binary]==3.2.6
