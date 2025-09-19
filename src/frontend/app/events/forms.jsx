@@ -370,7 +370,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
               </div>
             }
 
-            { event.type && false &&
+            { event.type &&
               <div className="section internal">
                 <InternalNotes />
               </div>

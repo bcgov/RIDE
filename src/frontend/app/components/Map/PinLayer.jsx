@@ -142,10 +142,10 @@ export default function PinLayer({ event, dispatch }) {
     point.dra = await getDRA(snapped, point, e.map);
     const props = point.dra.properties;
     const aliases = [
-      props.ROAD_NAME_ALIAS1,
-      props.ROAD_NAME_ALIAS2,
-      props.ROAD_NAME_ALIAS3,
-      props.ROAD_NAME_ALIAS4,
+      props?.ROAD_NAME_ALIAS1,
+      props?.ROAD_NAME_ALIAS2,
+      props?.ROAD_NAME_ALIAS3,
+      props?.ROAD_NAME_ALIAS4,
     ].filter(el => el);
     point.updateInfobox(e.map);
 
