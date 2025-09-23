@@ -57,6 +57,9 @@ export function pointerMove(evt) {
   }
 }
 
+/* This clickhandler is solely for toggling selection state on existing map
+ * elements.  Hover is handled in the pointerMove handler.
+ */
 export function click(evt, dispatch) {
   const feature = evt.map.getFeaturesAtPixel(evt.pixel,{
     layerFilter: (layer) => layer.listenForClicks,
@@ -66,8 +69,8 @@ export function click(evt, dispatch) {
       evt.map.selectedFeature.selected = false;
       evt.map.selectedFeature.updateStyle();
       evt.map.selectedFeature = null;
-      evt.stopPropagation();  // prevent placing a start pin
       dispatch({ type: 'reset form' });
+      evt.stopPropagation();  // prevent placing a start pin
     }
   } else {  // new selection
     if (evt.map.selectedFeature && evt.map.selectedFeature !== feature) {

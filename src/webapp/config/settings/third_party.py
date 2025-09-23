@@ -23,10 +23,10 @@ SOCIALACCOUNT_PROVIDERS = {
             {
                 'provider_id': 'idir',
                 'name': 'Azure IDIR via Keycloak',
-                'client_id': env("KEYCLOAK_CLIENT_ID"),
-                'secret': env("KEYCLOAK_SECRET"),
+                'client_id': env('KEYCLOAK_CLIENT_ID'),
+                'secret': env('KEYCLOAK_SECRET'),
                 'settings': {
-                    'server_url': env("KEYCLOAK_URL"),
+                    'server_url': env('KEYCLOAK_URL'),
                 },
             },
         ],
@@ -40,6 +40,9 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # On windows, GDAL and GEOS require explicit paths to the dlls
-if os.name == "nt":
-    GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")
-    GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
+if os.name == 'nt':
+    GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')
+    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
+    PROJ_LIB = env('PROJ_LIB')
+
+print(GEOS_LIBRARY_PATH)

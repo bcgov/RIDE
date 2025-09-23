@@ -51,7 +51,6 @@ export default function Details({ errors, event, dispatch }) {
         ref={catRef}
         value={[{ value: event.details.category, label: event.details.category }]}
         onChange={(changed, action) => {
-          console.log(changed, action);
           if (action.action === 'clear' || changed.value === event.details.category) { return; }
           sitRef.current.clearValue();
           dispatch({ type: 'set category', value: changed.value });

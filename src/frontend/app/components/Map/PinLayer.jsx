@@ -11,8 +11,9 @@ import { transform } from 'ol/proj';
 import { boundingExtent, getCenter } from 'ol/extent';
 import { linear } from 'ol/easing';
 
+import { MapContext } from '../../contexts';
 import {
-  getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, Drag, MapContext,
+  getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, Drag,
 } from './helpers.js';
 import { routeNormalStyle, routeActiveStyle, routeHoverStyle } from './styles.js';
 import ContextMenu from '../../events/ContextMenu';
@@ -41,6 +42,7 @@ layer.setZIndex(1000);
 export default function PinLayer({ event, dispatch }) {
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
+  const [canStartEvent, setCanStartEvent] = useState(true);
   const menuRef = useRef();
   const startRef = useRef();
   const endRef = useRef();
@@ -153,7 +155,7 @@ export default function PinLayer({ event, dispatch }) {
       type: point.action,
       value: {
         ... props,
-        name: props.ROAD_NAME_FULL,
+        name: props?.ROAD_NAME_FULL,
         alias: aliases[0],
         aliases,
         pending: false, nearbyPending: true
@@ -216,24 +218,49 @@ export default function PinLayer({ event, dispatch }) {
     menuRef.current.style.top = e.pixel[1] + 'px';
     menuRef.current.style.visibility = undefined;
     if (feature) {
+      const map = e.map; // necessary to bind map for callback below
       if (feature === e.map.route) { return; }
-      const map = e.map // necessary to bind map for callback below
-      setContextMenu([
-        {
-          label: 'Remove pin',
-          action: (e) => {
-            e.stopPropagation();
-            removePin(feature, map);
-            setContextMenu([]);
-          }
-        },
-      ]);
+      if (feature === e.map.start || feature === e.map.end) {
+        setContextMenu([
+          {
+            label: 'Remove pin',
+            action: (e) => {
+              e.stopPropagation();
+              removePin(feature, map);
+              setContextMenu([]);
+            }
+          },
+        ]);
+      } else {
+        setContextMenu([
+          {
+            label: 'Dump feature to console',
+            debugging: true,
+            action: (e) => {
+              e.stopPropagation();
+              console.log(feature);
+              setContextMenu([]);
+            }
+          },
+          {
+            label: 'Dump event to console',
+            debugging: true,
+            action: (e) => {
+              e.stopPropagation();
+              console.log(feature.get('raw') || feature?.paired.get('raw'));
+              setContextMenu([]);
+            }
+          },
+        ]);
+      }
+    } else {
+      setContextMenu([]);
     }
   };
 
   return <>
     <InfoBox className="startInfo" ref={startRef} point={event.location?.start} />
     <InfoBox className="endInfo" ref={endRef} point={event.location?.end} />
-    <ContextMenu ref={menuRef} options={contextMenu}></ContextMenu>
+    <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} />
   </>;
 }

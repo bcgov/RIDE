@@ -10,7 +10,9 @@ import { Point, LineString, Polygon } from 'ol/geom';
 import { Circle, Fill, Stroke, Style } from 'ol/style';
 import * as ol from 'ol';
 
-import { MapContext, ll2g, g2ll } from './helpers.js';
+import { MapContext } from '../../contexts';
+
+import { ll2g, g2ll } from './helpers.js';
 import RideFeature from './feature.js';
 
 import { API_HOST } from '../../env.js';

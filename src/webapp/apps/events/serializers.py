@@ -91,6 +91,7 @@ class EventSerializer(KeyMoveSerializer, ModelSerializer):
             'delays.unit': 'delay_unit',
             'timing.nextUpdate': 'next_update',
             'timing.endTime': 'end_time',
+            'external.url': 'link',
         }
 
     def get_is_closure(self, obj):

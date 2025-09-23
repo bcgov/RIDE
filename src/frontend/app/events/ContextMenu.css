@@ -23,5 +23,10 @@
       background: blue;
       color: white;
     }
+
+    &.debugging {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
   }
 }

@@ -2,7 +2,9 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { transform } from 'ol/proj';
 
-import { click, createMap, MapContext, pointerMove } from './helpers.js';
+import { MapContext } from '../../contexts';
+import { click, createMap, pointerMove } from './helpers.js';
+
 import './map.css';
 
 export default function Map({ children, dispatch }) {

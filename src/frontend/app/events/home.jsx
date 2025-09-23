@@ -8,8 +8,9 @@ import { boundingExtent, getCenter } from 'ol/extent';
 import Map from '../components/Map';
 import Layer from '../components/Map/Layer';
 import PinLayer from '../components/Map/PinLayer';
+import { MapContext } from '../contexts';
 import {
-  MapContext, getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped,
+  getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped,
 } from '../components/Map/helpers.js';
 import RideFeature from '../components/Map/feature';
 import {
@@ -87,7 +88,7 @@ export default function Home() {
       </MapContext.Provider>
 
       { event.location.start.name && event.showPreview &&
-        <Preview dispatch={dispatch} event={event} />
+        <Preview dispatch={dispatch} preview={() => setPreview(!preview)} event={event} />
       }
     </div>
   );

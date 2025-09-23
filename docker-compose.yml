@@ -1,9 +1,19 @@
 volumes:
-  postgres:
+  postgis:
     driver: local
 
 services:
-  django:
+  db:
+    env_file: .env
+    image: postgis/postgis:15-3.3-alpine
+    container_name: ride-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis:/var/lib/postgresql/data
+
+  webapp:
     env_file: .env
 
     build:
@@ -17,26 +27,37 @@ services:
 
     stdin_open: true
     tty: true
-    # depends_on:
-    #   - db
-    container_name: django
+    depends_on:
+      - db
+    container_name: webapp
     ports:
       - "8000:8000"
     command: /start.sh
     networks:
-      - drivebc
+      - ride
 
-  # db:
-  #   env_file: .env
-  #   image: postgis/postgis:15-3.3-alpine
-  #   container_name: postgres
-  #   restart: unless-stopped
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres:/var/lib/postgresql/data
+  frontend:
+    env_file: .env
+    container_name: frontend
+    build:
+      context: ./
+      dockerfile: ./compose/frontend/Dockerfile
+      args:
+        DEBUG_BUILD: true
+    stdin_open: true
+    tty: true
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src/frontend:/app
+      # One-way volume to use node_modules from inside image
+      - /app/node_modules
+      - /app/.react-router
+    command: /bin/sh -c 'cd /app && npm run dev'
+    # command: /bin/sh -c 'cd /app && npm run dev'
+    # command: node
 
 networks:
-  drivebc:
-    name: drivebcca_default
+  ride:
+    name: ride_default
     external: true

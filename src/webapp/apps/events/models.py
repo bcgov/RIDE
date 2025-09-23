@@ -183,6 +183,7 @@ class Event(VersionedModel):
     end_time = models.DateTimeField(null=True)
 
     additional = models.TextField(blank=True, null=True)
+    link = models.URLField(max_length=None, blank=True, null=True)
     # is_closure = models.BooleanField(default=False)
     # tlids = models.JSONField(default=list, null=True)
 
