@@ -228,7 +228,6 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
   const [errors, setErrors] = useState({});
 
   const handleSubmit = (e) => {
-    console.log(e);
     e.preventDefault();
     const err = {};
 
@@ -280,7 +279,6 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
       }
     }
     setErrors(err);
-    console.log(form);
 
     if (Object.keys(err).length === 0) {
       fetch('http://localhost:8000/api/events', {

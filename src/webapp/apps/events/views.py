@@ -6,14 +6,20 @@ from django.views.generic import edit
 from rest_framework import viewsets
 
 # from .forms import EventForm
-from .models import Event
-from .serializers import EventSerializer
+from .models import Event, Note
+from .serializers import EventSerializer, NoteSerializer
 
 
 class Events(viewsets.ModelViewSet):
-  
+
     queryset = Event.current.all()
     serializer_class = EventSerializer
+    lookup_field = 'id'
+
+class Notes(viewsets.ModelViewSet):
+
+    queryset = Note.current.all()
+    serializer_class = NoteSerializer
     lookup_field = 'id'
 
 # def home(request):
@@ -55,4 +61,3 @@ class Events(viewsets.ModelViewSet):
 #         kwargs = super().get_form_kwargs()
 #         kwargs['label_suffix'] = ''
 #         return kwargs
-    

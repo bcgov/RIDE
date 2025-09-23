@@ -1,9 +1,11 @@
 import copy
 from pprint import pprint
+
 from rest_framework import fields
 from rest_framework.serializers import BaseSerializer, ModelSerializer
+from rest_framework_gis.fields import GeometryField
 
-from .models import Event
+from .models import Event, Note
 
 class KeyMoveSerializer(BaseSerializer):
     '''
@@ -69,7 +71,6 @@ class KeyMoveSerializer(BaseSerializer):
     class Meta:
         keys_to_move = {}  # <source>: <target>
 
-from rest_framework_gis.fields import GeometryField
 class EventSerializer(KeyMoveSerializer, ModelSerializer):
 
     geometry = GeometryField()
@@ -144,3 +145,10 @@ class EventSerializer(KeyMoveSerializer, ModelSerializer):
             return 'DBC-100000'
         else:
             return f'DBC-{int(e.id.split('-')[-1]) + 1}'
+
+
+class NoteSerializer(ModelSerializer):
+
+    class Meta:
+        model = Note
+        fields = '__all__'

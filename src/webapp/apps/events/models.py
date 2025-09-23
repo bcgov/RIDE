@@ -188,8 +188,9 @@ class Event(VersionedModel):
     # tlids = models.JSONField(default=list, null=True)
 
 
-class Comment(VersionedModel):
+class Note(VersionedModel):
 
+    event = models.CharField()
     text = models.TextField(blank=True)
 
 

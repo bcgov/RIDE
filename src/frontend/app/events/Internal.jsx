@@ -1,19 +1,16 @@
 export default function InternalNotes () {
   return <>
     <div className="title">
-      <p><strong>Internal Notes</strong></p>
+      <p><strong>Internal Note</strong> (optional)</p>
     </div>
     <div className="table">
       <div className="note">
         <textarea
           name="note"
         />
-        <div className="header">
-          <div>add note</div>
-        </div>
       </div>
 
-      <div className="note">
+      {/* <div className="note">
         <div className="header">
           <div className="attribution">dkachman</div>
           <div className="updated">4/6/25 3:00 PM</div>
@@ -47,7 +44,7 @@ export default function InternalNotes () {
           </div>
         </div>
         <div className="body">I just created this delay</div>
-      </div>
+      </div> */}
     </div>
   </>;
 }
