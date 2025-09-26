@@ -1,10 +1,12 @@
 from pprint import pprint
 import uuid
 
-from django.db import models, transaction
-from django.db.models.constraints import UniqueConstraint
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.gis.db import models as gis
+from django.db import models, transaction
+from django.db.models.constraints import UniqueConstraint
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -14,7 +16,7 @@ from .enums import EventType, EventSubtype, Severity, Status
 class VersionedManager(models.Manager):
 
     def get_queryset(self):
-        return super().get_queryset().filter(latest=True)
+        return super().get_queryset().filter(latest=True, deleted=False)
 
 
 class RelatedEventManager(models.Manager):
@@ -63,6 +65,7 @@ class VersionedModel(models.Model):
         ordering = ['id', 'version']
         get_latest_by = ['id', 'version']
         abstract = True
+        _delete_related = []
 
     def __str__(self):
         return f'{self.id} ({self.version})'
@@ -114,25 +117,30 @@ class VersionedModel(models.Model):
 
             super().save(*args, **kwargs)
 
-    def unchanged_since(self, event):
+    def delete(self, *args, **kwargs):
+        pre_delete.send(sender=self.__class__, instance=self)
+        self.deleted = True
+        self.save()
+
+    def unchanged_since(self, instance):
         '''
         Return False if at least one model field differs from the comparison
 
         Keys listed in EXCLUDED are not compared because those keys would not
-        be different or that manage history.  The only fields that should be
+        be different, or they manage history.  The only fields that should be
         compared are the content fields.
 
         This function short circuits, returning `False` on the first detected
         difference in field values.
         '''
 
-        if event is None: return False
+        if instance is None: return False
 
         for key, value in self.__dict__.items():
             if key in EXCLUDED:
                 continue
 
-            if event.__dict__[key] != value:
+            if instance.__dict__[key] != value:
                 return False
 
         return True
@@ -154,7 +162,6 @@ class OrderedListField(models.JSONField):
     Field for holding a list of keys, or objects with key values relating to
     another model or contained extra data.  Order is always preserved.
     '''
-
 
 class Event(VersionedModel):
 
@@ -194,6 +201,12 @@ class Note(VersionedModel):
     text = models.TextField(blank=True)
 
 
+@receiver(pre_delete, sender=Event)
+def delete_related_notes(instance, **kwargs):
+    for note in Note.current.filter(event=instance.id):
+        note.delete()
+
+
 # class Choice(models.Model):
 
 #     label = models.CharField(max_length=20)
@@ -217,127 +230,3 @@ class Note(VersionedModel):
 
 # class Restriction(Choice):
 #     pass
-
-
-sample = '''{
-  "type": "Incident",
-  "start": {
-    "location": [
-      -120.69816026633748,
-      50.09734902191738
-    ],
-    "name": "Hwy 97C",
-    "alias": "Hwy 5A",
-    "aliases": [
-      "Hwy 5A",
-      "Merritt-Princeton Hwy 5A"
-    ],
-    "nearby": {
-      "options": [
-        {
-          "source": "BCGNWS",
-          "name": "Merritt",
-          "type": "City",
-          "coordinates": [
-            -120.788333334,
-            50.1124999965
-          ],
-          "distance": 15.431,
-          "direction": "E",
-          "priority": 6,
-          "phrase": "15.4km E of Merritt"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Kamloops",
-          "type": "City",
-          "coordinates": [
-            -120.3394444447,
-            50.6758333294
-          ],
-          "distance": 98.428,
-          "direction": "S",
-          "priority": 6,
-          "phrase": "98.4km S of Kamloops"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Logan Lake",
-          "type": "District Municipality (1)",
-          "coordinates": [
-            -120.8133333333,
-            50.4944444401
-          ],
-          "distance": 63.998,
-          "direction": "S",
-          "priority": 5,
-          "phrase": "64km S of Logan Lake"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Peachland",
-          "type": "District Municipality (1)",
-          "coordinates": [
-            -119.7363888889,
-            49.7738888844
-          ],
-          "distance": 108.016,
-          "direction": "NW",
-          "priority": 5,
-          "phrase": "108km NW of Peachland"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Princeton",
-          "type": "Town",
-          "coordinates": [
-            -120.5089678006,
-            49.4590345969
-          ],
-          "distance": 82.293,
-          "direction": "N",
-          "priority": 4,
-          "phrase": "82.3km N of Princeton"
-        }
-      ],
-      "picked": [
-        0,
-        2
-      ],
-      "other": ""
-    }
-  },
-  "end": {
-    "location": "",
-    "route": "",
-    "name": null,
-    "alias": "",
-    "aliases": null,
-    "nearby": {
-      "options": null,
-      "picked": [],
-      "other": ""
-    }
-  },
-  "route": [],
-  "impacts": [
-    "1",
-    "4",
-    "3"
-  ],
-  "restrictions": [],
-  "conditions": [],
-  "delay": {
-    "amount": "20",
-    "unit": "hours"
-  },
-  "timing": {
-    "nextUpdate": "2025-08-22T13:04",
-    "end": ""
-  },
-  "additional": "Additional Messaging",
-  "direction": "Both",
-  "severity": "Minor (30- minute delay)",
-  "situation": "92"
-}'''
-

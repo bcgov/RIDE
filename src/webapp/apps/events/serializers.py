@@ -1,8 +1,8 @@
 import copy
 from pprint import pprint
 
-from rest_framework import fields
-from rest_framework.serializers import BaseSerializer, ModelSerializer
+from rest_framework import fields, serializers
+from rest_framework.serializers import BaseSerializer, ModelSerializer, Field
 from rest_framework_gis.fields import GeometryField
 
 from .models import Event, Note
@@ -68,48 +68,8 @@ class KeyMoveSerializer(BaseSerializer):
 
             current[path[-1]] = actual
 
-    class Meta:
-        keys_to_move = {}  # <source>: <target>
-
-class EventSerializer(KeyMoveSerializer, ModelSerializer):
-
-    geometry = GeometryField()
-    is_closure = fields.SerializerMethodField()
-
-    class Meta:
-        model = Event
-        fields = '__all__'
-        # exclude = ['meta']
-        keys_to_move = {
-            '__orig__': 'meta.source',
-            'location.start': 'start',
-            'location.end': 'end',
-            'details.direction': 'direction',
-            'details.severity': 'severity',
-            'details.category': 'category',
-            'details.situation': 'situation',
-            'delays.amount': 'delay_amount',
-            'delays.unit': 'delay_unit',
-            'timing.nextUpdate': 'next_update',
-            'timing.endTime': 'end_time',
-            'external.url': 'link',
-        }
-
-    def get_is_closure(self, obj):
-        return len([i for i in obj.impacts if i['id'] == 7]) > 0
-
-    def to_internal_value(self, data):
-        validated = super().to_internal_value(data)
-
-        if validated.get('id') is None:
-            validated['id'] = self.get_id()
-        return validated
-
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        del data['meta']
-        del data['latest']
-        del data['deleted']
 
         # reverse the ingestion key movement
         for source, target in self.Meta.keys_to_move.items():
@@ -136,15 +96,20 @@ class EventSerializer(KeyMoveSerializer, ModelSerializer):
 
             current[path[-1]] = actual
 
-
         return data
 
-    def get_id(self):
-        e = Event.current.distinct('id').order_by('-id').first()
-        if e is None:
-            return 'DBC-100000'
-        else:
-            return f'DBC-{int(e.id.split('-')[-1]) + 1}'
+    class Meta:
+        keys_to_move = {}  # <source>: <target>
+
+
+class NotesField(Field):
+
+    def to_representation(self, value):
+        pprint(value)
+
+    def to_internal_value(self, data):
+        pprint(data)
+        return data
 
 
 class NoteSerializer(ModelSerializer):
@@ -152,3 +117,99 @@ class NoteSerializer(ModelSerializer):
     class Meta:
         model = Note
         fields = '__all__'
+
+    def to_internal_value(self, data):
+        validated = super().to_internal_value(data)
+
+        if validated.get('id') is None:
+            validated['id'] = self.get_id()
+        return validated
+
+    def get_id(self):
+        e = Note.current.distinct('id').order_by('-id').first()
+        if e is None:
+            return '100000'
+        else:
+            return int(e.id) + 1
+
+
+class NotesListSerializer(fields.ListField):
+    child = NoteSerializer()
+
+    def get_attribute(self, instance):
+        return Note.current.filter(event=instance.id).order_by('-created')
+
+
+class EventSerializer(KeyMoveSerializer, ModelSerializer):
+
+    geometry = GeometryField()
+    is_closure = fields.SerializerMethodField()
+    notes = NotesListSerializer(required=False)
+
+    class Meta:
+        model = Event
+        exclude = ['meta', 'deleted']
+        keys_to_move = {
+            '__orig__': 'meta.source',
+            'location.start': 'start',
+            'location.end': 'end',
+            'details.direction': 'direction',
+            'details.severity': 'severity',
+            'details.category': 'category',
+            'details.situation': 'situation',
+            'delays.amount': 'delay_amount',
+            'delays.unit': 'delay_unit',
+            'timing.nextUpdate': 'next_update',
+            'timing.endTime': 'end_time',
+            'external.url': 'link',
+        }
+
+    def validate_notes(self, notes):
+        if len(notes) > 1:
+            raise serializers.ValidationError(
+                'At most one note can be submitted on Event creation'
+            )
+        return notes
+
+    def get_is_closure(self, obj):
+        return len([i for i in obj.impacts if i['id'] == 7]) > 0
+
+    def to_internal_value(self, data):
+        if data.get('id') is None and self.instance is None:  # creating
+            data['id'] = self.get_id()
+
+            # Notes can only be created on Event creation; this allows an
+            # initial note to be submitted with the Event.
+            data['notes'] = data.get('notes', [])
+            for note in data['notes']:  # Note needs event ID
+                note['event'] = data['id']
+        else:  # updating
+            if len(data.get('notes', [])) > 0:
+                raise serializers.ValidationError({
+                    'Notes': 'Submitting notes with existing events is not allowed.'
+                })
+
+        return super().to_internal_value(data)
+
+
+    def create(self, validated_data):
+        # Notes need to be saved separately since they don't have an actual
+        # relation field joining them
+        for note in validated_data.get('notes', []):
+            Note.objects.create(**note)
+
+        # without a relation, the presence of 'notes' breaks creating the event
+        if 'notes' in validated_data:
+            del validated_data['notes']
+
+        return super().create(validated_data)
+
+    def destroy(self, *args, **kwargs):
+        print(self.instance)
+
+    def get_id(self):
+        event = Event.current.distinct('id').order_by('-id').first()
+        if event is None:
+            return 'DBC-100000'
+        else:
+            return f'DBC-{int(event.id.split('-')[-1]) + 1}'
