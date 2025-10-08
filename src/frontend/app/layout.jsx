@@ -1,23 +1,78 @@
-import { createContext, useState } from 'react';
+// React
+import { useState } from 'react';
+
+// Navigation
 import { NavLink, Outlet } from 'react-router';
-import { DebuggingContext } from './contexts';
+
+// Internal imports
+import { AuthContext, DebuggingContext } from './contexts';
+import { API_HOST } from './env.js';
+import { getCookie } from "./shared/helpers";
+import { handleFormSubmit } from "./shared/handlers";
+
+// Styling
+import './layout.scss';
 
 function getInitialDebuggingContext() {
   return JSON.parse(localStorage.getItem('debugging')) || false;
 }
 
+let callingSession = false;
+let sessionStateKnown = false;
 
 export default function Layout() {
+  /* Setup */
+  // States
+  const [authContext, setAuthContext] = useState(getInitialAuthContext());
+  const [debuggingIsOn, setDebugging] = useState(getInitialDebuggingContext());
 
-  const [debuggingIsOn, setDebugging] = useState(getInitialDebuggingContext);
+  /* Helpers */
+  function getInitialAuthContext() {
+    if (!sessionStateKnown && !callingSession) {
+      callingSession = true;
 
+      fetch(`${API_HOST}/session`, {
+        headers: { 'Accept': 'application/json' },
+        credentials: "include",
+      }).then((response) => response.json())
+        .then((data) => {
+          const ret = {
+            loginStateKnown: true,
+          };
+          sessionStateKnown = true;
+          if (data.username) {
+            ret.username = data.username;
+            ret.email = data.email;
+          }
+          setAuthContext((prior) => {
+            if (ret.loginStateKnown != prior.loginStateKnown) { return ret; }
+            if (ret.username != prior.username) { return ret; }
+            if (ret.email != prior.email) { return ret; }
+            return prior;
+          });
+        })
+        .finally(() => {
+          callingSession = false;
+        });
+    }
+
+    return { loginStateKnown: false };
+  }
+
+  /* Rendering */
+  // Main component
   return (
     <>
       <header>
         <NavLink to="/"><img src='/ride-logo.svg' /></NavLink>
-        <NavLink to="/events/">Events</NavLink>
-        <NavLink to="/cameras/">Cameras</NavLink>
-        <div className='right'>
+
+        {authContext.username &&
+          <>
+            <NavLink to="/events/">Events</NavLink>
+          </>
+        }
+
+        <div className='right mr-4'>
           <button
             className={debuggingIsOn ? 'debugging' : ''}
             onClick={() => { localStorage.setItem('debugging', !debuggingIsOn); setDebugging(!debuggingIsOn)}}
@@ -27,10 +82,20 @@ export default function Layout() {
             </svg>
           </button>
         </div>
+
+        {authContext.username &&
+          <form className={'sign-out-button'} method='post' action={`${API_HOST}/accounts/logout/`} onSubmit={handleFormSubmit}>
+            <input type='hidden' name='csrfmiddlewaretoken' value={getCookie('csrftoken')} />
+            <button type='submit' className="btn btn-outline-primary" autoFocus={true}>Sign out</button>
+          </form>
+        }
       </header>
+
       <main>
         <DebuggingContext value={debuggingIsOn}>
-          <Outlet/>
+          <AuthContext value={{authContext, setAuthContext}}>
+            <Outlet />
+          </AuthContext>
         </DebuggingContext>
       </main>
     </>

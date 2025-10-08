@@ -23,7 +23,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(SRC_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(SRC_DIR, 'media')
-FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:8000/')
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:5173/')
 
 # Security
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
@@ -144,4 +144,33 @@ INTERNAL_IPS = [
 SHOW_DEBUG_TOOLBAR = env('SHOW_DEBUG_TOOLBAR', default=False)
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': lambda request: SHOW_DEBUG_TOOLBAR,
+}
+
+# Auth
+AUTH_USER_MODEL = "users.RIDEUser"
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": f"django.contrib.auth.password_validation.{name}"}
+    for name in [
+        "UserAttributeSimilarityValidator",
+        "MinimumLengthValidator",
+        "CommonPasswordValidator",
+        "NumericPasswordValidator",
+    ]
+]
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+LOGIN_REDIRECT_URL = FRONTEND_BASE_URL
+IDIR_LOGIN_PATH = 'accounts/oidc/idir/login/?process=login&next=%2Fdrivebc-admin%2F&auth_params=kc_idp_hint=azureidir'
+LOGIN_URL = (('http://localhost:8000/' if 'localhost' in FRONTEND_BASE_URL else FRONTEND_BASE_URL) + IDIR_LOGIN_PATH)
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }

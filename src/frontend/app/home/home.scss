@@ -1,0 +1,61 @@
+@import "../styles/variables.scss";
+
+.homepage {
+  display: flex;
+  flex-direction: column;
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  .sign-in-button {
+    button {
+      color: white;
+      background-color: $Type-Primary;
+      font-weight: 700;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      padding: 0.5rem;
+      cursor: pointer;
+      text-decoration: none;
+
+      &:hover {
+        background-color: black;
+      }
+
+      &:active {
+        outline: none;
+        box-shadow: 0 0 0 2px $Grey50;
+      }
+    }
+  }
+
+  .login-container {
+    flex-direction: row;
+    justify-content: space-between;
+
+    .login-options {
+      align-items: start;
+    }
+
+    .login-access {
+
+    }
+  }
+
+  .help-container {
+
+    .help-idir {
+
+    }
+
+    .help-bceid {
+
+    }
+  }
+}

@@ -1,14 +1,20 @@
-import { useCallback, useReducer, useRef, useState } from 'react';
+// React
+import { useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
+// Navigation
+import { useNavigate } from 'react-router';
+
+// OpenLayers
 import { Point, LineString, Polygon } from 'ol/geom';
 import { circular } from 'ol/geom/Polygon';
 import { transform } from 'ol/proj';
 import { boundingExtent, getCenter } from 'ol/extent';
 
+// Internal imports
 import Map from '../components/Map';
 import Layer from '../components/Map/Layer';
 import PinLayer from '../components/Map/PinLayer';
-import { MapContext } from '../contexts';
+import { AuthContext, MapContext } from '../contexts';
 import {
   getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped,
 } from '../components/Map/helpers.js';
@@ -17,16 +23,13 @@ import {
   pinStartNormalStyle, pinStartHoverStyle, pinStartActiveStyle,
   pinEndNormalStyle, pinEndHoverStyle, pinEndActiveStyle,
 } from '../components/Map/styles';
-
-import './home.css';
-
 import ContextMenu from './ContextMenu';
 import EventForm, { eventReducer, getInitialEvent } from './forms';
 import InfoBox from './InfoBox';
 import Preview from './Preview';
 
-
-
+// Styling
+import './home.css';
 
 export function meta() {
   return [
@@ -35,12 +38,32 @@ export function meta() {
 }
 
 export default function Home() {
+  /* Setup */
+  // Navigation
+  const navigate = useNavigate();
 
+  /* Hooks */
+  // Context
+  const { authContext, _setAuthContext } = useContext(AuthContext);
+
+  // Refs
   const mapRef = useRef();
 
+  // States
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
+
+  // Effects
+  useEffect(() => {
+    if (!authContext) { return; }
+
+    if (authContext.loginStateKnown && !authContext.username) {
+      // Redirect to landing page if not logged in
+      // TODO: redirect back to this page after login, not required since this is the only page
+      navigate('/');
+    }
+  }, [authContext]);
 
   const centerMap = (coords) => {
     if (!map || !coords ) { return; }
@@ -65,7 +88,7 @@ export default function Home() {
 
   mapRef.current = map;
 
-  return (
+  return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
       { !event.id && event.location.start.name &&
         <div className="panel">
