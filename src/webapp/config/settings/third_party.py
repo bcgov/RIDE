@@ -10,10 +10,20 @@ APP_DIR = Path(__file__).resolve().parents[2]
 env = environ.Env()
 environ.Env.read_env(BASE_DIR / '.env', overwrite=True)
 
+# Allauth
+KEYCLOAK_CLIENT_ID = env('KEYCLOAK_CLIENT_ID')
+KEYCLOAK_SECRET = env('KEYCLOAK_SECRET')
+KEYCLOAK_URL = env('KEYCLOAK_URL')
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_LOGIN_ON_GET = False
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_STORE_TOKENS = True
+
+# need our own adapter to override various redirect url methods following
+# login or logout
 SOCIALACCOUNT_ADAPTER = 'config.adapter.DbcSocialAdapter'
 ACCOUNT_ADAPTER = 'config.adapter.DbcAdapter'
 
@@ -21,18 +31,30 @@ SOCIALACCOUNT_PROVIDERS = {
     'openid_connect': {
         'APPS': [
             {
+                'provider_id': 'bceid',
+                'name': 'BCeID via Keycloak',
+                'client_id': KEYCLOAK_CLIENT_ID,
+                'secret': KEYCLOAK_SECRET,
+                'settings': {
+                    'server_url': KEYCLOAK_URL,
+                    'auth_params': {
+                        'kc_idp_hint': 'bceidboth',
+                    },
+                },
+            },
+            {
                 'provider_id': 'idir',
                 'name': 'Azure IDIR via Keycloak',
-                'client_id': env('KEYCLOAK_CLIENT_ID'),
-                'secret': env('KEYCLOAK_SECRET'),
+                'client_id': KEYCLOAK_CLIENT_ID,
+                'secret': KEYCLOAK_SECRET,
                 'settings': {
-                    'server_url': env('KEYCLOAK_URL'),
+                    'server_url': KEYCLOAK_URL,
+                    'auth_params': {
+                        'kc_idp_hint': 'azureidir',
+                    },
                 },
             },
         ],
-        'AUTH_PARAMS': {
-            'kc_idp_hint': 'azureidir',
-        },
         'EMAIL_AUTHENTICATION_AUTO_CONNECT': True,
         'EMAIL_AUTHENTICATION': True,
         'STORE_TOKENS': True,
