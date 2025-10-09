@@ -168,9 +168,3 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_REDIRECT_URL = FRONTEND_BASE_URL
 IDIR_LOGIN_PATH = 'accounts/oidc/idir/login/?process=login&next=%2Fdrivebc-admin%2F&auth_params=kc_idp_hint=azureidir'
 LOGIN_URL = (('http://localhost:8000/' if 'localhost' in FRONTEND_BASE_URL else FRONTEND_BASE_URL) + IDIR_LOGIN_PATH)
-
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
-}
