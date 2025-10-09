@@ -71,6 +71,7 @@ export function click(evt, dispatch) {
       evt.map.selectedFeature = null;
       dispatch({ type: 'reset form' });
       evt.stopPropagation();  // prevent placing a start pin
+      evt.map.route.getGeometry().setCoordinates([]);
     }
   } else {  // new selection
     if (evt.map.selectedFeature && evt.map.selectedFeature !== feature) {
@@ -82,7 +83,8 @@ export function click(evt, dispatch) {
       feature.selected = true;
       feature.updateStyle();
     }
-    dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true })
+    const raw = feature.pointFeature.get('raw');
+    dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true })
   }
 }
 
@@ -396,7 +398,6 @@ export function getDRA(coords, point, map) {
       });
       if (closest) {
         point.set('dra', feature.properties);
-        point.set('closest', closest)
         return {properties: feature.properties, closest };
       }
       return {};
@@ -535,19 +536,47 @@ export const selectStyle = {
     minHeight: 0,
   }),
   container: (css) => ({ ...css, flex: 1, }),
-  input: (css) => ({ ...css, margin: 0, padding: 0 }),
+  input: (css) => ({ ...css, margin: 0, padding: 0, color: 'red' }),
   dropdownIndicator: (css) => ({ ...css, padding: 0, color: 'black' }),
   indicatorSeparator: (css) => ({ ...css, display: 'none', }),
   valueContainer: (css) => ({ ...css, padding: '0px 3px', }),
+  option: (css, { data }) => {
+    if (!data.closed) { return css; }
+    return {
+      ...css,
+      ':after': {
+        content: '" "',
+        backgroundImage: 'url("/images/mapIcons/closure-static.png")',
+        backgroundSize: '18px',
+        display: 'inline-block',
+        width: '16px',
+        height: '16px',
+      },
+    }
+  },
+  singleValue: (css, { data }) => {
+    if (!data.closed) { return css; }
+    return {
+      ...css,
+      ':after': {
+        content: '" "',
+        backgroundImage: 'url("/images/mapIcons/closure-static.png")',
+        backgroundSize: '18px',
+        display: 'inline-block',
+        width: '16px',
+        height: '16px',
+      },
+    }
+  },
 };
 
-export function getSnapped(e) {
-  const point = turf.point(g2ll(e.coordinate));
-  // console.log(point, e.coordinate);
-  const layer = e.map.getAllLayers()[0];
-  const resolution = e.map.getView().getResolution();
+export function getSnapped(coordinate, pixel, map) {
+  const point = turf.point(g2ll(coordinate));
+  // console.log(point, coordinate);
+  const layer = map.getAllLayers()[0];
+  const resolution = map.getView().getResolution();
   let closest;
-  const features = e.map.getFeaturesAtPixel(e.pixel, { hitTolerance: 50 })
+  const features = map.getFeaturesAtPixel(pixel, { hitTolerance: 50 })
     .filter((f) => f.get('mvt:layer')?.startsWith('DRA Roads'))
     .map((f) => {
       const line = turf.multiLineString(multi(f.getFlatCoordinates(), f.getEnds().map(a => a), g2ll));
@@ -561,19 +590,19 @@ export function getSnapped(e) {
       return f;
     });
   if (closest) {
-    e.map.pins.getSource().getFeatures().forEach((f) => {
+    map.pins.getSource().getFeatures().forEach((f) => {
       if (
-        f.ol_uid === e.map.start?.ol_uid ||
-        f.ol_uid === e.map.end?.ol_uid ||
-        f.ol_uid === e.map.route?.ol_uid
+        f.ol_uid === map.start?.ol_uid ||
+        f.ol_uid === map.end?.ol_uid ||
+        f.ol_uid === map.route?.ol_uid
       ) { return; }
-      e.map.pins.getSource().removeFeature(f);
+      map.pins.getSource().removeFeature(f);
     })
     // const p = new Feature({
     //   geometry: new Point(ll2g(closest.snapped.geometry.coordinates))
     // });
     // p.setStyle(dotStyle);
-    // e.map.pins.getSource().addFeature(p);
+    // map.pins.getSource().addFeature(p);
     // const ll = multi(closest.getFlatCoordinates(), closest.getEnds().map(a => a));
     // const flat = closest.getFlatCoordinates();
     // for (let ii = 0; ii < flat.length; ii += 2) {
@@ -581,16 +610,16 @@ export function getSnapped(e) {
     //     geometry: new Point([flat[ii], flat[ii + 1]])
     //   });
     //   p.setStyle(dotStyle2);
-    //   e.map.pins.getSource().addFeature(p);
+    //   map.pins.getSource().addFeature(p);
     // }
     // console.log(closest, ll, closest.getEnds());
     // const q = new Feature({
     //   geometry: new MultiLineString(ll),
     // });
     // q.setStyle(lineStyle);
-    // e.map.pins.getSource().addFeature(q);
+    // map.pins.getSource().addFeature(q);
   }
-  return closest ? ll2g(closest.snapped.geometry.coordinates) : e.coordinate;
+  return closest ? ll2g(closest.snapped.geometry.coordinates) : coordinate;
 }
 
 function unflatten(l) {
@@ -627,3 +656,5 @@ export function get(obj, path, defaultValue=undefined) {
   const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
   return result === undefined || result === obj ? defaultValue : result;
 };
+
+export const coordsMatch = (a, b) => (a[0] === b[0] && a[1] === b[1]);

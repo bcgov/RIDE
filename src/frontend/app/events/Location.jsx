@@ -20,13 +20,8 @@ export default function Location({ event, dispatch, goToFunc }) {
   const [startOther, setStartOther] = useState(start?.other);
   const [endOther, setEndOther] = useState(end?.other || '');
 
-  const startChange = (e) => {
-    if (e.target.value.length <= 100) { setStartOther(e.target.value); }
-  }
-
-  const endChange = (e) => {
-    if (e.target.value.length <= 100) { setEndOther(e.target.value); }
-  }
+  const startChange = (e) => setStartOther(e.target.value.substring(0, 100));
+  const endChange = (e) => setEndOther(e.target.value.substring(0, 100));
 
   return <>
     <div>
@@ -92,7 +87,7 @@ export default function Location({ event, dispatch, goToFunc }) {
           <div>
             <div>
               Reference Location
-              <Tooltip text={REF_LOC_TEXT} />
+              &nbsp;<Tooltip text={REF_LOC_TEXT} />
             </div>
             { start.nearby.map((loc, ii) => (
               <div key={loc.name}>&nbsp;&nbsp;
@@ -182,7 +177,7 @@ export default function Location({ event, dispatch, goToFunc }) {
             <div>
               <div>
                 Reference Location
-                <Tooltip text={REF_LOC_TEXT} />
+                &nbsp;<Tooltip text={REF_LOC_TEXT} />
               </div>
               { end.nearby.map((loc, ii) => (
                 <div key={loc.name}>&nbsp;&nbsp;

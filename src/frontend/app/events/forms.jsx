@@ -147,6 +147,10 @@ export function eventReducer(event, action) {
       return { ...event, additional: action.value };
     }
 
+    case 'set note': {
+      return { ...event, notes: [{ text: action.value }] };
+    }
+
     case 'remove location': {
       event.location[action.key] = structuredClone(LOCATION_BLANK);
       return { ...event };
@@ -162,12 +166,30 @@ export function eventReducer(event, action) {
       if (action.value) {
         const event = structuredClone(action.value);
         event.showPreview = !!action.showPreview;
+        event.showForm = !!action.showForm;
         return event;
       } else if (action.showForm) {
         return { ...event, showPreview: false };
       } else {
         return getInitialEvent();
       }
+    }
+
+    case 'add note': {
+      const notes = [action.value, ... event.notes];
+      return { ...event, notes }
+    }
+
+    case 'update note': {
+      const notes = event.notes.map((note) => (
+        note.id === action.value.id ? action.value : note
+      ));
+      return { ...event, notes }
+    }
+
+    case 'remove note': {
+      const notes = event.notes.filter((note) => note.id !== action.value.id );
+      return { ...event, notes }
     }
 
     default: {
@@ -191,6 +213,7 @@ export function getInitialEvent() {
     showPreview: true,
     showForm: true,
     id: null,
+    status: 'Active',
     type: 'Incident',
     waypoints: [],
     location: {
@@ -219,6 +242,7 @@ export function getInitialEvent() {
     },
     additional: '',
     external: { url: '' },
+    notes: [],
   }
 }
 
@@ -233,21 +257,24 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
 
     const form = structuredClone(event);
 
-    form.location.start.coords = g2ll(form.location.start.coords);
     const geometries = [{
       type: "Point",
       coordinates: form.location.start.coords,
     }];
 
-    if (!form.location.end.name) {
+    if (!form.location.end?.name) {
       form.location.end = null;
     } else {
-      form.location.end.coords = g2ll(form.location.end.coords);
       geometries.push({
         type: "Point",
-        coordinates: form.location.start.coords,
+        coordinates: form.location.end.coords,
       });
-      const route = map.route.getGeometry().getCoordinates();
+      let route = map.route.getGeometry().getCoordinates();
+      if (route.length === 0) {
+        route = event?.geometry?.geometries[2]?.coordinates;
+      } else {
+        route = route.map((pair) => g2ll(pair));
+      }
 
       geometries.push({
         type: "Linestring",
@@ -278,11 +305,17 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
         form.timing.endTime = new Date(form.timing.endTime).toISOString();
       }
     }
+
+    // submitting existing notes with form gets an error because notes are
+    // saved independently of the form, except on event creation where an
+    // initial note may be included.
+    if (form.id) { form.notes = []; }
+
     setErrors(err);
 
     if (Object.keys(err).length === 0) {
-      fetch('http://localhost:8000/api/events', {
-        method: 'POST',
+      fetch(`http://localhost:8000/api/events${ event.id ? `/${event.id}` : '' }`, {
+        method: event.id ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -291,11 +324,19 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
         .then(data => {
           cancel();
           addEvent(data, map);
+          dispatch({ type: 'reset form' });
         });
+    } else {
+      console.log(err);
     }
   }
 
-  const getLabel = () => event.details.severity.startsWith('Minor') ? 'Publish' : 'Submit';
+  const getLabel = () => {
+    if (event.details.severity.startsWith('Minor')) {
+      return event.id ? 'Update' : 'Publish'
+    }
+    return event.id ? 'Submit' : 'Submit Update'
+  }
 
   return (
     <div className="form">
@@ -303,12 +344,16 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
         <div className="section form-header">
           <div className="title">
 
-          <h4>
-            Create&nbsp;
-            <select onChange={(e) => dispatch({ type: 'set', value: { type: e.target.value }})} defaultValue={event.type}>
-              {FORMS.map((form) => (<option key={form}>{form}</option>))}
-            </select>
-          </h4>
+          { event.id
+            ? <h4>Edit { event.type.toLowerCase() } <span className="event-id">{event.id}</span></h4>
+            : <h4>
+                Create&nbsp;
+                <select onChange={(e) => dispatch({ type: 'set', value: { type: e.target.value }})} defaultValue={event.type}>
+                  {FORMS.map((form) => (<option key={form}>{form}</option>))}
+                </select>
+              </h4>
+
+          }
           <button type="button" onClick={() => dispatch({ type: 'set', value: { showPreview: !event.showPreview } })}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z"/></svg>
             Preview
@@ -317,7 +362,6 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
         </div>
 
         <div className="form-body">
-
           { event.location.start.name && <>
             <div className="section location">
               <Location event={event} dispatch={dispatch} goToFunc={goToFunc} />
@@ -373,12 +417,10 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
 
             { event.type &&
               <div className="section internal">
-                <InternalNotes />
+                <InternalNotes event={event} dispatch={dispatch} />
               </div>
             }
-          </> }
 
-          { event.location.start.name && (
             <div className="section buttons">
               <button type="button" onClick={handleSubmit}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM404.4 276.7C411.4 265.5 408 250.7 396.8 243.6C385.6 236.5 370.8 240 363.7 251.2L302.3 349.5L275.3 313.5C267.3 302.9 252.3 300.7 241.7 308.7C231.1 316.7 228.9 331.7 236.9 342.3L284.9 406.3C289.6 412.6 297.2 416.2 305.1 415.9C313 415.6 320.2 411.4 324.4 404.6L404.4 276.6z"/></svg>
@@ -389,7 +431,8 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
                 Cancel
               </button>
             </div>
-          )}
+          </>}
+
         </div>
       </form>
     </div>

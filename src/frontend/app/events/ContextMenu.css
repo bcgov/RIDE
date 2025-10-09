@@ -27,6 +27,10 @@
     &.debugging {
       text-transform: uppercase;
       font-size: 0.75rem;
+      color:  #0066cc;
+    }
+    &.debugging:hover {
+      color:  white;
     }
   }
 }

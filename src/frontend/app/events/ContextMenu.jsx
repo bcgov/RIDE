@@ -14,6 +14,7 @@ export default function ContextMenu({ ref, options, setContextMenu }) {
       ref={ref}
       className={`context-menu ${items.length > 0 && 'open'}`}
       onClick={() => null}
+      onMouseLeave={(e) => setContextMenu([]) }
     >
       {items.map((item, ii) => (
         <div

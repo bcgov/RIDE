@@ -1,12 +1,10 @@
 import { useState } from 'react';
 
 export default function AdditionalMessaging({ event, dispatch }) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState(event.additional);
 
   const change = (e) => {
-    if (e.target.value.length <= 200) {
-      setText(e.target.value)
-    }
+    setText(e.target.value.substring(0, 200))
   }
 
   return <>
@@ -18,7 +16,7 @@ export default function AdditionalMessaging({ event, dispatch }) {
       name="additional"
       onChange={change}
       onBlur={(e) => dispatch({ type: 'set additional', value: e.target.value })}
-      defaultValue={event.additional}
+      value={text}
     />
   </>;
 }

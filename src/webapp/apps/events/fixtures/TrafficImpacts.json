@@ -1,0 +1,806 @@
+[
+  {
+    "model": "events.trafficimpact",
+    "pk": 1,
+    "fields": {
+      "created": "2025-09-29T22:42:06.019Z",
+      "last_updated": "2025-09-29T22:42:06.019Z",
+      "deleted": false,
+      "label": "All lanes blocked",
+      "order": 1,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 2,
+    "fields": {
+      "created": "2025-09-29T22:42:06.026Z",
+      "last_updated": "2025-09-29T22:42:06.026Z",
+      "deleted": false,
+      "label": "Assessment in progress",
+      "order": 2,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 3,
+    "fields": {
+      "created": "2025-09-29T22:42:06.032Z",
+      "last_updated": "2025-09-29T22:42:06.032Z",
+      "deleted": false,
+      "label": "Bridge closed",
+      "order": 3,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 4,
+    "fields": {
+      "created": "2025-09-29T22:42:06.037Z",
+      "last_updated": "2025-09-29T22:42:06.037Z",
+      "deleted": false,
+      "label": "Centre lane blocked",
+      "order": 4,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 5,
+    "fields": {
+      "created": "2025-09-29T22:42:06.042Z",
+      "last_updated": "2025-09-29T22:42:06.042Z",
+      "deleted": false,
+      "label": "Centre lane closed",
+      "order": 5,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 6,
+    "fields": {
+      "created": "2025-09-29T22:42:06.048Z",
+      "last_updated": "2025-09-29T22:42:06.048Z",
+      "deleted": false,
+      "label": "Centre lane closed in both directions",
+      "order": 6,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 7,
+    "fields": {
+      "created": "2025-09-29T22:42:06.053Z",
+      "last_updated": "2025-09-29T22:42:06.053Z",
+      "deleted": false,
+      "label": "Closed",
+      "order": 7,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 9,
+    "fields": {
+      "created": "2025-09-29T22:42:06.057Z",
+      "last_updated": "2025-09-29T22:42:06.057Z",
+      "deleted": false,
+      "label": "Closed for repairs",
+      "order": 9,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 10,
+    "fields": {
+      "created": "2025-09-29T22:42:06.064Z",
+      "last_updated": "2025-09-29T22:42:06.064Z",
+      "deleted": false,
+      "label": "Closed for the season",
+      "order": 10,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 11,
+    "fields": {
+      "created": "2025-09-29T22:42:06.068Z",
+      "last_updated": "2025-09-29T22:42:06.068Z",
+      "deleted": false,
+      "label": "Closed intermittently",
+      "order": 11,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 12,
+    "fields": {
+      "created": "2025-09-29T22:42:06.072Z",
+      "last_updated": "2025-09-29T22:42:06.072Z",
+      "deleted": false,
+      "label": "Closed to all traffic except emergency vehicles",
+      "order": 12,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 13,
+    "fields": {
+      "created": "2025-09-29T22:42:06.076Z",
+      "last_updated": "2025-09-29T22:42:06.076Z",
+      "deleted": false,
+      "label": "Detour in effect",
+      "order": 13,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 14,
+    "fields": {
+      "created": "2025-09-29T22:42:06.082Z",
+      "last_updated": "2025-09-29T22:42:06.082Z",
+      "deleted": false,
+      "label": "Eastbound lane closure",
+      "order": 14,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 15,
+    "fields": {
+      "created": "2025-09-29T22:42:06.086Z",
+      "last_updated": "2025-09-29T22:42:06.086Z",
+      "deleted": false,
+      "label": "Emergency vehicles on scene",
+      "order": 15,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 16,
+    "fields": {
+      "created": "2025-09-29T22:42:06.091Z",
+      "last_updated": "2025-09-29T22:42:06.091Z",
+      "deleted": false,
+      "label": "Entrance ramp closed",
+      "order": 16,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 17,
+    "fields": {
+      "created": "2025-09-29T22:42:06.098Z",
+      "last_updated": "2025-09-29T22:42:06.098Z",
+      "deleted": false,
+      "label": "Essential travel only",
+      "order": 17,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 18,
+    "fields": {
+      "created": "2025-09-29T22:42:06.103Z",
+      "last_updated": "2025-09-29T22:42:06.103Z",
+      "deleted": false,
+      "label": "Estimated time of opening not available",
+      "order": 18,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 19,
+    "fields": {
+      "created": "2025-09-29T22:42:06.108Z",
+      "last_updated": "2025-09-29T22:42:06.108Z",
+      "deleted": false,
+      "label": "Exit ramp closed",
+      "order": 19,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 20,
+    "fields": {
+      "created": "2025-09-29T22:42:06.118Z",
+      "last_updated": "2025-09-29T22:42:06.118Z",
+      "deleted": false,
+      "label": "Expect delays",
+      "order": 20,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 21,
+    "fields": {
+      "created": "2025-09-29T22:42:06.124Z",
+      "last_updated": "2025-09-29T22:42:06.124Z",
+      "deleted": false,
+      "label": "Expect delays due to congestion",
+      "order": 21,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 22,
+    "fields": {
+      "created": "2025-09-29T22:42:06.131Z",
+      "last_updated": "2025-09-29T22:42:06.131Z",
+      "deleted": false,
+      "label": "Expect major delays",
+      "order": 22,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 23,
+    "fields": {
+      "created": "2025-09-29T22:42:06.138Z",
+      "last_updated": "2025-09-29T22:42:06.138Z",
+      "deleted": false,
+      "label": "Expect major delays due to congestion",
+      "order": 23,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 24,
+    "fields": {
+      "created": "2025-09-29T22:42:06.143Z",
+      "last_updated": "2025-09-29T22:42:06.143Z",
+      "deleted": false,
+      "label": "Expect minor delays",
+      "order": 24,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 25,
+    "fields": {
+      "created": "2025-09-29T22:42:06.151Z",
+      "last_updated": "2025-09-29T22:42:06.151Z",
+      "deleted": false,
+      "label": "Heavy congestion",
+      "order": 25,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 26,
+    "fields": {
+      "created": "2025-09-29T22:42:06.155Z",
+      "last_updated": "2025-09-29T22:42:06.156Z",
+      "deleted": false,
+      "label": "HOV lane closed",
+      "order": 26,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 27,
+    "fields": {
+      "created": "2025-09-29T22:42:06.160Z",
+      "last_updated": "2025-09-29T22:42:06.160Z",
+      "deleted": false,
+      "label": "Lane blocked",
+      "order": 27,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 28,
+    "fields": {
+      "created": "2025-09-29T22:42:06.167Z",
+      "last_updated": "2025-09-29T22:42:06.167Z",
+      "deleted": false,
+      "label": "Lane closures in both directions",
+      "order": 28,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 29,
+    "fields": {
+      "created": "2025-09-29T22:42:06.172Z",
+      "last_updated": "2025-09-29T22:42:06.172Z",
+      "deleted": false,
+      "label": "Left lane blocked",
+      "order": 29,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 30,
+    "fields": {
+      "created": "2025-09-29T22:42:06.176Z",
+      "last_updated": "2025-09-29T22:42:06.176Z",
+      "deleted": false,
+      "label": "Left lane closed",
+      "order": 30,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 31,
+    "fields": {
+      "created": "2025-09-29T22:42:06.184Z",
+      "last_updated": "2025-09-29T22:42:06.184Z",
+      "deleted": false,
+      "label": "Left lane closed in both directions",
+      "order": 31,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 32,
+    "fields": {
+      "created": "2025-09-29T22:42:06.190Z",
+      "last_updated": "2025-09-29T22:42:06.190Z",
+      "deleted": false,
+      "label": "Left shoulder closed",
+      "order": 32,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 33,
+    "fields": {
+      "created": "2025-09-29T22:42:06.194Z",
+      "last_updated": "2025-09-29T22:42:06.194Z",
+      "deleted": false,
+      "label": "Left turn lane closed",
+      "order": 33,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 34,
+    "fields": {
+      "created": "2025-09-29T22:42:06.200Z",
+      "last_updated": "2025-09-29T22:42:06.200Z",
+      "deleted": false,
+      "label": "Minor congestion",
+      "order": 34,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 35,
+    "fields": {
+      "created": "2025-09-29T22:42:06.205Z",
+      "last_updated": "2025-09-29T22:42:06.205Z",
+      "deleted": false,
+      "label": "No detour available",
+      "order": 35,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 36,
+    "fields": {
+      "created": "2025-09-29T22:42:06.210Z",
+      "last_updated": "2025-09-29T22:42:06.210Z",
+      "deleted": false,
+      "label": "Northbound lane closure",
+      "order": 36,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 37,
+    "fields": {
+      "created": "2025-09-29T22:42:06.216Z",
+      "last_updated": "2025-09-29T22:42:06.216Z",
+      "deleted": false,
+      "label": "On-ramp Shift",
+      "order": 37,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 38,
+    "fields": {
+      "created": "2025-09-29T22:42:06.220Z",
+      "last_updated": "2025-09-29T22:42:06.220Z",
+      "deleted": false,
+      "label": "Open to traffic",
+      "order": 38,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 39,
+    "fields": {
+      "created": "2025-09-29T22:42:06.224Z",
+      "last_updated": "2025-09-29T22:42:06.224Z",
+      "deleted": false,
+      "label": "Paving operations",
+      "order": 39,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 40,
+    "fields": {
+      "created": "2025-09-29T22:42:06.230Z",
+      "last_updated": "2025-09-29T22:42:06.230Z",
+      "deleted": false,
+      "label": "Plowing and sanding",
+      "order": 40,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 41,
+    "fields": {
+      "created": "2025-09-29T22:42:06.235Z",
+      "last_updated": "2025-09-29T22:42:06.236Z",
+      "deleted": false,
+      "label": "Possible delays",
+      "order": 41,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 42,
+    "fields": {
+      "created": "2025-09-29T22:42:06.243Z",
+      "last_updated": "2025-09-29T22:42:06.243Z",
+      "deleted": false,
+      "label": "Possible delays due to heavy traffic volumes",
+      "order": 42,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 43,
+    "fields": {
+      "created": "2025-09-29T22:42:06.253Z",
+      "last_updated": "2025-09-29T22:42:06.253Z",
+      "deleted": false,
+      "label": "Ramp blocked",
+      "order": 43,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 44,
+    "fields": {
+      "created": "2025-09-29T22:42:06.258Z",
+      "last_updated": "2025-09-29T22:42:06.258Z",
+      "deleted": false,
+      "label": "Reduced to one lane",
+      "order": 44,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 45,
+    "fields": {
+      "created": "2025-09-29T22:42:06.264Z",
+      "last_updated": "2025-09-29T22:42:06.264Z",
+      "deleted": false,
+      "label": "Reduced to two lanes",
+      "order": 45,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 46,
+    "fields": {
+      "created": "2025-09-29T22:42:06.270Z",
+      "last_updated": "2025-09-29T22:42:06.270Z",
+      "deleted": false,
+      "label": "Right lane blocked",
+      "order": 46,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 47,
+    "fields": {
+      "created": "2025-09-29T22:42:06.274Z",
+      "last_updated": "2025-09-29T22:42:06.274Z",
+      "deleted": false,
+      "label": "Right lane closed",
+      "order": 47,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 48,
+    "fields": {
+      "created": "2025-09-29T22:42:06.278Z",
+      "last_updated": "2025-09-29T22:42:06.278Z",
+      "deleted": false,
+      "label": "Right lane closed in both directions",
+      "order": 48,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 49,
+    "fields": {
+      "created": "2025-09-29T22:42:06.284Z",
+      "last_updated": "2025-09-29T22:42:06.284Z",
+      "deleted": false,
+      "label": "Right lane of exit ramp closed",
+      "order": 49,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 50,
+    "fields": {
+      "created": "2025-09-29T22:42:06.288Z",
+      "last_updated": "2025-09-29T22:42:06.288Z",
+      "deleted": false,
+      "label": "Right turn lane closed",
+      "order": 50,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 51,
+    "fields": {
+      "created": "2025-09-29T22:42:06.293Z",
+      "last_updated": "2025-09-29T22:42:06.293Z",
+      "deleted": false,
+      "label": "Road closure",
+      "order": 51,
+      "closed": true
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 52,
+    "fields": {
+      "created": "2025-09-29T22:42:06.299Z",
+      "last_updated": "2025-09-29T22:42:06.299Z",
+      "deleted": false,
+      "label": "Road open",
+      "order": 52,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 53,
+    "fields": {
+      "created": "2025-09-29T22:42:06.304Z",
+      "last_updated": "2025-09-29T22:42:06.304Z",
+      "deleted": false,
+      "label": "Sanded",
+      "order": 53,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 54,
+    "fields": {
+      "created": "2025-09-29T22:42:06.309Z",
+      "last_updated": "2025-09-29T22:42:06.309Z",
+      "deleted": false,
+      "label": "Shoulder closed",
+      "order": 54,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 55,
+    "fields": {
+      "created": "2025-09-29T22:42:06.317Z",
+      "last_updated": "2025-09-29T22:42:06.317Z",
+      "deleted": false,
+      "label": "Single lane alternating traffic",
+      "order": 55,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 56,
+    "fields": {
+      "created": "2025-09-29T22:42:06.322Z",
+      "last_updated": "2025-09-29T22:42:06.322Z",
+      "deleted": false,
+      "label": "Slow down and drive to winter conditions",
+      "order": 56,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 57,
+    "fields": {
+      "created": "2025-09-29T22:42:06.327Z",
+      "last_updated": "2025-09-29T22:42:06.327Z",
+      "deleted": false,
+      "label": "Southbound lane closure",
+      "order": 57,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 58,
+    "fields": {
+      "created": "2025-09-29T22:42:06.333Z",
+      "last_updated": "2025-09-29T22:42:06.333Z",
+      "deleted": false,
+      "label": "Traffic signal out",
+      "order": 58,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 59,
+    "fields": {
+      "created": "2025-09-29T22:42:06.338Z",
+      "last_updated": "2025-09-29T22:42:06.338Z",
+      "deleted": false,
+      "label": "Truck lane available for all vehicles",
+      "order": 59,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 60,
+    "fields": {
+      "created": "2025-09-29T22:42:06.342Z",
+      "last_updated": "2025-09-29T22:42:06.342Z",
+      "deleted": false,
+      "label": "Truck restriction",
+      "order": 60,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 61,
+    "fields": {
+      "created": "2025-09-29T22:42:06.351Z",
+      "last_updated": "2025-09-29T22:42:06.351Z",
+      "deleted": false,
+      "label": "Two centre lanes blocked",
+      "order": 61,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 62,
+    "fields": {
+      "created": "2025-09-29T22:42:06.356Z",
+      "last_updated": "2025-09-29T22:42:06.356Z",
+      "deleted": false,
+      "label": "Two centre lanes closed",
+      "order": 62,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 63,
+    "fields": {
+      "created": "2025-09-29T22:42:06.361Z",
+      "last_updated": "2025-09-29T22:42:06.361Z",
+      "deleted": false,
+      "label": "Two left lanes blocked",
+      "order": 63,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 64,
+    "fields": {
+      "created": "2025-09-29T22:42:06.368Z",
+      "last_updated": "2025-09-29T22:42:06.368Z",
+      "deleted": false,
+      "label": "Two left lanes of exit ramp blocked",
+      "order": 64,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 65,
+    "fields": {
+      "created": "2025-09-29T22:42:06.374Z",
+      "last_updated": "2025-09-29T22:42:06.374Z",
+      "deleted": false,
+      "label": "Two right lanes blocked",
+      "order": 65,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 66,
+    "fields": {
+      "created": "2025-09-29T22:42:06.381Z",
+      "last_updated": "2025-09-29T22:42:06.381Z",
+      "deleted": false,
+      "label": "Two right lanes of exit ramp blocked",
+      "order": 66,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 67,
+    "fields": {
+      "created": "2025-09-29T22:42:06.385Z",
+      "last_updated": "2025-09-29T22:42:06.385Z",
+      "deleted": false,
+      "label": "Watch for traffic control",
+      "order": 67,
+      "closed": false
+    }
+  },
+  {
+    "model": "events.trafficimpact",
+    "pk": 68,
+    "fields": {
+      "created": "2025-09-29T22:42:06.391Z",
+      "last_updated": "2025-09-29T22:42:06.391Z",
+      "deleted": false,
+      "label": "Westbound lane closure",
+      "order": 68,
+      "closed": false
+    }
+  }
+]

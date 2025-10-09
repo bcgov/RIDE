@@ -1,8 +1,10 @@
 import { Feature } from 'ol';
+import { Circle, Fill, Icon, Stroke, Style } from 'ol/style';
 
 import Styles, { normalStyle, hoverStyle, activeStyle } from './styles';
 import * as eStyles from '../../events/featureStyleDefinitions';
 import { get } from './helpers';
+import { getIcon } from '../../events/icons';
 
 
 export default class RideFeature extends Feature {
@@ -28,24 +30,16 @@ export default class RideFeature extends Feature {
       this.normal = style.static;
       this.active = style.active;
       this.hover = style.hover;
+    } else if (props.feat2) {
+      this.normal = props.feat2.static;
+      this.active = props.feat2.active;
+      this.hover = props.feat2.hover;
     }
     this.setStyle(this.normal);
 
     this.action = props.action;
     this.ref = props.ref;
-  }
-
-  updateInfobox(map) {
-    if (this.ref.current) {
-      const xy = map.getPixelFromCoordinate(this.getGeometry().getCoordinates());
-      this.ref.current.style.left = (xy[0] + 16) + 'px';
-      this.ref.current.style.top = (xy[1] - 30) + 'px';
-      if (!this.dra?.properties) {
-        this.ref.current.style.visibility = 'hidden';
-      } else {
-        this.ref.current.style.visibility = 'unset';
-      }
-    }
+    this.on('propertychange', this.propertyChanged)
   }
 
   resetStyle(key) {
@@ -78,8 +72,86 @@ export default class RideFeature extends Feature {
     }
   }
 
+  propertyChanged(e) {
+    if (e.key === 'raw') {
+      const styles = {};
+      const event = this.get('raw');
+      ['static', 'hover', 'active'].forEach((state) => {
+        styles[state] = new Style({ image: new Icon({ src: getIcon(event, state) }) });
+      });
+      this.normal = styles.static;
+      this.active = styles.active;
+      this.hover = styles.hover;
+      this.updateStyle();
+    }
+  }
+
   clear() { // used by the route feature on the map
     this.getGeometry().setCoordinates([]);
+  }
+}
+
+
+/* A pin is a RideFeature that adds control of an accompanying infobox.
+ * Currently used for the start and end pins on the map during event creation/
+ * editing, which have highway name and nearest cities attached.
+ */
+export class PinFeature extends RideFeature {
+  /* Return a two element array that gives the cardinality of the first point
+   * with respect to the second point, as either a 1 (greater than) or -1 (less
+   * than), so that pixel dimensions can be multiplied by that to shift the
+   * coordinates.  This calculation works for a canvas whose x, y origin (0, 0)
+   * is in the upper left.  The first element is East/West, the second is
+   * North/South.
+   */
+  getDirectionOffsets(a, b) {
+    const coordsA = a.getGeometry().getCoordinates();
+    const coordsB = b.getGeometry().getCoordinates();
+
+    return [
+      coordsA[0] < coordsB[0] ? -1 : 1, // A is west of B
+      coordsA[1] < coordsB[1] ? 1 : -1, // A is south of B
+    ];
+  }
+
+  /* Get pixel offsets for el that take account of relative position with
+   * respect to the 'other' pin (i.e., if both start and end pins are on the
+   * map, for each of those);
+   *
+   * If only the start pin is present, the offsets are basic spacing off the
+   * pin icon itself..
+   */
+  getOffsets(map, el) {
+    let baseX = 16;
+    let baseY = -30;
+    let offsetX = 0, offsetY = 0;
+    let xMult = 1, yMult = 1;
+
+    if (map.end) {
+      if (this === map.start) {
+        [xMult, yMult] = this.getDirectionOffsets(map.start, map.end);
+      } else {
+        [xMult, yMult] = this.getDirectionOffsets(map.end, map.start);
+      }
+      if (xMult === -1) { offsetX += el.offsetWidth; }
+      if (yMult === -1) { offsetY += el.offsetHeight; baseY =0; }
+    }
+
+    return [(baseX + offsetX) * xMult, (baseY + offsetY) * yMult];
+  }
+
+  updateInfobox(map) {
+    if (this.ref.current) {
+      const [offsetX, offsetY] = this.getOffsets(map, this.ref.current);
+      const xy = map.getPixelFromCoordinate(this.getGeometry().getCoordinates());
+      this.ref.current.style.left = (xy[0] + offsetX) + 'px';
+      this.ref.current.style.top = (xy[1] + offsetY) + 'px';
+      if (!this.dra?.properties) {
+        this.ref.current.style.visibility = 'hidden';
+      } else {
+        this.ref.current.style.visibility = 'unset';
+      }
+    }
   }
 
   upHandler(e) {

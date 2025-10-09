@@ -147,19 +147,19 @@ export const pinEndActiveStyle = new Style({
 export const routeNormalStyle = new Style({
   stroke: new Stroke({
     color: [0, 154, 255, 0.5],
-    width: 10,
+    width: 12,
   })
 });
 export const routeHoverStyle = new Style({
   stroke: new Stroke({
     color: [0, 154, 255, 0.75],
-    width: 12,
+    width: 14,
   })
 });
 export const routeActiveStyle = new Style({
   stroke: new Stroke({
     color: [0, 154, 255, 0.95],
-    width: 10,
+    width: 12,
   })
 });
 

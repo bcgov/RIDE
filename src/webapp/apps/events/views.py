@@ -6,8 +6,8 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 # from .forms import EventForm
-from .models import Event, Note
-from .serializers import EventSerializer, NoteSerializer
+from .models import Event, Note, TrafficImpact
+from .serializers import EventSerializer, NoteSerializer, TrafficImpactSerializer
 
 
 class Events(viewsets.ModelViewSet):
@@ -23,6 +23,13 @@ class Notes(viewsets.ModelViewSet):
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
 
+
+
+class TrafficImpacts(viewsets.ModelViewSet):
+
+    queryset = TrafficImpact.objects.filter(deleted=False)
+    serializer_class = TrafficImpactSerializer
+    lookup_field = 'id'
 
 # def home(request):
 

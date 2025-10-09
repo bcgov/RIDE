@@ -1,13 +1,14 @@
 import copy
+from datetime import datetime, timezone
 from pprint import pprint
 
 from rest_framework import fields, serializers
-from rest_framework.serializers import BaseSerializer, ModelSerializer, Field
+from rest_framework.serializers import Serializer, ModelSerializer, Field
 from rest_framework_gis.fields import GeometryField
 
-from .models import Event, Note
+from .models import Event, Note, TrafficImpact
 
-class KeyMoveSerializer(BaseSerializer):
+class KeyMoveSerializer(ModelSerializer):
     '''
     A serializer for adjusting keys in the data argument prior to processing.
 
@@ -39,6 +40,7 @@ class KeyMoveSerializer(BaseSerializer):
     '''
 
     def __init__(self, *args, **kwargs):
+        self.partial = kwargs.get('partial', False)
         if 'data' in kwargs:
             self.move_keys(kwargs['data'])
         super().__init__(*args, **kwargs)
@@ -66,7 +68,8 @@ class KeyMoveSerializer(BaseSerializer):
                     current[key] = {}
                 current = current[key]
 
-            current[path[-1]] = actual
+            if actual is not None or not self.partial:
+                current[path[-1]] = actual
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -121,12 +124,12 @@ class NoteSerializer(ModelSerializer):
     def to_internal_value(self, data):
         validated = super().to_internal_value(data)
 
-        if validated.get('id') is None:
+        if validated.get('id') is None and self.instance is None:
             validated['id'] = self.get_id()
         return validated
 
     def get_id(self):
-        e = Note.current.distinct('id').order_by('-id').first()
+        e = Note.objects.distinct('id').order_by('-id').first()
         if e is None:
             return '100000'
         else:
@@ -140,17 +143,19 @@ class NotesListSerializer(fields.ListField):
         return Note.current.filter(event=instance.id).order_by('-created')
 
 
-class EventSerializer(KeyMoveSerializer, ModelSerializer):
+class EventSerializer(KeyMoveSerializer):
 
     geometry = GeometryField()
     is_closure = fields.SerializerMethodField()
+    last_inactivated = fields.SerializerMethodField()
     notes = NotesListSerializer(required=False)
 
     class Meta:
         model = Event
-        exclude = ['meta', 'deleted']
+        exclude = ['deleted']
         keys_to_move = {
             '__orig__': 'meta.source',
+            'type': 'event_type',
             'location.start': 'start',
             'location.end': 'end',
             'details.direction': 'direction',
@@ -172,7 +177,12 @@ class EventSerializer(KeyMoveSerializer, ModelSerializer):
         return notes
 
     def get_is_closure(self, obj):
-        return len([i for i in obj.impacts if i['id'] == 7]) > 0
+        ids = [impact['id'] for impact in obj.impacts]
+        return TrafficImpact.objects.filter(id__in=ids, closed=True).count() > 0
+
+    def get_last_inactivated(self, obj):
+        print(obj.meta)
+        return obj.meta.get('last_inactivated')
 
     def to_internal_value(self, data):
         if data.get('id') is None and self.instance is None:  # creating
@@ -188,6 +198,9 @@ class EventSerializer(KeyMoveSerializer, ModelSerializer):
                 raise serializers.ValidationError({
                     'Notes': 'Submitting notes with existing events is not allowed.'
                 })
+            if data.get('status') == 'Inactive':
+                now = datetime.now(tz=timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
+                data['meta']['last_inactivated'] = now
 
         return super().to_internal_value(data)
 
@@ -208,8 +221,15 @@ class EventSerializer(KeyMoveSerializer, ModelSerializer):
         print(self.instance)
 
     def get_id(self):
-        event = Event.current.distinct('id').order_by('-id').first()
+        event = Event.objects.distinct('id').order_by('-id').first()
         if event is None:
             return 'DBC-100000'
         else:
             return f'DBC-{int(event.id.split('-')[-1]) + 1}'
+
+
+class TrafficImpactSerializer(ModelSerializer):
+
+    class Meta:
+        model = TrafficImpact
+        fields = ['id', 'label', 'order', 'closed']

@@ -10,6 +10,12 @@ function getTz(datetime) {
   return datetime.toLocaleString(['en-CA'], { timeZoneName: 'short' }).slice(-3);
 }
 
+function normalized(datestring) {
+  const a = new Date(datestring)
+  if (Number(a) === 0) { return ''; }
+  const b = new Date(a - a.getTimezoneOffset() * 60000);
+  return b.toISOString().replace('Z', '');
+}
 
 export default function EventTiming({ errors, event, dispatch }) {
 
@@ -39,7 +45,7 @@ export default function EventTiming({ errors, event, dispatch }) {
       <div className="row">
         <input
           type="datetime-local"
-          defaultValue={event.timing.nextUpdate}
+          defaultValue={normalized(event.timing.nextUpdate)}
           onBlur={(e) => dispatch({ type: 'set', section: 'timing', value: [{ nextUpdate: e.target.value, section: 'timing' }, { nextUpdateIsDefault: false, section: 'timing' }]})}
         />
 
@@ -65,7 +71,7 @@ export default function EventTiming({ errors, event, dispatch }) {
       <div className="row">
         <input
           type="datetime-local"
-          defaultValue={event.timing.endTime}
+          defaultValue={normalized(event.timing.endTime)}
           onBlur={(e) => dispatch({ type: 'set', section: 'timing', value: [{ endTime: e.target.value, section: 'timing' }]})}
         />
 

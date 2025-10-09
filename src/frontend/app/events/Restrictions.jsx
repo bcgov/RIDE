@@ -8,6 +8,10 @@ import { selectStyle } from '../components/Map/helpers';
 
 
 function Restriction({ id, item, change, update, current, }) {
+  const placeholder = (RestrictionsList.filter(
+    (restriction) => item.id > 0 && restriction.label === item.label
+  )[0] || {}).placeholder;
+
   return (
     <>
       <Select
@@ -29,6 +33,7 @@ function Restriction({ id, item, change, update, current, }) {
         disabled={id === 0}
         onBlur={(e) => update(id, {text: e.target.value}) }
         autoComplete="off"
+        placeholder={placeholder}
       />
     </>
   );

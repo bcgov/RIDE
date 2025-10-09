@@ -32,6 +32,15 @@ EXCLUDED = [
     '_state', 'uuid', 'id', 'version', 'latest', 'created', 'last_updated', 'user',
 ]
 
+class BaseModel(models.Model):
+
+    created = models.DateTimeField(default=timezone.now, editable=False)
+    last_updated = models.DateTimeField(auto_now=True, editable=False)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
 
 class VersionedModel(models.Model):
     '''
@@ -92,7 +101,6 @@ class VersionedModel(models.Model):
         The latest version is complete: no data needs to be retrieved from
         earlier versions, which exist only to provide a change and audit log.
         '''
-
         with transaction.atomic():
             if not kwargs.get('force_update'):
                 history = type(self).objects.filter(id=self.id).order_by('version')
@@ -105,8 +113,8 @@ class VersionedModel(models.Model):
                 # get latest prior version for calculating new version number
                 last = history.last()
 
-                # if self.unchanged_since(last):
-                #     return
+                if self.unchanged_since(last):
+                    return
 
                 if last:
                     type(self).objects.filter(id=self.id).update(latest=False)
@@ -207,13 +215,13 @@ def delete_related_notes(instance, **kwargs):
         note.delete()
 
 
-# class Choice(models.Model):
+class Choice(BaseModel):
 
-#     label = models.CharField(max_length=20)
-#     order = models.PositiveSmallIntegerField()
+    label = models.CharField()
+    order = models.PositiveSmallIntegerField()
 
-#     class Meta:
-#         abstract = True
+    class Meta:
+        abstract = True
 
 
 # class EventType(Choice):
@@ -224,8 +232,8 @@ def delete_related_notes(instance, **kwargs):
 #     pass
 
 
-# class TrafficImpact(Choice):
-#     pass
+class TrafficImpact(Choice):
+    closed = models.BooleanField(default=False)
 
 
 # class Restriction(Choice):

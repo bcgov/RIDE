@@ -48,6 +48,8 @@ export default function Home() {
 
   // Refs
   const mapRef = useRef();
+  const startRef = useRef();
+  const endRef = useRef();
 
   // States
   const [ map, setMap ] = useState(null);
@@ -90,7 +92,7 @@ export default function Home() {
 
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
-      { !event.id && event.location.start.name &&
+      { event.showForm && event.location.start.name &&
         <div className="panel">
           <EventForm
             map={mapRef.current}
@@ -105,8 +107,8 @@ export default function Home() {
 
       <MapContext.Provider value={{ map, setMap }}>
         <Map dispatch={dispatch}>
-          <PinLayer event={event} dispatch={dispatch} />
-          <Layer name='events' />
+          <Layer name='events' dispatch={dispatch} startRef={startRef} endRef={endRef} />
+          <PinLayer event={event} dispatch={dispatch} startRef={startRef} endRef={endRef} />
         </Map>
       </MapContext.Provider>
 

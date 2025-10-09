@@ -1,3 +1,4 @@
+import { createContext, useState } from 'react';
 import {
   isRouteErrorResponse,
   Links,
@@ -6,6 +7,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+
+import { API_HOST } from './env.js';
+import { DataContext } from './contexts';
 
 import "./app.css";
 
@@ -44,8 +48,33 @@ export function HydrateFallback() {
   return <p>Loading RIDE...</p>;
 }
 
+let fetching = false;
+
 export default function App() {
-  return <Outlet />;
+
+  const [impacts, setImpacts] = useState(getImpacts);
+
+  function getImpacts() {
+    if (fetching) { return; }
+    fetching = true;
+
+    const response = fetch(`${API_HOST}/api/traffic-impacts`, {
+      headers: { 'Accept': 'application/json' }
+    }).then((response) => response.json())
+      .then((data) => {
+        setImpacts(data);
+      })
+      .finally(() => {
+        fetching = false;
+      });
+    return [];
+  }
+
+  return (
+    <DataContext.Provider value={{ impacts }}>
+      <Outlet />
+    </DataContext.Provider>
+  )
 }
 
 export function ErrorBoundary({ error }) {

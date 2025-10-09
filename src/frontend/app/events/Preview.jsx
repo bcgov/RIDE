@@ -1,24 +1,12 @@
 import './Preview.css';
 import { PHRASES_LOOKUP, TrafficImpacts } from './references';
 
-import closure from '../../public/images/mapIcons/closure-static.png';
-import major from '../../public/images/mapIcons/incident-major-static.png';
-import minor from '../../public/images/mapIcons/incident-minor-static.png';
+import { getIcon } from './icons';
 
 const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   acc[curr.id] = curr;
   return acc;
 }, {});
-
-function getEventIcon(event) {
-  const is_closure = event.impacts.reduce((val, key) => val || key.id === 7, false)
-  if (is_closure || event.is_closure) {
-    return closure;
-  } else if (event.details.severity === 'Major') {
-    return major;
-  }
-  return minor;
-}
 
 
 export default function Preview({ event, dispatch }) {
@@ -30,22 +18,28 @@ export default function Preview({ event, dispatch }) {
   let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase);
   if (end.other && end.useOther) { endNearbies.push(end.other); }
 
-  const icon = getEventIcon(event);
   const lastUpdated = new Date(event.last_updated);
+  const cleared = event.status === 'Inactive' && lastUpdated > new Date() - 60000 * 15;  // TODO: time window move to env variable
+
+  const icon = getIcon(event);
   const nextUpdate = new Date(event?.timing?.nextUpdate);
+  const banner = event.banner;
 
   return (
-    <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'}`}>
+    <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'} ${event.status.toLowerCase()} ${cleared ? 'cleared' : ''}`}>
       <div className="header">
-        <div className="icons">
-          <img src={icon} />
+        { banner && <div className="banner">{ banner }</div> }
+        <div style={{padding: '1rem'}}>
+          <div className="icons">
+            <img src={icon} />
 
-          <svg className="close" onClick={() => dispatch({ type: 'reset form', showForm: event.showForm })} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
-            <path strokeWidth="30" stroke="currentColor" d="M135.5 169C126.1 159.6 126.1 144.4 135.5 135.1C144.9 125.8 160.1 125.7 169.4 135.1L320.4 286.1L471.4 135.1C480.8 125.7 496 125.7 505.3 135.1C514.6 144.5 514.7 159.7 505.3 169L354.3 320L505.3 471C514.7 480.4 514.7 495.6 505.3 504.9C495.9 514.2 480.7 514.3 471.4 504.9L320.4 353.9L169.4 504.9C160 514.3 144.8 514.3 135.5 504.9C126.2 495.5 126.1 480.3 135.5 471L286.5 320L135.5 169z"/>
-          </svg>
+            <svg className="close" onClick={() => dispatch({ type: 'reset form', showForm: event.showForm })} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
+              <path strokeWidth="30" stroke="currentColor" d="M135.5 169C126.1 159.6 126.1 144.4 135.5 135.1C144.9 125.8 160.1 125.7 169.4 135.1L320.4 286.1L471.4 135.1C480.8 125.7 496 125.7 505.3 135.1C514.6 144.5 514.7 159.7 505.3 169L354.3 320L505.3 471C514.7 480.4 514.7 495.6 505.3 504.9C495.9 514.2 480.7 514.3 471.4 504.9L320.4 353.9L169.4 504.9C160 514.3 144.8 514.3 135.5 504.9C126.2 495.5 126.1 480.3 135.5 471L286.5 320L135.5 169z"/>
+            </svg>
+          </div>
+          <h3>{ PHRASES_LOOKUP[event.details.situation] }</h3>
+          <p>{ event.details.severity} {event.type === 'Incident' ? 'incident' : 'delay' }</p>
         </div>
-        <h3>{ PHRASES_LOOKUP[event.details.situation] }</h3>
-        <p>{ event.details.severity} incident</p>
       </div>
 
       <div className="body">

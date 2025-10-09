@@ -1,5 +1,7 @@
 import { Fill, Icon, Stroke, Style } from 'ol/style.js';
 
+import Styles from './icons';
+
 // Static assets
 // Cameras
 import cameraIconActive from '../../public/images/mapIcons/camera-active.png';
@@ -129,6 +131,9 @@ import genericDelaysHoverIcon from '../../public/images/mapIcons/incident-minor-
 import genericDelaysHoverUnreadIcon from '../../public/images/mapIcons/incident-minor-hover-unread.png';
 import genericDelaysStaticIcon from '../../public/images/mapIcons/incident-minor-static.png';
 import genericDelaysStaticUnreadIcon from '../../public/images/mapIcons/incident-minor-static-unread.png';
+
+import * as Icons from './icons';
+
 
 // Map advisory styles
 export const advisoryStyles = {
@@ -422,6 +427,8 @@ export const restStopTruckClosedStyles = {
   }),
 };
 
+
+
 // Event icon styles
 export const eventStyles = {
   // Line Segments
@@ -628,26 +635,25 @@ export const eventStyles = {
 
   // Closures
   closures: {
-    static: new Style({
-      image: new Icon({
-        scale: 0.25,
-        src: closuresStaticIcon,
-      }),
-    }),
+    // static: new Style({
+    //   image: new Icon({
+    //     src: Icons.closureActiveStatic,
+    //   }),
+    // }),
 
-    hover: new Style({
-      image: new Icon({
-        scale: 0.25,
-        src: closuresHoverIcon,
-      }),
-    }),
+    // hover: new Style({
+    //   image: new Icon({
+    //     scale: 1,
+    //     src: Icons.closureActiveHover,
+    //   }),
+    // }),
 
-    active: new Style({
-      image: new Icon({
-        scale: 0.25,
-        src: closuresActiveIcon,
-      }),
-    }),
+    // active: new Style({
+    //   image: new Icon({
+    //     scale: 1,
+    //     src: Icons.closureActiveActive,
+    //   }),
+    // }),
   },
 
   closures_unread: {
@@ -675,26 +681,23 @@ export const eventStyles = {
 
   // Future events
   major_future_events: {
-    static: new Style({
-      image: new Icon({
-        scale: 0.25,
-        src: futureEventsMajorStaticIcon,
-      }),
-    }),
+    // static: new Style({
+    //   image: new Icon({
+    //     src: Icons.majorfutureActiveStatic,
+    //   }),
+    // }),
 
-    hover: new Style({
-      image: new Icon({
-        scale: 0.25,
-        src: futureEventsMajorHoverIcon,
-      }),
-    }),
+    // hover: new Style({
+    //   image: new Icon({
+    //     src: Icons.majorfutureActiveActive,
+    //   }),
+    // }),
 
-    active: new Style({
-      image: new Icon({
-        scale: 0.25,
-        src: futureEventsMajorActiveIcon,
-      }),
-    }),
+    // active: new Style({
+    //   image: new Icon({
+    //     src: Icons.majorfutureActiveActive,
+    //   }),
+    // }),
   },
 
   major_future_events_unread: {

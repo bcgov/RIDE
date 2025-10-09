@@ -22,11 +22,33 @@
     }
   }
 
+  &.inactive {
+    .header {
+      background: #edebe9;
+    }
+  }
+
+  &.cleared {
+    .header {
+      border-top: solid 5px #196323;
+      background: #e9f7eb;
+      color: #196323;
+    }
+    .alert {
+      color: #196323;
+    }
+  }
+
   .header {
     border-top: solid 5px #fcba19;
     background: #fde9c4;
     color: #584215;
-    padding: 1rem;
+
+    .banner {
+      color: #faf9f8;
+      background-color: #2d2d2d;
+      padding: 0.5rem 1rem;
+    }
 
     .icons {
       display: flex;

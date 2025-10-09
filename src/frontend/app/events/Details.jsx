@@ -2,11 +2,10 @@ import { useState, useRef } from 'react';
 
 import Select from 'react-select';
 
-import { FORM_CATEGORIES, FORM_CATEGORY_PHRASE, FORM_PHRASES, FORM_PHRASE_CATEGORY } from "./references";
+import { FORM_CATEGORIES, FORM_CATEGORY_PHRASE, FORM_PHRASES, FORM_PHRASE_CATEGORY, PHRASES_LOOKUP } from "./references";
 import { selectStyle } from '../components/Map/helpers';
 
 export default function Details({ errors, event, dispatch }) {
-
   const catRef = useRef();
   const sitRef = useRef();
 
@@ -14,6 +13,18 @@ export default function Details({ errors, event, dispatch }) {
     <div className="title">
       <p><strong>Details</strong></p>
     </div>
+
+    <div className="row">
+        <select
+          value={event.status}
+         onChange={(e) => dispatch({ type: 'set', value: { status: e.target.value }})}
+        >
+          <option>Active</option>
+          <option>Inactive</option>
+          <option>Cleared</option>
+        </select>
+    </div>
+
     <div className="row">
       <div className={`input ${errors.direction ? 'error' : ''}`}>
         <label>Direction</label>
@@ -65,9 +76,8 @@ export default function Details({ errors, event, dispatch }) {
     <div className={`input ${errors.situation ? 'error' : ''}`}>
       <label>Situation</label>
       <Select
-        name="situation"
         ref={sitRef}
-        defaultValue={event.details.situation}
+        value={[{ value: event.details.situation, label: PHRASES_LOOKUP[event.details.situation] }]}
         placeholder=""
         onChange={(changed, action) => {
           if (action.action === 'clear') { return; }
