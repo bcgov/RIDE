@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from django.views import generic
 from django.views.generic import edit
-
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 # from .forms import EventForm
 from .models import Event, Note
@@ -11,16 +11,18 @@ from .serializers import EventSerializer, NoteSerializer
 
 
 class Events(viewsets.ModelViewSet):
-
     queryset = Event.current.all()
     serializer_class = EventSerializer
     lookup_field = 'id'
+    permission_classes = [IsAuthenticated]
+
 
 class Notes(viewsets.ModelViewSet):
-
     queryset = Note.current.all()
     serializer_class = NoteSerializer
     lookup_field = 'id'
+    permission_classes = [IsAuthenticated]
+
 
 # def home(request):
 

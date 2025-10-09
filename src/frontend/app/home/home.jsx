@@ -5,7 +5,7 @@ import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 // Internal imports
-import { API_HOST } from '../env.js';
+import { API_HOST, DEBUG } from '../env.js';
 import { AuthContext } from '../contexts';
 import { getCookie } from "../shared/helpers";
 import { handleFormSubmit } from "../shared/handlers";
@@ -70,6 +70,19 @@ export default function Home() {
             <input type='hidden' name='next' value={window.location.href} />
             <button type='submit' autoFocus={true}>Sign-in with BCeID</button>
           </form>
+
+          {DEBUG &&
+            <form
+              className={'sign-in-button'}
+              method='post'
+              action={`${API_HOST}/accounts/login/`}
+              onSubmit={handleFormSubmit}>
+
+              <input type='hidden' name='csrfmiddlewaretoken' value={getCookie('csrftoken')} />
+              <input type='hidden' name='next' value={window.location.href} />
+              <button type='submit' autoFocus={true}>Dev Sign-in with Django</button>
+            </form>
+          }
         </div>
 
         <div className={'login-access col-span-4 gap-6'}>
