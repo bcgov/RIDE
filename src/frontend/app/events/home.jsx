@@ -29,7 +29,7 @@ import InfoBox from './InfoBox';
 import Preview from './Preview';
 
 // Styling
-import './home.css';
+import './home.scss';
 
 export function meta() {
   return [

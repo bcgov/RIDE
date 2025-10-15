@@ -5,7 +5,7 @@ import { transform } from 'ol/proj';
 import { MapContext } from '../../contexts';
 import { click, createMap, pointerMove } from './helpers.js';
 
-import './map.css';
+import './map.scss';
 
 export default function Map({ children, dispatch }) {
 

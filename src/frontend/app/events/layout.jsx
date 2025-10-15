@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router';
 
-import './events.css';
+import './events.scss';
 
 export default function Layout() {
   return (
