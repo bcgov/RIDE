@@ -122,8 +122,8 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
   const [ contextMenu, setContextMenu ] = useState([]);
   const [canStartEvent, setCanStartEvent] = useState(true);
   const menuRef = useRef();
-  // const startRef = useRef();
-  // const endRef = useRef();
+  const eventRef = useRef();
+  eventRef.current = event;
 
   useEffect(() => {
     if (!map) { return; }
@@ -132,10 +132,10 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.addLayer(layer);
       map.pins = layer;
       map.set('pins', layer);
-      map.on('click', clickHandler);
+      // map.on('click', clickHandler);
       map.on('contextmenu', contextHandler);
       map.getInteractions().extend([
-        new Drag({ endHandler, menuRef, resetContextMenu: () => setContextMenu([]) })
+        new Drag({ endHandler, menuRef, resetContextMenu: () => setContextMenu([]), dispatch })
       ]);
       map.route = new PinFeature({ style: 'route', geometry: new LineString([])})
       layer.getSource().addFeature(map.route);
@@ -239,6 +239,7 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.start = null;
 
       if (map.end) {
+        console.log('swapping');
         map.end.resetStyle('start');
         map.end.ref = startRef;
         endRef.current.style.visibility = 'hidden';
@@ -247,11 +248,15 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.end = null;
         startRef.current.style.visibility = 'unset';
         map.start.updateInfobox(map);
-        dispatch({ type: 'swap location', source: 'end', value: event.location.end, target: 'start' });
+        dispatch({
+          type: 'swap location',
+          source: 'end',
+          value: eventRef.current.location.end,
+          target: 'start'
+        });
       } else {
         dispatch({ type: 'remove location', key: 'start' });
       }
-
     } else if (feature === map.end) {
       map.pins.getSource().removeFeature(map.end);
       map.end = null;

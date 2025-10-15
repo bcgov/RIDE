@@ -138,7 +138,7 @@ export function createMap() {
   }).then(function (response) {
     response.json().then(function (glStyle) {
       // DBC22-2153
-      glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
+      // glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
 
       // Overrides
       for (const layer of glStyle.layers) {
@@ -187,6 +187,7 @@ export class Drag extends PointerInteraction {
     options = options || {};
     this.endHandler = options.endHandler || (() => {});
     this.menuRef = options.menuRef;
+    this.dispatch = options.dispatch;
     this.resetContextMenu = options.resetContextMenu
 
     /**
@@ -289,11 +290,8 @@ function handleMoveEvent(evt) {
  */
 function handleUpEvent(e) {
   if (e.originalEvent?.button > 0) { return false; } // right or middle click
-  // if (this.feature_.ref.current) {
-  //   this.feature_.ref.current.querySelectorAll('.near').forEach((el) => el.style.visibility = 'hidden');
-  // }
 
-  this.endHandler(e, this.feature_);
+  this.endHandler(e, this.feature_, this.dispatch);
   this.coordinate_ = null;
   if (this.feature_.upHandler) { this.feature_.upHandler(e) }
   this.feature_ = null;

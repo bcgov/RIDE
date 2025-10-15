@@ -62,7 +62,7 @@ export function eventReducer(event, action) {
       return Object.assign({}, event);
     }
     case 'set end': {
-      event.location.end = { ...event.location.end, ...action.value };
+      event.location.end = { ...LOCATION_BLANK, ...event.location.end, ...action.value };
       return Object.assign({}, event);
     }
     case 'set alias': {

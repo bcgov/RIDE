@@ -107,8 +107,8 @@ export default function Home() {
 
       <MapContext.Provider value={{ map, setMap }}>
         <Map dispatch={dispatch}>
-          <Layer name='events' dispatch={dispatch} startRef={startRef} endRef={endRef} />
           <PinLayer event={event} dispatch={dispatch} startRef={startRef} endRef={endRef} />
+          <Layer name='events' event={event} dispatch={dispatch} startRef={startRef} endRef={endRef} />
         </Map>
       </MapContext.Provider>
 

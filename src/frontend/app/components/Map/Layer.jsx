@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useCallback, useContext, useEffect, useState, useRef } from 'react';
 
 import * as turf from '@turf/turf';
 
@@ -102,13 +102,18 @@ function getStyle(event, isRoute=false) {
   return path.join('.');
 }
 
-export default function Layer({ dispatch, startRef, endRef }) {
+export default function Layer({ event, dispatch, startRef, endRef }) {
+
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
   const menuRef = useRef();
+  const eventRef = useRef(); // necessary for early-bound handler to read current prop
+  eventRef.current = event;
 
   const contextHandler = (e) => {
     e.preventDefault();
+    const event = eventRef.current; // updated event prop
+
     const feature = e.map.getFeaturesAtPixel(e.pixel, {
       layerFilter: (layer) => layer.listenForClicks,
     })[0];
@@ -119,8 +124,10 @@ export default function Layer({ dispatch, startRef, endRef }) {
 
     const coordinate = e.coordinate;
     const pixel = e.pixel;
-    const items = [
-      {
+    const items = [];
+
+    if (!event.location.start?.name) {
+      items.push({
         label: 'Create event',
         action: (e) => {
           setContextMenu([]);
@@ -135,8 +142,24 @@ export default function Layer({ dispatch, startRef, endRef }) {
           map.getView().animate({ center: coordinate, duration: 250, easing: linear });
           endHandler({ coordinate, pixel, map, }, map.start, dispatch);
         }
-      },
-    ];
+      });
+    } else if (!event.location.end?.name) {
+      items.push({
+        label: 'Add end point',
+        action: (e) => {
+          setContextMenu([]);
+          map.end = new PinFeature({
+            style: 'end',
+            geometry: new Point(coordinate),
+            ref: endRef,
+            action: 'set end',
+          });
+          map.pins.getSource().addFeature(map.end);
+          map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+          endHandler({ coordinate, pixel, map, }, map.end, dispatch);
+        }
+      });
+    }
 
     if (feature) {
       e.stopPropagation();
@@ -241,11 +264,10 @@ export default function Layer({ dispatch, startRef, endRef }) {
 
         data.forEach((event) => { addEvent(event, map)});
       });
-
     map.on('contextmenu', contextHandler);
   }, [map]);
 
   return <>
-    <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} />
+    <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} myevent={event} />
   </>;
 }

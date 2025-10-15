@@ -181,7 +181,6 @@ class EventSerializer(KeyMoveSerializer):
         return TrafficImpact.objects.filter(id__in=ids, closed=True).count() > 0
 
     def get_last_inactivated(self, obj):
-        print(obj.meta)
         return obj.meta.get('last_inactivated')
 
     def to_internal_value(self, data):
@@ -204,7 +203,6 @@ class EventSerializer(KeyMoveSerializer):
 
         return super().to_internal_value(data)
 
-
     def create(self, validated_data):
         # Notes need to be saved separately since they don't have an actual
         # relation field joining them
@@ -217,8 +215,8 @@ class EventSerializer(KeyMoveSerializer):
 
         return super().create(validated_data)
 
-    def destroy(self, *args, **kwargs):
-        print(self.instance)
+    # def destroy(self, *args, **kwargs):
+    #     print(self.instance)
 
     def get_id(self):
         event = Event.objects.distinct('id').order_by('-id').first()
