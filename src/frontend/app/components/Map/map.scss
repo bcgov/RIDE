@@ -1,6 +1,5 @@
-@import "tailwindcss";
-@import 'ol/ol.css';
-/* @import "./styles/variables"; */
+@use "tailwindcss";
+@use 'ol/ol.css';
 
 .map-container {
   flex: 1;

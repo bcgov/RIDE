@@ -11,7 +11,7 @@ import {
 import { API_HOST } from './env.js';
 import { DataContext } from './contexts';
 
-import "./app.css";
+import "./app.scss";
 
 export const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@use "tailwindcss";
 
 .cameras-home {
   height: 100%;
