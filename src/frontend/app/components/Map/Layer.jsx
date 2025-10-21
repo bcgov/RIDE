@@ -161,7 +161,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
       });
     }
 
-    if (feature) {
+    if (feature && feature !== map.location) {
       e.stopPropagation();
       const map = e.map; // necessary to bind map for callback below
 

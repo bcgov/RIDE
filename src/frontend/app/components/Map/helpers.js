@@ -38,6 +38,7 @@ export function pointerMove(evt) {
   const feature = evt.map.getFeaturesAtPixel(evt.pixel, {
     layerFilter: (layer) => layer.listenForHover,
   })[0];
+  if (feature?.noHover) { return; }
   if (!feature || !feature.styleState) {
     if (evt.map.hoveredFeature) {
       evt.map.hoveredFeature.hovered = false;
@@ -64,6 +65,7 @@ export function click(evt, dispatch) {
   const feature = evt.map.getFeaturesAtPixel(evt.pixel,{
     layerFilter: (layer) => layer.listenForClicks,
   })[0];
+  if (feature?.noSelect) { return; }
   if (!feature || !feature.styleState) {
     if (evt.map.selectedFeature) {  // deselect existing selection
       evt.map.selectedFeature.selected = false;
@@ -236,6 +238,7 @@ function handleDownEvent(evt) {
   })[0];
 
   if (feature) {
+    if (feature.noSelect) { return false; }
     map.route?.clear();
     this.coordinate_ = evt.coordinate;
     feature.getGeometry().setCoordinates(evt.coordinate);
@@ -274,6 +277,7 @@ function handleMoveEvent(evt) {
     })[0];
     const element = evt.map.getTargetElement();
     if (feature) {
+      if (feature.noHover) { return; }
       if (element.style.cursor != this.cursor_) {
         this.previousCursor_ = element.style.cursor;
         element.style.cursor = this.cursor_;
@@ -656,3 +660,86 @@ export function get(obj, path, defaultValue=undefined) {
 };
 
 export const coordsMatch = (a, b) => (a[0] === b[0] && a[1] === b[1]);
+
+class CustomError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name; // Set the name of the error to the class name
+    this.message = message; // Set the error message
+    this.stack = (new Error()).stack; // Generate stack trace
+  }
+}
+
+export class NetworkError extends CustomError {
+  constructor() {
+    super("Network error");
+  }
+}
+
+export class NotFoundError extends CustomError {
+  constructor() {
+    super("Not found error");
+  }
+}
+
+export class ServerError extends CustomError {
+  constructor() {
+    super("Server error");
+  }
+}
+
+export const request = (url, params = {}, headers = {}, include_credentials = true, method = "GET") => {
+  const options = {
+    headers,
+    method,
+  };
+
+  if (include_credentials) {
+    options.credentials = 'include';
+  }
+
+  if ("GET" === method) {
+    url += "?" + new URLSearchParams(params).toString();
+  } else {
+    options.body = JSON.stringify(params);
+  }
+
+  const result = fetch(`${url}`, options).then((response) => {
+    const statusCode = response.status.toString();
+
+    // Raise error for 4xx-5xx status codes
+    if (statusCode === '404') {
+      throw new NotFoundError();
+    } else if (statusCode.startsWith('4')) {
+      throw new NetworkError();
+    } else if (statusCode.startsWith('5')) {
+      throw new ServerError();
+    }
+
+    // Read the response body as text
+    return response.text().then((text) => {
+      // Check if the response body is empty
+      if (!text) {
+        return {}; // Return an empty object or suitable default value
+      }
+
+      return JSON.parse(text);
+    });
+
+  }).catch((error) => {
+    // throw network error on failed fetches
+    if (error instanceof TypeError && (
+      error.message.includes("Failed to fetch") ||  // Chrome
+      error.message.includes("Load failed") ||  // Safari
+      error.message.includes("NetworkError") // Firefox
+    )) {
+      throw new NetworkError();
+
+    // Propagate the error
+    } else {
+      throw error;
+    }
+  });
+
+  return result;
+};
