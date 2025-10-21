@@ -139,6 +139,13 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       ]);
       map.route = new PinFeature({ style: 'route', geometry: new LineString([])})
       layer.getSource().addFeature(map.route);
+      map.location = new PinFeature({
+        style: 'location',
+        geometry: new Point([]),
+      });
+      map.location.noHover = true;
+      map.location.noSelect = true;
+      layer.getSource().addFeature(map.location);
     }
   });
 

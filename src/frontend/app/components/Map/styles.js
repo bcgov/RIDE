@@ -111,6 +111,39 @@ export const pinStartActiveStyle = new Style({
   text: startTextStyle,
 });
 
+export const pinLocationNormalStyle = new Style({
+  image: new Icon({
+    src:'/pin-location.svg',
+    width: 32,
+    height: 32,
+    opacity: 0.7,
+    displacement: [0, 16],
+  }),
+  text: startTextStyle,
+});
+
+export const pinLocationHoverStyle = new Style({
+  image: new Icon({
+    src:'/pin-location.svg',
+    width: 32,
+    height: 32,
+    opacity: 1,
+    displacement: [0, 16],
+  }),
+  text: startTextStyle,
+});
+
+export const pinLocationActiveStyle = new Style({
+  image: new Icon({
+    src:'/pin-location.svg',
+    width: 32,
+    height: 32,
+    opacity: 0.9,
+    displacement: [0, 16],
+  }),
+  text: startTextStyle,
+});
+
 export const pinEndNormalStyle = new Style({
   image: new Icon({
     src:'/pin-end.svg',
@@ -170,6 +203,9 @@ export default {
     },
     end: {
       normal: pinEndNormalStyle, active: pinEndActiveStyle, hover: pinEndHoverStyle,
+    },
+    location: {
+      normal: pinLocationNormalStyle, active: pinLocationActiveStyle, hover: pinLocationHoverStyle,
     },
     route: {
         normal: routeNormalStyle, active: routeActiveStyle, hover: routeHoverStyle,

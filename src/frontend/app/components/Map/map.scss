@@ -37,4 +37,17 @@
     transition: all 0.25s;
   }
 
+  .geosearch {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    width: 300px;
+
+    input {
+      border: solid 1px grey;
+      border-radius: 4px;
+      background-color: white;
+    }
+  }
 }
