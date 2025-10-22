@@ -130,6 +130,7 @@ export default function Home() {
       const lowerSearchText = searchText.toLowerCase();
       filteredUsers = filteredUsers.filter(user =>
         user.social_username && user.social_username.toLowerCase().includes(lowerSearchText) ||
+        user.username.toLowerCase().includes(lowerSearchText) ||
         `${user.first_name} ${user.last_name}`.toLowerCase().includes(lowerSearchText) ||
         user.email.toLowerCase().includes(lowerSearchText)
       );
@@ -202,7 +203,7 @@ export default function Home() {
           {!!processedUsers.length && processedUsers.map((user) => (
             <div key={user.id} className='user-row'>
               <p>{`${user.first_name} ${user.last_name}`}</p>
-              <p>{user.social_username}</p>
+              <p>{user.social_username || user.username}</p>
               <p>{user.email}</p>
               <p>{user.group}</p>
               <p>{getUserRole(user)}</p>

@@ -5,6 +5,7 @@ import { getTransform } from 'ol/proj';
 import Conditions from './Conditions.jsx';
 import Details from './Details.jsx';
 import Delays from './Delays.jsx';
+import Scheduled from './Schedule.jsx';
 import EventTiming from './Timing.jsx';
 import Impacts from './Impacts.jsx';
 import InternalNotes from './Internal.jsx';
@@ -21,6 +22,7 @@ import {
   g2ll,
 } from "../components/Map/helpers";
 import { addEvent } from '../components/Map/Layer.jsx';
+import { getCookie } from './shared.jsx';
 
 import './forms.css';
 
@@ -37,22 +39,26 @@ function getLater(severity) {
   return null;
 }
 
+// SonarQube exemption from javascript:S2245 (weak encryption) because random()
+// not used for security purposes (id is used for React keys)
+const id = () => Math.random().toString(36).substr(2, 9); // NOSONAR
+
+const numDaysOn = (schedule) => (
+  days_of_the_week.reduce((numOn, day) => numOn + (schedule[day] ? 1 : 0), 0)
+)
+
+const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
 export function eventReducer(event, action) {
   switch (action.type) {
     case 'set': {
       if (!Array.isArray(action.value)) { action.value = [action.value]; }
       action.value.forEach((value) => {
         if (value.section) {
-          event[value.section] = {
-            ...event[value.section],
-            ...value,
-          }
+          event[value.section] = { ...event[value.section], ...value,}
           delete event[value.section].section;
         } else {
-          event = {
-            ...event,
-            ...value,
-          }
+          event = { ...event, ...value, }
         }
       });
       return Object.assign({}, event);
@@ -88,6 +94,47 @@ export function eventReducer(event, action) {
       return Object.assign({}, event);
     }
 
+    case 'toggle days': {
+      const schedule = structuredClone(event.timing.schedules[action.index]);
+      delete schedule.error;
+      const days = Array.isArray(action.days) ? action.days : [action.days];
+      for (const day of days) {
+        schedule[day] = action.value;
+      }
+      if (numDaysOn(schedule) > 0) {
+        event.timing.schedules[action.index] = schedule;
+      } else {
+        event.timing.schedules[action.index].error = 'Must have at least one day selected';
+      }
+      return Object.assign({}, event);
+    }
+
+    case 'set days': {
+      const schedule = event.timing.schedules[action.index];
+      for (const day of days_of_the_week) { schedule[day] = false; }
+      const days = Array.isArray(action.days) ? action.days : [action.days];
+      for (const day of days) { schedule[day] = true; }
+      return Object.assign({}, event);
+    }
+
+    case 'set schedule': {
+      const schedule = event.timing.schedules[action.index];
+      event.timing.schedules[action.index] = { ...schedule, ...action.value };
+      return Object.assign({}, event);
+    }
+
+    case 'remove schedule': {
+      event.timing.schedules = event.timing.schedules.filter((s) => s.id !== action.id);
+      return Object.assign({}, event);
+    }
+
+    case 'add schedule': {
+      if (event.timing.schedules.length === action.currentLength) {
+        event.timing.schedules.push(addId(structuredClone(SCHEDULE_BLANK)));
+      }
+      return Object.assign({}, event);
+    }
+
     case 'set severity': {
       event.details.severity = action.value;
       if (event.timing.nextUpdateIsDefault) {
@@ -95,12 +142,14 @@ export function eventReducer(event, action) {
       }
       return Object.assign({}, event);
     }
+
     case 'set category': {
       if (action.value === action.previous) { return event; }
       event.details.category = action.value;
       event.details.situation = null;
       return Object.assign({}, event);
     }
+
     case 'set situation': {
       event.details.situation = action.value;
       if (!event.details.category) {
@@ -121,12 +170,20 @@ export function eventReducer(event, action) {
       if (!found) {
         items.push(action.value);
       }
+      if (action.section === 'impacts') {
+        event.is_closure = items.filter((item) => item.closed).length > 0;
+      }
       return Object.assign({}, event, {[action.section]: items});
     }
+
     case 'remove from list': {
+      const items = event[action.section].filter((item) => item.id !== action.id);
+      if (action.section === 'impacts') {
+        event.is_closure = items.filter((item) => item.closed).length > 0;
+      }
       return {
         ...event,
-        [action.section]: event[action.section].filter((item) => item.id !== action.id)
+        [action.section]: items,
       };
     }
     case 'update item': {
@@ -139,10 +196,16 @@ export function eventReducer(event, action) {
       })
       return Object.assign({}, event, {[action.section]: items});
     }
+
     case 'change order': {
-      event[action.section] = action.value;
+      let obj = event;
+      let segments = action.section.split('.');
+      const final = segments.pop();
+      for (const segment of segments) { obj = obj[segment]; }
+      obj[final] = action.value;
       return Object.assign({}, event);
     }
+
     case 'set additional': {
       return { ...event, additional: action.value };
     }
@@ -208,13 +271,31 @@ const LOCATION_BLANK = {
   nearby: [],
 };
 
+const SCHEDULE_BLANK = {
+  type: 'week',
+  allDay: true,
+  startTime: null,
+  endTime: null,
+  mon: true,
+  tue: true,
+  wed: true,
+  thu: true,
+  fri: true,
+  sat: true,
+  sun: true,
+}
+
+function addId(obj) {
+  obj.id = id();
+  return obj;
+}
 export function getInitialEvent() {
   return {
     showPreview: true,
     showForm: true,
     id: null,
     status: 'Active',
-    type: 'Incident',
+    type: 'Planned event',
     waypoints: [],
     location: {
       start: structuredClone(LOCATION_BLANK),
@@ -227,6 +308,7 @@ export function getInitialEvent() {
       situation: null,
     },
     impacts: [],
+    is_closure: false,
     delays: {
       amount: 0,
       unit: 'minutes',
@@ -239,6 +321,11 @@ export function getInitialEvent() {
       nextUpdateIsDefault: true,
       endTime: null,
       endTimeTZ: null,
+      ongoing: true,
+      startTime: null,
+      schedules: [
+        addId(structuredClone(SCHEDULE_BLANK)),
+      ],
     },
     additional: '',
     external: { url: '' },
@@ -247,7 +334,7 @@ export function getInitialEvent() {
 }
 
 
-export default function EventForm({ map, preview, cancel, event, dispatch, goToFunc }) {
+export default function EventForm({ map, preview, cancel, event, dispatch, goToFunc, setMessage }) {
 
   const [errors, setErrors] = useState({});
 
@@ -287,23 +374,56 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
     };
 
     if (form.type !== 'condition') {
-      if (!form.details.direction) { err.direction = true; }
-      if (!form.details.severity) { err.severity = true; }
-      if (!form.details.category) { err.category = true; }
-      if (!form.details.situation) { err.situation = true; }
+      if (!form.details.direction) { err.direction = 'You must set a direction'; }
+      if (!form.details.severity) { err.severity = 'You must set a severity'; }
+      if (!form.details.category) { err.category = 'You must set a category'; }
+      if (!form.details.situation) { err.situation = 'You must set a situation'; }
 
       if (form.impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'; }
     }
 
-    if (!form.timing.nextUpdate && !form.timing.endTime) {
-      err['Manage Timing By'] = 'Must set one or both';
-    } else {
-      if (form.timing.nextUpdate) {
-        form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+    if (form.type === 'Incident') {
+      if (!form.timing.nextUpdate && !form.timing.endTime) {
+        err['Manage Timing By'] = 'Must set one or both';
+      } else {
+        if (form.timing.nextUpdate) {
+          form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+        }
+        if (form.timing.endTime) {
+          form.timing.endTime = new Date(form.timing.endTime).toISOString();
+        }
       }
-      if (form.timing.endTime) {
-        form.timing.endTime = new Date(form.timing.endTime).toISOString();
+      form.timing.startTime = null;
+      form.timing.schedules = [];
+    } else if (form.type === 'Planned event') {
+      form.timing.nextUpdate = null;
+      if (!form.timing.startTime) {
+        err.startTime = 'Must set start date';
       }
+      if (!form.timing.ongoing && !form.timing.endTime) {
+        err.endTime = 'Must set end date';
+      }
+      if (form.timing.startTime && form.timing.endTime) {
+        const start = new Date(form.timing.startTime);
+        const end = new Date(form.timing.endTime);
+        if (end < start) {
+          err.inEffect = 'End date cannot be earlier than start date';
+        }
+      }
+
+      const scheduleErrors = form.timing.schedules.map((schedule) => {
+        const errors = {};
+        if (!schedule.allDay) {
+          if (!schedule.startTime) {
+            errors.startTime = 'Must set start time';
+          }
+          if (!schedule.endTime) {
+            errors.endTime = 'Must set end time';
+          }
+        }
+        return Object.keys(errors).length ? errors : null;
+      }).filter((el) => el);
+      if (scheduleErrors.length > 0) { err.schedules = scheduleErrors; }
     }
 
     // submitting existing notes with form gets an error because notes are
@@ -318,16 +438,19 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
         method: event.id ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
         },
+        credentials: 'include',
         body: JSON.stringify(form),
       }).then(response => response.json())
         .then(data => {
           cancel();
           addEvent(data, map);
           dispatch({ type: 'reset form' });
+          setMessage(`${event.type} successfully created`)
         });
     } else {
-      console.log(err);
+      console.log('Errors', err);
     }
   }
 
@@ -397,9 +520,15 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
               </div>
             }
 
-            { event.type &&
+            { event.type && event.type === 'Incident' &&
               <div className="section timing">
                 <EventTiming errors={errors} event={event} dispatch={dispatch} />
+              </div>
+            }
+
+            { event.type && event.type === 'Planned event' &&
+              <div className="section scheduled">
+                <Scheduled errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 

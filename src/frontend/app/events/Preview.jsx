@@ -1,5 +1,8 @@
+import { format } from 'date-fns';
+
 import './Preview.css';
 import { PHRASES_LOOKUP, TrafficImpacts } from './references';
+import { desc } from './Schedule';
 
 import { getIcon } from './icons';
 
@@ -8,6 +11,7 @@ const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   return acc;
 }, {});
 
+const sd = (date) => date ? format(new Date(date), 'MMM d, y') : '';
 
 export default function Preview({ event, dispatch }) {
   const start = event.location.start || {};
@@ -116,6 +120,29 @@ export default function Preview({ event, dispatch }) {
           </>
         }
 
+        { event.type === 'Planned event' &&
+          <>
+            <h5>In effect</h5>
+            <div className="additional">
+              <p>
+                { event.timing.startTime && `From ${sd(event.timing.startTime)}`}
+                { (event.timing.ongoing || (!event.timing.startTime && event.timing.endTime))
+                  ? ' until '
+                  : (sd(event.timing.endTime) && ' to ')
+                }
+                { event.timing.ongoing
+                  ? 'further notice'
+                  : sd(event.timing.endTime)}
+              </p>
+              <ul className='inner'>
+                { event.timing.schedules.map((schedule) => (
+                  <li key={schedule.id}>{desc(schedule)}</li>
+                ))}
+              </ul>
+            </div>
+          </>
+        }
+
         { event.restrictions.length > 0 &&
           <>
             <h5>Restrictions</h5>
@@ -150,7 +177,7 @@ export default function Preview({ event, dispatch }) {
           </>
         }
 
-        { event.timing.endTime &&
+        { event.type === 'Incident' && event.timing.endTime &&
           <>
             <h5>In effect until</h5>
             <ul>
@@ -160,14 +187,18 @@ export default function Preview({ event, dispatch }) {
         }
 
         <div className="timing">
-          <div className="time">
-            <strong>Last updated</strong><br />
-            {!isNaN(lastUpdated) && lastUpdated.toLocaleString()}
-          </div>
-          <div className="time">
-            <strong>Next update</strong><br />
-            {!isNaN(nextUpdate) && nextUpdate.toLocaleString()}
-          </div>
+          { !isNaN(lastUpdated) &&
+            <div className="time">
+              <strong>Last updated</strong><br />
+              {lastUpdated.toLocaleString()}
+            </div>
+          }
+          { event.type === 'Incident' &&
+            <div className="time">
+              <strong>Next update</strong><br />
+              {!isNaN(nextUpdate) && nextUpdate.toLocaleString()}
+            </div>
+          }
         </div>
       </div>
 

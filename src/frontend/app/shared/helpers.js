@@ -32,16 +32,23 @@ export class ServerError extends CustomError {
   }
 }
 
-const request = (url, params = {}, headers = {
+const DEFAULT_HEADERS = {
   'Accept': 'application/json',
   'Content-Type': 'application/json',
-  'X-CSRFToken': getCookie('csrftoken')
+};
 
-}, include_credentials = true, method = "GET") => {
-  const options = {
-    headers,
-    method,
+const request = (url, params={}, headers={}, include_credentials=true, method="GET") => {
+  // caller submitted headers overwrite defaults when present
+  headers = {
+    ...DEFAULT_HEADERS,
+    ...(headers || {})
   };
+
+  if (URL.parse(url).hostname === location.hostname) {
+    headers['X-CSRFToken'] = getCookie('csrftoken');
+  }
+
+  const options = { headers, method, };
 
   if (include_credentials) {
     options.credentials = 'include';
@@ -53,7 +60,7 @@ const request = (url, params = {}, headers = {
     options.body = JSON.stringify(params);
   }
 
-  const result = fetch(`${url}`, options).then((response) => {
+  const result = fetch(url, options).then((response) => {
     const statusCode = response.status.toString();
 
     // Raise error for 4xx-5xx status codes

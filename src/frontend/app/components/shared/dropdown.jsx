@@ -44,7 +44,7 @@ export default function RIDEDropdown(props) {
                     handler(item);
                   }
                 }}>
-                  {item.toString()}
+                  {item.name || item.toString()}
                 </a>
               </MenuItem>
             ))}

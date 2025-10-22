@@ -66,3 +66,11 @@ if os.name == 'nt':
     GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')
     GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
     PROJ_LIB = env('PROJ_LIB')
+
+
+# Django Rest Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}

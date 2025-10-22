@@ -9,20 +9,10 @@ export default function Details({ errors, event, dispatch }) {
   const catRef = useRef();
   const sitRef = useRef();
 
+  const hasErrors = !!(errors.direction || errors.severity || errors.category || errors.situation);
   return <>
-    <div className="title">
+    <div className={`title ${hasErrors && 'error'}`}>
       <p><strong>Details</strong></p>
-    </div>
-
-    <div className="row">
-        <select
-          value={event.status}
-         onChange={(e) => dispatch({ type: 'set', value: { status: e.target.value }})}
-        >
-          <option>Active</option>
-          <option>Inactive</option>
-          <option>Cleared</option>
-        </select>
     </div>
 
     <div className="row">
@@ -57,7 +47,10 @@ export default function Details({ errors, event, dispatch }) {
     </div>
 
     <div className={`input ${errors.category ? 'error' : ''}`} style={{marginBottom: '0.5rem'}}>
-      <label>Category</label>
+      <label>
+        Category
+        <span className="error-message">{errors?.category}</span>
+      </label>
       <Select
         ref={catRef}
         value={[{ value: event.details.category, label: event.details.category }]}
@@ -74,7 +67,10 @@ export default function Details({ errors, event, dispatch }) {
     </div>
 
     <div className={`input ${errors.situation ? 'error' : ''}`}>
-      <label>Situation</label>
+      <label>
+        Situation
+        <span className="error-message">{errors?.situation}</span>
+      </label>
       <Select
         ref={sitRef}
         value={[{ value: event.details.situation, label: PHRASES_LOOKUP[event.details.situation] }]}

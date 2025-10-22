@@ -1,0 +1,27 @@
+@use "../styles/variables.scss" as *;
+
+.message {
+  position: absolute;
+  bottom: 100px;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+
+  .background {
+    background: $Type-Primary;
+    border-radius: 8px;
+    width: 25rem;
+    color: $Grey10;
+    display: flex;
+    padding: 0.5rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    .text {
+      flex: 1;
+    }
+
+
+  }
+
+}

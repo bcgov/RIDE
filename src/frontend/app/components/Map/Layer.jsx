@@ -21,6 +21,7 @@ import { getInitialEvent } from '../../events/forms';
 import { API_HOST } from '../../env.js';
 import { getIcon } from '../../events/icons';
 import { endHandler } from './PinLayer';
+import { patch } from '../../shared/helpers';
 
 
 export function addEvent(event, map) {
@@ -143,7 +144,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
           endHandler({ coordinate, pixel, map, }, map.start, dispatch);
         }
       });
-    } else if (!event.location.end?.name) {
+    } else if (!event.location.end?.name && !feature) {
       items.push({
         label: 'Add end point',
         action: (e) => {
@@ -180,43 +181,43 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
             setContextMenu([]);
             // dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: true });
           }
-        },
-        {
+        }
+      ]);
+
+      if (feature.get('raw').status === 'Active') {
+        items.push({
           label: 'Clear event',
           action: (e) => {
             setContextMenu([]);
             const event = feature.get('raw');
-            fetch(`http://localhost:8000/api/events/${event.id}`, {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ status: 'Inactive' }),
-            }).then((response) => response.json())
-              .then((event) => {
+            patch(
+              `http://localhost:8000/api/events/${event.id}`,
+              { status: 'Inactive' },
+            ).then((event) => {
                 feature.set('raw', event);
                 dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
               });
           }
-        },
-        {
+        });
+      } else {
+        items.push({
           label: 'Unclear event',
+          debugging: true,
           action: (e) => {
             setContextMenu([]);
             const event = feature.get('raw');
-            fetch(`http://localhost:8000/api/events/${event.id}`, {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ status: 'Active' }),
-            }).then((response) => response.json())
-              .then((event) => {
+            patch(
+              `http://localhost:8000/api/events/${event.id}`,
+              { status: 'Active' },
+            ).then((event) => {
                 feature.set('raw', event);
                 dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
               });
           }
-        },
+        });
+      }
+
+      items.push(...[
         {
           label: 'Dump feature to console',
           debugging: true,
@@ -235,6 +236,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
         },
       ]);
     }
+
     setContextMenu(items);
   };
 
