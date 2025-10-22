@@ -171,6 +171,7 @@ class OrderedListField(models.JSONField):
     another model or contained extra data.  Order is always preserved.
     '''
 
+
 class Event(VersionedModel):
 
     meta = models.JSONField(default=dict)
@@ -187,14 +188,16 @@ class Event(VersionedModel):
     category = models.CharField(blank=True, null=True)
     situation = models.PositiveIntegerField(default=0)
 
-    impacts = OrderedListField()
-    restrictions = OrderedListField()
-    conditions = OrderedListField()
+    impacts = OrderedListField(default=list)
+    restrictions = OrderedListField(default=list)
+    conditions = OrderedListField(default=list)
+    schedules = OrderedListField(default=list)
 
     delay_amount = models.PositiveIntegerField(default=0)
     delay_unit = models.CharField(default='minutes')
 
     next_update = models.DateTimeField(null=True)
+    start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 
     additional = models.TextField(blank=True, null=True)

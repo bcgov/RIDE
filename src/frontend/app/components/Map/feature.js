@@ -3,9 +3,19 @@ import { Circle, Fill, Icon, Stroke, Style } from 'ol/style';
 
 import Styles, { normalStyle, hoverStyle, activeStyle } from './styles';
 import * as eStyles from '../../events/featureStyleDefinitions';
-import { get } from './helpers';
 import { getIcon } from '../../events/icons';
 
+
+
+function get(obj, path, defaultValue=undefined) {
+  const travel = regexp =>
+    String.prototype.split
+      .call(path, regexp)
+      .filter(Boolean)
+      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+  const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+  return result === undefined || result === obj ? defaultValue : result;
+};
 
 export default class RideFeature extends Feature {
   hovered = false;

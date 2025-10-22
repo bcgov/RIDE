@@ -165,7 +165,9 @@ class EventSerializer(KeyMoveSerializer):
             'delays.amount': 'delay_amount',
             'delays.unit': 'delay_unit',
             'timing.nextUpdate': 'next_update',
+            'timing.startTime': 'start_time',
             'timing.endTime': 'end_time',
+            'timing.schedules': 'schedules',
             'external.url': 'link',
         }
 

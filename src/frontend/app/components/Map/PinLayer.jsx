@@ -153,7 +153,7 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
   useEffect(() => {
     if (!map) { return; }
 
-    if (event.location.start?.name) { // start location but no pin
+    if (event.location.start?.name && event.showForm) { // start location but no pin
       const coords = ll2g(event.location.start.coords);
       if (map.start) {
         map.start.getGeometry().setCoordinates(coords);

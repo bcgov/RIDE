@@ -27,6 +27,7 @@ import ContextMenu from './ContextMenu';
 import EventForm, { eventReducer, getInitialEvent } from './forms';
 import InfoBox from './InfoBox';
 import Preview from './Preview';
+import Message from './Message';
 
 // Styling
 import './home.scss';
@@ -55,6 +56,7 @@ export default function Home() {
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
+  const [ message, setMessage ] = useState('');
 
   // Effects
   useEffect(() => {
@@ -101,6 +103,7 @@ export default function Home() {
             event={event}
             dispatch={dispatch}
             goToFunc={centerMap}
+            setMessage={setMessage}
           />
         </div>
       }
@@ -115,6 +118,7 @@ export default function Home() {
       { event.location.start.name && event.showPreview &&
         <Preview dispatch={dispatch} preview={() => setPreview(!preview)} event={event} />
       }
+      <Message message={message} setMessage={setMessage} />
     </div>
   );
 }

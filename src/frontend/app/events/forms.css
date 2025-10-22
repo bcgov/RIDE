@@ -98,12 +98,15 @@
       margin-bottom: 0.5rem;
 
       &.error {
-        color: red;
+        p {
 
-        .error-message {
-          display: inline-block;
-          font-size: 80%;
-          margin-left: 3rem;
+          color: red;
+
+          .error-message {
+            display: inline-block;
+            font-size: 80%;
+            margin-left: 3rem;
+          }
         }
       }
     }
@@ -125,6 +128,7 @@
       div {
         flex: 1;
       }
+
     }
 
     .toggleable {
@@ -139,6 +143,18 @@
         display: block;
         font-size: 0.675rem;
         margin-bottom: 0.25rem;
+        &.error {
+          color: red;
+          font-weight: bold;
+        }
+
+        .error-message {
+          display: inline-block;
+          margin-left: 2rem;
+          color: red;
+          font-weight: normal;
+        }
+
       }
 
       input, select {
@@ -171,7 +187,7 @@
       font-weight: bold;
       padding: 0 0.25rem;
       display: grid;
-      align-items: center;
+      align-items: top;
 
       &.delete {
         color: red;
@@ -264,7 +280,49 @@
       }
     }
 
-    &.impacts, &.conditions {
+    &.scheduled {
+      .draggable {
+        border: solid 1px black;
+        background-color: white;
+        border-radius: 8px;
+        padding: 0.5rem;
+
+        .row {
+          margin-bottom: 0;
+          .row-title {
+            &.errors {
+              color: red;
+            }
+          }
+        }
+
+        .handle {
+          margin-right: 0.5rem;
+        }
+      }
+
+      button.day {
+        font-size: 85%;
+        font-weight: bold;
+        border: solid 2px black;
+        border-radius: 10px;
+        padding: 0 0.5rem;
+
+        &.checked {
+          color: white;
+          background-color: black;
+        }
+      }
+
+      button.shortcut {
+        font-size: 65%;
+        font-weight: bold;
+        text-decoration: underline;
+        margin-right: 1rem;
+      }
+    }
+
+    &.impacts, &.conditions, &.scheduled {
       .draggable {
         .control {
           flex-direction: column;

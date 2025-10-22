@@ -17,11 +17,10 @@ import * as turf from '@turf/turf';
 
 import overrides from './overrides.js';
 import RideFeature from './feature.js';
+import { BASE_MAP_URL, MAP_STYLE_URL, ROUTER_CLIENT_ID } from '../../env.js';
+import { get, post } from '../../shared/helpers'
 
 import { dotStyle, dotStyle2, lineStyle } from './styles.js';
-
-window.BASE_MAP = 'https://tiles.arcgis.com/tiles/ubm4tcTYICKBpist/arcgis/rest/services/BC_BASEMAP_20240307/VectorTileServer/tile/{z}/{y}/{x}.pbf';
-window.MAP_STYLE = 'https://www.arcgis.com/sharing/rest/content/items/b1624fea73bd46c681fab55be53d96ae/resources/styles/root.json';
 
 proj4.defs([
   ["EPSG:3005", "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"],
@@ -96,7 +95,7 @@ export function click(evt, dispatch) {
 export function createMap() {
   const tileSource = new VectorTileSource({
     format: new MVT({layerName: 'mvt:layer'}), // layername required for ol-mapbox-style 13+
-    url: window.BASE_MAP,
+    url: BASE_MAP_URL,
   });
 
   // base tile map layer
@@ -134,33 +133,28 @@ export function createMap() {
   window.view = view;
 
   // Apply the basemap style from the arcgis resource
-  fetch(window.MAP_STYLE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  }).then(function (response) {
-    response.json().then(function (glStyle) {
-      // DBC22-2153
-      // glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
+  post(MAP_STYLE_URL).then(function (glStyle) {
+    // DBC22-2153
+    glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
 
-      // Overrides
-      for (const layer of glStyle.layers) {
-        overrides.merge(layer, overrides[layer.id] || {});
-      }
+    // Overrides
+    for (const layer of glStyle.layers) {
+      overrides.merge(layer, overrides[layer.id] || {});
+    }
 
-      // clone the basemap style so we can override the style layers,
-      // filtering out everything that isn't a highway symbol.
-      const symbolsStyle = {
-        ...glStyle,
-        layers: glStyle.layers.filter((layer) => (
-          layer.id.startsWith('TRANSPORTATION/DRA/Hwy Symbols') ||
-          layer.id.startsWith('TRANSPORTATION/DRA/Road Names')
-        )),
-      };
+    // clone the basemap style so we can override the style layers,
+    // filtering out everything that isn't a highway symbol.
+    const symbolsStyle = {
+      ...glStyle,
+      layers: glStyle.layers.filter((layer) => (
+        layer.id.startsWith('TRANSPORTATION/DRA/Hwy Symbols') ||
+        layer.id.startsWith('TRANSPORTATION/DRA/Road Names')
+      )),
+    };
 
-      // console.log(glStyle);
-      applyStyle(vectorLayer, glStyle, 'esri');
-      applyStyle(symbolLayer, symbolsStyle, 'esri');
-    });
+    // console.log(glStyle);
+    applyStyle(vectorLayer, glStyle, 'esri');
+    applyStyle(symbolLayer, symbolsStyle, 'esri');
   });
 
   // create map
@@ -469,7 +463,7 @@ export async function getNearby(coords) {
   try {
     const response = await fetch(apiUrl, {mode: 'cors'});
     const data = await response.json();
-
+console.log(data);
     const results = await filterByTypes(data.features, PopulationCenterTypes, coords);
     if (results.length < 5) {
       results.push(... await filterByTypes(data.features, ['', 'Community'], coords));
@@ -489,7 +483,7 @@ export async function getNearby(coords) {
 export async function fetchRoute(points) {
   const pointString = `${points[0]},${points[1]},${points[2]},${points[3]}`;
   const baseUrl = "https://router.api.gov.bc.ca/directions.json";
-  const apiKey = "6097f62f6a8144edae53c59fc7c12351";
+  const apiKey = ROUTER_CLIENT_ID;
   const apiUrl = `${baseUrl}?points=${encodeURIComponent(pointString)}&criteria=fastest&roundTrip=false&correctSide=false&apikey=${apiKey}`;
 
   try {
@@ -647,17 +641,6 @@ function multi(l, ends, func = fun) {
   }
   return all;
 }
-
-
-export function get(obj, path, defaultValue=undefined) {
-  const travel = regexp =>
-    String.prototype.split
-      .call(path, regexp)
-      .filter(Boolean)
-      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
-  const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
-  return result === undefined || result === obj ? defaultValue : result;
-};
 
 export const coordsMatch = (a, b) => (a[0] === b[0] && a[1] === b[1]);
 

@@ -102,6 +102,20 @@
         text-indent: -30px;
         margin-left: 30px;
       }
+
+      ul.inner {
+        list-style: disc;
+        box-shadow: none;
+        padding: 0.25rem 0 0 2rem;
+
+        li {
+          text-indent: 0;
+          margin-left: 0;
+          &+li {
+            margin-top: 0.25rem;
+          }
+        }
+      }
     }
 
     .additional {
