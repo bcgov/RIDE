@@ -11,6 +11,7 @@ function getTz(datetime) {
 }
 
 function normalized(datestring) {
+  if (!datestring) { return ''; }
   const a = new Date(datestring)
   if (Number(a) === 0) { return ''; }
   const b = new Date(a - a.getTimezoneOffset() * 60000);

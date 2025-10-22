@@ -15,17 +15,6 @@ export default function Details({ errors, event, dispatch }) {
     </div>
 
     <div className="row">
-        <select
-          value={event.status}
-         onChange={(e) => dispatch({ type: 'set', value: { status: e.target.value }})}
-        >
-          <option>Active</option>
-          <option>Inactive</option>
-          <option>Cleared</option>
-        </select>
-    </div>
-
-    <div className="row">
       <div className={`input ${errors.direction ? 'error' : ''}`}>
         <label>Direction</label>
         <select

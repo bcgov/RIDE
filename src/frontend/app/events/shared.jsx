@@ -30,7 +30,7 @@ import {
  * state is maintained by the parent component, with state-changing callbacks
  * passed in as props.
  */
-function DraggableRow({ children, id, isDraggable, remove }) {
+function DraggableRow({ children, id, isDraggable, remove, noX }) {
   const {
     attributes,
     listeners,
@@ -62,10 +62,11 @@ function DraggableRow({ children, id, isDraggable, remove }) {
         { children }
       </div>
 
-      <div
-        className={`handle delete ${ isDraggable ? '' : 'inactive' }`}
-        onClick={() => remove(id)}
-      >×</div>
+      { !noX && <div
+          className={`handle delete ${ isDraggable ? '' : 'inactive' }`}
+          onClick={() => remove(id)}
+        >×</div>
+      }
     </div>
   );
 }
@@ -78,12 +79,7 @@ function DraggableRow({ children, id, isDraggable, remove }) {
  */
 export function DraggableRows({
   label, limit=5, itemsSource, Child, errors, callback, dispatch, section,
-  appended, items=[] }) {
-
-  const itemsByKey = itemsSource.reduce((acc, curr) => {
-    acc[curr.id] = curr;
-    return acc;
-  }, {});
+  appended, items=[], noX, noBlank }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -121,7 +117,7 @@ export function DraggableRows({
         </p>
       </div>
 
-      { (items || []).reduce((acc, item) => acc || itemsByKey[item.id]?.closed, false) && (
+      { (items || []).reduce((acc, item) => acc || item.closed, false) && (
         <div className="is-closure">
           This event will display as a <strong>closure</strong>
         </div>
@@ -142,24 +138,28 @@ export function DraggableRows({
                 isDraggable={true}
                 remove={(e) => dispatch({ type: 'remove from list', section, id: item.id })}
                 key={`${label} row ${i}`}
+                noX={noX}
               >
                 <Child
                   id={item.id}
+                  index={i}
                   item={{ ...item, value: item.id, label: item.label }}
                   change={change}
                   update={update}
                   current={current}
+                  dispatch={dispatch}
                 />
               </DraggableRow>
             ))}
 
             {/* empty row if more allowed */}
-            { items.length < limit &&
+            { items.length < limit && !noBlank &&
               <DraggableRow
                 id={0}
                 isDraggable={false}
                 remove={() => null}
                 key={`empty row`}
+                noX={noX}
               >
                 <Child
                   id={0}

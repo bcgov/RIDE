@@ -5,6 +5,7 @@ import { getTransform } from 'ol/proj';
 import Conditions from './Conditions.jsx';
 import Details from './Details.jsx';
 import Delays from './Delays.jsx';
+import Scheduled from './Schedule.jsx';
 import EventTiming from './Timing.jsx';
 import Impacts from './Impacts.jsx';
 import InternalNotes from './Internal.jsx';
@@ -37,22 +38,20 @@ function getLater(severity) {
   return null;
 }
 
+const id = () => Math.random().toString(36).substr(2, 9);
+
+const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
 export function eventReducer(event, action) {
   switch (action.type) {
     case 'set': {
       if (!Array.isArray(action.value)) { action.value = [action.value]; }
       action.value.forEach((value) => {
         if (value.section) {
-          event[value.section] = {
-            ...event[value.section],
-            ...value,
-          }
+          event[value.section] = { ...event[value.section], ...value,}
           delete event[value.section].section;
         } else {
-          event = {
-            ...event,
-            ...value,
-          }
+          event = { ...event, ...value, }
         }
       });
       return Object.assign({}, event);
@@ -88,6 +87,41 @@ export function eventReducer(event, action) {
       return Object.assign({}, event);
     }
 
+    case 'toggle days': {
+      const schedule = event.timing.schedules[action.index];
+      const days = Array.isArray(action.days) ? action.days : [action.days];
+      for (const day of days) {
+        schedule[day] = action.value;
+      }
+      return Object.assign({}, event);
+    }
+
+    case 'set days': {
+      const schedule = event.timing.schedules[action.index];
+      for (const day of days_of_the_week) { schedule[day] = false; }
+      const days = Array.isArray(action.days) ? action.days : [action.days];
+      for (const day of days) { schedule[day] = true; }
+      return Object.assign({}, event);
+    }
+
+    case 'set schedule': {
+      const schedule = event.timing.schedules[action.index];
+      event.timing.schedules[action.index] = { ...schedule, ...action.value };
+      return Object.assign({}, event);
+    }
+
+    case 'remove schedule': {
+      event.timing.schedules = event.timing.schedules.filter((s) => s.id !== action.id);
+      return Object.assign({}, event);
+    }
+
+    case 'add schedule': {
+      if (event.timing.schedules.length === action.currentLength) {
+        event.timing.schedules.push(addId(structuredClone(SCHEDULE_BLANK)));
+      }
+      return Object.assign({}, event);
+    }
+
     case 'set severity': {
       event.details.severity = action.value;
       if (event.timing.nextUpdateIsDefault) {
@@ -95,12 +129,14 @@ export function eventReducer(event, action) {
       }
       return Object.assign({}, event);
     }
+
     case 'set category': {
       if (action.value === action.previous) { return event; }
       event.details.category = action.value;
       event.details.situation = null;
       return Object.assign({}, event);
     }
+
     case 'set situation': {
       event.details.situation = action.value;
       if (!event.details.category) {
@@ -121,12 +157,20 @@ export function eventReducer(event, action) {
       if (!found) {
         items.push(action.value);
       }
+      if (action.section === 'impacts') {
+        event.is_closure = items.filter((item) => item.closed).length > 0;
+      }
       return Object.assign({}, event, {[action.section]: items});
     }
+
     case 'remove from list': {
+      const items = event[action.section].filter((item) => item.id !== action.id);
+      if (action.section === 'impacts') {
+        event.is_closure = items.filter((item) => item.closed).length > 0;
+      }
       return {
         ...event,
-        [action.section]: event[action.section].filter((item) => item.id !== action.id)
+        [action.section]: items,
       };
     }
     case 'update item': {
@@ -139,10 +183,16 @@ export function eventReducer(event, action) {
       })
       return Object.assign({}, event, {[action.section]: items});
     }
+
     case 'change order': {
-      event[action.section] = action.value;
+      let obj = event;
+      let segments = action.section.split('.');
+      const final = segments.pop();
+      for (const segment of segments) { obj = obj[segment]; }
+      obj[final] = action.value;
       return Object.assign({}, event);
     }
+
     case 'set additional': {
       return { ...event, additional: action.value };
     }
@@ -208,13 +258,31 @@ const LOCATION_BLANK = {
   nearby: [],
 };
 
+const SCHEDULE_BLANK = {
+  type: 'week',
+  allDay: true,
+  startTime: null,
+  endTime: null,
+  mon: true,
+  tue: true,
+  wed: true,
+  thu: true,
+  fri: true,
+  sat: true,
+  sun: true,
+}
+
+function addId(obj) {
+  obj.id = id();
+  return obj;
+}
 export function getInitialEvent() {
   return {
     showPreview: true,
     showForm: true,
     id: null,
     status: 'Active',
-    type: 'Incident',
+    type: 'Planned event',
     waypoints: [],
     location: {
       start: structuredClone(LOCATION_BLANK),
@@ -227,6 +295,7 @@ export function getInitialEvent() {
       situation: null,
     },
     impacts: [],
+    is_closure: false,
     delays: {
       amount: 0,
       unit: 'minutes',
@@ -239,6 +308,11 @@ export function getInitialEvent() {
       nextUpdateIsDefault: true,
       endTime: null,
       endTimeTZ: null,
+      ongoing: true,
+      startTime: null,
+      schedules: [
+        addId(structuredClone(SCHEDULE_BLANK)),
+      ],
     },
     additional: '',
     external: { url: '' },
@@ -397,9 +471,15 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
               </div>
             }
 
-            { event.type &&
+            { event.type && event.type === 'Incident' &&
               <div className="section timing">
                 <EventTiming errors={errors} event={event} dispatch={dispatch} />
+              </div>
+            }
+
+            { event.type && event.type === 'Planned event' &&
+              <div className="section scheduled">
+                <Scheduled errors={errors} event={event} dispatch={dispatch} />
               </div>
             }
 

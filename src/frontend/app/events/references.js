@@ -367,7 +367,7 @@ export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
     FORM_CATEGORIES[form] = []
     FORM_PHRASES[form] = []
     FORM_PHRASE_CATEGORY[form] = {};
-    FORMS.push(form);
+    if (form !== 'Chain-up') { FORMS.push(form); }
   }
   if (!acc[form][category]) {
     acc[form][category] = [];
