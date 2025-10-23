@@ -11,6 +11,7 @@ from allauth.urls import build_provider_urlpatterns
 
 from apps.ride.views import home, cameras
 from apps.events import urls as event_urls
+from apps.users import urls as user_urls
 from apps.users.views import session
 
 admin.autodiscover()
@@ -20,6 +21,7 @@ urlpatterns = [
     path('admin/logout/', logout),
     path('admin/', admin.site.urls),
     path('api/', include((event_urls, 'events'), namespace='events')),
+    path('api/', include((user_urls, 'users'), namespace='users')),
     path('cameras/', cameras),
     path('', home),
 

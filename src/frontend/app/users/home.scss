@@ -1,0 +1,93 @@
+@use "../styles/variables.scss" as *;
+@use "tailwindcss";
+
+.users-home {
+  .toolbar {
+    display: flex;
+    background: $Grey20;
+    border-radius: .5rem;
+    width: 100%;
+    justify-content: space-between;
+    padding: .5rem;
+
+    .left, .right {
+      display: flex;
+      align-items: center;
+    }
+
+    .right {
+      .toolbar-btn {
+        padding: 6px 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: $Grey80;
+        margin-left: 1.5rem;
+
+        &:first-of-type {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+
+  .users-table {
+    display: grid;
+    width: 100%;
+    border-collapse: collapse;
+
+    // Row widths
+    .user-row, .header-row {
+      grid-template-columns:
+        1fr     /* Name */
+        1fr     /* Username */
+        1fr     /* Email */
+        1fr     /* Organization */
+        160px    /* Role */
+        120px   /* Created */
+        120px   /* Last Login */
+        80px    /* Edit */
+        80px;   /* Disable */
+    }
+
+    .header-row {
+      display: grid;
+      font-weight: bold;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+
+      .header {
+        display: flex;
+        align-items: center;
+
+        .sort-icon {
+          font-size: 12px;
+        }
+      }
+
+    }
+
+    .user-row {
+      display: grid;
+      padding: 8px;
+      align-items: center;
+
+      .user-btn {
+        font-size: .875rem;
+        color: $Grey80;
+      }
+
+      p {
+        word-break: break-all;
+      }
+    }
+
+    .user-row:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+
+    /* Optional hover effect */
+    .user-row:hover {
+      background-color: #f1f1f1;
+    }
+  }
+}

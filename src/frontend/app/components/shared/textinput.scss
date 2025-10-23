@@ -1,0 +1,25 @@
+@use "../../styles/variables.scss" as *;
+@use "tailwindcss";
+
+.ride-textinput {
+  &-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
+
+  &-label {
+    font-size: 0.875rem;
+    margin-right: 1.25rem;
+  }
+
+  &-input {
+    resize: none;
+    border-radius: .25rem;
+    border: 1px solid black;
+    background: $Grey10;
+    padding: .25rem .75rem;
+    font-size: 0.875rem;
+  }
+}
