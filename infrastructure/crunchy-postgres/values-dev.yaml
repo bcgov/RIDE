@@ -75,7 +75,7 @@ crunchy:
         storage: 1000Mi
         storageClassName: netapp-file-backup
     s3:
-      enabled: true # if enabled, below must be provided
+      enabled: false # if enabled, below must be provided
       retention: 7 # one weeks backup in object store.
       bucket:  # DO NOT UPLOAD TO GITHUB
       endpoint: 
