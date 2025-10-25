@@ -6,7 +6,8 @@ import { transform } from 'ol/proj';
 import { Point } from 'ol/geom';
 
 import { MapContext } from '../../contexts';
-import { click, createMap, ll2g, pointerMove, request } from './helpers.js';
+import { click, createMap, ll2g, pointerMove } from './helpers';
+import { get } from '../../shared/helpers';
 import { PinFeature } from './feature';
 
 import { GEOCODER_CLIENT_ID, GEOCODER_HOST } from '../../env';
@@ -24,7 +25,7 @@ const DropdownIndicator = (props) => (
 
 async function getLocations(addressInput) {
   if (addressInput.length < 3) { return []; }
-  return request(`${GEOCODER_HOST}/addresses.json`, {
+  return get(`${GEOCODER_HOST}/addresses.json`, {
       minScore: 50,
       maxResults: 7,
       echo: 'false',

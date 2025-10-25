@@ -1,0 +1,38 @@
+@use "../../styles/variables.scss" as *;
+@use "tailwindcss";
+
+.edit-user-form {
+  .user-info, .permissions {
+    background: white;
+    border: 1px solid black;
+    border-radius: .5rem;
+    padding: 1rem;
+  }
+
+  .user-info {
+    margin-bottom: .5rem;
+
+    .row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      &:not(:last-child) {
+        margin-bottom: .75rem;
+      }
+
+      .label {
+        width: 150px;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .permissions {
+    .header {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+  }
+}

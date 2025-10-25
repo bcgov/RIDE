@@ -11,5 +11,9 @@ export default [
       index("./events/home.jsx"),
       route("test", "./events/test.jsx"),
     ]),
+    route("users", "./users/layout.jsx", [
+      index("./users/home.jsx"),
+      route("test", "./users/test.jsx"),
+    ]),
   ]),
 ];

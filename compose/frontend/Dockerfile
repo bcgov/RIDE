@@ -1,6 +1,10 @@
 FROM node:20-alpine AS development-dependencies-env
+
+COPY ./src/frontend/.npmrc /app/
 COPY ./src/frontend/package.json /app/
 COPY ./src/frontend/package-lock.json /app/
+ARG FONTAWESOME_PACKAGE_TOKEN
+
 WORKDIR /app
 ENV NODE_ENV=development
 RUN npm ci --include=dev

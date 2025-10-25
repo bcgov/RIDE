@@ -1,0 +1,117 @@
+@use "../../styles/variables.scss" as *;
+@use "tailwindcss";
+
+.modal-root {
+  .modal-open-btn {
+    cursor: pointer;
+  }
+
+  .modal-dialog {
+    position: relative;
+    z-index: 10;
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(107, 114, 128, 0.75);
+      transition: opacity 0.3s;
+    }
+
+    .modal-outer {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      width: 100vw;
+      overflow-y: auto;
+
+      .modal-center {
+        display: flex;
+        min-height: 100vh;
+        justify-content: center;
+        text-align: center;
+        align-items: center;
+
+        .modal-panel {
+          position: relative;
+          transform: translateY(0);
+          overflow: hidden;
+          background: #fff;
+          text-align: left;
+          box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+          transition: all 0.3s;
+          width: 520px;
+
+          .modal-content {
+
+            .modal-header {
+              display: flex;
+              align-items: flex-start;
+
+              .modal-title-container {
+                margin-left: .5rem;
+                margin-top: .75rem;
+
+                .modal-title {
+                  font-size: 1.5rem;
+                }
+
+                .modal-message {
+                  margin-top: 0.5rem;
+
+                  .modal-message-text {
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                  }
+                }
+              }
+            }
+
+            .modal-body {
+              padding: .5rem;
+              background: $Grey20;
+            }
+          }
+
+          .modal-actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin: .75rem;
+
+            button {
+              display: flex;
+              cursor: pointer;
+              align-items: center;
+              border-radius: 0.25rem;
+              padding: .4rem .5rem;
+              font-size: 0.875rem;
+              font-weight: 700;
+              transition: background 0.2s;
+
+              svg {
+                margin-right: .5rem;
+              }
+            }
+
+            .modal-deactivate-btn {
+              background: $Type-Primary;
+              color: #fff;
+
+              &:hover {
+                background: $Type-Secondary;
+              }
+            }
+
+            .modal-cancel-btn {
+              color: $Grey80;
+
+              &:hover {
+                background: $Grey20;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
