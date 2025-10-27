@@ -56,7 +56,7 @@ crunchy:
         memory: 64Mi
 
   pgBackRest:
-    enabled: false
+    enabled: true
     backupPath: /ride/db/version # change it for PROD, create values-prod.yaml
     clusterCounter: 2 # this is the number to identify what is the current counter for the cluster, each time it is cloned it should be incremented.
     # If retention-full-type set to 'count' then the oldest backups will expire when the number of backups reach the number defined in retention
