@@ -78,8 +78,8 @@ function DraggableRow({ children, id, isDraggable, remove, noX }) {
  * data fields.  It provides the state-changing callbacks to children as props.
  */
 export function DraggableRows({
-  label, limit=5, itemsSource, Child, errors, callback, dispatch, section,
-  appended, items=[], noX, noBlank }) {
+  label, limit=5, itemsSource, Child, errors, childErrors=[], callback, dispatch,
+  section, appended, items=[], noX, noBlank }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -148,6 +148,7 @@ export function DraggableRows({
                   update={update}
                   current={current}
                   dispatch={dispatch}
+                  errors={childErrors[i]}
                 />
               </DraggableRow>
             ))}
@@ -175,4 +176,11 @@ export function DraggableRows({
       </div>
     </div>
   );
+}
+
+export function getCookie(key) {
+  const cookies = document.cookie.split('; ')
+  const cookie = cookies.filter(c => c.startsWith(key + '='))
+  if (cookie[0]) { return cookie[0].split('=')[1]; }
+  return '';
 }

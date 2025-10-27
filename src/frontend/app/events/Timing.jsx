@@ -23,23 +23,18 @@ export default function EventTiming({ errors, event, dispatch }) {
   const id = ++idc;
 
   return <div key={'a' + id}>
-    <div className="title">
-      <h4>Event Timing</h4>
-    </div>
-
-    { event?.type !== 'Incident' &&
-      <div className="subtitle">
-        <p><strong>Scheduling</strong></p>
-        <p>Always in Effect</p>
-      </div>
-    }
-
-    <div className={`subtitle ${errors['Manage Timing By'] ? 'error' : ''}`}>
+    <div className={`title ${errors['Manage Timing By'] ? 'error' : ''}`}>
       <p>
-        <strong>Manage Event Timing By</strong>
+        <strong>Event Timing</strong>
         <span className="error-message">{errors['Manage Timing By']}</span>
       </p>
     </div>
+
+    {/* <div className={`subtitle ${errors['Manage Timing By'] ? 'error' : ''}`}>
+      <p>
+        Manage Event Timing By
+      </p>
+    </div> */}
 
     <div className="input">
       <label>Next Update Time</label>

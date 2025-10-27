@@ -22,6 +22,7 @@ import {
   g2ll,
 } from "../components/Map/helpers";
 import { addEvent } from '../components/Map/Layer.jsx';
+import { getCookie } from './shared.jsx';
 
 import './forms.css';
 
@@ -39,6 +40,9 @@ function getLater(severity) {
 }
 
 const id = () => Math.random().toString(36).substr(2, 9);
+const numDaysOn = (schedule) => (
+  days_of_the_week.reduce((numOn, day) => numOn + (schedule[day] ? 1 : 0), 0)
+)
 
 const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -88,10 +92,16 @@ export function eventReducer(event, action) {
     }
 
     case 'toggle days': {
-      const schedule = event.timing.schedules[action.index];
+      const schedule = structuredClone(event.timing.schedules[action.index]);
+      delete schedule.error;
       const days = Array.isArray(action.days) ? action.days : [action.days];
       for (const day of days) {
         schedule[day] = action.value;
+      }
+      if (numDaysOn(schedule) > 0) {
+        event.timing.schedules[action.index] = schedule;
+      } else {
+        event.timing.schedules[action.index].error = 'Must have at least one day selected';
       }
       return Object.assign({}, event);
     }
@@ -361,23 +371,55 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
     };
 
     if (form.type !== 'condition') {
-      if (!form.details.direction) { err.direction = true; }
-      if (!form.details.severity) { err.severity = true; }
-      if (!form.details.category) { err.category = true; }
-      if (!form.details.situation) { err.situation = true; }
+      if (!form.details.direction) { err.direction = 'You must set a direction'; }
+      if (!form.details.severity) { err.severity = 'You must set a severity'; }
+      if (!form.details.category) { err.category = 'You must set a category'; }
+      if (!form.details.situation) { err.situation = 'You must set a situation'; }
 
       if (form.impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'; }
     }
 
-    if (!form.timing.nextUpdate && !form.timing.endTime) {
-      err['Manage Timing By'] = 'Must set one or both';
-    } else {
-      if (form.timing.nextUpdate) {
-        form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+    if (form.type === 'Incident') {
+      if (!form.timing.nextUpdate && !form.timing.endTime) {
+        err['Manage Timing By'] = 'Must set one or both';
+      } else {
+        if (form.timing.nextUpdate) {
+          form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+        }
+        if (form.timing.endTime) {
+          form.timing.endTime = new Date(form.timing.endTime).toISOString();
+        }
       }
-      if (form.timing.endTime) {
-        form.timing.endTime = new Date(form.timing.endTime).toISOString();
+      form.timing.startTime = null;
+      form.timing.schedules = [];
+    } else if (form.type === 'Planned event') {
+      form.timing.nextUpdate = null;
+      if (!form.timing.startTime) {
+        err.startTime = 'Must set start date';
       }
+      if (!form.timing.ongoing && !form.timing.endTime) {
+        err.endTime = 'Must set end date';
+      }
+      if (form.timing.startTime && form.timing.endTime) {
+        const start = new Date(form.timing.startTime);
+        const end = new Date(form.timing.endTime);
+        if (end < start) {
+          err.inEffect = 'End date cannot be earlier than start date';
+        }
+      }
+
+      err.schedules = form.timing.schedules.map((schedule) => {
+        const errors = {};
+        if (!schedule.allDay) {
+          if (!schedule.startTime) {
+            errors.startTime = 'Must set start time';
+          }
+          if (!schedule.endTime) {
+            errors.endTime = 'Must set end time';
+          }
+        }
+        return Object.keys(errors).length ? errors : null;
+      });
     }
 
     // submitting existing notes with form gets an error because notes are
@@ -392,7 +434,9 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
         method: event.id ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
         },
+        credentials: 'include',
         body: JSON.stringify(form),
       }).then(response => response.json())
         .then(data => {

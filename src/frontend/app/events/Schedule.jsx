@@ -55,6 +55,11 @@ function printTime(time) {
   // return time.toLocaleTimeString('en-CA', { timeStyle: 'short'});
 }
 
+function printDate(date) {
+  if (!date) { return; }
+  return format(date, 'y-MM-dd');
+}
+
 export function desc(schedule, short=false) {
   const all = [];
   let curr = [];
@@ -107,66 +112,38 @@ export function desc(schedule, short=false) {
   return (final.length > 40 && !short) ? desc(schedule, true) : final ;
 }
 
-function Schedule({ id, item, change, update, current, dispatch, index }) {
+function Schedule({ id, item, change, update, current, dispatch, index, errors }) {
+  const hasErrors = !!(errors || item.error);
   return <>
     <div className="row">
-      <span>{desc(item)}</span>
+      <span className={`row-title ${hasErrors && 'errors'}`}><strong>{desc(item)}</strong></span>
       <button
         type='button'
         onClick={(e) => {
           dispatch({ 'type': 'remove schedule', id });
         }}
       >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M262.2 48C248.9 48 236.9 56.3 232.2 68.8L216 112L120 112C106.7 112 96 122.7 96 136C96 149.3 106.7 160 120 160L520 160C533.3 160 544 149.3 544 136C544 122.7 533.3 112 520 112L424 112L407.8 68.8C403.1 56.3 391.2 48 377.8 48L262.2 48zM128 208L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 208L464 208L464 512C464 520.8 456.8 528 448 528L192 528C183.2 528 176 520.8 176 512L176 208L128 208zM288 280C288 266.7 277.3 256 264 256C250.7 256 240 266.7 240 280L240 456C240 469.3 250.7 480 264 480C277.3 480 288 469.3 288 456L288 280zM400 280C400 266.7 389.3 256 376 256C362.7 256 352 266.7 352 280L352 456C352 469.3 362.7 480 376 480C389.3 480 400 469.3 400 456L400 280z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M262.2 48C248.9 48 236.9 56.3 232.2 68.8L216 112L120 112C106.7 112 96 122.7 96 136C96 149.3 106.7 160 120 160L520 160C533.3 160 544 149.3 544 136C544 122.7 533.3 112 520 112L424 112L407.8 68.8C403.1 56.3 391.2 48 377.8 48L262.2 48zM128 208L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 208L464 208L464 512C464 520.8 456.8 528 448 528L192 528C183.2 528 176 520.8 176 512L176 208L128 208zM288 280C288 266.7 277.3 256 264 256C250.7 256 240 266.7 240 280L240 456C240 469.3 250.7 480 264 480C277.3 480 288 469.3 288 456L288 280zM400 280C400 266.7 389.3 256 376 256C362.7 256 352 266.7 352 280L352 456C352 469.3 362.7 480 376 480C389.3 480 400 469.3 400 456L400 280z"/></svg>
       </button>
     </div>
     <div className="input">
-      <label>Days affected</label>
-      <div className="row">
-        <button
-          className={`day ${item.mon && 'checked'}`}
-          onClick={(e) => { e.preventDefault();
-            dispatch({ type: 'toggle days', index: index, days: 'mon', value: !item.mon });
-          }}
-        >Mon</button>
-        <button
-          className={`day ${item.tue && 'checked'}`}
-          onClick={(e) => { e.preventDefault();
-            dispatch({ type: 'toggle days', index, days: 'tue', value: !item.tue });
-          }}
-        >Tue</button>
-        <button
-          className={`day ${item.wed && 'checked'}`}
-          onClick={(e) => { e.preventDefault();
-            dispatch({ type: 'toggle days', index, days: 'wed', value: !item.wed });
-          }}
-        >Wed</button>
-        <button
-          className={`day ${item.thu && 'checked'}`}
-          onClick={(e) => { e.preventDefault();
-            dispatch({ type: 'toggle days', index, days: 'thu', value: !item.thu });
-          }}
-        >Thu</button>
-        <button
-          className={`day ${item.fri && 'checked'}`}
-          onClick={(e) => { e.preventDefault();
-            dispatch({ type: 'toggle days', index, days: 'fri', value: !item.fri });
-          }}
-        >Fri</button>
-        <button
-          className={`day ${item.sat && 'checked'}`}
-          onClick={(e) => { e.preventDefault();
-            dispatch({ type: 'toggle days', index, days: 'sat', value: !item.sat });
-          }}
-        >Sat</button>
-        <button
-          className={`day ${item.sun && 'checked'}`}
-          onClick={(e) => { e.preventDefault();
-            dispatch({ type: 'toggle days', index, days: 'sun', value: !item.sun });
-          }}
-        >Sun</button>
+      <label className={item.error ? 'error' : undefined}>
+        Days affected
+        { item.error && <span className="error-message">{item.error}</span>}
 
+      </label>
+      <div className="row">
+        { days_of_the_week.map((day) => (
+          <button
+            className={`day ${item[day] && 'checked'}`}
+            key={day}
+            onClick={(e) => { e.preventDefault();
+              dispatch({ type: 'toggle days', index: index, days: day, value: !item[day] });
+            }}
+          >{day[0].toUpperCase() + day.slice(1)}</button>
+        ))}
       </div>
+
       <div>
         <button
           className="shortcut"
@@ -175,6 +152,7 @@ function Schedule({ id, item, change, update, current, dispatch, index }) {
             dispatch({ type: 'set days', index, days: ['mon', 'tue', 'wed', 'thu', 'fri'] });
           }}
         >Weekdays</button>
+
         <button
           className="shortcut"
           onClick={(e) => {
@@ -184,6 +162,7 @@ function Schedule({ id, item, change, update, current, dispatch, index }) {
         >Weekends</button>
       </div>
     </div>
+
     <div className="">
       <input
         type="checkbox"
@@ -195,7 +174,10 @@ function Schedule({ id, item, change, update, current, dispatch, index }) {
     { !item.allDay &&
       <div className="row">
         <div className="input">
-          <label>Start Time</label>
+          <label className={errors?.startTime ? 'error' : undefined}>
+            Start Time
+            <span className="error-message">{errors?.startTime}</span>
+          </label>
           <input
             type="time"
             defaultValue={item.startTime}
@@ -204,7 +186,10 @@ function Schedule({ id, item, change, update, current, dispatch, index }) {
         </div>
 
         <div className="input">
-          <label>End Time</label>
+          <label className={errors?.endTime ? 'error' : undefined}>
+            End Time
+            <span className="error-message">{errors?.endTime}</span>
+          </label>
           <input
             type="time"
             defaultValue={item.endTime}
@@ -220,36 +205,43 @@ export default function Scheduled({ errors, event, dispatch }) {
 
   const id = ++idc;
 
-  return <div key={'a' + id}>
-    <div className="title">
-      <h4>Event Timing</h4>
-    </div>
+  const hasErrors = errors.inEffect || errors.startTime || errors.endTime;
 
-    <div className="subtitle">
-      <p><strong>Duration</strong></p>
+  return <div key={'a' + id}>
+    <div className={`subtitle ${hasErrors && 'error'}`}>
+      <p>
+        <strong>In Effect</strong>
+        <span className="error-message">{errors.inEffect}</span>
+      </p>
     </div>
 
       <div className="">
         <input
-        type="checkbox"
-        defaultChecked={event.timing.ongoing}
-        onChange={(e) => dispatch({ type: 'set', value: [{ section: 'timing', ongoing: e.target.checked }] })}
+          type="checkbox"
+          defaultChecked={event.timing.ongoing}
+          onChange={(e) => dispatch({ type: 'set', value: [{ section: 'timing', ongoing: e.target.checked }] })}
         /> Ongoing
       </div>
 
       <div className="row">
         <div className="input">
-          <label>Start Date</label>
+          <label className={errors?.startTime ? 'error' : undefined}>
+            Start Date
+            <span className="error-message">{errors.startTime}</span>
+          </label>
           <input type="date"
-            defaultValue={event.timing.startTime}
+            defaultValue={printDate(event.timing.startTime)}
             onBlur={(e) => dispatch({ type: 'set', value: [{ startTime: e.target.value, section: 'timing' }]})}
           />
         </div>
 
         <div className="input" style={{ visibility: event.timing.ongoing ? 'hidden' : 'visible' }}>
-          <label>End Date</label>
+          <label className={errors?.endTime ? 'error' : undefined}>
+            End Date
+            <span className="error-message">{errors.endTime}</span>
+          </label>
           <input type="date"
-            defaultValue={event.timing.endTime}
+            defaultValue={printDate(event.timing.endTime)}
             onBlur={(e) => dispatch({ type: 'set', value: [{ endTime: e.target.value, section: 'timing' }]})}
           />
         </div>
@@ -257,24 +249,26 @@ export default function Scheduled({ errors, event, dispatch }) {
 
     <DraggableRows
       label="Schedules"
-      limit={10}
       itemsSource={[]}
       items={event.timing.schedules}
       Child={Schedule}
       errors={errors}
+      childErrors={errors.schedules}
       dispatch={dispatch}
       section={'timing.schedules'}
       noX={true}
       noBlank={true}
     />
-    <button
-      type="button"
-      onClick={(e) => {
-        dispatch({ type: 'add schedule', currentLength: event.timing.schedules.length });
-      }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" style={{ cursor: 'pointer', verticalAlign: 'middle', marginBottom: '3px' }}viewBox="0 0 640 640" width="16" height="16" fill="currentColor"><path d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z"/></svg>
-      &nbsp;Add schedule
-    </button>
+    { event.timing.schedules.length < 7 &&
+      <button
+        type="button"
+        onClick={(e) => {
+          dispatch({ type: 'add schedule', currentLength: event.timing.schedules.length });
+        }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" style={{ cursor: 'pointer', verticalAlign: 'middle', marginBottom: '3px' }}viewBox="0 0 640 640" width="16" height="16" fill="currentColor"><path d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z"/></svg>
+        &nbsp;Add schedule
+      </button>
+    }
   </div>;
 }

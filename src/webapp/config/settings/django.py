@@ -130,12 +130,6 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# On windows, GDAL and GEOS require explicit paths to the dlls
-if os.name == 'nt':
-    GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')
-    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
-
-
 # Django Debug Toolbar settings
 INTERNAL_IPS = [
     '127.0.0.1',

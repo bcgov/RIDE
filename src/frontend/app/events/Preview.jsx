@@ -11,7 +11,7 @@ const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   return acc;
 }, {});
 
-const sd = (date) => date ? format(new Date(date), 'MMM d, Y') : '';
+const sd = (date) => date ? format(new Date(date), 'MMM d, y') : '';
 
 export default function Preview({ event, dispatch }) {
   const start = event.location.start || {};

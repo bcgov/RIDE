@@ -140,7 +140,7 @@ export function createMap() {
   }).then(function (response) {
     response.json().then(function (glStyle) {
       // DBC22-2153
-      // glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
+      glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
 
       // Overrides
       for (const layer of glStyle.layers) {
