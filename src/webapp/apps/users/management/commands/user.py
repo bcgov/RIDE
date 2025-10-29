@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
 
@@ -39,6 +39,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         try:
+            User = get_user_model()
             user = User.objects.get(email=options['email'])
         except User.DoesNotExist:
             raise CommandError('User not found with that email address')
