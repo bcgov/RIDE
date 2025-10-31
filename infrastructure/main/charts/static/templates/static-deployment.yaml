@@ -31,9 +31,6 @@ spec:
         vault.hashicorp.com/role: {{ .Values.global.vault.licenceplate }}-{{ .Values.global.vault.environment}}
     spec:
       volumes:
-        - name: django-app-images-volume
-          persistentVolumeClaim:
-            claimName: {{ .Values.deployment.volumes.imagesClaimName  }}
         - name: log-storage
           persistentVolumeClaim:
             claimName: {{ template "app.fullname" . }}-log-storage
@@ -50,9 +47,6 @@ spec:
               protocol: TCP
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: django-app-images-volume
-              mountPath: /app/images/webcams
-              readOnly: true
             - name: log-storage
               mountPath: /logs
           image: >-
