@@ -54,19 +54,19 @@ webapp:
     
 static:
   enabled: true
-  fullnameOverride: static
-  nameOverride: static
+  fullnameOverride: dev-ride-static
+  nameOverride: dev-ride-static
 
   replicaCount: 1
 
   image:
     repository: ghcr.io/bcgov/ride-frontend
-    tag: latest-prod
+    tag: latest-dev
 
   release: 
 
   vault:
-   secretName: dev-static  # This is the name of the secret in vault that contains the environment variables for the app
+   secretName: dev-frontend  # This is the name of the secret in vault that contains the environment variables for the app
    authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
 
@@ -87,7 +87,7 @@ static:
     targetCPUUtilizationPercentage: 75
 
   route:
-    host: ride-frontend.apps.gold.devops.gov.bc.ca
+    host: dev-ride-frontend.apps.gold.devops.gov.bc.ca
     iprestricted: true #Set to true if you want to limit IP's the the addresses in the ipallowlist below
     ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 #The first 4 ranges are GOV IP's, the last one is for OXD external IP
     vanityurl: 
