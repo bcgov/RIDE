@@ -10,4 +10,8 @@ export default defineConfig({
     tailwindcss(),
     devtoolsJson(),
   ],
+  server: {
+    allowedHosts: ['localhost', '.apps.gold.devops.gov.bc.ca', '.th.gov.bc.ca'],
+  },
+  optimizeDeps: { exclude: ['node_modules/.cache'] }
 });

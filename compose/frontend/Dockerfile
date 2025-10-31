@@ -1,20 +1,25 @@
-FROM node:20-alpine AS development-dependencies-env
+FROM node:24-alpine AS development-dependencies-env
 
-COPY ./src/frontend/.npmrc /app/
-COPY ./src/frontend/package.json /app/
-COPY ./src/frontend/package-lock.json /app/
+COPY ./src/frontend/ /app/
+
+# vite creates temporary files in /app
+RUN chmod 0777 /app
+#RUN find /app -type f -exec chmod 0644 {} \;
+
 ARG FONTAWESOME_PACKAGE_TOKEN
 
 WORKDIR /app
 ENV NODE_ENV=development
 RUN npm ci --include=dev
-RUN npm install react-router-dev
 
-RUN apk add jq vim procps less curl
+RUN mkdir /app/node_modules/.vite/
+RUN chmod 0777 /app/node_modules/.vite/
+
+RUN if [ ${DEBUG_BUILD} = true ]; then \
+    apk add jq vim procps less curl; \
+fi
 
 EXPOSE 5173
-
-RUN echo ls -al /app/node_modules/.bin
 
 # RUN ["npm", "run", "dev"]
 # RUN ["node"]

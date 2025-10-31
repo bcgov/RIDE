@@ -42,13 +42,59 @@ webapp:
         DEBUG: 'True' # Set to False for UAT and Prod
 
   route:
-    host: dev-ride.apps.gold.devops.gov.bc.ca # The host name for the route
-    iprestricted: false #Set to true if you want to limit IP's the the addresses in the ipallowlist in the global section. Applies to above url and vanity url
+    host: dev-ride-webapp.apps.gold.devops.gov.bc.ca # The host name for the route
+    iprestricted: true #Set to true if you want to limit IP's the the addresses in the ipallowlist below
+    ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 #The first 4 ranges are GOV IP's, the last one is for OXD external IP
     # NOTE: For Vanity URL, this will only do the initial install of the URL. Once created it WILL NOT update it or delete it. This must be done manually
     # because you would most likely have set a certificate on the route and updating it or deleting it could cause issues.
-    vanityurl: true #Set to true if you want to use a vanity URL. This will require a certificate in the cluster (set manually) and dns entry
-    vanityurlhost: dev-ride.th.gov.bc.ca  #The path to use for the vanity URL
 
   podDisruptionBudget: 
     enabled: false # If you have more than 1 replica, you can set this to true. Will also check to ensure more than 1 replica set to prevent issues
-    minAvailable: 1 
+    minAvailable: 1
+    
+static:
+  enabled: true
+  fullnameOverride: dev-ride-static
+  nameOverride: dev-ride-static
+
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/bcgov/ride-static
+    tag: latest-dev
+
+  release: 
+
+  vault:
+   secretName: dev-static  # This is the name of the secret in vault that contains the environment variables for the app
+   authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
+
+  deployment:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 50Mi
+      limits:
+        memory: 1000Mi
+    env:
+      staticConfigMap: ride-static
+
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 75
+
+  route:
+    host: dev-ride.apps.gold.devops.gov.bc.ca
+    iprestricted: true #Set to true if you want to limit IP's the the addresses in the ipallowlist below
+    ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 #The first 4 ranges are GOV IP's, the last one is for OXD external IP
+    vanityurl: 
+      enabled: true #Set to true if you want to use a vanity URL. This will require a certificate in the cluster (set manually) and dns entry
+    vanityurlhost: dev-ride.th.gov.bc.ca  #The path to use for the vanity URL
+  logpvc:
+    storage: 1Gi
+
+  podDisruptionBudget: 
+    enabled: false #If you have more than 1 replica, you can set this to true.
+    minAvailable: 1

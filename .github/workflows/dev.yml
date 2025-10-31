@@ -18,7 +18,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
-  STATIC_IMAGE_NAME: ${{ github.repository }}-frontend
+  STATIC_IMAGE_NAME: ${{ github.repository }}-static
 
 jobs:
   build-and-push-static:
@@ -58,11 +58,12 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./compose/frontend/StaticBuild
+          file: ./compose/frontend/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args:
+          build-args: |
+            FONTAWESOME_PACKAGE_TOKEN=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}
             DEBUG_BUILD=true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -114,7 +115,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   update-openshift-gold:
-    needs: [build-and-push-webapp]
+    needs: [build-and-push-webapp, build-and-push-static]
     runs-on: ubuntu-latest
     name: Deploy Latest Images to OpenShift Gold
     environment:

@@ -9,3 +9,7 @@ dependencies:
     version: '0.1.0'
     repository: 'file://./charts/webapp'
     condition: webapp.enabled
+  - name: static
+    version: '0.1.0'
+    repository: 'file://./charts/static'
+    condition: static.enabled
