@@ -1,39 +1,28 @@
-FROM node:20-alpine AS development-dependencies-env
+# Use an official node runtime as a parent image
+FROM node:22-slim
 
-COPY ./src/frontend/.npmrc /app/
+WORKDIR /app/
+RUN chown node:root /app
+
+# Install dependencies
 COPY ./src/frontend/package.json /app/
 COPY ./src/frontend/package-lock.json /app/
+COPY ./src/frontend/.npmrc /app/
 ARG FONTAWESOME_PACKAGE_TOKEN
+RUN npm install
 
-WORKDIR /app
-ENV NODE_ENV=development
-RUN npm ci --include=dev
-RUN npm install react-router-dev
+# Add rest of the client code
+COPY ./src/frontend /app/
+COPY ./.env /app/
+RUN chown node:root /app/node_modules
 
-RUN apk add jq vim procps less curl
+EXPOSE 3000
 
-EXPOSE 5173
+ARG DEBUG_BUILD=false
 
-RUN echo ls -al /app/node_modules/.bin
+# Add debugging tools into builds if enabled
+RUN if [ ${DEBUG_BUILD} = true ]; then \
+  apt update && apt-get install -y jq vim procps less; \
+fi
 
-# RUN ["npm", "run", "dev"]
-# RUN ["node"]
-
-# FROM node:20-alpine AS production-dependencies-env
-# COPY ./src/frontend/package.json ./src/frontend/package-lock.json /app/
-# WORKDIR /app
-# RUN npm ci
-
-# FROM node:20-alpine AS build-env
-# COPY ./src/frontend/ /app/
-# COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-# WORKDIR /app
-# RUN npm run build
-
-# FROM node:20-alpine
-# COPY ./src/frontend/package.json ./src/frontend/package-lock.json /app/
-# # COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-# # COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-# # COPY --from=build-env /app/build /app/build
-# WORKDIR /app
-# RUN npm ci --include=dev
+CMD npm start
