@@ -1,14 +1,15 @@
 // React
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Navigation
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useSearchParams } from 'react-router';
 
 // Internal imports
-import { AuthContext, DebuggingContext } from './contexts';
+import { AlertContext, AuthContext, DebuggingContext } from './contexts';
 import { API_HOST } from './env.js';
 import { getCookie } from "./shared/helpers";
 import { handleFormSubmit } from "./shared/handlers";
+import Alert from "./components/shared/Alert.jsx";
 
 // Styling
 import './layout.scss';
@@ -22,9 +23,45 @@ let sessionStateKnown = false;
 
 export default function Layout() {
   /* Setup */
+  // Routing
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Refs
+  const isInitialAlertMount = useRef(true);
+  const timeout = useRef();
+
   // States
+  const [alertContext, setAlertContext] = useState();
   const [authContext, setAuthContext] = useState(getInitialAuthContext());
   const [debuggingIsOn, setDebugging] = useState(getInitialDebuggingContext());
+
+  // Effects
+  useEffect(() => {
+    if (isInitialAlertMount.current) {
+      isInitialAlertMount.current = false;
+      return;
+    }
+
+    if (alertContext) {
+      // Clear existing close alert timers
+      if (timeout.current) {
+        clearTimeout(timeout.current);
+      }
+
+      // Set new close alert timer to reference
+      timeout.current = setTimeout(() => {
+        setAlertContext(null);
+      }, 5000);
+    }
+
+  }, [alertContext]);
+
+  useEffect(() => {
+    searchParams.get('inactive') && setAlertContext({
+      message: 'Your account is inactive. Please contact an administrator.'
+    });
+    setSearchParams({}, { replace: true });
+  }, []);
 
   /* Helpers */
   function getInitialAuthContext() {
@@ -95,7 +132,11 @@ export default function Layout() {
       <main>
         <DebuggingContext value={debuggingIsOn}>
           <AuthContext value={{authContext, setAuthContext}}>
-            <Outlet />
+            <AlertContext value={{alertContext, setAlertContext}}>
+              <Outlet />
+
+              <Alert />
+            </AlertContext>
           </AuthContext>
         </DebuggingContext>
       </main>
