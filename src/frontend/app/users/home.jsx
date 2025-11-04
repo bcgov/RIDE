@@ -1,8 +1,9 @@
 // React
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 // Internal imports
-import { getUsers, getOrganizations } from "../shared/data/users";
+import { AlertContext } from "../contexts.js";
+import { getUsers, getOrganizations, updateUser } from "../shared/data/users";
 import RIDEDropdown from '../components/shared/dropdown';
 import RIDETextInput from '../components/shared/textinput';
 import RIDEModal from "../components/shared/modal.jsx";
@@ -24,6 +25,8 @@ export function meta() {
 
 export default function Home() {
   /* Setup */
+  // Context
+  const { _alertContext, setAlertContext } = useContext(AlertContext);
 
   /* Hooks */
   // States
@@ -143,6 +146,37 @@ export default function Home() {
     setProcessedUsers(filteredUsers);
   }
 
+  /* Handlers */
+  const disableUserHandler = (user, undoing=false) => {
+    updateUser(user.id, {
+      is_active: undoing
+
+    }).then(user => {
+      if (user) {
+        setUsers(prevUsers => {
+          return prevUsers.map(u => {
+            if (u.id === user.id) {
+              return user;
+            }
+
+            return u;
+          });
+        });
+
+        if (!undoing) {
+          setAlertContext({
+            type: 'success',
+            message: `User successfully disabled`,
+            undoHandler: () => disableUserHandler(user, true)
+          });
+        }
+
+      } else {
+        // Handle error (not implemented here)
+      }
+    });
+  }
+
   /* Rendering */
   // Sub Components
   const columns = [
@@ -200,7 +234,7 @@ export default function Home() {
           </div>
 
           {/* Data columns */}
-          {!!processedUsers.length && processedUsers.map((user) => (
+          {!!processedUsers.length && processedUsers.map((user) => user.is_active && (
             <div key={user.id} className='user-row'>
               <p>{`${user.first_name} ${user.last_name}`}</p>
               <p>{user.social_username || user.username}</p>
@@ -219,7 +253,18 @@ export default function Home() {
                 <EditUserForm user={user} orgs={orgs} setUsers={setUsers} />
               </RIDEModal>
 
-              <div className={'user-btn'}><FontAwesomeIcon icon={faBan} /> <span>Disable</span></div>
+              <div
+                className={'user-btn'}
+                tabIndex={0}
+                onClick={() => disableUserHandler(user)}
+                onKeyDown={(keyEvent) => {
+                  if (['Enter', 'NumpadEnter'].includes(keyEvent.key)) {
+                    disableUserHandler(user);
+                  }
+                }}>
+
+                <FontAwesomeIcon icon={faBan} /> <span>Disable</span>
+              </div>
             </div>
           ))}
 

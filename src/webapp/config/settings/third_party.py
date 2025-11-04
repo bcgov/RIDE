@@ -24,8 +24,8 @@ SOCIALACCOUNT_STORE_TOKENS = True
 
 # need our own adapter to override various redirect url methods following
 # login or logout
-SOCIALACCOUNT_ADAPTER = 'config.adapter.DbcSocialAdapter'
-ACCOUNT_ADAPTER = 'config.adapter.DbcAdapter'
+SOCIALACCOUNT_ADAPTER = 'config.adapter.RideSocialAdapter'
+ACCOUNT_ADAPTER = 'config.adapter.RideAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     'openid_connect': {

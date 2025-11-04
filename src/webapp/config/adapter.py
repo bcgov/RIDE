@@ -3,18 +3,20 @@ from allauth.account.adapter import DefaultAccountAdapter
 from django.contrib.auth.signals import user_logged_in
 from django.conf import settings
 import requests
+from django.http import HttpResponseRedirect
 
 
-class DbcAdapter(DefaultAccountAdapter):
-
+class RideAdapter(DefaultAccountAdapter):
     def get_logout_redirect_url(self, request):
         token = request.session.get('id_token')
         url = f'{settings.KEYCLOAK_URL}/protocol/openid-connect/logout?post_logout_redirect_uri={settings.FRONTEND_BASE_URL}&id_token_hint={token}'
         return url
 
+    def respond_user_inactive(self, request, user):
+        return HttpResponseRedirect(settings.FRONTEND_BASE_URL + '?inactive=true')
 
-class DbcSocialAdapter(DefaultSocialAccountAdapter):
 
+class RideSocialAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):
         return super().populate_user(request, sociallogin, data)
 

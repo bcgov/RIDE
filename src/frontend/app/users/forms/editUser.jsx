@@ -1,7 +1,8 @@
 // React
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 // Internal imports
+import { AlertContext } from "../../contexts.js";
 import { updateUser } from "../../shared/data/users.js";
 
 // Styling
@@ -13,6 +14,9 @@ export default function EditUserForm(props) {
   // Props
   const { user, orgs, submitting, setSubmitting, setOpen, setUsers } = props
 
+  // Context
+  const { _alertContext, setAlertContext } = useContext(AlertContext);
+
   /* Hooks */
   // States
   const [ selectedOrg, setSelectedOrg ] = useState(user.organization);
@@ -21,32 +25,43 @@ export default function EditUserForm(props) {
 
   // Effects
   useEffect(() => {
-    if (submitting) {
-      updateUser(user.id, {
-        organization: selectedOrg,
-        is_approver: selectedRole,
-        is_superuser: isSuperuser
-
-      }).then(user => {
-        if (user) {
-          setUsers(prevUsers => {
-            return prevUsers.map(u => {
-              if (u.id === user.id) {
-                return user;
-              }
-              return u;
-            });
-          });
-
-          setOpen(false);
-          setSubmitting(false);
-
-        } else {
-          // Handle error (not implemented here)
-        }
-      });
-    }
+    {submitting && submitForm()}
   }, [submitting]);
+
+  /* Helpers */
+  const submitForm = (undoing=false) => {
+    updateUser(user.id, {
+      organization: undoing ? user.organization : selectedOrg,
+      is_approver: undoing ? user.is_approver : selectedRole,
+      is_superuser: undoing? user.is_superuser : isSuperuser
+
+    }).then(user => {
+      if (user) {
+        if (!undoing) {
+          setAlertContext({
+            type: 'success',
+            message: `User successfully updated`,
+            undoHandler: () => submitForm(true)
+          });
+        }
+
+        setUsers(prevUsers => {
+          return prevUsers.map(u => {
+            if (u.id === user.id) {
+              return user;
+            }
+            return u;
+          });
+        });
+
+        setOpen(false);
+        setSubmitting(false);
+
+      } else {
+        // Handle error (not implemented here)
+      }
+    });
+  }
 
   /* Rendering */
   // Main component
