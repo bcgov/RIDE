@@ -203,7 +203,29 @@ class EventSerializer(KeyMoveSerializer):
                 now = datetime.now(tz=timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
                 data['meta']['last_inactivated'] = now
 
+        data['approved'] = self.approval_not_needed(data)
+
         return super().to_internal_value(data)
+
+    def to_representation(self, instance):
+        obj = super().to_representation(instance)
+
+        # have to remove meta here to avoid sending it, rather than as an
+        # excluded field, because otherwise meta doesn't get populated on the
+        # way in through key movement and to_internal_value()
+        del obj['meta']
+
+        return obj
+
+    def approval_not_needed(self, data):
+        if data.get('severity') == 'Minor':
+            return True
+
+        request = self.context.get('request')
+        if request.user.is_approver:
+            return True
+
+        return False
 
     def create(self, validated_data):
         # Notes need to be saved separately since they don't have an actual

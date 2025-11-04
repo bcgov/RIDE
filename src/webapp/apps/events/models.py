@@ -19,15 +19,6 @@ class VersionedManager(models.Manager):
         return super().get_queryset().filter(latest=True, deleted=False)
 
 
-class RelatedEventManager(models.Manager):
-
-    def get_queryset(self, **hints):
-
-        print('related event manager')
-        pprint(dir(self))
-        return super().get_queryset()
-
-
 EXCLUDED = [
     '_state', 'uuid', 'id', 'version', 'latest', 'created', 'last_updated', 'user',
 ]
@@ -79,7 +70,7 @@ class VersionedModel(models.Model):
     def __str__(self):
         return f'{self.id} ({self.version})'
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, make_latest=True, **kwargs):
         '''
         Overriding save for purposes of keeping model history.
 
@@ -121,7 +112,10 @@ class VersionedModel(models.Model):
                     self.version = last.version + 1
 
                 self.pk = None  # ensure INSERT over UPDATE
-                self.latest = True
+
+                # allows for adding a subsequent version which is "unpublished"
+                # (e.g., awaiting approval)
+                self.latest = make_latest
 
             super().save(*args, **kwargs)
 
@@ -173,10 +167,19 @@ class OrderedListField(models.JSONField):
 
 
 class Event(VersionedModel):
+    '''
+    An event is an occurrence with 1) a time, and 2) a place.
+
+    Events are versioned: the event ID is a constant value across multiple,
+    sequential versions, of which one is the latest.  As some events may need
+    review and approval, the latest is not necessarily the one with the highest
+    version.
+    '''
 
     meta = models.JSONField(default=dict)
     event_type = models.CharField(blank=True, null=True)
     status = models.CharField(default='Active')
+    approved = models.BooleanField(default=True)
 
     start = LocationField(default=dict)
     end = LocationField(default=dict, null=True)
@@ -204,6 +207,14 @@ class Event(VersionedModel):
     link = models.URLField(max_length=None, blank=True, null=True)
     # is_closure = models.BooleanField(default=False)
     # tlids = models.JSONField(default=list, null=True)
+
+    def save(self, *args, **kwargs):
+        '''
+        Overriding save to control whether or not the next version is made the
+        latest version, based on whether it requires approval.
+        '''
+
+        super().save(*args, make_latest=self.approved, **kwargs)
 
 
 class Note(VersionedModel):
