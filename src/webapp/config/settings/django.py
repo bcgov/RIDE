@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'apps.ride',
     'apps.events',
     'apps.users',
+    'apps.organizations',
 
     'django.contrib.admin',
 ]
