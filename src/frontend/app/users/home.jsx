@@ -263,7 +263,7 @@ export default function Home() {
                   }
                 }}>
 
-                <FontAwesomeIcon icon={faBan} /> <span>Disable</span>
+                <FontAwesomeIcon icon={faBan} /> <span>Remove</span>
               </div>
             </div>
           ))}

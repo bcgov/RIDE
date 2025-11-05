@@ -58,7 +58,7 @@ export default function Layout() {
 
   useEffect(() => {
     searchParams.get('inactive') && setAlertContext({
-      message: 'Your account is inactive. Please contact an administrator.'
+      message: 'Your account has been disabled. Please contact a RIDE administrator for access.'
     });
     setSearchParams({}, { replace: true });
   }, []);
