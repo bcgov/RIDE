@@ -1,13 +1,17 @@
-import { reactRouter } from "@react-router/dev/vite";
-import tailwindcss from "@tailwindcss/vite";
-import devtoolsJson from 'vite-plugin-devtools-json';
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import devtoolsJson from "vite-plugin-devtools-json";
 
 export default defineConfig({
-  envDir: '../../',
+  envDir: "../../",
   plugins: [
-    reactRouter(),
+    react(),
     tailwindcss(),
     devtoolsJson(),
   ],
+  base: "/",
+  build: {
+    outDir: "build/client",
+  },
 });

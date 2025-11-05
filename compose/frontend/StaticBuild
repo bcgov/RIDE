@@ -1,27 +1,29 @@
-# Stage 1: Build stage with all deps
-FROM node:20-alpine AS build-env
+# Stage 1: Build SPA
+FROM node:24-alpine AS build
+
 WORKDIR /app
 
-# Copy package files
-COPY ./src/frontend/package.json ./src/frontend/package-lock.json ./
+COPY ./src/frontend/ /app/
+
+ARG FONTAWESOME_PACKAGE_TOKEN
+
 RUN npm ci
+RUN npm install react-router-dom
+RUN npm run build:vite
 
-# Copy the entire frontend folder
-COPY ./src/frontend ./
+# Stage 2: Nginx runtime
+FROM nginx:stable-alpine AS production
 
-# Run React Router build
-RUN npm run build
+EXPOSE 3000
 
-# Stage 2: Production image
-FROM node:20-alpine
-WORKDIR /app
+RUN touch /run/nginx.pid
 
-# Copy package files and install production deps + serve
-COPY ./src/frontend/package.json ./src/frontend/package-lock.json ./
-RUN npm ci --omit=dev && npm install -g serve
+# Copy built SPA into Nginx html folder
+COPY --from=build /app/build/client /usr/share/nginx/html
 
-# Copy the build output (only client exists)
-COPY --from=build-env /app/build ./build
+# Copy custom nginx config
+COPY ./compose/frontend/default.conf /etc/nginx/conf.d
+RUN chmod -R 777 /run /var/log/nginx /var/cache/nginx /etc/nginx/conf.d /usr/share/nginx/html/assets
 
-# Start static file server
-CMD ["npm", "run", "start"]
+COPY ./compose/frontend/entrypoint /docker-entrypoint.d/add_client_env.sh
+RUN sed -i 's/\r$//g' /docker-entrypoint.d/add_client_env.sh && chmod +x /docker-entrypoint.d/add_client_env.sh

@@ -40,7 +40,7 @@ spec:
             - sh
             - '-c'
           args:
-            - npm run start
+            - './docker-entrypoint.d/add_client_env.sh && nginx -g "daemon off;"'
           env:
             - name: DEPLOYMENT_TAG
               value: {{ $deploymentTag | quote }}
@@ -53,7 +53,7 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
           ports:
-            - containerPort: 5173
+            - containerPort: 3000
               protocol: TCP
           imagePullPolicy: IfNotPresent
           terminationMessagePolicy: File
@@ -61,12 +61,12 @@ spec:
             {{ .Values.image.repository  }}:{{ .Values.image.tag  }}
           livenessProbe:
             tcpSocket:
-              port: 5173
+              port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
             tcpSocket:
-              port: 5173
+              port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
       affinity:

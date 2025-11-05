@@ -1,16 +1,7 @@
-import { createContext, useState } from 'react';
-import {
-  isRouteErrorResponse,
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "react-router";
-
+import { createContext, useState, useEffect } from 'react';
+import { Links, Meta, Scripts, ScrollRestoration } from "react-router";
 import { API_HOST } from './env.js';
 import { DataContext } from './contexts';
-
 import "./app.scss";
 
 export const links = () => [
@@ -48,58 +39,44 @@ export function HydrateFallback() {
   return <p>Loading RIDE...</p>;
 }
 
-let fetching = false;
-
 export default function App() {
+  const [impacts, setImpacts] = useState([]);
 
-  const [impacts, setImpacts] = useState(getImpacts);
-
-  function getImpacts() {
-    if (fetching) { return; }
-    fetching = true;
-
-    const response = fetch(`${API_HOST}/api/traffic-impacts`, {
+  useEffect(() => {
+    fetch(`${API_HOST}/api/traffic-impacts`, {
       headers: { 'Accept': 'application/json' }
-    }).then((response) => response.json())
-      .then((data) => {
-        setImpacts(data);
-      })
-      .finally(() => {
-        fetching = false;
-      });
-    return [];
-  }
+    })
+      .then(res => res.json())
+      .then(data => setImpacts(data))
+      .catch(err => console.error("Failed to fetch impacts:", err));
+  }, []);
 
   return (
     <DataContext.Provider value={{ impacts }}>
-      <Outlet />
+      <div className="container mx-auto p-4">
+        <h1>RIDE — Traffic Impacts</h1>
+        {impacts.length === 0 ? (
+          <p>Loading impacts...</p>
+        ) : (
+          <ul>
+            {impacts.map((impact, i) => (
+              <li key={i}>{impact.description || JSON.stringify(impact)}</li>
+            ))}
+          </ul>
+        )}
+      </div>
     </DataContext.Provider>
-  )
+  );
 }
 
 export function ErrorBoundary({ error }) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
-  let stack;
-
-  if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
-    stack = error.stack;
-  }
-
   return (
     <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
+      <h1>{error?.status || "Oops!"}</h1>
+      <p>{error?.statusText || error?.message || "An unexpected error occurred."}</p>
+      {error?.stack && (
         <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
+          <code>{error.stack}</code>
         </pre>
       )}
     </main>

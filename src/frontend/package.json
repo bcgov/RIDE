@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev:vite": "vite",
+    "build:vite": "vite build",
+    "preview:vite": "vite preview",
+
     "build": "react-router build",
     "dev": "react-router dev --minify false -l info --host",
     "start": "react-router-serve ./build/server/index.js",
@@ -47,6 +51,7 @@
     "sass": "^1.63.6",
     "tailwindcss": "^4.1.4",
     "vite": "^6.3.3",
+    "@vitejs/plugin-react": "^4.2.1",
     "vite-plugin-devtools-json": "^0.2.0"
   }
 }
