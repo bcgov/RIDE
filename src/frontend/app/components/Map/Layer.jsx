@@ -191,7 +191,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
             setContextMenu([]);
             const event = feature.get('raw');
             patch(
-              `http://localhost:8000/api/events/${event.id}`,
+              `${API_HOST}/api/events/${event.id}`,
               { status: 'Inactive' },
             ).then((event) => {
                 feature.set('raw', event);
@@ -207,7 +207,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
             setContextMenu([]);
             const event = feature.get('raw');
             patch(
-              `http://localhost:8000/api/events/${event.id}`,
+              `${API_HOST}/api/events/${event.id}`,
               { status: 'Active' },
             ).then((event) => {
                 feature.set('raw', event);

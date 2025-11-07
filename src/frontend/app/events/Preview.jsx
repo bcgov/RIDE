@@ -47,7 +47,7 @@ export default function Preview({ event, dispatch }) {
       </div>
 
       <div className="body">
-        <h3 className="alert">
+        <h3 className="direction">
           {event.details?.direction} on&nbsp;
           {start.name}
           {isLinear && end.name !== start.name &&
@@ -56,7 +56,7 @@ export default function Preview({ event, dispatch }) {
         </h3>
 
         { start.useAlias &&
-          <p className="alert">
+          <p className="direction">
             {start.alias}
             {end.alias && end.useAlias && end.alias !== start.alias &&
               <>&nbsp;to {end.alias}</>

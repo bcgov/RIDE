@@ -23,6 +23,7 @@ import {
 } from "../components/Map/helpers";
 import { addEvent } from '../components/Map/Layer.jsx';
 import { getCookie } from './shared.jsx';
+import { API_HOST } from '../env';
 
 import './forms.css';
 
@@ -434,7 +435,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
     setErrors(err);
 
     if (Object.keys(err).length === 0) {
-      fetch(`http://localhost:8000/api/events${ event.id ? `/${event.id}` : '' }`, {
+      fetch(`${API_HOST}/api/events${ event.id ? `/${event.id}` : '' }`, {
         method: event.id ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',

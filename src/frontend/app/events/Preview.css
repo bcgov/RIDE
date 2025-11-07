@@ -4,7 +4,7 @@
   overflow: hidden;
   z-index: 2;
 
-  .alert {
+  .direction {
     color: #584215;
   }
 
@@ -17,7 +17,7 @@
       color: #ce3e39;
     }
 
-    .alert {
+    .direction {
       color: #ce3e39;
     }
   }
@@ -34,7 +34,7 @@
       background: #e9f7eb;
       color: #196323;
     }
-    .alert {
+    .direction {
       color: #196323;
     }
   }
