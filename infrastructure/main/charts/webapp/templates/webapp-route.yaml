@@ -86,6 +86,7 @@ metadata:
   name: {{ template "app.fullname" . }}-session-vanityurl
   labels: {{ include "app.labels" . | nindent 4 }}
   annotations:
+    "helm.sh/resource-policy": keep
     {{ if .Values.route.iprestricted }}
     haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
     {{ end }}
@@ -139,6 +140,7 @@ metadata:
   name: {{ template "app.fullname" . }}-accounts-vanityurl
   labels: {{ include "app.labels" . | nindent 4 }}
   annotations:
+    "helm.sh/resource-policy": keep
     {{ if .Values.route.iprestricted }}
     haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
     {{ end }}
@@ -193,6 +195,7 @@ metadata:
   labels: {{ include "app.labels" . | nindent 4 }}
   annotations:
     {{ if .Values.route.iprestricted }}
+    "helm.sh/resource-policy": keep
     haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
     {{ end }}
 spec:
@@ -245,6 +248,7 @@ metadata:
   name: {{ template "app.fullname" . }}-static-vanityurl
   labels: {{ include "app.labels" . | nindent 4 }}
   annotations:
+    "helm.sh/resource-policy": keep
     {{ if .Values.route.iprestricted }}
     haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
     {{ end }}

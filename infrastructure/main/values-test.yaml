@@ -28,7 +28,7 @@ webapp:
     authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
   deployment:
-    strategy: RollingUpdate # Can be Recreate or RollingUpdate
+    strategy: Recreate # Can be Recreate or RollingUpdate
     resources:
       requests:
         cpu: 10m
@@ -40,11 +40,10 @@ webapp:
       variables:
         SHOW_DEBUG_TOOLBAR: 'True' # Set to False for UAT and Prod
         DEBUG: 'True' # Set to False for UAT and Prod
-        VITE_API_HOST: https://test-ride.th.gov.bc.ca # Temporary till we setup proxy to the backend internally.
 
   route:
     host: test-ride.apps.gold.devops.gov.bc.ca # The host name for the route
-    iprestricted: true #Set to true if you want to limit IP's the the addresses in the ipallowlist in the global section. Applies to above url and vanity url
+    iprestricted: false #Set to true if you want to limit IP's the the addresses in the ipallowlist in the global section. Applies to above url and vanity url
     # NOTE: For Vanity URL, this will only do the initial install of the URL. Once created it WILL NOT update it or delete it. This must be done manually
     # because you would most likely have set a certificate on the route and updating it or deleting it could cause issues.
     vanityurl: true #Set to true if you want to use a vanity URL. This will require a certificate in the cluster (set manually) and dns entry
@@ -68,19 +67,21 @@ frontend:
   prometheus:
     enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
 
+  vault:
+    secretName: test-static  # This is the name of the secret in vault that contains the environment variables for the app
+    authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
+
   deployment:
-    strategy: RollingUpdate # Can be Recreate or RollingUpdate
+    strategy: Recreate # Can be Recreate or RollingUpdate
     resources:
       requests:
         cpu: 10m
-        memory: 75Mi
+        memory: 500Mi
       limits:
-        memory: 300Mi
+        memory: 1000Mi
     env:
       variables:
         SHOW_DEBUG_TOOLBAR: 'True' # Set to False for UAT and Prod
-        DEBUG: 'True' # Set to False for UAT and Prod
-        VITE_API_HOST: https://tst-ride.th.gov.bc.ca # Temporary till we setup proxy to the backend internally.
 
   route:
     host: test-ride-frontend.apps.gold.devops.gov.bc.ca # The host name for the route
