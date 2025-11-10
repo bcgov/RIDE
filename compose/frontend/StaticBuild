@@ -11,7 +11,7 @@ ARG DEBUG_BUILD=false
 WORKDIR /app
 ENV NODE_ENV=development
 RUN --mount=type=secret,id=fontawesome_token \
-    export FONTAWESOME_PACKAGE_TOKEN=$(cat /run/secrets/fontawesome_token) && \
+    FONTAWESOME_PACKAGE_TOKEN=$(cat /run/secrets/fontawesome_token) \
     npm ci --include=dev
 
 RUN mkdir /app/node_modules/.vite/
