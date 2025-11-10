@@ -28,7 +28,7 @@ webapp:
     authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
   deployment:
-    strategy: RollingUpdate # Can be Recreate or RollingUpdate
+    strategy: Recreate # Can be Recreate or RollingUpdate
     resources:
       requests:
         cpu: 10m
@@ -73,7 +73,7 @@ frontend:
     authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
   deployment:
-    strategy: RollingUpdate # Can be Recreate or RollingUpdate
+    strategy: Recreate # Can be Recreate or RollingUpdate
     resources:
       requests:
         cpu: 10m
