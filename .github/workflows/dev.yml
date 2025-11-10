@@ -155,10 +155,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            DEBUG_BUILD=true
           secrets: |
-            fontawesome_token=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}
+            "fontawesome_token=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}""
+          build-args: |
+            "DEBUG_BUILD=true"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
