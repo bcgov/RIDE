@@ -158,7 +158,7 @@ jobs:
           build-args: |
             DEBUG_BUILD=true
           secrets: |
-            "fontawesome_token=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}"
+            fontawesome_token=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
