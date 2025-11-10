@@ -13,7 +13,7 @@ WORKDIR /app
 ENV NODE_ENV=development
 RUN --mount=type=secret,id=fontawesome_token,env=FONTAWESOME_PACKAGE_TOKEN \
     echo "Token starts with: ${FONTAWESOME_PACKAGE_TOKEN:0:2}
-    #npm ci --include=dev
+RUN npm ci --include=dev
 
 RUN mkdir /app/node_modules/.vite/
 RUN chmod 0777 /app/node_modules/.vite/
