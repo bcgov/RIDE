@@ -6,12 +6,13 @@ COPY ./src/frontend/ /app/
 RUN chmod 0777 /app
 #RUN find /app -type f -exec chmod 0644 {} \;
 
-ARG FONTAWESOME_PACKAGE_TOKEN
 ARG DEBUG_BUILD=false
 
 WORKDIR /app
 ENV NODE_ENV=development
-RUN npm ci --include=dev
+RUN --mount=type=secret,id=fontawesome_token \
+    export FONTAWESOME_PACKAGE_TOKEN=$(cat /run/secrets/fontawesome_token) && \
+    npm ci --include=dev
 
 RUN mkdir /app/node_modules/.vite/
 RUN chmod 0777 /app/node_modules/.vite/
