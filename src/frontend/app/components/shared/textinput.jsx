@@ -7,7 +7,7 @@ import './textinput.scss'
 export default function RIDETextInput(props) {
   /* Setup */
   // Props
-  const { label, extraClasses, value, handler } = props;
+  const { label, extraClasses, value, handler, maxLength } = props;
 
   /* Rendering */
   // Main Component
@@ -19,7 +19,8 @@ export default function RIDETextInput(props) {
         <Input
           className={'ride-textinput-input'}
           value={value}
-          onChange={(e) => handler(e.target.value)} />
+          onChange={(e) => handler(e.target.value)}
+          maxLength={maxLength} />
       </Field>
     </div>
   );

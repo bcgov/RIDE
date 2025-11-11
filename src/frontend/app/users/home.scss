@@ -21,6 +21,10 @@
         font-size: 14px;
         font-weight: 700;
         color: $Grey80;
+        cursor: pointer;
+      }
+
+      .toolbar-btn, .modal-root {
         margin-left: 1.5rem;
 
         &:first-of-type {

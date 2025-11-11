@@ -2,6 +2,20 @@
 @use "tailwindcss";
 
 .ride-textinput {
+  &.form {
+    .ride-textinput-label {
+      width: 150px;
+    }
+
+    .ride-textinput-input {
+      flex: 1;
+    }
+
+    &:not(:last-child) {
+      margin-bottom: .75rem;
+    }
+  }
+
   &-container {
     display: flex;
     flex-direction: row;

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.organizations.serializers import OrganizationSerializer
 from apps.users.models import RIDEUser
 from django.contrib.auth.models import Group
 
@@ -8,6 +9,7 @@ class RIDEUserSerializer(serializers.ModelSerializer):
     social_username = serializers.SerializerMethodField()
     social_provider = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
+    organization = serializers.SerializerMethodField()
 
     class Meta:
         model = RIDEUser
@@ -31,6 +33,10 @@ class RIDEUserSerializer(serializers.ModelSerializer):
 
     def get_is_approver(self, obj):
         return obj.is_approver
+
+    def get_organization(self, obj):
+        if obj.organizations.exists():
+            return OrganizationSerializer(obj.organizations.first()).data
 
 
 class RIDEGroupSerializer(serializers.ModelSerializer):

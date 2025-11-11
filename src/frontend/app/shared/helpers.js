@@ -14,6 +14,18 @@ class CustomError extends Error {
   }
 }
 
+export class HasUserError extends CustomError {
+  constructor() {
+    super("Organization must be empty before deletion");
+  }
+}
+
+export class UniqueNameError extends CustomError {
+  constructor() {
+    super("Organization name must be unique");
+  }
+}
+
 export class NetworkError extends CustomError {
   constructor() {
     super("Network error");
@@ -85,13 +97,21 @@ const request = (url, params={}, headers={}, include_credentials=true, method="G
     options.body = JSON.stringify(params);
   }
 
-  const result = fetch(url, options).then((response) => {
+  const result = fetch(url, options).then(async (response) => {
     const statusCode = response.status.toString();
 
     // Raise error for 4xx-5xx status codes
     if (statusCode === '404') {
       throw new NotFoundError();
     } else if (statusCode.startsWith('4')) {
+      const responseData = await response.json();
+      switch (responseData.error) {
+        case 'unique_name':
+          throw new UniqueNameError();
+        case 'has_users':
+          throw new HasUserError();
+      }
+
       throw new NetworkError();
     } else if (statusCode.startsWith('5')) {
       throw new ServerError();
@@ -128,3 +148,4 @@ const request = (url, params={}, headers={}, include_credentials=true, method="G
 export const get = (url, params, headers, include_credentials=true) => request(url, params, headers, include_credentials, "GET");
 export const post = (url, params, headers, include_credentials=true) => request(url, params, headers, include_credentials, "POST");
 export const patch = (url, params, headers, include_credentials=true) => request(url, params, headers, include_credentials, "PATCH");
+export const deleteRequest = (url, params, headers, include_credentials=true) => request(url, params, headers, include_credentials, "DELETE");

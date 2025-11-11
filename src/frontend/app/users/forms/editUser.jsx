@@ -31,7 +31,7 @@ export default function EditUserForm(props) {
   /* Helpers */
   const submitForm = (undoing=false) => {
     updateUser(user.id, {
-      organization: undoing ? user.organization : selectedOrg,
+      organizations: undoing ? (user.organization ? [user.organization.id] : []) : [selectedOrg.id],
       is_approver: undoing ? user.is_approver : selectedRole,
       is_superuser: undoing? user.is_superuser : isSuperuser
 
@@ -91,7 +91,7 @@ export default function EditUserForm(props) {
           label={'Organization: '}
           extraClasses={`mr-5 user-form`}
           items={orgs}
-          initialValue={user.groups.length > 0 ? user.groups[0] : null}
+          initialValue={user.organization}
           handler={setSelectedOrg} />
 
         <RIDEDropdown

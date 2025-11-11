@@ -3,11 +3,14 @@ import { useContext, useEffect, useState } from 'react';
 
 // Internal imports
 import { AlertContext } from "../contexts.js";
-import { getUsers, getOrganizations, updateUser } from "../shared/data/users";
+import { getUsers, updateUser } from "../shared/data/users";
+import { getOrganizations, getServiceAreas, deleteOrganization, createOrganization } from "../shared/data/organizations";
+import { HasUserError } from "../shared/helpers.js";
 import RIDEDropdown from '../components/shared/dropdown';
 import RIDETextInput from '../components/shared/textinput';
-import RIDEModal from "../components/shared/modal.jsx";
-import EditUserForm from "./forms/editUser.jsx";
+import RIDEModal from "../components/shared/modal";
+import EditUserForm from "./forms/editUser";
+import OrgForm from "./forms/orgForm";
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -32,22 +35,35 @@ export default function Home() {
   // States
   const [ users, setUsers ] = useState();
   const [ processedUsers, setProcessedUsers ] = useState();
+  const [ serviceAreas, setServiceAreas ] = useState([]);
   const [ orgs, setOrgs ] = useState([]);
   const [ sortKey, setSortKey ] = useState('Name');
-  const [ orgFilter, setOrgFilter ] = useState('All organizations');
+  const [ selectedOrg, setSelectedOrg ] = useState('All organizations');
   const [ searchText, setSearchText ] = useState('');
 
   // Effects
   useEffect(() => {
-    getUsers().then(data => {
-      setUsers(data);
-    });
+    getUsers().then(data => setUsers(data));
     getOrganizations().then(data => setOrgs(data));
+    getServiceAreas().then(data => setServiceAreas(data));
   }, []);
 
   useEffect(() => {
     filterAndSortUsers();
-  }, [users, sortKey, orgFilter, searchText]);
+  }, [users, sortKey, selectedOrg, searchText]);
+
+  useEffect(() => {
+    // Sync selectedOrg with orgs list if it changes
+    if (selectedOrg !== 'All organizations') {
+      const updatedOrg = orgs.find(org => org.id === selectedOrg.id);
+      if (updatedOrg) {
+        setSelectedOrg(updatedOrg);
+
+      } else {
+        setSelectedOrg('All organizations');
+      }
+    }
+  }, [orgs]);
 
   /* Helpers */
   const formatDate = (dateString) => {
@@ -124,8 +140,8 @@ export default function Home() {
     if (!filteredUsers) return;  // Data not ready, do nothing
 
     // Apply organization filter
-    if (orgFilter !== 'All organizations') {
-      filteredUsers = users.filter(user => user.group === orgFilter);
+    if (selectedOrg !== 'All organizations') {
+      filteredUsers = users.filter(user => (user.organization ? user.organization.name : '') === selectedOrg.name);
     }
 
     // Apply search text filter
@@ -177,6 +193,48 @@ export default function Home() {
     });
   }
 
+  const removeOrgHanlder = () => {
+    deleteOrganization(selectedOrg.id).then(() => {
+      setAlertContext({
+        type: 'success',
+        message: `Organization successfully deleted`,
+        undoHandler: () => undoRemoveOrgHandler(selectedOrg)
+      });
+
+      setSelectedOrg('All organizations');
+      setOrgs(prevOrgs => {
+        return prevOrgs.filter(org => org.id !== selectedOrg.id);
+      });
+
+    }).catch(error => {
+      if (error instanceof HasUserError) {
+        setAlertContext({
+          message: 'Organization delete unsuccessful. Organization must be empty to be deleted.'
+        });
+      }
+    });
+  }
+  
+  // Recreate deleted organization
+  const undoRemoveOrgHandler = (org) => {
+    const payload = {
+      name: org.name,
+      service_areas: org.service_areas,
+      contact_name: org.contact_name,
+      contact_id: org.contact_id
+    };
+    
+    createOrganization(payload).then(res => {
+      setSelectedOrg(res);
+      setOrgs(prevOrgs => {
+        // Add org, append to existing list
+        const newOrgs = [...prevOrgs, res];
+        newOrgs.sort((a, b) => a.name.localeCompare(b.name));
+        return newOrgs;
+      });
+    });
+  }
+
   /* Rendering */
   // Sub Components
   const columns = [
@@ -194,28 +252,64 @@ export default function Home() {
     <div className='users-home p-4'>
       <div className={'toolbar'}>
         <div className={'left'}>
-          <RIDETextInput label={'Search:'} extraClasses={'mr-5'} value={searchText} handler={setSearchText}/>
+          <RIDETextInput label={'Search:'} extraClasses={'mr-5'} value={searchText} handler={setSearchText} maxLength={100} />
 
           <RIDEDropdown
             label={'Organization'}
             extraClasses={'mr-5'}
             items={['All organizations', ...orgs]}
-            handler={(filter) => setOrgFilter(filter)}
-            initialValue={'All organizations'} />
+            handler={(filter) => setSelectedOrg(filter)}
+            value={selectedOrg} />
 
           <RIDEDropdown
             label={'Sort'}
             extraClasses={'mr-5'}
             items={columns}
             handler={(column) => setSortKey(column)}
-            initialValue={'Name'} />
+            value={'Name'} />
         </div>
 
         <div className={'right'}>
           <div className={'toolbar-btn'}><FontAwesomeIcon icon={faPlus} /> <span>Add user</span></div>
-          <div className={'toolbar-btn'}><FontAwesomeIcon icon={faPlus} /> <span>Add organization</span></div>
-          <div className={'toolbar-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit organization</span></div>
-          <div className={'toolbar-btn'}><FontAwesomeIcon icon={faTrashCan} /> <span>Delete organization</span></div>
+
+          <RIDEModal
+            title={'Add RIDE organization'}
+            confirmBtnText={'Add organization'}
+            openButton={
+              <div className={'toolbar-btn'}><FontAwesomeIcon icon={faPlus} /> <span>Add organization</span></div>
+            }>
+
+            <OrgForm areas={serviceAreas} setOrgs={setOrgs} />
+          </RIDEModal>
+
+          {selectedOrg && selectedOrg !== 'All organizations' &&
+            <RIDEModal
+              title={'Edit RIDE organization'}
+              confirmBtnText={'Update organization'}
+              openButton={
+              <div className={'toolbar-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit organization</span></div>
+              }>
+
+              <OrgForm initialOrg={selectedOrg} areas={serviceAreas} setOrgs={setOrgs} />
+            </RIDEModal>
+          }
+
+          {selectedOrg && selectedOrg !== 'All organizations' &&
+            <div
+              className={'toolbar-btn'}
+              tabIndex={0}
+              onClick={() => removeOrgHanlder()}
+              onKeyDown={
+                (keyEvent) => {
+                  if (['Enter', 'NumpadEnter'].includes(keyEvent.key)) {
+                    removeOrgHanlder();
+                  }
+                }
+              }>
+
+              <FontAwesomeIcon icon={faTrashCan} /> <span>Delete organization</span>
+            </div>
+          }
         </div>
       </div>
 
@@ -239,13 +333,14 @@ export default function Home() {
               <p>{`${user.first_name} ${user.last_name}`}</p>
               <p>{user.social_username || user.username}</p>
               <p>{user.email}</p>
-              <p>{user.group}</p>
+              <p>{user.organization ? user.organization.name : ''}</p>
               <p>{getUserRole(user)}</p>
               <p>{formatDate(user.date_joined)}</p>
               <p>{formatDate(user.last_login)}</p>
 
               <RIDEModal
                 title={'Edit RIDE User'}
+                confirmBtnText={'Update user'}
                 openButton={
                   <div className={'user-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit</span></div>
                 }>

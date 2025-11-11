@@ -11,7 +11,7 @@ import './modal.scss';
 export default function RIDEModal(props) {
   /* Setup */
   // Props
-  const { title, children, openButton } = props
+  const { title, confirmBtnText, children, openButton } = props
 
   /* Hooks */
   // States
@@ -49,12 +49,10 @@ export default function RIDEModal(props) {
                       <p className="modal-title">{title}</p>
                     </div>
                   </div>
-                  <div className="modal-body p-2">
-                    <div className="modal-body p-2">
-                      {React.Children.map(children, child =>
-                        React.cloneElement(child, { submitting: submitting, setSubmitting: setSubmitting, setOpen: setOpen })
-                      )}
-                    </div>
+                  <div className="modal-body">
+                    {React.Children.map(children, child =>
+                      React.cloneElement(child, { submitting: submitting, setSubmitting: setSubmitting, setOpen: setOpen })
+                    )}
                   </div>
                 </div>
 
@@ -68,8 +66,9 @@ export default function RIDEModal(props) {
                       }
                     }}
                     className="modal-deactivate-btn">
+
                     <FontAwesomeIcon icon={faCheckCircle} />
-                    Confirm
+                    {confirmBtnText}
                   </button>
 
                   <button

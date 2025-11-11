@@ -50,8 +50,16 @@ export default function Alert() {
     <div className={`alert fade-out ${!visible ? 'hidden' : ''}`}>
       <div className="content">
         <div className="content__text">
-          <FontAwesomeIcon icon={renderedAlert.icon === 'success' ? faCheckCircle : faCircleInfo} />
-          {renderedAlert.message}
+          {renderedAlert.message
+            .split('\n')
+            .map((line, idx) => (
+              <React.Fragment key={idx}>
+                <FontAwesomeIcon icon={renderedAlert.icon === 'success' ? faCheckCircle : faCircleInfo} />
+                {line}
+                <br />
+              </React.Fragment>
+            ))
+          }
         </div>
 
         {renderedAlert.undoHandler &&
