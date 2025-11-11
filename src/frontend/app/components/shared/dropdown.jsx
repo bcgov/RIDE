@@ -1,3 +1,6 @@
+// React
+import { useEffect, useState } from "react";
+
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/pro-regular-svg-icons';
@@ -5,22 +8,28 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 
 // Styling
 import './dropdown.scss';
-import {useEffect, useState} from "react";
 
 // https://headlessui.com/react/menu
 export default function RIDEDropdown(props) {
   /* Setup */
   // Props
-  const { label, extraClasses, items, handler, initialValue } = props;
+  const { label, extraClasses, items, handler, value } = props;
 
   /* Hooks */
   // States
-  const [ selected, setSelected ] = useState(initialValue ? initialValue : null);
+  const [ selected, setSelected ] = useState(value ? value : null);
 
   // Effects
   useEffect(() => {
-    //
-  }, []);
+    setSelected(value);
+  }, [value]);
+
+  /* Helpers */
+  const getDisplayText = () => {
+    if (!selected) return '';
+    if (selected.name) return selected.name;
+    return selected.toString();
+  }
 
   /* Rendering */
   // Main Component
@@ -29,7 +38,7 @@ export default function RIDEDropdown(props) {
       <p className={'ride-dropdown-label'}>{label}</p>
 
       <MenuButton disabled={!items || !items.length} className="ride-dropdown-button">
-        <span className={'selected-text'}>{selected != null ? selected.toString() : ''}</span>
+        <span className={'selected-text'}>{getDisplayText()}</span>
         <FontAwesomeIcon icon={faChevronDown} aria-hidden="true" className="ride-dropdown-icon" />
       </MenuButton>
 

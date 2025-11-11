@@ -5,10 +5,6 @@ export function getUsers() {
   return get(`${API_HOST}/api/users`, {});
 }
 
-export function getOrganizations() {
-  return get(`${API_HOST}/api/groups`, {});
-}
-
 export function updateUser(userId, payload) {
   return patch(`${API_HOST}/api/users/${userId}`, payload);
 }

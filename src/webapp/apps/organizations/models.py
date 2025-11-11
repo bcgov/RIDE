@@ -5,8 +5,10 @@ from apps.events.models import BaseModel
 
 
 class Organization(BaseModel):
-    name = models.CharField(max_length=128, blank=True, default='')
+    name = models.CharField(max_length=30, blank=True, default='', unique=True)
     service_areas = models.ManyToManyField('ServiceArea', related_name='organizations')
+    contact_name = models.CharField(max_length=30, blank=True, default='')
+    contact_id = models.CharField(max_length=30, blank=True, default='')
 
 
 class ServiceArea(BaseModel):

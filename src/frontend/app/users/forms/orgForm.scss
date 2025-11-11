@@ -1,0 +1,11 @@
+@use "../../styles/variables.scss" as *;
+@use "tailwindcss";
+
+.org-form {
+  .container {
+    background: white;
+    border: 1px solid black;
+    border-radius: .5rem;
+    padding: 1rem;
+  }
+}
