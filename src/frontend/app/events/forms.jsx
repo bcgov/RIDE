@@ -296,7 +296,7 @@ export function getInitialEvent() {
     showForm: true,
     id: null,
     status: 'Active',
-    type: 'Planned event',
+    type: 'Incident',
     waypoints: [],
     location: {
       start: structuredClone(LOCATION_BLANK),
