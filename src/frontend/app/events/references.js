@@ -83,22 +83,21 @@ export const RestrictionsList = [
 export const RoadConditions = [
   { id: 0, label: '', },
   { id: 1, label: 'Black ice', },
-  { id: 2, label: 'Compact ice', },
-  { id: 3, label: 'Slippery sections', },
-  { id: 4, label: 'Slushy sections', },
-  { id: 5, label: 'Compact snow', },
-  { id: 6, label: 'High flood warning', },
-  { id: 7, label: 'Sanded', },
-  { id: 8, label: 'Plowing and sanding', },
+  { id: 2, label: 'Bridge Closed (Road Condition)', },
+  { id: 3, label: 'Compact ice', },
+  { id: 4, label: 'Compact snow', },
+  { id: 5, label: 'Debris on road', },
+  { id: 6, label: 'Fog patches', },
+  { id: 7, label: 'Heavy slush', },
+  { id: 8, label: 'High flood warning', },
   { id: 9, label: 'Muddy Sections', },
-  { id: 10, label: 'Fog patches', },
-  { id: 11, label: 'Heavy slush', },
-  { id: 12, label: 'Water pooling', },
-  { id: 13, label: 'Slushy Sections', },
-  { id: 14, label: 'Slushy with slippery sections', },
-  { id: 15, label: 'Rain on compact snow', },
-  { id: 16, label: 'Debris on road', },
-  { id: 17, label: 'Bridge Closed (Road Condition)', },
+  { id: 10, label: 'Plowing and sanding', },
+  { id: 11, label: 'Rain on compact snow', },
+  { id: 12, label: 'Sanded', },
+  { id: 13, label: 'Slippery sections', },
+  { id: 14, label: 'Slushy sections', },
+  { id: 15, label: 'Slushy with slippery sections', },
+  { id: 16, label: 'Water pooling', },
 ];
 
 export const IncidentsList = [
@@ -378,5 +377,10 @@ export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
   FORM_PHRASE_CATEGORY[form][id] = category;
   PHRASES_LOOKUP[id] = phrase;
   return acc;
-}, {}); window.FORM_CATEGORY_PHRASE = FORM_CATEGORY_PHRASE
+}, {});
+
+// the list of phrases for each incident type needs to alphabetic (DBC22-5063)
+Object.keys(FORM_PHRASES).forEach((key) => FORM_PHRASES[key].sort((a, b) => a.phrase < b.phrase ? -1 : 1));
+
+window.FORM_CATEGORY_PHRASE = FORM_CATEGORY_PHRASE
 
