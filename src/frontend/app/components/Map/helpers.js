@@ -463,7 +463,6 @@ export async function getNearby(coords) {
   try {
     const response = await fetch(apiUrl, {mode: 'cors'});
     const data = await response.json();
-console.log(data);
     const results = await filterByTypes(data.features, PopulationCenterTypes, coords);
     if (results.length < 5) {
       results.push(... await filterByTypes(data.features, ['', 'Community'], coords));
@@ -532,7 +531,7 @@ export const selectStyle = {
     minHeight: 0,
   }),
   container: (css) => ({ ...css, flex: 1, }),
-  input: (css) => ({ ...css, margin: 0, padding: 0, color: 'red' }),
+  input: (css) => ({ ...css, margin: 0, padding: 0 }),
   dropdownIndicator: (css) => ({ ...css, padding: 0, color: 'black' }),
   indicatorSeparator: (css) => ({ ...css, display: 'none', }),
   valueContainer: (css) => ({ ...css, padding: '0px 3px', }),
