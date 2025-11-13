@@ -14,7 +14,7 @@ webapp:
   enabled: true
   nameOverride: uat-ride-webapp
   fullnameOverride: uat-ride-webapp
-  replicaCount: 2 # Number of replicas to deploy
+  replicaCount: 1 # Number of replicas to deploy
 
   image:
     repository: ghcr.io/bcgov/ride-webapp
