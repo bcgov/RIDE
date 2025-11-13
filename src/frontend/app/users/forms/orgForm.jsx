@@ -83,7 +83,7 @@ export default function OrgForm(props) {
       setAlertContext({
         type: 'success',
         message: `Organization successfully ${initialOrg ? 'updated' : 'added'}`,
-        undoHandler: () => initialOrg ? undoUpdateSubmit() : undoAddSubmit()
+        undoHandler: () => initialOrg ? undoUpdateSubmit() : undoAddSubmit(res.id)
       });
 
       setOrgs(prevOrgs => {
