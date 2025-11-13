@@ -74,10 +74,10 @@ export default function Home() {
 
   const getUserRole = (user) => {
     if (user.is_superuser) {
-      return 'Superuser';
+      return 'Approver (admin)';
     }
 
-    return user.is_approver ? 'Approver (admin)' : 'Submitter';
+    return user.is_approver ? 'Approver' : 'Submitter';
   }
 
   // Add this function in the Helpers section
@@ -365,7 +365,7 @@ export default function Home() {
 
           {/* Data columns */}
           {!processedUsers.length &&
-            <div className='empty-search ml-2 mt-4'>No users found using current search term.</div>
+            <div className='empty-search ml-2 mt-4'>No users found using current search and filters.</div>
           }
         </div>
       }
