@@ -156,7 +156,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
-            "fontawesome_token=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}""
+            "fontawesome_token=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}"
           build-args: |
             "DEBUG_BUILD=true"
           cache-from: type=gha
