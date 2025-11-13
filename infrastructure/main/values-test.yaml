@@ -40,7 +40,6 @@ webapp:
       variables:
         SHOW_DEBUG_TOOLBAR: 'True' # Set to False for UAT and Prod
         DEBUG: 'True' # Set to False for UAT and Prod
-        VITE_API_HOST: https://test-ride.th.gov.bc.ca # Temporary till we setup proxy to the backend internally.
 
   route:
     host: test-ride.apps.gold.devops.gov.bc.ca # The host name for the route
