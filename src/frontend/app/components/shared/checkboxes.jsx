@@ -21,7 +21,7 @@ export default function RIDECheckBoxes(props) {
 
       <div className={'ride-checkboxes-items'}>
         {itemsList.map((item, index) => (
-          <div key={item.label} className={'ride-checkboxes-items-row'}>
+          <div key={item.id} className={'ride-checkboxes-items-row'}>
             <Checkbox
               className="checkbox"
               checked={itemsState.includes(item.id)}
