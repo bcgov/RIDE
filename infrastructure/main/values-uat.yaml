@@ -68,7 +68,7 @@ frontend:
     enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
 
   vault:
-    secretName: test-static  # This is the name of the secret in vault that contains the environment variables for the app
+    secretName: uat-static  # This is the name of the secret in vault that contains the environment variables for the app
     authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
   deployment:
