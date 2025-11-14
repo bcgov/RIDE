@@ -5,3 +5,5 @@ export const ROUTER_CLIENT_ID = `${import.meta.env.VITE_ROUTER_CLIENT_ID}`;
 export const DEBUG = `${import.meta.env.DEBUG}`;
 export const BASE_MAP_URL = `${import.meta.env.VITE_BASE_MAP_URL}`;
 export const MAP_STYLE_URL = `${import.meta.env.VITE_MAP_STYLE_URL}`;
+export const DEPLOYMENT_TAG = `${import.meta.env.DEPLOYMENT_TAG || ''}`
+export const RELEASE = `${import.meta.env.RELEASE || ''}`

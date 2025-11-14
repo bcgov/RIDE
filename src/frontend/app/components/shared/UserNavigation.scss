@@ -1,0 +1,147 @@
+@use "../../styles/variables.scss" as *;
+@use "tailwindcss";
+
+.user-nav {
+  display: flex;
+  flex-direction: row;
+  margin-left: 1rem;
+
+  @media (min-width: 1200px) {
+    order: 2;
+    margin-left: 0;
+  }
+
+  &-btn {
+    border: 1px solid   #323130;
+    background: $BC-Blue;
+    color: $White;
+    &:hover {
+      background: $BtnHover-Primary;
+    }
+  }
+
+  // Generic dropdown styling
+  &-dropdown {
+    padding: 0;
+    width: 268px;
+    top: 2rem;
+
+    &:last-of-type {
+      margin-left: 12px;
+      margin-right: 10px;
+
+      @media (min-width: 576px) {
+        margin-right: 0;
+      }
+    }
+
+    button {
+      margin: 0;
+    }
+
+    .dropdown-menu {
+      margin-top: 0.5rem;
+      min-width: 268px;
+      max-height: calc(100vh - 3.75rem); /* 3.75rem is rough height of header bar */
+      padding: 0;
+      box-shadow: 0px 6.4px 14.4px 0px rgba(0, 0, 0, 0.13), 0px 1.2px 3.6px 0px rgba(0, 0, 0, 0.10);
+      overflow-y: auto;
+
+      .dropdown-item {
+        &:hover {
+          background-color: $White;
+        }
+      }
+
+      .menu-items {
+        padding: 0.25rem;
+
+        .menu-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          color: $Type-Primary;
+          text-decoration: none;
+          padding: 0.75rem 1rem 0.75rem 0.25rem;
+
+          &:hover {
+            background: $BtnHover-Secondary;
+            .fa-chevron-right {
+              transform: translateX(2px);
+              transition: 0.4s transform $Anim-gentle;
+            }
+          }
+
+          svg {
+            font-size: 0.825rem;
+            transition: 0.4s transform $Anim-gentle;
+          }
+
+          .menu-item-header {
+            svg {
+              width: 2.5rem;
+              text-align: right;
+            }
+
+            .item-count {
+              display: inline-block;
+              margin-left: 0.75rem;
+              padding: 0rem 0.4rem;
+              border-radius: 0.8rem;
+              background: $BC-Blue;
+              color: white;
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+
+    // User menu
+    #user-menu-header {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+
+      background: $Grey10;
+
+      padding: 0.5rem;
+      cursor: default;
+
+      #user-icon {
+        font-size: 2.25rem;
+        padding: 0.5rem;
+      }
+
+      #user-email {
+        font-size: 14px;
+        font-weight: 700;
+        color: $Type-Primary;
+        text-align: center;
+      }
+
+      #signout-link {
+        text-align: center;
+        margin: 1rem 0;
+
+        button {
+          margin-bottom: 0.5rem;
+          color: $Type-Link;
+          cursor: pointer;
+          background: none;
+          border: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+
+    .release-tag {
+      font-size: 75%;
+      color: $Grey60;
+      margin: .5rem;
+    }
+  }
+}

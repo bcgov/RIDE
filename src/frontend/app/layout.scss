@@ -1,21 +1,2 @@
 @use "./styles/variables.scss" as *;
 
-.sign-out-button {
-  button {
-    border-radius: .25rem;
-    font-size: .875rem;
-    border: 1px solid $Grey110;
-    padding: .3rem .5rem;
-    cursor: pointer;
-    text-decoration: none;
-
-    &:hover {
-      background-color: $Grey20;
-    }
-
-    &:active {
-      outline: none;
-      box-shadow: 0 0 0 2px $Grey50;
-    }
-  }
-}
