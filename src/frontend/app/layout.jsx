@@ -7,9 +7,8 @@ import { NavLink, Outlet, useSearchParams } from 'react-router';
 // Internal imports
 import { AlertContext, AuthContext, DebuggingContext } from './contexts';
 import { API_HOST } from './env.js';
-import { getCookie } from "./shared/helpers";
-import { handleFormSubmit } from "./shared/handlers";
-import Alert from "./components/shared/Alert.jsx";
+import Alert from "./components/shared/Alert";
+import UserNavigation from "./components/shared/UserNavigation";
 
 // Styling
 import './layout.scss';
@@ -121,12 +120,7 @@ export default function Layout() {
           </button>
         </div>
 
-        {authContext.username &&
-          <form className={'sign-out-button'} method='post' action={`${API_HOST}/accounts/logout/`} onSubmit={handleFormSubmit}>
-            <input type='hidden' name='csrfmiddlewaretoken' value={getCookie('csrftoken')} />
-            <button type='submit' className="btn btn-outline-primary" autoFocus={true}>Sign out</button>
-          </form>
-        }
+        <UserNavigation authContext={authContext} />
       </header>
 
       <main>
