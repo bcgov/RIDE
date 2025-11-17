@@ -2,13 +2,27 @@ import copy
 from datetime import datetime, timezone
 from pprint import pprint
 
+from django.contrib.auth import get_user_model
 from rest_framework import fields, serializers
 from rest_framework.serializers import Serializer, ModelSerializer, Field
 from rest_framework_gis.fields import GeometryField
 
 from .models import Event, Note, TrafficImpact
 
-class KeyMoveSerializer(ModelSerializer):
+
+class UserSerializer(ModelSerializer):
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'first_name', 'last_name', 'email']
+
+
+class VersionSerializer(ModelSerializer):
+
+    user = UserSerializer(default=serializers.CurrentUserDefault())
+
+
+class KeyMoveSerializer(VersionSerializer):
     '''
     A serializer for adjusting keys in the data argument prior to processing.
 
@@ -105,21 +119,18 @@ class KeyMoveSerializer(ModelSerializer):
         keys_to_move = {}  # <source>: <target>
 
 
-class NotesField(Field):
-
-    def to_representation(self, value):
-        pprint(value)
-
-    def to_internal_value(self, data):
-        pprint(data)
-        return data
-
-
-class NoteSerializer(ModelSerializer):
+class NoteSerializer(VersionSerializer):
 
     class Meta:
         model = Note
         fields = '__all__'
+
+    def validate_event(self, value):
+
+        # if Event.objects.filter(id=value).count() == 0:
+        #     raise serializers.ValidationError("Event not found for ID")
+
+        return value
 
     def to_internal_value(self, data):
         validated = super().to_internal_value(data)
@@ -238,9 +249,6 @@ class EventSerializer(KeyMoveSerializer):
             del validated_data['notes']
 
         return super().create(validated_data)
-
-    # def destroy(self, *args, **kwargs):
-    #     print(self.instance)
 
     def get_id(self):
         event = Event.objects.distinct('id').order_by('-id').first()

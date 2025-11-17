@@ -24,7 +24,6 @@ class Notes(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
-
 class TrafficImpacts(viewsets.ModelViewSet):
 
     queryset = TrafficImpact.objects.filter(deleted=False)

@@ -5,6 +5,8 @@ import { API_HOST } from '../env.js';
 
 import Tooltip from './Tooltip.jsx';
 
+import { patch, del } from '../shared/helpers.js';
+
 function Note({ note, dispatch }) {
 
   const [editing, setEditing] = useState(false);
@@ -15,13 +17,10 @@ function Note({ note, dispatch }) {
     if (saving) { return; }
     try {
       setSaving(true);
-      const response = await fetch(`${API_HOST}/api/notes/${note.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textarea.current.value }),
-      });
-      const updatedNote = await response.json();
-      dispatch({ type: 'update note', value: updatedNote});
+      const response = await patch(`${API_HOST}/api/notes/${note.id}`, {
+        text: textarea.current.value });
+      // const updatedNote = await response.json();
+      dispatch({ type: 'update note', value: response});
       setEditing(false);
     } catch (err) {
       console.log(err);
@@ -35,7 +34,7 @@ function Note({ note, dispatch }) {
 
     try {
       setSaving(true);
-      const response = fetch(`${API_HOST}/api/notes/${note.id}`, { method: 'DELETE' });
+      const response = await del(`${API_HOST}/api/notes/${note.id}`);
       dispatch({ type: 'remove note', value: note});
     } catch (err) {
       console.log(err);
@@ -52,7 +51,7 @@ function Note({ note, dispatch }) {
 
       <div className="note-inner">
         <div className="header">
-          <div className="attribution">{ note.user || 'Dave Kachman' }</div>
+          <div className="attribution">{note.user.first_name} {note.user.last_name}</div>
           {/* <div className="updated">Updated {new Date(note.last_updated).toLocaleString()}</div> */}
           <div className="updated">Updated <TimeAgo date={new Date(note.last_updated)} /></div>
         </div>
