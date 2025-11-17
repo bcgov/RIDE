@@ -53,6 +53,7 @@ class VersionedModel(models.Model):
 
     objects = models.Manager()
     current = VersionedManager()
+    last = VersionedManager()
 
     class Meta:
         ordering = ['id', 'version']
@@ -105,10 +106,7 @@ class VersionedModel(models.Model):
                     self.version = last.version + 1
 
                 self.pk = None  # ensure INSERT over UPDATE
-
-                # allows for adding a subsequent version which is "unpublished"
-                # (e.g., awaiting approval)
-                self.latest = make_latest
+                self.latest = True
 
             super().save(*args, **kwargs)
 
@@ -159,6 +157,18 @@ class OrderedListField(models.JSONField):
     '''
 
 
+class PendingManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(latest=True, approved=False, deleted=False)
+
+
+class LatestApprovedManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(latest_approved=True, deleted=False)
+
+
 class Event(VersionedModel):
     '''
     An event is an occurrence with 1) a time, and 2) a place.
@@ -172,7 +182,8 @@ class Event(VersionedModel):
     meta = models.JSONField(default=dict)
     event_type = models.CharField(blank=True, null=True)
     status = models.CharField(default='Active')
-    approved = models.BooleanField(default=True)
+    approved = models.BooleanField(default=False)
+    latest_approved = models.BooleanField(default=False)
 
     start = LocationField(default=dict)
     end = LocationField(default=dict, null=True)
@@ -201,13 +212,31 @@ class Event(VersionedModel):
     # is_closure = models.BooleanField(default=False)
     # tlids = models.JSONField(default=list, null=True)
 
+    # override VersionedModel's .current manager to use latest_approved
+    # rather than latest (still available via the .last manager)
+    current = LatestApprovedManager()
+    pending = PendingManager()
+
     def save(self, *args, **kwargs):
         '''
-        Overriding save to control whether or not the next version is made the
-        latest version, based on whether it requires approval.
+        Overriding save for maintaining the `latest_approved` field.
+
+        `latest_approved` is a convenience field to allow easy querying
+        of the last approved version of a VersionedModel (thus avoiding
+        an aggregation query).  Basically just setting `latest_approved`
+        to `False` for all the other approved instances in the history.
         '''
 
-        super().save(*args, make_latest=self.approved, **kwargs)
+        with transaction.atomic():
+            self.latest_approved = self.approved
+            if self.approved:
+                Event.objects\
+                    .filter(id=self.id, latest_approved=True)\
+                    .update(latest_approved=False)
+            super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.id} ({self.version}) {self.latest} {self.approved} {self.latest_approved}'
 
 
 class Note(VersionedModel):

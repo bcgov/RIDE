@@ -28,6 +28,8 @@ import EventForm, { eventReducer, getInitialEvent } from './forms';
 import InfoBox from './InfoBox';
 import Preview from './Preview';
 import Message from './Message';
+import Queue from './Queue';
+import { selectFeature } from '../components/Map/helpers.js';
 
 // Styling
 import './home.scss';
@@ -73,7 +75,8 @@ export default function Home() {
     if (!map || !coords ) { return; }
     if (!Array.isArray(coords[0])) { coords = [coords]; }
     coords = coords.filter(el => el) // filter undefined elements, such as if end isn't set
-    coords = coords.map((pair) => pair[0] > -180 ? ll2g(pair) : pair);
+    // FIXME: test if lat/long, convert if so
+    coords = coords.map((pair) => pair[0] > -180 ? ll2g(pair): pair);
     const extent = boundingExtent(coords);
 
     if (coords.length > 1) {
@@ -88,36 +91,67 @@ export default function Home() {
     map.pins.getSource().removeFeature(map.end);
     map.route.getGeometry().setCoordinates([]);
     map.start = map.end = null;
-    dispatch({ type: 'reset form' });
+    selectFeature(map, null);
+    dispatch({ type: 'reset form', cancel: true });
+  }
+
+  const clickHandler = (e, event) => {
+    if (event.showForm) {
+      return;
+    }
+
+    const feature = e.map.getFeaturesAtPixel(e.pixel,{
+      layerFilter: (layer) => layer.listenForClicks,
+    })[0];
+
+    if (feature?.noSelect) { return; }
+
+    if (!feature || !feature.styleState) {
+      if (e.map.selectedFeature) {  // deselect existing selection
+        selectFeature(e.map, null);
+        dispatch({ type: 'reset form' });
+        e.map.route.getGeometry().setCoordinates([]);
+      }
+    } else {  // new selection
+      selectFeature(e.map, feature);
+      const raw = feature.pointFeature.get('raw');
+      dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false });
+    }
   }
 
   mapRef.current = map;
 
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
-      { event.showForm && event.location.start.name &&
-        <div className="panel">
-          <EventForm
-            map={mapRef.current}
-            preview={() => setPreview(!preview)}
-            cancel={cancel}
-            event={event}
-            dispatch={dispatch}
-            goToFunc={centerMap}
-            setMessage={setMessage}
-          />
-        </div>
-      }
+      <div className="panel">
+        { (event.showForm && event.location.start.name)
+          ? <EventForm
+              map={mapRef.current}
+              preview={() => setPreview(!preview)}
+              cancel={cancel}
+              event={event}
+              dispatch={dispatch}
+              goToFunc={centerMap}
+              setMessage={setMessage}
+            />
+          : <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
+        }
+      </div>
 
       <MapContext.Provider value={{ map, setMap }}>
-        <Map dispatch={dispatch}>
+        <Map dispatch={dispatch} event={event} clickHandler={clickHandler}>
           <PinLayer event={event} dispatch={dispatch} startRef={startRef} endRef={endRef} />
           <Layer name='events' event={event} dispatch={dispatch} startRef={startRef} endRef={endRef} />
         </Map>
       </MapContext.Provider>
 
       { event.location.start.name && event.showPreview &&
-        <Preview dispatch={dispatch} preview={() => setPreview(!preview)} event={event} />
+        <Preview
+          event={event}
+          dispatch={dispatch}
+          preview={() => setPreview(!preview)}
+          mapRef={mapRef}
+        />
       }
       <Message message={message} setMessage={setMessage} />
     </div>

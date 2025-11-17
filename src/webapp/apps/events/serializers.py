@@ -1,5 +1,6 @@
 import copy
 from datetime import datetime, timezone
+import logging
 from pprint import pprint
 
 from django.contrib.auth import get_user_model
@@ -9,6 +10,7 @@ from rest_framework_gis.fields import GeometryField
 
 from .models import Event, Note, TrafficImpact
 
+log = logging.getLogger('debug')
 
 class UserSerializer(ModelSerializer):
 
@@ -222,7 +224,7 @@ class EventSerializer(KeyMoveSerializer):
                 now = datetime.now(tz=timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
                 data['meta']['last_inactivated'] = now
 
-        data['approved'] = self.approval_not_needed(data)
+        data['approved'] = self.is_automatically_approved(data)
 
         return super().to_internal_value(data)
 
@@ -236,8 +238,30 @@ class EventSerializer(KeyMoveSerializer):
 
         return obj
 
-    def approval_not_needed(self, data):
-        if data.get('severity') == 'Minor':
+    def is_automatically_approved(self, data):
+        '''
+        Return whether or not the data allows for automatic approval.
+
+        If the severity of the event is major, or the event impacts include a
+        closure, approval is not automatic unless the person submitting it is
+        an approver.
+
+        Where the submission does not include the impacts or severity, the
+        current values for the instance are used if an instance exists.
+        '''
+
+        impacts = data.get('impacts')
+        severity = data.get('severity')
+
+        if self.instance is not None:
+            if severity is None:
+                severity = self.instance.severity
+            if impacts is None:
+                impacts = self.instance.impacts
+
+        is_closure = len([el for el in (impacts or []) if el.get('closed', False)]) > 0
+
+        if severity == 'Minor' and not is_closure:
             return True
 
         request = self.context.get('request')
@@ -265,6 +289,25 @@ class EventSerializer(KeyMoveSerializer):
         else:
             return f'DBC-{int(event.id.split('-')[-1]) + 1}'
 
+
+class PendingSerializer(EventSerializer):
+
+    latest_published_version = serializers.SerializerMethodField()
+    clearing = serializers.SerializerMethodField()
+
+    def get_latest_published_version(self, obj):
+        latest = Event.current.filter(id=obj.id).first()
+        return None if latest is None else latest.version
+
+    def get_clearing(self, obj):
+        if obj.status == 'Active':
+            return False
+
+        latest = Event.current.filter(id=obj.id).first()
+        if latest.status == 'Active':
+            return True
+
+        return False
 
 class TrafficImpactSerializer(ModelSerializer):
 

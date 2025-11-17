@@ -5,18 +5,65 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.events.models import Event
 from apps.events.serializers import EventSerializer
 from apps.events.tests import e2
+from apps.users.models import RIDEUser
 
+
+NEW_EVENT = {
+    'id': 'DBC-100006',
+    'event_type': 'Incident',
+}
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        # e = EventSerializer(data=e2)
-        # if e.is_valid():
-        #     ee = e.save()
-        #     pprint(e.data)
-        # else:
-        #     print(e.errors)
+        user = RIDEUser.objects.get(username='approver')
 
+
+        Event.objects.filter(id='DBC-100006').delete()
+
+        # e = Event(**NEW_EVENT)
+        # e.user = user
+        # e.save()
+        # self.print_events()
+        # self.print_managers()
+
+        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e.delay_amount = 1
+        # e.save()
+        # self.print_events()
+        # self.print_managers()
+
+        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e.approved = True
+        # e.save()
+        # self.print_events()
+        # self.print_managers()
+
+        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e.approved = False
+        # e.save()
+        # self.print_events()
+        # self.print_managers()
+
+        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e.approved = True
+        # e.save()
+        # self.print_events()
+        # self.print_managers()
+
+
+    def print_events(self, id):
+        print('====')
+        for e in Event.objects.filter(id=id).order_by('id', 'version'):
+            print(e)
+
+    def print_managers(self):
+        pending = Event.pending.filter(id='DBC-100006').first()
+        current = Event.current.filter(id='DBC-100006').first()
+
+        print(getattr(pending, 'version', '-'), getattr(current, 'version', '-'))
+
+    def count_field_lengths(self):
         with  open('../../samples/cars.json') as src:
             data = json.load(src)
 
@@ -62,6 +109,5 @@ class Command(BaseCommand):
             if nearby is not None and len(nearby) > output['nearby']['length']:
                 output['nearby']['length'] = len(nearby)
                 output['nearby']['longest'] = nearby
-
 
         pprint(output)

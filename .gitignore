@@ -25,6 +25,7 @@ src/static/
 infrastructure/yaml
 src/scripts/
 samples/
+debug.log
 
 notes
 
