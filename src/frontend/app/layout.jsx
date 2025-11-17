@@ -80,11 +80,13 @@ export default function Layout() {
             ret.username = data.username;
             ret.email = data.email;
             ret.is_superuser = data.is_superuser;
+            ret.is_approver = data.is_approver;
           }
           setAuthContext((prior) => {
             if (ret.loginStateKnown != prior.loginStateKnown) { return ret; }
             if (ret.username != prior.username) { return ret; }
             if (ret.email != prior.email) { return ret; }
+            if (ret.is_approver != prior.is_approver) { return ret; }
             return prior;
           });
         })
@@ -129,13 +131,13 @@ export default function Layout() {
 
       <main>
         <DebuggingContext value={debuggingIsOn}>
-          <AuthContext value={{authContext, setAuthContext}}>
+          <AuthContext.Provider value={{authContext, setAuthContext}}>
             <AlertContext value={{alertContext, setAlertContext}}>
               <Outlet />
 
               <Alert />
             </AlertContext>
-          </AuthContext>
+          </AuthContext.Provider>
         </DebuggingContext>
       </main>
     </>

@@ -86,7 +86,6 @@ function getEndDate(value) {
 function printTime(time) {
   if (!time) { return; }
   return format(time, 'h:mm b');
-  // return time.toLocaleTimeString('en-CA', { timeStyle: 'short'});
 }
 
 function printDate(date) {

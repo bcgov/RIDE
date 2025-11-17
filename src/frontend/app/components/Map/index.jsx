@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useCallback, useEffect, useRef, useState } from 'react';
 import { components } from 'react-select';
 import AsyncSelect from 'react-select/async';
 
@@ -46,14 +46,20 @@ async function getLocations(addressInput) {
 }
 
 
-export default function Map({ children, dispatch }) {
+export default function Map({ children, dispatch, event, clickHandler }) {
 
   let creatingMap = false;
 
   const elementRef = useRef();
   const searchRef = useRef();
+  const eventRef = useRef();
+  eventRef.current = event;
 
   const { map, setMap } = useContext(MapContext);
+
+  const click = useCallback((e) => {
+    clickHandler(e, eventRef.current);
+  }, [event]);
 
   useEffect(() => {
     if (creatingMap) { return; }  // only once
@@ -62,14 +68,10 @@ export default function Map({ children, dispatch }) {
     const map = createMap();
     map.setTarget(elementRef.current);
     map.on('pointermove', pointerMove);
-    map.on('click', (e) => click(e, dispatch));
+    map.on('click', click);
     map.on('movestart', (e) => {
       if (e.map.start?.ref?.current) { e.map.start.ref.current.style.visibility = 'hidden'; }
       if (e.map.end?.ref?.current) { e.map.end.ref.current.style.visibility = 'hidden'; }
-    })
-    map.on('moveend', (e) => {
-      e.map.start?.updateInfobox(e.map);
-      e.map.end?.updateInfobox(e.map);
     })
     setMap(map);
   }, []);

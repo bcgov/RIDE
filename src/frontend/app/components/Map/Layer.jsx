@@ -22,13 +22,17 @@ import { API_HOST } from '../../env.js';
 import { getIcon } from '../../events/icons';
 import { endHandler } from './PinLayer';
 import { patch } from '../../shared/helpers';
+import { selectFeature } from './helpers.js';
 
 
-export function addEvent(event, map) {
+export function addEvent(event, map, dispatch) {
   // TODO: remove earlier feature if exists
   const source = map.get('majorEvents').getSource();
   const existing = source.get(event.id);
+
   if (existing) {
+    if (event.version <= existing.get('version')) { return; }
+
     source.unset(event.id, true);
     if (existing.paired) { source.removeFeature(existing.paired); }
     source.removeFeature(existing);
@@ -58,9 +62,11 @@ export function addEvent(event, map) {
     feat2: styles,
     type: 'event',
     raw: structuredClone(event),
+    version: event.version,
     geometry: new Point(mid || start),
   });
   pointFeature.pointFeature = pointFeature;
+  pointFeature.setId(event.id);
 
   if (pointFeature.getGeometry().getCoordinates()[0] > -1000) {
     pointFeature.getGeometry().transform('EPSG:4326', map.getView().getProjection().getCode());
@@ -78,6 +84,10 @@ export function addEvent(event, map) {
   }
   source.addFeature(pointFeature);
   source.set(event.id, pointFeature, true);
+
+  if (map.selectedFeature && map.selectedFeature.getId() === event.id) {
+    dispatch({ type: 'update event', value: event})
+  }
 }
 
 function getStyle(event, isRoute=false) {
@@ -103,10 +113,52 @@ function getStyle(event, isRoute=false) {
   return path.join('.');
 }
 
+async function updateEvents(map, dispatch) {
+  fetch(`${API_HOST}/api/events`, {
+    headers: { 'Accept': 'application/json' },
+    credentials: "include",
+  }).then((response) => response.json())
+    .then((data) => {
+      if (!map.get('majorEvents')) {
+        const layer = new VectorLayer({
+          classname: 'events',
+          visible: true,
+          source: new VectorSource({ format: new GeoJSON() }),
+          style: () => null
+        });
+        layer.listenForHover = true;
+        layer.listenForClicks = true;
+        map.addLayer(layer);
+        map.set('majorEvents', layer);
+      }
+
+      const source = map.get('majorEvents').getSource();
+      window.s = source; window.vl = map.get('majorEvents');
+
+      const eventIds = {};
+      data.forEach((event) => {
+        addEvent(event, map, dispatch);
+        eventIds[event.id] = true;
+      });
+
+      // remove events no longer in the list of events
+      source.getKeys().forEach((key) => {
+        if (!key.startsWith('DBC')) { return; }
+        if (!eventIds[key]) {
+          const existing = source.get(key);
+          source.unset(key, true);
+          if (existing.paired) { source.removeFeature(existing.paired); }
+          source.removeFeature(existing);
+        }
+      });
+    });
+}
+
 export default function Layer({ event, dispatch, startRef, endRef }) {
 
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
+  const [ fetchInterval, setFetchInterval ] = useState();
   const menuRef = useRef();
   const eventRef = useRef(); // necessary for early-bound handler to read current prop
   eventRef.current = event;
@@ -127,94 +179,99 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
     const pixel = e.pixel;
     const items = [];
 
-    if (!event.location.start?.name) {
-      items.push({
-        label: 'Create event',
-        action: (e) => {
-          setContextMenu([]);
-          dispatch({ type: 'reset form', value: getInitialEvent(), showPreview: true, showForm: true });
-          map.start = new PinFeature({
-            style: 'start',
-            geometry: new Point(coordinate),
-            ref: startRef,
-            action: 'set start',
-          });
-          map.pins.getSource().addFeature(map.start);
-          map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-          endHandler({ coordinate, pixel, map, }, map.start, dispatch);
-        }
-      });
-    } else if (!event.location.end?.name && !feature) {
-      items.push({
-        label: 'Add end point',
-        action: (e) => {
-          setContextMenu([]);
-          map.end = new PinFeature({
-            style: 'end',
-            geometry: new Point(coordinate),
-            ref: endRef,
-            action: 'set end',
-          });
-          map.pins.getSource().addFeature(map.end);
-          map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-          endHandler({ coordinate, pixel, map, }, map.end, dispatch);
-        }
-      });
+    if (!feature) {
+      if (!event.location.start?.name) {
+        items.push({
+          label: 'Create event',
+          action: (e) => {
+            setContextMenu([]);
+            dispatch({ type: 'reset form', value: getInitialEvent(), showPreview: true, showForm: true });
+            map.start = new PinFeature({
+              style: 'start',
+              geometry: new Point(coordinate),
+              ref: startRef,
+              action: 'set start',
+            });
+            map.pins.getSource().addFeature(map.start);
+            map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+            endHandler({ coordinate, pixel, map, }, map.start, dispatch);
+          }
+        });
+      } else if (!event.location.end?.name && event.showForm) {
+        items.push({
+          label: 'Add end point',
+          action: (e) => {
+            setContextMenu([]);
+            map.end = new PinFeature({
+              style: 'end',
+              geometry: new Point(coordinate),
+              ref: endRef,
+              action: 'set end',
+            });
+            map.pins.getSource().addFeature(map.end);
+            map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+            endHandler({ coordinate, pixel, map, }, map.end, dispatch);
+          }
+        });
+      }
     }
 
     if (feature && feature !== map.location) {
       e.stopPropagation();
       const map = e.map; // necessary to bind map for callback below
 
-      // TODO: add permission based checks on these items
-      items.push(...[
-        {
-          label: 'Edit event',
-          action: (e) => {
-            setContextMenu([]);
-            dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: true });
-          }
-        },
-        {
-          label: 'View history',
-          action: (e) => {
-            setContextMenu([]);
-            // dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: true });
-          }
-        }
-      ]);
+      if (!event.showForm) {
 
-      if (feature.get('raw').status === 'Active') {
-        items.push({
-          label: 'Clear event',
-          action: (e) => {
-            setContextMenu([]);
-            const event = feature.get('raw');
-            patch(
-              `${API_HOST}/api/events/${event.id}`,
-              { status: 'Inactive' },
-            ).then((event) => {
-                feature.set('raw', event);
-                dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
-              });
+        // TODO: add permission based checks on these items
+        items.push(...[
+          {
+            label: 'Edit event',
+            action: (e) => {
+              setContextMenu([]);
+              selectFeature(map, feature);
+              dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: true });
+            }
+          },
+          {
+            label: 'View history',
+            action: (e) => {
+              setContextMenu([]);
+              // dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: true });
+            }
           }
-        });
-      } else {
-        items.push({
-          label: 'Unclear event',
-          debugging: true,
-          action: (e) => {
-            setContextMenu([]);
-            const event = feature.get('raw');
-            patch(
-              `${API_HOST}/api/events/${event.id}`,
-              { status: 'Active' },
-            ).then((event) => {
-                feature.set('raw', event);
-                dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
-              });
-          }
-        });
+        ]);
+
+        if (feature.get('raw').status === 'Active') {
+          items.push({
+            label: 'Clear event',
+            action: (e) => {
+              setContextMenu([]);
+              const event = feature.get('raw');
+              patch(
+                `${API_HOST}/api/events/${event.id}`,
+                { status: 'Inactive' },
+              ).then((event) => {
+                  feature.set('raw', event);
+                  dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
+                });
+            }
+          });
+        } else if (feature.get('raw').approved) {
+          items.push({
+            label: 'Reactivate event',
+            action: (e) => {
+              setContextMenu([]);
+              const event = feature.get('raw');
+              patch(
+                `${API_HOST}/api/events/${event.id}`,
+                { status: 'Active' },
+              ).then((event) => {
+                  feature.set('raw', event);
+                  dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
+                });
+            }
+          });
+        }
       }
 
       items.push(...[
@@ -242,31 +299,10 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
 
   useEffect(() => {
     if (!map) { return; }
-
-    fetch(`${API_HOST}/api/events`, {
-      headers: { 'Accept': 'application/json' },
-      credentials: "include",
-    }).then((response) => response.json())
-      .then((data) => {
-        if (!map.get('majorEvents')) {
-          const layer = new VectorLayer({
-            classname: 'events',
-            visible: true,
-            source: new VectorSource({ format: new GeoJSON() }),
-            style: () => null
-          });
-          layer.listenForHover = true;
-          layer.listenForClicks = true;
-          map.addLayer(layer);
-          map.set('majorEvents', layer);
-        }
-
-        const source = map.get('majorEvents').getSource();
-        window.s = source; window.vl = map.get('majorEvents');
-
-        data.forEach((event) => { addEvent(event, map)});
-      });
     map.on('contextmenu', contextHandler);
+    if (!fetchInterval) {
+      setFetchInterval(setInterval(() => updateEvents(map, dispatch), 1000));
+    }
   }, [map]);
 
   return <>

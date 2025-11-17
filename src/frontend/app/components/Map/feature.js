@@ -82,16 +82,14 @@ export default class RideFeature extends Feature {
     }
   }
 
+  // used to update available styles based on the underlying event changing
   propertyChanged(e) {
     if (e.key === 'raw') {
       const styles = {};
       const event = this.get('raw');
       ['static', 'hover', 'active'].forEach((state) => {
-        styles[state] = new Style({ image: new Icon({ src: getIcon(event, state) }) });
+        this[state] = new Style({ image: new Icon({ src: getIcon(event, state) }) });
       });
-      this.normal = styles.static;
-      this.active = styles.active;
-      this.hover = styles.hover;
       this.updateStyle();
     }
   }

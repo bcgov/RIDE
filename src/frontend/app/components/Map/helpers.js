@@ -64,28 +64,34 @@ export function click(evt, dispatch) {
   const feature = evt.map.getFeaturesAtPixel(evt.pixel,{
     layerFilter: (layer) => layer.listenForClicks,
   })[0];
+
   if (feature?.noSelect) { return; }
+
   if (!feature || !feature.styleState) {
     if (evt.map.selectedFeature) {  // deselect existing selection
-      evt.map.selectedFeature.selected = false;
-      evt.map.selectedFeature.updateStyle();
-      evt.map.selectedFeature = null;
+      selectFeature(evt.map, null);
       dispatch({ type: 'reset form' });
       evt.stopPropagation();  // prevent placing a start pin
       evt.map.route.getGeometry().setCoordinates([]);
     }
   } else {  // new selection
-    if (evt.map.selectedFeature && evt.map.selectedFeature !== feature) {
-      evt.map.selectedFeature.selected = false;
-      evt.map.selectedFeature.updateStyle();
-    }
-    evt.map.selectedFeature = feature;
-    if (!feature.selected) {
-      feature.selected = true;
-      feature.updateStyle();
-    }
+    selectFeature(evt.map, feature);
     const raw = feature.pointFeature.get('raw');
-    dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true })
+    dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false });
+  }
+}
+
+export function selectFeature(map, feature) {
+  if (map.selectedFeature && map.selectedFeature !== feature) {
+    map.selectedFeature.selected = false;
+    map.selectedFeature.updateStyle();
+  }
+
+  map.selectedFeature = feature;
+
+  if (feature) {
+    feature.selected = true;
+    feature.updateStyle();
   }
 }
 

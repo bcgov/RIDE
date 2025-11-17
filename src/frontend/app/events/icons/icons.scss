@@ -1,0 +1,12 @@
+@use "../../styles/variables.scss" as *;
+
+svg.minorincident {
+  path.badge {
+    stroke: $Gold110;
+    stroke-width: 2;
+    fill: $BC-Yellow;
+  }
+  path.icon {
+    fill: $Gold110;
+  }
+}

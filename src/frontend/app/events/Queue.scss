@@ -1,0 +1,85 @@
+@use '../styles/variables.scss' as *;
+
+.events-header {
+  background: white;
+}
+
+.queue {
+  padding: 1rem;
+
+  .pending {
+    background: white;
+    border: solid 2px $Type-Primary;
+    border-radius: 8px;
+    overflow: auto;;
+
+    header, section {
+      padding: 0.5rem 1rem;
+    }
+
+    header {
+      background-color: $BC-Yellow;
+      color: $BC-Yellow-Dark;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    section.title {
+      display: flex;
+      gap: 1rem;
+
+      .icon {
+        padding-top: 0.25rem;
+        img {
+          height: 40px;
+          width: 40px;
+        }
+      }
+
+      .title {
+        .situation {
+          font-size: 16px;
+          font-weight: bold;
+        }
+        .id {
+          font-size: 14px;
+        }
+      }
+
+    }
+
+    .road {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    section.button {
+      margin-top: 0.25rem;
+      button {
+        padding: 0.5rem;
+        width: 100%;
+        border-radius: 4px;
+        background: $Grey10;
+        color: $ViewDetailsText;
+        font-weight: bold;
+        font-size: 14px;
+
+        svg {
+          margin-left: 0.25rem;
+        }
+      }
+
+      button:hover {
+        background: $Grey20;
+      }
+
+      button:active {
+        background: $Grey30;
+      }
+    }
+  }
+
+  .pending + .pending {
+    margin-top: 0.5rem;
+  }
+}

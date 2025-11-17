@@ -138,7 +138,23 @@ import roadconditionInactiveStatic from './roadcondition-inactive-static.svg';
 import roadconditionInactiveHover from './roadcondition-inactive-hover.svg';
 import roadconditionInactiveActive from './roadcondition-inactive-active.svg';
 
+import chainup from './chainup.svg';
+import closure from './closure.svg';
+import majordelay from './majordelay.svg';
+import majorfuture from './majorfuture.svg';
+import majorfutureclosure from './majorfutureclosure.svg';
+import majorincident from './majorincident.svg';
+import minordelay from './minordelay.svg';
+import minorfuture from './minorfuture.svg';
+import minorfutureclosure from './minorfutureclosure.svg';
+import MinorIncident from './minorincident.svg?react';
+import roadcondition from './roadcondition.svg';
+
+import './icons.scss';
+
 export {
+  MinorIncident,
+
   incidentMajorActiveStatic,
   incidentMajorActiveHover,
   incidentMajorActiveActive,
@@ -727,25 +743,64 @@ const icons = {
 window.icons = icons;
 export default icons;
 
-export function getIcon(event, state='static') {
+let curr, prev;
+['incident', 'planned'].forEach((type) => {
+  const prev = curr;
+  curr = icons[type];
+  ['major', 'minor'].forEach((severity) => {
+    const prev = curr;
+    curr = curr[severity];
+    ['present', 'future'].forEach((tense) => {
+      const prev = curr;
+      curr = curr[tense];
+      ['open', 'closure'].forEach((closure)=> {
+        // if (closure === 'open' && severity === 'minor') { return; }
+        const prev = curr;
+        curr = curr[closure];
+        curr.pending = structuredClone(curr.active);
+        ['active', 'hover', 'static'].forEach((state) => {
+          curr.pending[state] = curr.pending[state].replaceAll('white', '%23D8EAFD');
+          curr.pending[state] = curr.pending[state].replaceAll('%23584215', '%231E5189');
+          curr.pending[state] = curr.pending[state].replaceAll('%23FACC75', '%235595D9');
+          curr.pending[state] = curr.pending[state].replaceAll('%23FCBA19', '%235595D9');
+
+          curr.pending[state] = curr.pending[state].replaceAll('%23EFB4BA', 'white');
+          curr.pending[state] = curr.pending[state].replaceAll('%23CE3E39', '%235595D9');
+          curr.pending[state] = curr.pending[state].replaceAll('%23953734', '%233470B1');
+        });
+        curr = prev;
+      });
+      curr = prev;
+    });
+    curr = prev;
+  });
+  curr = prev;
+});
+
+export function getPlainIcon(event, state='static') {
+  return getIcon(event, state, false);
+}
+
+export function getIcon(event, state='static', includePending=true) {
   let type, status, severity, tense, closure;
   try {
     type = event.type.toLowerCase() || 'incident';
     if (type === 'planned event') { type = 'planned' ; }
     status = event.status.toLowerCase() || 'active';
+    if (event.approved === false && includePending) { status = 'pending'; }
 
     if (['incident', 'planned'].includes(type)) {
       severity = event.details.severity.toLowerCase() || 'minor';
 
       if (status === 'inactive') { // TODO: cleared determine by time of last inactivation
         const lastUpdated = new Date(event.last_updated);
-        if (lastUpdated > new Date() - 60000 * 15) {  // TODO: time window move to env variable
+        if (!event.approved || lastUpdated > new Date() - 60000 * 15) {  // TODO: time window move to env variable
           status = 'clearing';
         }
       }
 
       // TOOD: determine future tense once schedules are implemented
-      tense = 'present';
+      tense = type === 'incident' ? 'present' : 'future';
       closure = event.is_closure ? 'closure' : 'open';
       return icons[type][severity][tense][closure][status][state];
     } else {
@@ -757,193 +812,3 @@ export function getIcon(event, state='static') {
     console.log(event);
   }
 }
-
-// export default {
-//   closure: {
-//     active: {
-//       static: closureActiveStatic,
-//       hover: closureActiveHover,
-//       active: closureActiveActive
-//     },
-//     clearing: {
-//       static: closureClearingStatic,
-//       hover: closureClearingHover,
-//       active: closureClearingActive
-//     },
-//     inactive: {
-//       static: closureInactiveStatic,
-//       hover: closureInactiveHover,
-//       active: closureInactiveActive
-//     }
-//   },
-//   majorincident: {
-//     active: {
-//       static: majorincidentActiveStatic,
-//       hover: majorincidentActiveHover,
-//       active: majorincidentActiveActive
-//     },
-//     clearing: {
-//       static: majorincidentClearingStatic,
-//       hover: majorincidentClearingHover,
-//       active: majorincidentClearingActive
-//     },
-//     inactive: {
-//       static: majorincidentInactiveStatic,
-//       hover: majorincidentInactiveHover,
-//       active: majorincidentInactiveActive
-//     }
-//   },
-//   majorfuture: {
-//     active: {
-//       static: majorfutureActiveStatic,
-//       hover: majorfutureActiveHover,
-//       active: majorfutureActiveActive
-//     },
-//     clearing: {
-//       static: majorfutureClearingStatic,
-//       hover: majorfutureClearingHover,
-//       active: majorfutureClearingActive
-//     },
-//     inactive: {
-//       static: majorfutureInactiveStatic,
-//       hover: majorfutureInactiveHover,
-//       active: majorfutureInactiveActive
-//     }
-//   },
-//   majorfutureclosure: {
-//     active: {
-//       static: majorfutureclosureActiveStatic,
-//       hover: majorfutureclosureActiveHover,
-//       active: majorfutureclosureActiveActive
-//     },
-//     clearing: {
-//       static: majorfutureclosureClearingStatic,
-//       hover: majorfutureclosureClearingHover,
-//       active: majorfutureclosureClearingActive
-//     },
-//     inactive: {
-//       static: majorfutureclosureInactiveStatic,
-//       hover: majorfutureclosureInactiveHover,
-//       active: majorfutureclosureInactiveActive
-//     }
-//   },
-//   majordelay: {
-//     active: {
-//       static: majordelayActiveStatic,
-//       hover: majordelayActiveHover,
-//       active: majordelayActiveActive
-//     },
-//     clearing: {
-//       static: majordelayClearingStatic,
-//       hover: majordelayClearingHover,
-//       active: majordelayClearingActive
-//     },
-//     inactive: {
-//       static: majordelayInactiveStatic,
-//       hover: majordelayInactiveHover,
-//       active: majordelayInactiveActive
-//     }
-//   },
-//   chainup: {
-//     active: {
-//       static: chainupActiveStatic,
-//       hover: chainupActiveHover,
-//       active: chainupActiveActive
-//     },
-//     clearing: {
-//       static: chainupClearingStatic,
-//       hover: chainupClearingHover,
-//       active: chainupClearingActive
-//     },
-//     inactive: {
-//       static: chainupInactiveStatic,
-//       hover: chainupInactiveHover,
-//       active: chainupInactiveActive
-//     }
-//   },
-//   minorincident: {
-//     active: {
-//       static: minorincidentActiveStatic,
-//       hover: minorincidentActiveHover,
-//       active: minorincidentActiveActive
-//     },
-//     clearing: {
-//       static: minorincidentClearingStatic,
-//       hover: minorincidentClearingHover,
-//       active: minorincidentClearingActive
-//     },
-//     inactive: {
-//       static: minorincidentInactiveStatic,
-//       hover: minorincidentInactiveHover,
-//       active: minorincidentInactiveActive
-//     }
-//   },
-//   minorfuture: {
-//     active: {
-//       static: minorfutureActiveStatic,
-//       hover: minorfutureActiveHover,
-//       active: minorfutureActiveActive
-//     },
-//     clearing: {
-//       static: minorfutureClearingStatic,
-//       hover: minorfutureClearingHover,
-//       active: minorfutureClearingActive
-//     },
-//     inactive: {
-//       static: minorfutureInactiveStatic,
-//       hover: minorfutureInactiveHover,
-//       active: minorfutureInactiveActive
-//     }
-//   },
-//   minorfutureclosure: {
-//     active: {
-//       static: minorfutureclosureActiveStatic,
-//       hover: minorfutureclosureActiveHover,
-//       active: minorfutureclosureActiveActive
-//     },
-//     clearing: {
-//       static: minorfutureclosureClearingStatic,
-//       hover: minorfutureclosureClearingHover,
-//       active: minorfutureclosureClearingActive
-//     },
-//     inactive: {
-//       static: minorfutureclosureInactiveStatic,
-//       hover: minorfutureclosureInactiveHover,
-//       active: minorfutureclosureInactiveActive
-//     }
-//   },
-//   minordelay: {
-//     active: {
-//       static: minordelayActiveStatic,
-//       hover: minordelayActiveHover,
-//       active: minordelayActiveActive
-//     },
-//     clearing: {
-//       static: minordelayClearingStatic,
-//       hover: minordelayClearingHover,
-//       active: minordelayClearingActive
-//     },
-//     inactive: {
-//       static: minordelayInactiveStatic,
-//       hover: minordelayInactiveHover,
-//       active: minordelayInactiveActive
-//     }
-//   },
-//   roadcondition: {
-//     active: {
-//       static: roadconditionActiveStatic,
-//       hover: roadconditionActiveHover,
-//       active: roadconditionActiveActive
-//     },
-//     clearing: {
-//       static: roadconditionClearingStatic,
-//       hover: roadconditionClearingHover,
-//       active: roadconditionClearingActive
-//     },
-//     inactive: {
-//       static: roadconditionInactiveStatic,
-//       hover: roadconditionInactiveHover,
-//       active: roadconditionInactiveActive
-//     }
-//   }
-// }

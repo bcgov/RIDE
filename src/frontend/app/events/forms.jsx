@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useContext, useState, useRef } from 'react';
 
 import { getTransform } from 'ol/proj';
 
@@ -24,6 +24,7 @@ import {
 import { addEvent } from '../components/Map/Layer.jsx';
 import { getCookie } from './shared.jsx';
 import { API_HOST } from '../env';
+import { AuthContext } from '../contexts';
 
 import './forms.css';
 
@@ -52,6 +53,11 @@ const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 export function eventReducer(event, action) {
   switch (action.type) {
+    case 'update event': {
+      if (event.id !== action.value.id) { return event; }
+      return Object.assign({}, event, action.value);
+    }
+
     case 'set': {
       if (!Array.isArray(action.value)) { action.value = [action.value]; }
       action.value.forEach((value) => {
@@ -227,6 +233,9 @@ export function eventReducer(event, action) {
     }
 
     case 'reset form': {
+      if (event.showForm && !action.cancel) {
+        return event; // disallow resetting if form is open
+      }
       if (action.value) {
         const event = structuredClone(action.value);
         event.showPreview = !!action.showPreview;
@@ -290,10 +299,11 @@ function addId(obj) {
   obj.id = id();
   return obj;
 }
+
 export function getInitialEvent() {
   return {
     showPreview: true,
-    showForm: true,
+    showForm: false,
     id: null,
     status: 'Active',
     type: 'Incident',
@@ -338,8 +348,9 @@ export function getInitialEvent() {
 export default function EventForm({ map, preview, cancel, event, dispatch, goToFunc, setMessage }) {
 
   const [errors, setErrors] = useState({});
+  const { authContext } = useContext(AuthContext);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e, submitLabel) => {
     e.preventDefault();
     const err = {};
 
@@ -437,6 +448,21 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
 
     setErrors(err);
 
+    let label;
+    switch(submitLabel) {
+      case 'Publish':
+        label = 'published';
+        break;
+      case 'Update':
+        label = 'updated';
+        break;
+      case 'Clear':
+        label = 'cleared';
+        break;
+      default:
+        label = 'submitted';
+    }
+
     if (Object.keys(err).length === 0) {
       fetch(`${API_HOST}/api/events${ event.id ? `/${event.id}` : '' }`, {
         method: event.id ? 'PUT' : 'POST',
@@ -451,7 +477,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
           cancel();
           addEvent(data, map);
           dispatch({ type: 'reset form' });
-          setMessage(`${event.type} successfully created`)
+          setMessage(`${event.type} successfully ${label}`)
           setTimeout(() => setMessage(''), 5000);
         });
     } else {
@@ -460,10 +486,13 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
   }
 
   const getLabel = () => {
-    if (event.details.severity.startsWith('Minor')) {
-      return event.id ? 'Update' : 'Publish'
+    if (authContext.is_approver) {
+      if (!event.approved && event.status === 'Inactive') { return 'Clear'; }
+      return 'Publish';
+    } else if (event.details.severity.startsWith('Minor') && !event.is_closure) {
+      return event.id ? 'Update' : 'Publish';
     }
-    return event.id ? 'Submit' : 'Submit Update'
+    return 'Submit for Approval';
   }
 
   return (
@@ -473,7 +502,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
           <div className="title">
 
           { event.id
-            ? <h4>Edit { event.type.toLowerCase() } <span className="event-id">{event.id}</span></h4>
+            ? <h4>Edit { event.type.toLowerCase() } <span className="event-id">{event.id} v{event.version}</span></h4>
             : <h4>
                 Create&nbsp;
                 <select onChange={(e) => dispatch({ type: 'set', value: { type: e.target.value }})} defaultValue={event.type}>
@@ -556,7 +585,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
             }
 
             <div className="section buttons">
-              <button type="button" onClick={handleSubmit}>
+              <button type="button" onClick={(e) => handleSubmit(e, getLabel())}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM404.4 276.7C411.4 265.5 408 250.7 396.8 243.6C385.6 236.5 370.8 240 363.7 251.2L302.3 349.5L275.3 313.5C267.3 302.9 252.3 300.7 241.7 308.7C231.1 316.7 228.9 331.7 236.9 342.3L284.9 406.3C289.6 412.6 297.2 416.2 305.1 415.9C313 415.6 320.2 411.4 324.4 404.6L404.4 276.6z"/></svg>
                 {getLabel()}
               </button>

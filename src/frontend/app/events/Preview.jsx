@@ -1,10 +1,12 @@
+import { ReactComponent } from 'react';
 import { format } from 'date-fns';
 
 import './Preview.css';
 import { PHRASES_LOOKUP, TrafficImpacts } from './references';
 import { desc } from './Schedule';
+import { selectFeature } from '../components/Map/helpers';
 
-import { getIcon } from './icons';
+import { getPlainIcon } from './icons';
 
 const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   acc[curr.id] = curr;
@@ -13,7 +15,7 @@ const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
 
 const sd = (date) => date ? format(new Date(date), 'MMM d, y') : '';
 
-export default function Preview({ event, dispatch }) {
+export default function Preview({ event, dispatch, mapRef }) {
   const start = event.location.start || {};
   const end = event.location.end || {};
   const isLinear = !!end.name;
@@ -23,11 +25,11 @@ export default function Preview({ event, dispatch }) {
   if (end.other && end.useOther) { endNearbies.push(end.other); }
 
   const lastUpdated = new Date(event.last_updated);
-  const cleared = event.status === 'Inactive' && lastUpdated > new Date() - 60000 * 15;  // TODO: time window move to env variable
+  const cleared = event.status === 'Inactive' && (!event.approved || lastUpdated > new Date() - 60000 * 15);  // TODO: time window move to env variable
 
-  const icon = getIcon(event);
+  const icon = getPlainIcon(event);
   const nextUpdate = new Date(event?.timing?.nextUpdate);
-  const banner = event.banner;
+  const banner = event.approved === false && 'Event awaiting approval';
 
   return (
     <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'} ${event.status.toLowerCase()} ${cleared ? 'cleared' : ''}`}>
@@ -37,7 +39,21 @@ export default function Preview({ event, dispatch }) {
           <div className="icons">
             <img src={icon} />
 
-            <svg className="close" onClick={() => dispatch({ type: 'reset form', showForm: event.showForm })} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="14" height="14" fill="currentColor">
+            <svg
+              className="close"
+              onClick={() => {
+                if (event.showForm) {
+                  dispatch({ type: 'set', value: { showPreview: false } });
+                } else {
+                  if (mapRef.current) {
+                    selectFeature(mapRef.current, null);
+                  }
+                  dispatch({ type: 'reset form' });
+                }
+              }}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640" width="14" height="14" fill="currentColor"
+            >
               <path strokeWidth="30" stroke="currentColor" d="M135.5 169C126.1 159.6 126.1 144.4 135.5 135.1C144.9 125.8 160.1 125.7 169.4 135.1L320.4 286.1L471.4 135.1C480.8 125.7 496 125.7 505.3 135.1C514.6 144.5 514.7 159.7 505.3 169L354.3 320L505.3 471C514.7 480.4 514.7 495.6 505.3 504.9C495.9 514.2 480.7 514.3 471.4 504.9L320.4 353.9L169.4 504.9C160 514.3 144.8 514.3 135.5 504.9C126.2 495.5 126.1 480.3 135.5 471L286.5 320L135.5 169z"/>
             </svg>
           </div>
@@ -209,7 +225,7 @@ export default function Preview({ event, dispatch }) {
 
       { event.id &&
         <div className="footer" onClick={() => console.log(event)}>
-          Reference ID: { event.id }
+          Reference ID: { event.id } v{event.version}
         </div>
       }
     </div>
