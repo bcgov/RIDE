@@ -432,6 +432,9 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
     // initial note may be included.
     if (form.id) { form.notes = []; }
 
+    // user is always taken from the request
+    delete form.user;
+
     setErrors(err);
 
     if (Object.keys(err).length === 0) {

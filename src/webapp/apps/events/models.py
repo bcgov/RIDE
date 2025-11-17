@@ -2,6 +2,7 @@ from pprint import pprint
 import uuid
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.conf import settings
 from django.contrib.gis.db import models as gis
 from django.db import models, transaction
 from django.db.models.constraints import UniqueConstraint
@@ -55,7 +56,7 @@ class VersionedModel(models.Model):
     latest = models.BooleanField(default=False)
     created = models.DateTimeField(default=timezone.now, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
-    user = models.CharField(max_length=100, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     deleted = models.BooleanField(default=False)
 
     objects = models.Manager()

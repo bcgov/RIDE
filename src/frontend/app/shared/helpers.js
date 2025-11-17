@@ -52,7 +52,7 @@ const DEFAULT_HEADERS = {
 const request = (url, params={}, headers={}, include_credentials=true, method="GET") => {
   // Check if this is an external API call
   const isExternalAPI = url.startsWith('http') && !url.includes(window.location.hostname);
-  
+
   // For external APIs, use minimal headers
   if (isExternalAPI) {
     headers = {
