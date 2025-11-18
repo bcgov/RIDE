@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from 'react';
 
 // Internal imports
-import { AlertContext } from "../contexts.js";
+import { AlertContext, AuthContext } from "../contexts.js";
 import { getUsers, updateUser } from "../shared/data/users";
 import { getOrganizations, getServiceAreas, deleteOrganization, createOrganization } from "../shared/data/organizations";
 import { HasUserError } from "../shared/helpers.js";
@@ -19,6 +19,7 @@ import { faArrowUpLong } from '@fortawesome/pro-solid-svg-icons';
 
 // Styling
 import './home.scss';
+import {useNavigate} from "react-router";
 
 export function meta() {
   return [
@@ -28,10 +29,14 @@ export function meta() {
 
 export default function Home() {
   /* Setup */
-  // Context
-  const { _alertContext, setAlertContext } = useContext(AlertContext);
+  // Navigation
+  const navigate = useNavigate();
 
   /* Hooks */
+  // Context
+  const { _alertContext, setAlertContext } = useContext(AlertContext);
+  const { authContext, _setAuthContext } = useContext(AuthContext);
+
   // States
   const [ users, setUsers ] = useState();
   const [ processedUsers, setProcessedUsers ] = useState();
@@ -42,6 +47,18 @@ export default function Home() {
   const [ searchText, setSearchText ] = useState('');
 
   // Effects
+  useEffect(() => {
+    if (!authContext || !authContext.loginStateKnown) { return; }
+
+    if (!authContext.username) {
+      navigate('/');
+
+    // Redirect to first page if logged in
+    } else {
+      navigate('/events/');
+    }
+  }, [authContext]);
+
   useEffect(() => {
     getUsers().then(data => setUsers(data));
     getOrganizations().then(data => setOrgs(data));
