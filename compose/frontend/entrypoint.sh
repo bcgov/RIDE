@@ -13,6 +13,8 @@ export const ROUTER_CLIENT_ID = '${VITE_ROUTER_CLIENT_ID}';
 export const DEBUG = '${DEBUG}';
 export const BASE_MAP_URL = '${VITE_BASE_MAP_URL}';
 export const MAP_STYLE_URL = '${VITE_MAP_STYLE_URL}';
+export const DEPLOYMENT_TAG = '${DEPLOYMENT_TAG}';
+export const RELEASE = '${RELEASE}';
 EOF
 
 echo "Generated env.js with runtime configuration"
