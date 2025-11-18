@@ -87,7 +87,7 @@ export default function Home() {
 
         <div className={'login-access col-span-4 gap-6'}>
           <p><b>Don’t have access to RIDE?</b></p>
-          <p>To get access to RIDE you must have a BC Government IDIR or a BCeID.</p>
+          <p>To get access to RIDE you must have a BC Government IDIR or a <a href='https://www.bceid.ca/'>BCeID</a>.</p>
           <p>Once you have an IDIR or BCeID you’ll need to request access to RIDE by contacting <a href={'mailto:ride.support@gov.bc.ca'}>ride.support@gov.bc.ca</a>.</p>
         </div>
       </div>
