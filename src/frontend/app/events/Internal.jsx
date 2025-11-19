@@ -5,7 +5,7 @@ import { API_HOST } from '../env.js';
 
 import Tooltip from './Tooltip.jsx';
 
-import { patch, del } from '../shared/helpers.js';
+import { patch, deleteRequest } from '../shared/helpers.js';
 
 function Note({ note, dispatch }) {
 
@@ -33,7 +33,7 @@ function Note({ note, dispatch }) {
 
     try {
       setSaving(true);
-      const response = await del(`${API_HOST}/api/notes/${note.id}`);
+      const response = await deleteRequest(`${API_HOST}/api/notes/${note.id}`);
       dispatch({ type: 'remove note', value: note});
     } catch (err) {
       console.log(err);

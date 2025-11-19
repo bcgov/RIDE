@@ -1,6 +1,9 @@
 // React
 import { useContext, useEffect, useState } from 'react';
 
+// Navigation
+import { useNavigate } from "react-router";
+
 // Internal imports
 import { AlertContext, AuthContext } from "../contexts.js";
 import { getUsers, updateUser } from "../shared/data/users";
@@ -19,7 +22,6 @@ import { faArrowUpLong } from '@fortawesome/pro-solid-svg-icons';
 
 // Styling
 import './home.scss';
-import {useNavigate} from "react-router";
 
 export function meta() {
   return [
@@ -53,8 +55,8 @@ export default function Home() {
     if (!authContext.username) {
       navigate('/');
 
-    // Redirect to first page if logged in
-    } else {
+    // Redirect to first page if not superuser
+    } else if (!authContext.is_superuser) {
       navigate('/events/');
     }
   }, [authContext]);

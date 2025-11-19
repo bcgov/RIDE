@@ -79,6 +79,7 @@ export default function Layout() {
           if (data.username) {
             ret.username = data.username;
             ret.email = data.email;
+            ret.is_superuser = data.is_superuser;
           }
           setAuthContext((prior) => {
             if (ret.loginStateKnown != prior.loginStateKnown) { return ret; }

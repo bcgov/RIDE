@@ -2,9 +2,10 @@ from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
 
 from apps.users.models import RIDEUser
 from apps.users.serializers import RIDEUserSerializer, RIDEGroupSerializer
@@ -120,10 +121,8 @@ class RIDEGroupAPIView(ModelViewSet):
 class session(APIView):
     def get(self, request, format=None):
         if request.user.is_authenticated:
-            response = JsonResponse({
-                "username": request.user.username,
-                "email": request.user.email,
-            })
+            serializer = RIDEUserSerializer(request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         else:
             response = JsonResponse({"username": None})
