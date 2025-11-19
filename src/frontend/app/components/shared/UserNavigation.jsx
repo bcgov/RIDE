@@ -2,7 +2,7 @@
 import React from "react";
 
 // Internal imports
-import { API_HOST } from '../../env.js';
+import { API_HOST, DEPLOYMENT_TAG, RELEASE } from '../../env.js';
 import { getCookie } from "../../shared/helpers";
 import { handleFormSubmit } from "../../shared/handlers";
 
@@ -44,8 +44,8 @@ export default function UserNavigation(props) {
 
         <div className={'menu-items'}>
           <div className='release-tag'>
-            { window.DEPLOYMENT_TAG || '' }
-            { window.RELEASE ? ` (${window.RELEASE})` : 'local' }
+            { DEPLOYMENT_TAG || '' }
+            { RELEASE || '' }
           </div>
         </div>
       </MenuItems>
