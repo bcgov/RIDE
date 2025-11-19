@@ -19,7 +19,6 @@ function Note({ note, dispatch }) {
       setSaving(true);
       const response = await patch(`${API_HOST}/api/notes/${note.id}`, {
         text: textarea.current.value });
-      // const updatedNote = await response.json();
       dispatch({ type: 'update note', value: response});
       setEditing(false);
     } catch (err) {
