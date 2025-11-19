@@ -105,7 +105,10 @@ export default function Layout() {
         {authContext.username &&
           <>
             <NavLink to="/events/">Events</NavLink>
-            <NavLink to="/users/">Users</NavLink>
+
+            {authContext.is_superuser &&
+              <NavLink to="/users/">Users</NavLink>
+            }
           </>
         }
 
