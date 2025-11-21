@@ -73,6 +73,7 @@ export default function Home() {
     if (!map || !coords ) { return; }
     if (!Array.isArray(coords[0])) { coords = [coords]; }
     coords = coords.filter(el => el) // filter undefined elements, such as if end isn't set
+    coords = coords.map((pair) => pair[0] > -180 ? ll2g(pair) : pair);
     const extent = boundingExtent(coords);
 
     if (coords.length > 1) {
