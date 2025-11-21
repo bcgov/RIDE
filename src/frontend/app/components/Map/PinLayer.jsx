@@ -100,6 +100,7 @@ export const endHandler = async (e, point, dispatch) => {
   * route
   */
 export const updateRoute = async (map) => {
+  console.log('updating route', map.start, map.end);
   let route = [];
   if (map.start && map.end) {
     const startCoordinates = g2ll(map.start.getGeometry().getCoordinates());
@@ -193,12 +194,14 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.end = null;
     }
 
-    const route = event.geometry?.geometries[2]?.coordinates;
-    if (map.start && map.end && route) {
-      map.route.getGeometry().setCoordinates(route.map(cc => ll2g(cc)));
-    } else {
-      map.route.getGeometry().setCoordinates([]);
-    }
+    // const route = event.geometry?.geometries[2]?.coordinates;
+    // if (map.start && map.end && route) {
+    //     console.log('resetting');
+    //   map.route.getGeometry().setCoordinates(route.map(cc => ll2g(cc)));
+    // } else {
+    //     console.log('rreesetting', event.geometry?.geometries);
+    //   map.route.getGeometry().setCoordinates([]);
+    // }
   }, [event]);
 
   /* If there's no feature at the click, create a start point if none exists, an
