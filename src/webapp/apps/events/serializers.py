@@ -159,6 +159,7 @@ class EventSerializer(KeyMoveSerializer):
     geometry = GeometryField()
     is_closure = fields.SerializerMethodField()
     last_inactivated = fields.SerializerMethodField()
+    ongoing = fields.SerializerMethodField()
     notes = NotesListSerializer(required=False)
 
     class Meta:
@@ -178,6 +179,7 @@ class EventSerializer(KeyMoveSerializer):
             'timing.nextUpdate': 'next_update',
             'timing.startTime': 'start_time',
             'timing.endTime': 'end_time',
+            'timing.ongoing': 'ongoing',
             'timing.schedules': 'schedules',
             'external.url': 'link',
         }
@@ -195,6 +197,13 @@ class EventSerializer(KeyMoveSerializer):
 
     def get_last_inactivated(self, obj):
         return obj.meta.get('last_inactivated')
+
+    def get_ongoing(self, obj):
+        print(obj.start_time, obj.end_time)
+        if obj.start_time is not None and obj.end_time is None:
+            return True
+
+        return False
 
     def to_internal_value(self, data):
         if data.get('id') is None and self.instance is None:  # creating
