@@ -100,7 +100,6 @@ export const endHandler = async (e, point, dispatch) => {
   * route
   */
 export const updateRoute = async (map) => {
-  console.log('updating route', map.start, map.end);
   let route = [];
   if (map.start && map.end) {
     const startCoordinates = g2ll(map.start.getGeometry().getCoordinates());
@@ -249,7 +248,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.start = null;
 
       if (map.end) {
-        console.log('swapping');
         map.end.resetStyle('start');
         map.end.ref = startRef;
         endRef.current.style.visibility = 'hidden';
