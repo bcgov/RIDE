@@ -9,6 +9,7 @@ global:
   route:
     ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 #The first 4 ranges are GOV IP's, the last one is for OXD external IP
   release: # This is set by Github actions for the prod release. Do not change this value.
+  branch: # This is set by Github actions for the branch name. Do not change this value.
 
 webapp:
   enabled: true

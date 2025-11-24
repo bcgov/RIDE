@@ -57,6 +57,8 @@ spec:
               value: {{ $deploymentTime | quote }}
             - name: RELEASE
               value: {{ .Values.global.release }}
+            - name: BRANCH
+              value: {{ .Values.global.branch }}
             {{- range $key, $value := .Values.deployment.env.variables }}
             - name: {{ $key }}
               value: {{ $value | quote }}
