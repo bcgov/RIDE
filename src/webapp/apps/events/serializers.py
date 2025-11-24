@@ -199,7 +199,6 @@ class EventSerializer(KeyMoveSerializer):
         return obj.meta.get('last_inactivated')
 
     def get_ongoing(self, obj):
-        print(obj.start_time, obj.end_time)
         if obj.start_time is not None and obj.end_time is None:
             return True
 
