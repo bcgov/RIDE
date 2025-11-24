@@ -51,7 +51,7 @@ jobs:
       url: https://prod-ride.apps.gold.devops.gov.bc.ca
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Install CLI tools from OpenShift Mirror
       uses: redhat-actions/openshift-tools-installer@v1
       with:
@@ -79,7 +79,7 @@ jobs:
       url: https://prod-ride.apps.golddr.devops.gov.bc.ca
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Install CLI tools from OpenShift Mirror
       uses: redhat-actions/openshift-tools-installer@v1
