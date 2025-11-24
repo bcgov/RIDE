@@ -224,6 +224,7 @@ class EventSerializer(KeyMoveSerializer):
                 data['meta']['last_inactivated'] = now
 
         data['approved'] = self.approval_not_needed(data)
+        data['approved'] = True  # temp fix in UAT to disable approval queue
 
         return super().to_internal_value(data)
 
