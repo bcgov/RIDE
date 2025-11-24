@@ -11,3 +11,5 @@ environ.Env.read_env(BASE_DIR / '.env', overwrite=True)
 KEYCLOAK_URL = env('KEYCLOAK_URL')
 KEYCLOAK_CLIENT_ID = env('KEYCLOAK_CLIENT_ID')
 KEYCLOAK_SECRET = env('KEYCLOAK_SECRET')
+
+ALLOW_LOCAL_ACCOUNTS = env.bool('ALLOW_LOCAL_ACCOUNTS', default=False)
