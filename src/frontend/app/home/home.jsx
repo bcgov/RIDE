@@ -5,7 +5,7 @@ import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 // Internal imports
-import { API_HOST, DEBUG } from '../env.js';
+import { ALLOW_LOCAL_ACCOUNTS, API_HOST, DEBUG } from '../env.js';
 import { AuthContext } from '../contexts';
 import { getCookie } from "../shared/helpers";
 import { handleFormSubmit } from "../shared/handlers";
@@ -71,7 +71,7 @@ export default function Home() {
             <button type='submit' autoFocus={true}>Sign-in with BCeID</button>
           </form>
 
-          {DEBUG &&
+          {DEBUG && ALLOW_LOCAL_ACCOUNTS &&
             <form
               className={'sign-in-button'}
               method='post'
