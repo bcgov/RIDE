@@ -452,6 +452,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
           addEvent(data, map);
           dispatch({ type: 'reset form' });
           setMessage(`${event.type} successfully created`)
+          setTimeout(() => setMessage(''), 5000);
         });
     } else {
       console.log('Errors', err);
