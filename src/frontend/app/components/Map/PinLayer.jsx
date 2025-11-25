@@ -52,19 +52,25 @@ export const endHandler = async (e, point, dispatch) => {
   point.getGeometry().setCoordinates(snapped);
   point.dra = await getDRA(snapped, point, e.map);
   const props = point.dra.properties;
-  const aliases = [
+  let aliases = [
     props?.ROAD_NAME_ALIAS1,
     props?.ROAD_NAME_ALIAS2,
     props?.ROAD_NAME_ALIAS3,
     props?.ROAD_NAME_ALIAS4,
   ].filter(el => el);
+  let name = props?.ROAD_NAME_FULL;
+  if (props?.HIGHWAY_ROUTE_NUMBER) {
+    name = `Hwy ${props?.HIGHWAY_ROUTE_NUMBER}`;
+    aliases.unshift(props?.ROAD_NAME_FULL);
+    aliases = aliases.filter((alias) => alias !== name);
+  }
   point.updateInfobox(e.map);
 
   dispatch({
     type: point.action,
     value: {
       ... props,
-      name: props?.ROAD_NAME_FULL,
+      name,
       alias: aliases[0],
       aliases,
       pending: false, nearbyPending: true
