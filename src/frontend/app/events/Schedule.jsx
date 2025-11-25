@@ -49,6 +49,40 @@ function getDate(time) {
   return date;
 }
 
+/* The date input widget returns a date like "2025-11-24", which creates a JS
+ * date in UTC; the local date is then "2025-11-23 16:00:00 GMT-800", and the
+ * value in the widget is 2025-11-23, a day earlier.
+ *
+ * To cure this we append a time to the date string, which creates the date in
+ * the local timezone, which then yields the expected UTC
+ * ("2025-22-24T08:00:00Z"), localized back to 0 hour on the correct date in the
+ * event's timezone.
+ */
+function getStartDate(value) {
+  if (value) {
+    const date = new Date(`${value}T00:00:00`);
+    if (!isNaN(date)) { return date; }
+  }
+  return null;
+}
+
+/* The date input widget returns a date like "2025-11-24", which creates a JS
+ * date in UTC; the local date is then "2025-11-23 16:00:00 GMT-800", and the
+ * value in the widget is 2025-11-23, a day earlier.
+ *
+ * To cure this we append a time to the date string, which creates the date in
+ * the local timezone, which then yields the expected UTC
+ * ("2025-22-25T07:59:59Z"), localized back to 11:59:59 PM on the correct date
+ * in the event's timezone.
+ */
+function getEndDate(value) {
+  if (value) {
+    const date = new Date(`${value}T23:59:59`);
+    if (!isNaN(date)) { return date; }
+  }
+  return null;
+}
+
 function printTime(time) {
   if (!time) { return; }
   return format(time, 'h:mm b');
@@ -57,6 +91,7 @@ function printTime(time) {
 
 function printDate(date) {
   if (!date) { return; }
+  date = new Date(date);
   return format(date, 'y-MM-dd');
 }
 
@@ -231,7 +266,7 @@ export default function Scheduled({ errors, event, dispatch }) {
           </label>
           <input type="date"
             defaultValue={printDate(event.timing.startTime)}
-            onBlur={(e) => dispatch({ type: 'set', value: [{ startTime: e.target.value, section: 'timing' }]})}
+            onBlur={(e) => dispatch({ type: 'set', value: [{ startTime: getStartDate(e.target.value), section: 'timing' }]})}
           />
         </div>
 
@@ -242,7 +277,7 @@ export default function Scheduled({ errors, event, dispatch }) {
           </label>
           <input type="date"
             defaultValue={printDate(event.timing.endTime)}
-            onBlur={(e) => dispatch({ type: 'set', value: [{ endTime: e.target.value, section: 'timing' }]})}
+            onBlur={(e) => dispatch({ type: 'set', value: [{ endTime: getEndDate(e.target.value), section: 'timing' }]})}
           />
         </div>
       </div>
