@@ -325,11 +325,7 @@ export function getDRA(coords, point, map) {
   /* Resolution is projection unit per pixel.  For EPSG:3857, the unit is
    * meter; if the resolution is 30, then one pixel represents 30m.
    */
-  // const p = new Feature({ geometry: new Point(coords) });
-  // p.setStyle(dotStyle2);
-  // map.pins.getSource().addFeature(p);
   const polygon = circular(g2ll(coords), map.getView().getResolution() * 20, 8); // 50 pixel circle
-  // const polygon = circular(coords, 100, 8); // 50 pixel circle
   const actual = [];
   for (let ii = 0; ii < polygon.flatCoordinates.length; ii += 2) {
     const coords = [polygon.flatCoordinates[ii], polygon.flatCoordinates[ii + 1]];
@@ -369,23 +365,10 @@ export function getDRA(coords, point, map) {
               snapped = turf.nearestPointOnLine(line, point2, { units: "meters" });
             }
           }
-          // if (feat.properties.ROAD_NAME_FULL === 'Quilchena Ave') {
-            // console.log(snapped.properties.dist, feat.properties.ROAD_NAME_FULL, feat, snapped)
-            // const p = new Feature({
-            //   geometry: new Point(ll2g(snapped.geometry.coordinates))
-            // });
-            // p.setStyle(dotStyle);
-            // map.pins.getSource().addFeature(p);
-          // }
           if (!closest || snapped.properties.dist < closest.properties.dist) {
             closest = snapped;
             feature = feat;
           }
-          // const q = new Feature({
-          //   geometry: new LineString(feature.geometry.coordinates.map(c => ll2g(c))),
-          // });
-          // q.setStyle(lineStyle);
-          // map.pins.getSource().addFeature(q);
 
         } catch (ex) {
           console.error(ex);

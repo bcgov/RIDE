@@ -76,8 +76,7 @@ export default function Location({ event, dispatch, goToFunc }) {
                 onChange={(e) => dispatch({ type: 'set alias', key: 'start', value: e.target.value })}
               >
                 {start?.aliases.map((a) => <option key={a}>{a}</option>)}
-              </select> :
-              <input type="text" defaultValue={start.aliases[0]} name="start alias" readOnly={true} style={{ border: 'none' }} />
+              </select> : start.aliases[0]
             }
           </div>
         }
