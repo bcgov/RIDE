@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM node:24-alpine AS development-dependencies-env
 
 COPY ./src/frontend/ /app/
@@ -6,12 +8,14 @@ COPY ./src/frontend/ /app/
 RUN chmod 0777 /app
 #RUN find /app -type f -exec chmod 0644 {} \;
 
-ARG FONTAWESOME_PACKAGE_TOKEN
 ARG DEBUG_BUILD=false
 
 WORKDIR /app
 ENV NODE_ENV=development
-RUN npm ci --include=dev
+RUN --mount=type=secret,id=FONTAWESOME_PACKAGE_TOKEN \
+    test -s /run/secrets/FONTAWESOME_PACKAGE_TOKEN || { echo "FONTAWESOME_PACKAGE_TOKEN secret missing"; exit 1; }; \
+    export FONTAWESOME_PACKAGE_TOKEN="$(cat /run/secrets/FONTAWESOME_PACKAGE_TOKEN)" && \
+    npm ci --include=dev
 
 RUN mkdir /app/node_modules/.vite/
 RUN chmod 0777 /app/node_modules/.vite/
