@@ -4,10 +4,6 @@ metadata:
   name: {{ include "app.fullname" . }}-allow-from-openshift-ingress
   labels: {{ include "app.labels" . | nindent 4 }}
 spec:
-  # This policy allows any pod with a route & service combination
-  # to accept traffic from the OpenShift router pods. This is
-  # required for things outside of OpenShift (like the Internet)
-  # to reach your pods.
   ingress:
     - from:
         - namespaceSelector:
@@ -25,7 +21,9 @@ metadata:
   name: {{ include "app.fullname" . }}-allow-same-namespace
   labels: {{ include "app.labels" . | nindent 4 }}
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "app.fullname" . }}
   ingress:
     - from:
         - podSelector: {}

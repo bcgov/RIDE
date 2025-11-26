@@ -1,4 +1,4 @@
-{{- $deploymentTag := .Values.image.tag | default .Chart.AppVersion -}}
+{{- $deploymentTag := .Values.global.image.tag | default .Chart.AppVersion -}}
 {{- $deploymentTime := now | date "2006-01-02 15:04:05.000000" -}}
 
 apiVersion: apps/v1
@@ -24,6 +24,7 @@ spec:
         {{ include "app.selectorLabels" . | nindent 8 }}
       annotations: 
         vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/agent-init-first: 'true'
         vault.hashicorp.com/agent-inject-secret-secrets.env: {{ .Values.global.vault.licenceplate }}-{{ .Values.global.vault.environment}}/{{ .Values.vault.secretName }}
         vault.hashicorp.com/agent-inject-template-secrets.env: |
           {{`{{- with secret `}}"{{ .Values.global.vault.licenceplate }}-{{ .Values.global.vault.environment }}/{{ .Values.vault.secretName }}"{{` }}
@@ -37,6 +38,32 @@ spec:
         vault.hashicorp.com/namespace: platform-services
         vault.hashicorp.com/role: {{ .Values.global.vault.licenceplate }}-{{ .Values.global.vault.environment}}
     spec:
+      volumes:
+        - name: shared-config
+          emptyDir: {}
+      initContainers:
+        - name: config-init
+          image: "{{ .Values.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "/tmp/generate-config.sh"]
+          env:
+            - name: SHARED_VOLUME_PATH
+              value: "/shared-config"
+            - name: DEPLOYMENT_TAG
+              value: {{ $deploymentTag | quote }}
+            - name: DEPLOYMENT_TIME
+              value: {{ $deploymentTime | quote }}
+            - name: RELEASE
+              value: {{ .Values.global.release }}
+            - name: BRANCH
+              value: {{ .Values.global.branch }}
+            {{- range $key, $value := .Values.deployment.env.variables }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: shared-config
+              mountPath: /shared-config
       containers:
         - resources:
             requests:
@@ -50,6 +77,12 @@ spec:
               type: RuntimeDefault
             runAsNonRoot: true
             allowPrivilegeEscalation: false
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+            limits:
+              memory: 200Mi
           env:
             - name: DEPLOYMENT_TAG
               value: {{ $deploymentTag | quote }}
@@ -69,17 +102,40 @@ spec:
           imagePullPolicy: IfNotPresent
           terminationMessagePolicy: File
           image: >-
-            {{ .Values.image.repository  }}:{{ .Values.image.tag  }}
+            {{ .Values.image.repository  }}:{{ .Values.global.image.tag  }}
+          volumeMounts:
+            - name: shared-config
+              mountPath: /usr/share/nginx/html/env.js
+              subPath: env.js
+              readOnly: true
+            - name: shared-config
+              mountPath: /usr/share/nginx/html/env.js.gz
+              subPath: env.js.gz
+              readOnly: true
+            - name: shared-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: 5173
+              scheme: HTTP
             initialDelaySeconds: 5
-            periodSeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: 5173
+              scheme: HTTP
             initialDelaySeconds: 5
-            periodSeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
       serviceAccountName: {{ .Values.global.vault.licenceplate }}-vault
       affinity:
         podAntiAffinity:
