@@ -10,7 +10,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
-  FRONTEND_IMAGE_NAME: ${{ github.repository }}-frontend
+  STATIC_IMAGE_NAME: ${{ github.repository }}-static
 
 jobs:
   tag:
@@ -59,111 +59,96 @@ jobs:
       run: |
         echo "Tag Name: ${{ steps.create_tag.outputs.tag }}"
 
-  build-and-push-webapp:
-    needs: [tag]
+
+  setup: # Need to define variables this way because certain fields don't accept env variables (ie. environment)
+    needs : [tag]
     runs-on: ubuntu-latest
-    name: Build & Push Webapp Image
-    environment: uat
-    permissions:
-      contents: read
-      packages: write
+    name: Setup Job to define outputs
+    outputs:
+      environment_name: uat
+      helm_release_name: uat-ride
+      image_registry: ghcr.io
+      openshift_gold_url: https://uat-ride.apps.gold.devops.gov.bc.ca
+      openshift_golddr_url: https://uat-ride.apps.golddr.devops.gov.bc.ca
+      custom_tag: type=raw,value=${{ needs.tag.outputs.tag }}
+      tag_for_helm: ${{ needs.tag.outputs.tag }}
+    steps:
+      - name: Set outputs
+        run: echo "This step is required to set job outputs."
+
+  build-and-push:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    name: Build & Push ${{ matrix.name }} Image
+    environment: ${{ needs.setup.outputs.environment_name }}
+    outputs:
+      tag: ${{ steps.meta.outputs.tags }}
+    strategy:
+      matrix: # Set of images to build
+        include:
+          - name: Webapp
+            image_name: ${{ github.repository }}-webapp
+            dockerfile: ./compose/webapp/Dockerfile
+            build_args: |
+              DEBUG_BUILD=false
+            needs_fontawesome: false
+          - name: Static
+            image_name: ${{ github.repository }}-static
+            dockerfile: ./compose/frontend/StaticBuild
+            build_args: |
+              DEBUG_BUILD=false
+            needs_fontawesome: true
+
+### EVERYTHING PAST THIS POINT SHOULD BE THE SAME IN DEV, TEST AND UAT WORKFLOWS ###            
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-    
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ needs.setup.outputs.image_registry }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+  
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.WEBAPP_IMAGE_NAME }}
+          images: ${{ needs.setup.outputs.image_registry }}/${{ matrix.image_name }}
           tags: |
             type=raw,value=latest
-            type=raw,value=latest-uat
+            type=raw,value=latest-${{ needs.setup.outputs.environment_name }}
             type=sha,format=long
-            type=raw,value=${{ needs.tag.outputs.tag }}
-
+            ${{ needs.setup.outputs.custom_tag }}
+            
+  
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
+  
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./compose/webapp/Dockerfile
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args:
-            DEBUG_BUILD=false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  build-and-push-frontend:
-    needs: [tag]
-    runs-on: ubuntu-latest
-    name: Build & Push Frontend Image
-    environment: test
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-    
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=raw,value=latest-uat
-            type=sha,format=long
-            type=raw,value=${{ needs.tag.outputs.tag }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Docker image
-        id: push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./compose/frontend/StaticBuild
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            DEBUG_BUILD=false
+          build-args: ${{ matrix.build_args }}
           secrets: |
-            FONTAWESOME_PACKAGE_TOKEN=${{ secrets.FONTAWESOME_PACKAGE_TOKEN }}
+            ${{ matrix.needs_fontawesome && format('FONTAWESOME_PACKAGE_TOKEN={0}', secrets.FONTAWESOME_PACKAGE_TOKEN) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
 
   update-openshift-gold:
-    needs: [tag, build-and-push-webapp, build-and-push-frontend]
+    needs: [setup, build-and-push]
     runs-on: ubuntu-latest
-    name: Deploy Latest Image (${{ needs.tag.outputs.tag }}) to OpenShift Gold
+    name: Deploy to Gold. Tag ${{ needs.setup.outputs.tag_for_helm }}
     environment:
-      name: uat
-      url: https://uat-ride.apps.gold.devops.gov.bc.ca
+      name: ${{ needs.setup.outputs.environment_name }}
+      url: ${{ needs.setup.outputs.openshift_gold_url }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
@@ -182,16 +167,16 @@ jobs:
         insecure_skip_tls_verify: false
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
-        helm upgrade uat-ride -f ./infrastructure/main/values-uat.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set frontend.image.tag="${{ needs.tag.outputs.tag }}" --set global.branch="${{ github.ref }}"
+        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}"
 
-  # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
+  # GoldDR Runs after Gold Deployment due to GoldDR DB being read-only replica of Gold
   update-openshift-golddr:
-    needs: [tag, update-openshift-gold] 
+    needs: [setup, update-openshift-gold] 
     runs-on: ubuntu-latest
-    name: Deploy Latest Image (${{ needs.tag.outputs.tag }}) to OpenShift GoldDR
+    name: Deploy to GoldDR. Tag ${{ needs.setup.outputs.tag_for_helm }}
     environment:
-      name: uat
-      url: https://uat-ride.apps.golddr.devops.gov.bc.ca
+      name: ${{ needs.setup.outputs.environment_name }}
+      url: ${{ needs.setup.outputs.openshift_golddr_url }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
@@ -212,4 +197,4 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-        helm upgrade uat-ride -f ./infrastructure/main/values-uat.yaml -f ./infrastructure/main/values-uat-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}"  --set frontend.image.tag="${{ needs.tag.outputs.tag }}" --set global.branch="${{ github.ref }}"
+        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}-dr.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}"

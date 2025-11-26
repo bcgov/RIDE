@@ -5,6 +5,10 @@ type: application
 version: 0.1.0
 appVersion: "0.1.0"
 dependencies:
+  - name: static
+    version: '0.1.0'
+    repository: 'file://./charts/static'
+    condition: static.enabled
   - name: webapp
     version: '0.1.0'
     repository: 'file://./charts/webapp'

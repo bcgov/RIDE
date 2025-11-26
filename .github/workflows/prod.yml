@@ -8,10 +8,6 @@ permissions:
   contents: read
   packages: write
 
-env:
-  REGISTRY: ghcr.io
-  WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
-
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -27,28 +23,53 @@ jobs:
           vtag=${{ github.ref_name }}
           echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
+  setup: # Need to define variables this way because certain fields don't accept env variables (ie. environment)
+    runs-on: ubuntu-latest
+    needs : [tag]
+    name: Setup Job to define outputs
+    outputs:
+      environment_name: prod
+      helm_release_name: prod-ride
+      image_registry: ghcr.io
+      openshift_gold_url: https://prod-ride.apps.gold.devops.gov.bc.ca
+      openshift_golddr_url: https://prod-ride.apps.golddr.devops.gov.bc.ca
+      custom_tag: '' # Not required for Prod
+      tag_for_helm: ${{ needs.tag.outputs.tag }}
+    steps:
+      - name: Set outputs
+        run: echo "This step is required to set job outputs."
+
   #This job adds 'latest-prod' docker tags to the existing image in Github Packages so it's always clear which image is current for a particular environment
   addDockerTag:
-    needs: [tag]
+    needs: [setup, tag]
     runs-on: ubuntu-latest
-    name: Add latest-prod Tag
+    name: Add latest-prod Tag to ${{ matrix.name }} Image
+    outputs:
+      tag: ${{ steps.meta.outputs.tags }}
+    strategy:
+      matrix:
+        include:
+          - name: Webapp
+            image_name: bcgov/ride-webapp
+          - name: Static
+            image_name: bcgov/ride-static
     steps:
-    - name: Add latest-prod tag to webapp image
+    - name: Add Tag
       uses: shrink/actions-docker-registry-tag@v4
       with:
-        registry: ghcr.io
-        repository: bcgov/ride-webapp
+        registry: ${{ needs.setup.outputs.image_registry }}
+        repository: ${{ matrix.image_name }}
         target: ${{ needs.tag.outputs.tag }}
         tags: |
-          latest-prod
+          latest-${{ needs.setup.outputs.environment_name }}
 
-  update-openShift-gold:
-    needs: [tag]
+  update-openshift-gold:
+    needs: [setup]
     runs-on: ubuntu-latest
-    name: Deploy Latest Images to OpenShift Gold
+    name: Deploy to Gold. Tag ${{ needs.setup.outputs.tag_for_helm }}
     environment:
-      name: prod
-      url: https://prod-ride.apps.gold.devops.gov.bc.ca
+      name: ${{ needs.setup.outputs.environment_name }}
+      url: ${{ needs.setup.outputs.openshift_gold_url }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
@@ -67,16 +88,16 @@ jobs:
         insecure_skip_tls_verify: false
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
-        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"
+        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}" --set global.release="${{ github.event.release.name }}"
 
-  # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
+  # GoldDR Runs after Gold Deployment due to GoldDR DB being read-only replica of Gold
   update-openshift-golddr:
-    needs: [update-openShift-gold, tag] 
+    needs: [setup, update-openshift-gold] 
     runs-on: ubuntu-latest
-    name: Deploy Latest Images to OpenShift GoldDR
+    name: Deploy to GoldDR. Tag ${{ needs.setup.outputs.tag_for_helm }}
     environment:
-      name: prod
-      url: https://prod-ride.apps.golddr.devops.gov.bc.ca
+      name: ${{ needs.setup.outputs.environment_name }}
+      url: ${{ needs.setup.outputs.openshift_golddr_url }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
@@ -97,4 +118,4 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml -f ./infrastructure/main/values-prod-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"
+        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}-dr.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}" --set global.release="${{ github.event.release.name }}"

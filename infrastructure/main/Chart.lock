@@ -1,0 +1,9 @@
+dependencies:
+- name: static
+  repository: file://./charts/static
+  version: 0.1.0
+- name: webapp
+  repository: file://./charts/webapp
+  version: 0.1.0
+digest: sha256:1735138fcf7e08f41c2a07c9d0c4ed5cdf67fec97c3cda4026694b669c3533d8
+generated: "2025-12-04T15:32:25.5091559-08:00"

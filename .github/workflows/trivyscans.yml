@@ -36,7 +36,7 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
   imagescan-frontend:
-    name: Scan latest-dev frontend Image
+    name: Scan latest-dev static Image
     runs-on: ubuntu-latest
     steps:
       - name: Run Trivy vulnerability scanner
@@ -44,7 +44,7 @@ jobs:
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
         with:
-          image-ref: 'ghcr.io/bcgov/ride-frontend:latest-dev'
+          image-ref: 'ghcr.io/bcgov/ride-static:latest-dev'
           format: 'sarif'
           output: 'trivy-results.sarif'
           ignore-unfixed: true
