@@ -43,27 +43,19 @@ webapp:
         DEBUG: 'True' # Set to False for UAT and Prod
         VITE_API_HOST: https://ride.th.gov.bc.ca # Temporary till we setup proxy to the backend internally.
 
-  route:
-    host: prod-ride.apps.gold.devops.gov.bc.ca # The host name for the route
-    iprestricted: true #Set to true if you want to limit IP's the the addresses in the ipallowlist in the global section. Applies to above url and vanity url
-    # NOTE: For Vanity URL, this will only do the initial install of the URL. Once created it WILL NOT update it or delete it. This must be done manually
-    # because you would most likely have set a certificate on the route and updating it or deleting it could cause issues.
-    vanityurl: true #Set to true if you want to use a vanity URL. This will require a certificate in the cluster (set manually) and dns entry
-    vanityurlhost: ride.th.gov.bc.ca  #The path to use for the vanity URL
-
   podDisruptionBudget: 
     enabled: true # If you have more than 1 replica, you can set this to true. Will also check to ensure more than 1 replica set to prevent issues
     minAvailable: 1 
 
 
-frontend:
+static:
   enabled: true
-  nameOverride: prod-ride-frontend
-  fullnameOverride: prod-ride-frontend
+  nameOverride: prod-ride-static
+  fullnameOverride: prod-ride-static
   replicaCount: 1 # Number of replicas to deploy
 
   image:
-    repository: ghcr.io/bcgov/ride-frontend
+    repository: ghcr.io/bcgov/ride-static
     tag: latest-prod
 
   prometheus:
@@ -76,15 +68,13 @@ frontend:
         cpu: 10m
         memory: 75Mi
       limits:
-        memory: 300Mi
+        memory: 200Mi
     env:
       variables:
-        SHOW_DEBUG_TOOLBAR: 'False' # Set to False for UAT and Prod
-        DEBUG: 'False' # Set to False for UAT and Prod
-        VITE_API_HOST: https://ride.th.gov.bc.ca # Temporary till we setup proxy to the backend internally.
+        ENVIRONMENT: 'prod' # Set to dev, test, uat, prod
 
   route:
-    host: prod-ride-frontend.apps.gold.devops.gov.bc.ca # The host name for the route
+    host: prod-ride.apps.gold.devops.gov.bc.ca # The host name for the route
     iprestricted: false #Set to true if you want to limit IP's the the addresses in the ipallowlist in the global section. Applies to above url and vanity url
     # NOTE: For Vanity URL, this will only do the initial install of the URL. Once created it WILL NOT update it or delete it. This must be done manually
     # because you would most likely have set a certificate on the route and updating it or deleting it could cause issues.

@@ -67,7 +67,7 @@ jobs:
         insecure_skip_tls_verify: false
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
-        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"
+        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set static.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"
 
   # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
   update-openshift-golddr:
@@ -97,4 +97,4 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml -f ./infrastructure/main/values-prod-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"
+        helm upgrade prod-ride -f ./infrastructure/main/values-prod.yaml -f ./infrastructure/main/values-prod-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set static.image.tag="${{ needs.tag.outputs.tag }}" --set global.release="${{ github.event.release.name }}"

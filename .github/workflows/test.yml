@@ -10,7 +10,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   WEBAPP_IMAGE_NAME: ${{ github.repository }}-webapp
-  FRONTEND_IMAGE_NAME: ${{ github.repository }}-frontend
+  STATIC_IMAGE_NAME: ${{ github.repository }}-static
 
 jobs:
   tag:
@@ -109,7 +109,7 @@ jobs:
   build-and-push-frontend:
     needs: [tag]
     runs-on: ubuntu-latest
-    name: Build & Push Frontend Image
+    name: Build & Push Static Image
     environment: test
     permissions:
       contents: read
@@ -130,7 +130,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.STATIC_IMAGE_NAME }}
           tags: |
             type=raw,value=latest
             type=raw,value=latest-test
@@ -182,7 +182,7 @@ jobs:
         insecure_skip_tls_verify: false
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
-        helm upgrade test-ride -f ./infrastructure/main/values-test.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set frontend.image.tag="${{ needs.tag.outputs.tag }}" --set global.branch="${{ github.ref }}"
+        helm upgrade test-ride -f ./infrastructure/main/values-test.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set static.image.tag="${{ needs.tag.outputs.tag }}" --set global.branch="${{ github.ref }}"
 
   # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
   update-openshift-golddr:
@@ -212,4 +212,4 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-        helm upgrade test-ride -f ./infrastructure/main/values-test.yaml -f ./infrastructure/main/values-test-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set frontend.image.tag="${{ needs.tag.outputs.tag }}" --set global.branch="${{ github.ref }}"
+        helm upgrade test-ride -f ./infrastructure/main/values-test.yaml -f ./infrastructure/main/values-test-dr.yaml ./infrastructure/main --set webapp.image.tag="${{ needs.tag.outputs.tag }}" --set static.image.tag="${{ needs.tag.outputs.tag }}" --set global.branch="${{ github.ref }}"

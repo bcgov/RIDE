@@ -71,15 +71,25 @@ spec:
           image: >-
             {{ .Values.image.repository  }}:{{ .Values.image.tag  }}
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: 5173
+              scheme: HTTP
             initialDelaySeconds: 5
-            periodSeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: 5173
+              scheme: HTTP
             initialDelaySeconds: 5
-            periodSeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
       serviceAccountName: {{ .Values.global.vault.licenceplate }}-vault
       affinity:
         podAntiAffinity:

@@ -2,9 +2,7 @@ webapp:
   vault:
     authPath: auth/k8s-golddr # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
-  route:
-    host: prod-ride.apps.golddr.devops.gov.bc.ca
 
-frontend:
+static:
   route:
-    host: prod-ride-frontend.apps.golddr.devops.gov.bc.ca # The host name for the route. Ensure set to golddr for the Gold DR cluster.
+    host: prod-ride.apps.golddr.devops.gov.bc.ca # The host name for the route. Ensure set to golddr for the Gold DR cluster.
