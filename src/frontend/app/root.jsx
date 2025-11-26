@@ -38,6 +38,7 @@ export function Layout({ children }) {
       <body>
         {children}
         <ScrollRestoration />
+        <script src="/env.js"></script>
         <Scripts />
       </body>
     </html>
