@@ -26,3 +26,6 @@ window.__ENV__ = {
 EOF
 
 echo "Generated env.js with runtime configuration"
+
+echo "Setting the Environment for connecting to the backend to '$ENVIRONMENT'"
+sed -i "s~{ENVIRONMENT}~$ENVIRONMENT~g" /etc/nginx/conf.d/default.conf
