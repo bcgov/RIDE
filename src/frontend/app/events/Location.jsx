@@ -2,6 +2,9 @@ import { useCallback, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import "react-loading-skeleton/dist/skeleton.css";
 
+import pinStart from '../../public/pin-start.svg';
+import pinEnd from '../../public/pin-end.svg';
+
 import Tooltip from './Tooltip';
 
 const REF_LOC_TEXT = `Sorted by population class, then by distance.
@@ -55,9 +58,11 @@ export default function Location({ event, dispatch, goToFunc }) {
         <div>
           { start?.name || 'Greenfield'}&nbsp;&nbsp;
           <Tooltip text="Center start pin">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" className="go-to" color="currentColor" onClick={(e) => goToFunc(start?.coords)}>
-              <path fill="currentColor" d="M528 320C528 205.1 434.9 112 320 112C205.1 112 112 205.1 112 320C112 434.9 205.1 528 320 528C434.9 528 528 434.9 528 320zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320zM422.2 246.7L338.2 442.7C334.7 450.8 326.8 456 318 456C316.6 456 315.1 455.9 313.6 455.6C303.4 453.5 296 444.4 296 434L296 344L206 344C195.6 344 186.5 336.6 184.5 326.4C182.4 316.2 187.8 305.9 197.4 301.8L393.4 217.8C401.9 214.3 411.4 216.1 417.6 222.5C424 228.8 425.8 238.4 422.3 246.7z"/>
-            </svg>
+              <img
+                src={pinStart}
+                style={{ width: '20px' }}
+                onClick={(e) => goToFunc(start?.coords)}
+              />
           </Tooltip>
         </div>
 
@@ -149,9 +154,11 @@ export default function Location({ event, dispatch, goToFunc }) {
         <div className="toggled">
           <div>{end?.name}&nbsp;
             <Tooltip text="Center end pin">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" className="go-to" color="currentColor" onClick={(e) => goToFunc(end?.coords)}>
-                <path d="M528 320C528 205.1 434.9 112 320 112C205.1 112 112 205.1 112 320C112 434.9 205.1 528 320 528C434.9 528 528 434.9 528 320zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320zM422.2 246.7L338.2 442.7C334.7 450.8 326.8 456 318 456C316.6 456 315.1 455.9 313.6 455.6C303.4 453.5 296 444.4 296 434L296 344L206 344C195.6 344 186.5 336.6 184.5 326.4C182.4 316.2 187.8 305.9 197.4 301.8L393.4 217.8C401.9 214.3 411.4 216.1 417.6 222.5C424 228.8 425.8 238.4 422.3 246.7z"/>
-              </svg>
+              <img
+                src={pinEnd}
+                style={{ width: '20px' }}
+                onClick={(e) => goToFunc(end?.coords)}
+              />
             </Tooltip>
           </div>
 
