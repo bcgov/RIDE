@@ -83,6 +83,7 @@ frontend:
     env:
       variables:
         SHOW_DEBUG_TOOLBAR: 'False' # Set to False for UAT and Prod
+        ENVIRONMENT: 'uat' # Set to dev, test, uat, prod
 
   route:
     host: uat-ride-frontend.apps.gold.devops.gov.bc.ca # The host name for the route
