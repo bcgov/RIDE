@@ -1,5 +1,8 @@
 import { useId, useState } from 'react';
+import { format } from 'date-fns';
+
 import Tooltip from './Tooltip';
+
 
 let idc = 0;
 
@@ -14,8 +17,7 @@ function normalized(datestring) {
   if (!datestring) { return ''; }
   const a = new Date(datestring)
   if (Number(a) === 0) { return ''; }
-  const b = new Date(a - a.getTimezoneOffset() * 60000);
-  return b.toISOString().replace('Z', '');
+  return format(a, "yyyy-MM-dd'T'HH:mm");
 }
 
 export default function EventTiming({ errors, event, dispatch }) {
@@ -29,12 +31,6 @@ export default function EventTiming({ errors, event, dispatch }) {
         <span className="error-message">{errors['Manage Timing By']}</span>
       </p>
     </div>
-
-    {/* <div className={`subtitle ${errors['Manage Timing By'] ? 'error' : ''}`}>
-      <p>
-        Manage Event Timing By
-      </p>
-    </div> */}
 
     <div className="input">
       <label>Next Update Time</label>

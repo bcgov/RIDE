@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { format } from 'date-fns';
 
 import Tooltip from './Tooltip';
 import { DraggableRows } from './shared';
@@ -61,7 +61,7 @@ function getDate(time) {
 function getStartDate(value) {
   if (value) {
     const date = new Date(`${value}T00:00:00`);
-    if (!isNaN(date)) { return date; }
+    if (!isNaN(date)) { return date.toISOString(); }
   }
   return null;
 }
@@ -78,7 +78,7 @@ function getStartDate(value) {
 function getEndDate(value) {
   if (value) {
     const date = new Date(`${value}T23:59:59`);
-    if (!isNaN(date)) { return date; }
+    if (!isNaN(date)) { return date.toISOString(); }
   }
   return null;
 }
