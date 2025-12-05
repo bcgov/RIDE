@@ -8,8 +8,6 @@ FROM node:24-alpine AS development-dependencies-env
 WORKDIR /app
 COPY ./src/frontend/ /app/
 
-RUN chmod 0777 /app
-
 ARG DEBUG_BUILD=false
 
 ENV NODE_ENV=development
@@ -20,32 +18,31 @@ RUN --mount=type=secret,id=FONTAWESOME_PACKAGE_TOKEN \
 
 RUN npm run build
 
+# Gzip static assets
+RUN apk add --no-cache gzip && \
+    find /app/build/client -type f \( \
+      -name '*.js' -o -name '*.css' -o -name '*.html' -o -name '*.json' -o -name '*.svg' -o -name '*.xml' -o -name '*.wasm' \
+    \) -exec sh -c 'gzip -9 -c "$1" > "$1.gz"' _ {} \;
+
 ############################################
 # Runtime: nginx serving built assets      #
 ############################################
-FROM nginx:stable-alpine
+FROM nginxinc/nginx-unprivileged:stable-alpine-perl
 
 ARG DEBUG_BUILD=false
 
 EXPOSE 5173
 
-RUN touch /run/nginx.pid
-
 # Copy built assets
 RUN mkdir -p /usr/share/nginx/html
 COPY --from=development-dependencies-env /app/build/client /usr/share/nginx/html
-# Precompress text assets for nginx gzip_static
-RUN find /usr/share/nginx/html -type f \( \
-      -name '*.js' -o -name '*.css' -o -name '*.html' -o -name '*.json' -o -name '*.svg' -o -name '*.xml' -o -name '*.wasm' \
-    \) -exec sh -c 'gzip -9 -c "$1" > "$1.gz"' _ {} \;
 
 # Nginx config and runtime permissions
 COPY ./compose/frontend/default.conf /etc/nginx/conf.d/default.conf
 COPY ./compose/frontend/security_headers.conf /etc/nginx/conf.d/security_headers.conf
 
 # Runtime env injection hook (This will be run by an initContainer in OpenShift)
-COPY ./compose/frontend/generate-config.sh /usr/local/bin/generate-config.sh
-RUN chmod +x /usr/local/bin/generate-config.sh
+COPY --chmod=755 ./compose/frontend/generate-config.sh /tmp/generate-config.sh
 
 # Add debugging tools into builds if enabled
 RUN if [ "${DEBUG_BUILD}" = "true" ]; then \

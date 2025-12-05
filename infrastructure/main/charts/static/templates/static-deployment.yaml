@@ -41,13 +41,11 @@ spec:
       volumes:
         - name: shared-config
           emptyDir: {}
-        - name: tmp-volume
-          emptyDir: {}
       initContainers:
         - name: config-init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: IfNotPresent
-          command: ["/bin/sh", "/usr/local/bin/generate-config.sh"]
+          command: ["/bin/sh", "/tmp/generate-config.sh"]
           env:
             - name: SHARED_VOLUME_PATH
               value: "/shared-config"
@@ -111,13 +109,13 @@ spec:
               subPath: env.js
               readOnly: true
             - name: shared-config
+              mountPath: /usr/share/nginx/html/env.js.gz
+              subPath: env.js.gz
+              readOnly: true
+            - name: shared-config
               mountPath: /etc/nginx/conf.d/default.conf
               subPath: default.conf
               readOnly: true
-            - name: tmp-volume
-              mountPath: /var/cache/nginx
-            - name: tmp-volume
-              mountPath: /var/run
           livenessProbe:
             httpGet:
               path: /healthz
