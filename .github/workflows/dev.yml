@@ -63,7 +63,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args:
-            DEBUG_BUILD=true
+            DEBUG_BUILD=false
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
