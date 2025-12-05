@@ -43,8 +43,3 @@ COPY ./compose/frontend/security_headers.conf /etc/nginx/conf.d/security_headers
 
 # Runtime env injection hook (This will be run by an initContainer in OpenShift)
 COPY --chmod=755 ./compose/frontend/generate-config.sh /tmp/generate-config.sh
-
-# Add debugging tools into builds if enabled
-RUN if [ "${DEBUG_BUILD}" = "true" ]; then \
-      apk update && apk add --no-cache jq vim procps less curl; \
-    fi
