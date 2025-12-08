@@ -7,7 +7,6 @@ permissions:
   contents: read
   packages: write   
 
-
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -140,7 +139,7 @@ jobs:
   update-openshift-gold:
     needs: [setup, build-and-push]
     runs-on: ubuntu-latest
-    name: Deploy Latest Images to OpenShift Gold
+    name: Deploy to Gold. Tag ${{ needs.setup.outputs.tag_for_helm }}
     environment:
       name: ${{ needs.setup.outputs.environment_name }}
       url: ${{ needs.setup.outputs.openshift_gold_url }}
@@ -168,7 +167,7 @@ jobs:
   update-openshift-golddr:
     needs: [setup, update-openshift-gold] 
     runs-on: ubuntu-latest
-    name: Deploy Latest Images to OpenShift GoldDR
+    name: Deploy to GoldDR. Tag ${{ needs.setup.outputs.tag_for_helm }}
     environment:
       name: ${{ needs.setup.outputs.environment_name }}
       url: ${{ needs.setup.outputs.openshift_golddr_url }}
