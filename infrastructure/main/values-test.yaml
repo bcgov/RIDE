@@ -6,8 +6,6 @@ global:
   vault:
     licenceplate: f4dbc3 # This is the license plate you are deploying to. It is used to determine the vault path
     environment: nonprod #Set to prod if you want to use the prod vault or nonprod for dev/test/uat
-  route:
-    ipallowlist: 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 #The first 4 ranges are GOV IP's, the last one is for OXD external IP
   release: # This is set by Github actions for the prod release. Do not change this value.
   branch: # This is set by Github actions for the branch name. Do not change this value.
 
@@ -78,7 +76,6 @@ static:
 
   route:
     host: test-ride.apps.gold.devops.gov.bc.ca # The host name for the route
-    iprestricted: false #Set to true if you want to limit IP's the the addresses in the ipallowlist in the global section. Applies to above url and vanity url
     # NOTE: For Vanity URL, this will only do the initial install of the URL. Once created it WILL NOT update it or delete it. This must be done manually
     # because you would most likely have set a certificate on the route and updating it or deleting it could cause issues.
     vanityurl: true #Set to true if you want to use a vanity URL. This will require a certificate in the cluster (set manually) and dns entry

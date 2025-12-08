@@ -4,9 +4,6 @@ metadata:
   name: {{ template "app.fullname" . }}
   labels: {{ include "app.labels" . | nindent 4 }}
   annotations:
-    {{ if .Values.route.iprestricted }}
-    haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
-    {{ end }}
     haproxy.router.openshift.io/set-forwarded-headers: replace
 spec:
   to:
@@ -33,9 +30,6 @@ metadata:
   annotations:
     "helm.sh/resource-policy": keep
     haproxy.router.openshift.io/set-forwarded-headers: replace
-    {{ if .Values.route.iprestricted }}
-    haproxy.router.openshift.io/ip_whitelist: {{ .Values.global.route.ipallowlist  }}
-    {{ end }}
 spec:
   to:
     kind: Service
