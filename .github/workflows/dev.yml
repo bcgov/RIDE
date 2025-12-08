@@ -25,9 +25,13 @@ jobs:
       image_registry: ghcr.io
       openshift_gold_url: https://dev-ride.apps.gold.devops.gov.bc.ca
       openshift_golddr_url: https://dev-ride.apps.golddr.devops.gov.bc.ca
+      custom_tag: '' 
+      tag_for_helm: sha-${{ github.sha }} 
     steps:
       - name: Set outputs
         run: echo "This step is required to set job outputs."
+
+
 
   build-and-push:
     needs: [setup]
@@ -51,6 +55,9 @@ jobs:
             build_args: |
               DEBUG_BUILD=false
             needs_fontawesome: true
+
+### EVERYTHING PAST THIS POINT SHOULD BE THE SAME IN DEV, TEST AND UAT WORKFLOWS ###            
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -71,6 +78,8 @@ jobs:
             type=raw,value=latest
             type=raw,value=latest-${{ needs.setup.outputs.environment_name }}
             type=sha,format=long
+            ${{ needs.setup.outputs.custom_tag }}
+            
   
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -115,9 +124,9 @@ jobs:
         insecure_skip_tls_verify: false
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
-        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml ./infrastructure/main --set global.image.tag="sha-${{ github.sha }}" --set global.branch="${{ github.ref }}"
+        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}"
 
-  # I have this run after the push to Gold because I want to make sure that Gold runs the migrations first. Gold DR can't run migrations as DB is read-only
+  # GoldDR Runs after Gold Deployment due to GoldDR DB being read-only replica of Gold
   update-openshift-golddr:
     needs: [setup, update-openshift-gold] 
     runs-on: ubuntu-latest
@@ -145,4 +154,4 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
-        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}-dr.yaml ./infrastructure/main --set global.image.tag="sha-${{ github.sha }}" --set global.branch="${{ github.ref }}"
+        helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}-dr.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}"
