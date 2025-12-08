@@ -8,6 +8,8 @@ global:
     environment: prod #Set to prod if you want to use the prod vault or nonprod for dev/test/uat
   release: # This is set by Github actions for the prod release. Do not change this value.
   branch: # This is set by Github actions for the branch name. Do not change this value.
+  image:
+    tag: latest-prod
 
 webapp:
   enabled: true
@@ -17,7 +19,6 @@ webapp:
 
   image:
     repository: ghcr.io/bcgov/ride-webapp
-    tag: latest-uat
 
   prometheus:
     enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
@@ -54,10 +55,13 @@ static:
 
   image:
     repository: ghcr.io/bcgov/ride-static
-    tag: latest-prod
 
   prometheus:
     enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
+
+  vault:
+    secretName: prod-static  # This is the name of the secret in vault that contains the environment variables for the app
+    authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
   deployment:
     strategy: RollingUpdate # Can be Recreate or RollingUpdate
