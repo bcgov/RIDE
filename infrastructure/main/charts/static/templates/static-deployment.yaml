@@ -43,7 +43,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: config-init
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.global.image.tag }}"
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/tmp/generate-config.sh"]
           env:
