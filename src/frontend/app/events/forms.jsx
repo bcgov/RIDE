@@ -277,13 +277,13 @@ const SCHEDULE_BLANK = {
   allDay: true,
   startTime: null,
   endTime: null,
-  mon: true,
-  tue: true,
-  wed: true,
-  thu: true,
-  fri: true,
-  sat: true,
-  sun: true,
+  mon: false,
+  tue: false,
+  wed: false,
+  thu: false,
+  fri: false,
+  sat: false,
+  sun: false,
 }
 
 function addId(obj) {
