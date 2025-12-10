@@ -64,7 +64,7 @@ export const endHandler = async (e, point, dispatch) => {
     aliases.unshift(props?.ROAD_NAME_FULL);
     aliases = aliases.filter((alias) => alias !== name);
   }
-  point.updateInfobox(e.map);
+  // point.updateInfobox(e.map);
 
   dispatch({
     type: point.action,
@@ -96,7 +96,7 @@ export const endHandler = async (e, point, dispatch) => {
     });
   }
 
-  point.updateInfobox(e.map);
+  // point.updateInfobox(e.map);
   updateRoute(e.map);
 };
 
@@ -170,7 +170,7 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.start.dra = { properties: event.location.start }
         map.pins.getSource().addFeature(map.start);
       }
-      map.start.updateInfobox(map);
+      // map.start.updateInfobox(map);
     } else if (map.start) { // no start location but start pin exists
       map.pins.getSource().removeFeature(map.start);
       map.start = null;
@@ -187,7 +187,7 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.end.dra = { properties: event.location.end }
         map.pins.getSource().addFeature(map.end);
       }
-      map.end.updateInfobox(map);
+      // map.end.updateInfobox(map);
 
       const route = event.geometry?.geometries[2]?.coordinates;
       if (route && route.length > 0) {
@@ -261,7 +261,7 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.start = map.end;
         map.end = null;
         startRef.current.style.visibility = 'unset';
-        map.start.updateInfobox(map);
+        // map.start.updateInfobox(map);
         dispatch({
           type: 'swap location',
           source: 'end',
@@ -309,8 +309,8 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
   };
 
   return <>
-    <InfoBox className="startInfo" ref={startRef} point={event.location?.start} />
-    <InfoBox className="endInfo" ref={endRef} point={event.location?.end} />
+    {/* <InfoBox className="startInfo" ref={startRef} point={event.location?.start} />
+    <InfoBox className="endInfo" ref={endRef} point={event.location?.end} /> */}
     <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} />
   </>;
 }

@@ -165,6 +165,6 @@ export class PinFeature extends RideFeature {
   }
 
   upHandler(e) {
-    this.updateInfobox(e.map);
+    // this.updateInfobox(e.map);
   }
 }
