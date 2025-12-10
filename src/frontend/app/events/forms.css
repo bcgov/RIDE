@@ -132,6 +132,9 @@
     }
 
     .toggleable {
+      margin-top: 0.25rem;
+      margin-bottom: 0.5rem;
+
       .toggle {
         padding: 0 0.5rem 0 0.25rem;
       }

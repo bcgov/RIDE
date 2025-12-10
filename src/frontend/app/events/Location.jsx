@@ -41,22 +41,6 @@ export default function Location({ event, dispatch, goToFunc }) {
 
     <div className="toggleable">
       <div className="toggle">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20"
-          className="fold"
-          onClick={(e) => { e.target.parentNode.parentNode.classList.toggle('folded'); }}
-        >
-          <path fill="currentColor" d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z"/>
-        </svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20"
-          className="unfold"
-          onClick={(e) => { e.target.parentNode.parentNode.classList.toggle('folded'); }}
-        >
-        <path fill="currentColor" d="M471.1 297.4C483.6 309.9 483.6 330.2 471.1 342.7L279.1 534.7C266.6 547.2 246.3 547.2 233.8 534.7C221.3 522.2 221.3 501.9 233.8 489.4L403.2 320L233.9 150.6C221.4 138.1 221.4 117.8 233.9 105.3C246.4 92.8 266.7 92.8 279.2 105.3L471.2 297.3z"/></svg>
-      </div>
-
-      <div className="toggled">
-        <div>
-          { start?.name || 'Greenfield'}&nbsp;&nbsp;
           <Tooltip text="Center start pin">
               <img
                 src={pinStart}
@@ -64,7 +48,10 @@ export default function Location({ event, dispatch, goToFunc }) {
                 onClick={(e) => goToFunc(start?.coords)}
               />
           </Tooltip>
-        </div>
+      </div>
+
+      <div className="toggled">
+        <div>{ start?.name || 'Greenfield'}</div>
 
         { start?.aliases.length > 0 &&
           <div>
@@ -136,31 +123,17 @@ export default function Location({ event, dispatch, goToFunc }) {
     { end?.name &&
       <div className="toggleable">
         <div className="toggle">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20"
-            className="fold"
-            onClick={(e) => { e.target.parentNode.parentNode.classList.toggle('folded'); }}
-          >
-            <path fill="currentColor" d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z"/>
-          </svg>
-
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20"
-            className="unfold"
-            onClick={(e) => { e.target.parentNode.parentNode.classList.toggle('folded'); }}
-          >
-            <path fill="currentColor" d="M471.1 297.4C483.6 309.9 483.6 330.2 471.1 342.7L279.1 534.7C266.6 547.2 246.3 547.2 233.8 534.7C221.3 522.2 221.3 501.9 233.8 489.4L403.2 320L233.9 150.6C221.4 138.1 221.4 117.8 233.9 105.3C246.4 92.8 266.7 92.8 279.2 105.3L471.2 297.3z"/>
-          </svg>
+          <Tooltip text="Center end pin">
+            <img
+              src={pinEnd}
+              style={{ width: '20px' }}
+              onClick={(e) => goToFunc(end?.coords)}
+            />
+          </Tooltip>
         </div>
 
         <div className="toggled">
-          <div>{end?.name}&nbsp;
-            <Tooltip text="Center end pin">
-              <img
-                src={pinEnd}
-                style={{ width: '20px' }}
-                onClick={(e) => goToFunc(end?.coords)}
-              />
-            </Tooltip>
-          </div>
+          <div>{end?.name}</div>
 
           { end?.aliases.length > 0 &&
             <div>
