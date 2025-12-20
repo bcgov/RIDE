@@ -1,21 +1,14 @@
-from pprint import pprint
 import uuid
 
-from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.contrib.gis.db import models as gis
 from django.db import models, transaction
-from django.db.models.constraints import UniqueConstraint
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
 
-from .enums import EventType, EventSubtype, Severity, Status
-
-
 class VersionedManager(models.Manager):
-
     def get_queryset(self):
         return super().get_queryset().filter(latest=True, deleted=False)
 
@@ -25,7 +18,6 @@ EXCLUDED = [
 ]
 
 class BaseModel(models.Model):
-
     created = models.DateTimeField(default=timezone.now, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     deleted = models.BooleanField(default=False)
@@ -219,7 +211,6 @@ class Event(VersionedModel):
 
 
 class Note(VersionedModel):
-
     event = models.CharField()
     text = models.TextField(blank=True)
 
@@ -231,7 +222,6 @@ def delete_related_notes(instance, **kwargs):
 
 
 class Choice(BaseModel):
-
     label = models.CharField()
     order = models.PositiveSmallIntegerField()
 
