@@ -30,5 +30,6 @@ class Segment(BaseModel):
     primary_point = models.PointField()
     secondary_mp = models.FloatField()
     secondary_point = models.PointField()
+    geometry = models.LineStringField(null=True, blank=True)
 
     last_updated = models.DateTimeField(auto_now=True, editable=False, null=True, blank=True)

@@ -74,3 +74,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ]
 }
+
+ROUTE_PLANNER_API_URL = env('ROUTE_PLANNER_API_URL', '')
+ROUTE_PLANNER_API_KEY = env('ROUTE_PLANNER_API_KEY', '')
