@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
@@ -7,17 +7,14 @@ import VectorSource from 'ol/source/Vector';
 import { Point, LineString, Polygon, Circle } from 'ol/geom';
 import { circular } from 'ol/geom/Polygon';
 import * as ol from 'ol';
-import { transform } from 'ol/proj';
 import { boundingExtent, getCenter } from 'ol/extent';
 import { linear } from 'ol/easing';
 
 import { MapContext } from '../../contexts';
 import {
-  getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, Drag, coordsMatch
+  getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, Drag
 } from './helpers.js';
-import { routeNormalStyle, routeActiveStyle, routeHoverStyle } from './styles.js';
 import ContextMenu from '../../events/ContextMenu';
-import InfoBox from '../../events/InfoBox';
 
 globalThis.ol = ol;
 globalThis.Circle = Circle;
@@ -64,7 +61,6 @@ export const endHandler = async (e, point, dispatch) => {
     aliases.unshift(props?.ROAD_NAME_FULL);
     aliases = aliases.filter((alias) => alias !== name);
   }
-  // point.updateInfobox(e.map);
 
   dispatch({
     type: point.action,
@@ -96,7 +92,6 @@ export const endHandler = async (e, point, dispatch) => {
     });
   }
 
-  // point.updateInfobox(e.map);
   updateRoute(e.map);
 };
 
@@ -126,7 +121,6 @@ export const updateRoute = async (map) => {
 export default function PinLayer({ event, dispatch, startRef, endRef }) {
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
-  const [canStartEvent, setCanStartEvent] = useState(true);
   const menuRef = useRef();
   const eventRef = useRef();
   eventRef.current = event;
@@ -198,15 +192,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.pins.getSource().removeFeature(map.end);
       map.end = null;
     }
-
-    // const route = event.geometry?.geometries[2]?.coordinates;
-    // if (map.start && map.end && route) {
-    //     console.log('resetting');
-    //   map.route.getGeometry().setCoordinates(route.map(cc => ll2g(cc)));
-    // } else {
-    //     console.log('rreesetting', event.geometry?.geometries);
-    //   map.route.getGeometry().setCoordinates([]);
-    // }
   }, [event]);
 
   /* If there's no feature at the click, create a start point if none exists, an
@@ -261,7 +246,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.start = map.end;
         map.end = null;
         startRef.current.style.visibility = 'unset';
-        // map.start.updateInfobox(map);
         dispatch({
           type: 'swap location',
           source: 'end',
@@ -309,8 +293,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
   };
 
   return <>
-    {/* <InfoBox className="startInfo" ref={startRef} point={event.location?.start} />
-    <InfoBox className="endInfo" ref={endRef} point={event.location?.end} /> */}
     <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} />
   </>;
 }
