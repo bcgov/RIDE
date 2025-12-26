@@ -39,9 +39,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         try:
-            User = get_user_model()
-            user = User.objects.get(email=options['email'])
-        except User.DoesNotExist:
+            user_model = get_user_model()
+            user = user_model.objects.get(email=options['email'])
+        except user_model.DoesNotExist:
             raise CommandError('User not found with that email address')
 
         if options['active'] and options['not_active']:

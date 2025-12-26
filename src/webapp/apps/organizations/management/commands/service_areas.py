@@ -71,13 +71,13 @@ class Command(BaseCommand):
                     print(parent, check[2])
                 parent = sa[str(parent)]
 
-            sortingOrder = area['properties']['OBJECTID']
-            if sortingOrder != check[1]:
-                print(sortingOrder, check[1])
+            sorting_order = area['properties']['OBJECTID']
+            if sorting_order != check[1]:
+                print(sorting_order, check[1])
 
             name = area['properties']['CONTRACT_AREA_NAME']
             area['geometry']['crs'] = 3005
 
             g = GEOSGeometry(json.dumps(area['geometry']), srid=3005)
             g.transform(4326)
-            sa[str(area['id'])] = ServiceArea.objects.create(id=area['id'], name=name, sortingOrder=sortingOrder, geometry=g.json, parent=parent)
+            sa[str(area['id'])] = ServiceArea.objects.create(id=area['id'], name=name, sortingOrder=sorting_order, geometry=g.json, parent=parent)
