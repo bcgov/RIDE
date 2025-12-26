@@ -37,7 +37,7 @@ export default function RIDEDropdown(props) {
     <Menu as="div" className={`ride-dropdown ${extraClasses ? extraClasses : ''}`}>
       <p className={'ride-dropdown-label'}>{label}</p>
 
-      <MenuButton disabled={!items || !items.length} className="ride-dropdown-button">
+      <MenuButton disabled={!items?.length} className="ride-dropdown-button">
         <span className={'selected-text'}>{getDisplayText()}</span>
         <FontAwesomeIcon icon={faChevronDown} aria-hidden="true" className="ride-dropdown-icon" />
       </MenuButton>

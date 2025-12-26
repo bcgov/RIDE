@@ -24,7 +24,7 @@ export default function UserNavigation(props) {
 
   /* Rendering */
   // Main Component
-  return authContext && authContext.username && (
+  return authContext?.username && (
     <Menu as="div" className={`ride-dropdown user-nav`}>
       <MenuButton className="ride-dropdown-button user-nav-btn">
         <FontAwesomeIcon id="user-icon" icon={faCircleUser} />

@@ -50,7 +50,7 @@ export default function Home() {
 
   // Effects
   useEffect(() => {
-    if (!authContext || !authContext.loginStateKnown) { return; }
+    if (!authContext?.loginStateKnown) { return; }
 
     if (!authContext.username) {
       navigate('/');
@@ -167,10 +167,10 @@ export default function Home() {
     if (searchText) {
       const lowerSearchText = searchText.toLowerCase();
       filteredUsers = filteredUsers.filter(user =>
-        user.social_username && user.social_username.toLowerCase().includes(lowerSearchText) ||
-        user.username.toLowerCase().includes(lowerSearchText) ||
-        `${user.first_name} ${user.last_name}`.toLowerCase().includes(lowerSearchText) ||
-        user.email.toLowerCase().includes(lowerSearchText)
+        user?.social_username.toLowerCase().includes(lowerSearchText) ||
+        user?.username.toLowerCase().includes(lowerSearchText) ||
+        `${user?.first_name} ${user?.last_name}`.toLowerCase().includes(lowerSearchText) ||
+        user?.email.toLowerCase().includes(lowerSearchText)
       );
     }
 
@@ -188,7 +188,7 @@ export default function Home() {
 
     }).then(user => {
       if (user) {
-        setUsers(prevUsers => {
+        setUsers((prevUsers) => {
           return prevUsers.map(u => {
             if (u.id === user.id) {
               return user;
@@ -233,7 +233,7 @@ export default function Home() {
       }
     });
   }
-  
+
   // Recreate deleted organization
   const undoRemoveOrgHandler = (org) => {
     const payload = {
@@ -242,7 +242,7 @@ export default function Home() {
       contact_name: org.contact_name,
       contact_id: org.contact_id
     };
-    
+
     createOrganization(payload).then(res => {
       setSelectedOrg(res);
       setOrgs(prevOrgs => {

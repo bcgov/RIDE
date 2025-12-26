@@ -106,16 +106,14 @@ export default function Home() {
 
     if (feature?.noSelect) { return; }
 
-    if (!feature || !feature.styleState) {
-      if (e.map.selectedFeature) {  // deselect existing selection
-        selectFeature(e.map, null);
-        dispatch({ type: 'reset form' });
-        e.map.route.getGeometry().setCoordinates([]);
-      }
-    } else {  // new selection
+    if (feature?.styleState) { // new selection
       selectFeature(e.map, feature);
       const raw = feature.pointFeature.get('raw');
       dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false });
+    } else if (e.map.selectedFeature) { // deselect existing selection
+      selectFeature(e.map, null);
+      dispatch({ type: 'reset form' });
+      e.map.route.getGeometry().setCoordinates([]);
     }
   }
 

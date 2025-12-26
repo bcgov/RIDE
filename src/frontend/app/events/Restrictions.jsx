@@ -8,9 +8,9 @@ import { selectStyle } from '../components/Map/helpers';
 
 
 function Restriction({ id, item, change, update, current, }) {
-  const placeholder = (RestrictionsList.filter(
+  const placeholder = RestrictionsList.filter(
     (restriction) => item.id > 0 && restriction.label === item.label
-  )[0] || {}).placeholder;
+  )[0]?.placeholder;
 
   return (
     <>

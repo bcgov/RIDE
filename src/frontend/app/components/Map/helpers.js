@@ -1,7 +1,6 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext } from 'react';
 
 import { applyStyle } from 'ol-mapbox-style';
-import { fromLonLat, transformExtent } from 'ol/proj';
 import Map from 'ol/Map';
 import MVT from 'ol/format/MVT.js';
 import { ScaleLine } from 'ol/control.js';
@@ -9,7 +8,7 @@ import { circular } from 'ol/geom/Polygon';
 import { Point, LineString, MultiLineString } from 'ol/geom';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
-import { transform, getTransform } from 'ol/proj';
+import { fromLonLat, getTransform, transform, transformExtent } from 'ol/proj';
 import VectorTileSource from 'ol/source/VectorTile.js';
 import View from 'ol/View';
 import proj4 from 'proj4';
@@ -38,7 +37,7 @@ export function pointerMove(evt) {
     layerFilter: (layer) => layer.listenForHover,
   })[0];
   if (feature?.noHover) { return; }
-  if (!feature || !feature.styleState) {
+  if (!feature?.styleState) {
     if (evt.map.hoveredFeature) {
       evt.map.hoveredFeature.hovered = false;
       evt.map.hoveredFeature.updateStyle();
@@ -67,17 +66,15 @@ export function click(evt, dispatch) {
 
   if (feature?.noSelect) { return; }
 
-  if (!feature || !feature.styleState) {
-    if (evt.map.selectedFeature) {  // deselect existing selection
-      selectFeature(evt.map, null);
-      dispatch({ type: 'reset form' });
-      evt.stopPropagation();  // prevent placing a start pin
-      evt.map.route.getGeometry().setCoordinates([]);
-    }
-  } else {  // new selection
+  if (feature?.styleState) { // new selection
     selectFeature(evt.map, feature);
     const raw = feature.pointFeature.get('raw');
     dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false });
+  } else if (evt.map.selectedFeature) {  // deselect existing selection
+    selectFeature(evt.map, null);
+    dispatch({ type: 'reset form' });
+    evt.stopPropagation();  // prevent placing a start pin
+    evt.map.route.getGeometry().setCoordinates([]);
   }
 }
 
@@ -556,11 +553,8 @@ export const selectStyle = {
 
 export function getSnapped(coordinate, pixel, map) {
   const point = turf.point(g2ll(coordinate));
-  // console.log(point, coordinate);
-  const layer = map.getAllLayers()[0];
-  const resolution = map.getView().getResolution();
   let closest;
-  const features = map.getFeaturesAtPixel(pixel, { hitTolerance: 50 })
+  map.getFeaturesAtPixel(pixel, { hitTolerance: 50 })
     .filter((f) => f.get('mvt:layer')?.startsWith('DRA Roads'))
     .map((f) => {
       const line = turf.multiLineString(multi(f.getFlatCoordinates(), f.getEnds().map(a => a), g2ll));
@@ -582,26 +576,6 @@ export function getSnapped(coordinate, pixel, map) {
       ) { return; }
       map.pins.getSource().removeFeature(f);
     })
-    // const p = new Feature({
-    //   geometry: new Point(ll2g(closest.snapped.geometry.coordinates))
-    // });
-    // p.setStyle(dotStyle);
-    // map.pins.getSource().addFeature(p);
-    // const ll = multi(closest.getFlatCoordinates(), closest.getEnds().map(a => a));
-    // const flat = closest.getFlatCoordinates();
-    // for (let ii = 0; ii < flat.length; ii += 2) {
-    //   const p = new Feature({
-    //     geometry: new Point([flat[ii], flat[ii + 1]])
-    //   });
-    //   p.setStyle(dotStyle2);
-    //   map.pins.getSource().addFeature(p);
-    // }
-    // console.log(closest, ll, closest.getEnds());
-    // const q = new Feature({
-    //   geometry: new MultiLineString(ll),
-    // });
-    // q.setStyle(lineStyle);
-    // map.pins.getSource().addFeature(q);
   }
   return closest ? ll2g(closest.snapped.geometry.coordinates) : coordinate;
 }
