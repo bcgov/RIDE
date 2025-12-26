@@ -432,7 +432,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
           }
         }
         return Object.keys(errors).length ? errors : null;
-      }).filter((el) => el);
+      }).filter(Boolean);
       if (scheduleErrors.length > 0) { err.schedules = scheduleErrors; }
     }
 

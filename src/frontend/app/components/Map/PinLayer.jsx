@@ -54,7 +54,7 @@ export const endHandler = async (e, point, dispatch) => {
     props?.ROAD_NAME_ALIAS2,
     props?.ROAD_NAME_ALIAS3,
     props?.ROAD_NAME_ALIAS4,
-  ].filter(el => el);
+  ].filter(Boolean);
   let name = props?.ROAD_NAME_FULL;
   if (props?.HIGHWAY_ROUTE_NUMBER) {
     name = `Hwy ${props?.HIGHWAY_ROUTE_NUMBER}`;
