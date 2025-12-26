@@ -15,7 +15,7 @@ export default function EditUserForm(props) {
   const { user, orgs, submitting, setSubmitting, setOpen, setUsers } = props
 
   // Context
-  const { _alertContext, setAlertContext } = useContext(AlertContext);
+  const { setAlertContext } = useContext(AlertContext);
 
   /* Hooks */
   // States

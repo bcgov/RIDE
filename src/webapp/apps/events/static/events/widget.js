@@ -300,7 +300,6 @@ class MapWidget {
       hitTolerance: 20,
       layerFilter: (layer) => layer === this.featureOverlay,
     })[0];
-    const coords = this.map.getCoordinateFromPixel(event.pixel);
 
     this.featureCollection.remove(feature);
     this.updateRoute();

@@ -16,20 +16,14 @@ import Layer from '../components/Map/Layer';
 import PinLayer from '../components/Map/PinLayer';
 import { AuthContext, MapContext } from '../contexts';
 import {
-  getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped,
+  getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, selectFeature
 } from '../components/Map/helpers.js';
 import RideFeature from '../components/Map/feature';
-import {
-  pinStartNormalStyle, pinStartHoverStyle, pinStartActiveStyle,
-  pinEndNormalStyle, pinEndHoverStyle, pinEndActiveStyle,
-} from '../components/Map/styles';
-import ContextMenu from './ContextMenu';
+
 import EventForm, { eventReducer, getInitialEvent } from './forms';
-import InfoBox from './InfoBox';
 import Preview from './Preview';
 import Message from './Message';
 import Queue from './Queue';
-import { selectFeature } from '../components/Map/helpers.js';
 
 // Styling
 import './home.scss';
@@ -47,7 +41,7 @@ export default function Home() {
 
   /* Hooks */
   // Context
-  const { authContext, _setAuthContext } = useContext(AuthContext);
+  const { authContext } = useContext(AuthContext);
 
   // Refs
   const mapRef = useRef();

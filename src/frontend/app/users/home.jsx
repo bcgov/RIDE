@@ -36,8 +36,8 @@ export default function Home() {
 
   /* Hooks */
   // Context
-  const { _alertContext, setAlertContext } = useContext(AlertContext);
-  const { authContext, _setAuthContext } = useContext(AuthContext);
+  const { setAlertContext } = useContext(AlertContext);
+  const { authContext } = useContext(AuthContext);
 
   // States
   const [ users, setUsers ] = useState();

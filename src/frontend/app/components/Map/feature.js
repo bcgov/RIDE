@@ -85,7 +85,6 @@ export default class RideFeature extends Feature {
   // used to update available styles based on the underlying event changing
   propertyChanged(e) {
     if (e.key === 'raw') {
-      const styles = {};
       const event = this.get('raw');
       ['static', 'hover', 'active'].forEach((state) => {
         this[state] = new Style({ image: new Icon({ src: getIcon(event, state) }) });
@@ -154,10 +153,10 @@ export class PinFeature extends RideFeature {
       const xy = map.getPixelFromCoordinate(this.getGeometry().getCoordinates());
       this.ref.current.style.left = (xy[0] + offsetX) + 'px';
       this.ref.current.style.top = (xy[1] + offsetY) + 'px';
-      if (!this.dra?.properties) {
-        this.ref.current.style.visibility = 'hidden';
-      } else {
+      if (this.dra?.properties) {
         this.ref.current.style.visibility = 'unset';
+      } else {
+        this.ref.current.style.visibility = 'hidden';
       }
     }
   }

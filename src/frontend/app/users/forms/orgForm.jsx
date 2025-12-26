@@ -17,7 +17,7 @@ export default function OrgForm(props) {
   const { initialOrg, areas, submitting, setSubmitting, setOpen, setOrgs } = props;
 
   // Context
-  const { _alertContext, setAlertContext } = useContext(AlertContext);
+  const { setAlertContext } = useContext(AlertContext);
 
   /* Hooks */
   // States

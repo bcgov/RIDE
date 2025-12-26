@@ -37,7 +37,6 @@ function DraggableRow({ children, id, isDraggable, remove, noX }) {
     setActivatorNodeRef,
     setNodeRef,
     transform,
-    transition,
   } = useSortable({ id });
 
   const style = {

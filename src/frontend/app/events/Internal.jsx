@@ -33,7 +33,7 @@ function Note({ note, dispatch }) {
 
     try {
       setSaving(true);
-      const response = await deleteRequest(`${API_HOST}/api/notes/${note.id}`);
+      await deleteRequest(`${API_HOST}/api/notes/${note.id}`);
       dispatch({ type: 'remove note', value: note});
     } catch (err) {
       console.log(err);

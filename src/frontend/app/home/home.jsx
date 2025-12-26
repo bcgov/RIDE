@@ -26,7 +26,7 @@ export default function Home() {
 
   /* Hooks */
   // Context
-  const { authContext, _setAuthContext } = useContext(AuthContext);
+  const { authContext } = useContext(AuthContext);
 
   // Effects
   useEffect(() => {

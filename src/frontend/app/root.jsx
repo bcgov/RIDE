@@ -59,7 +59,7 @@ export default function App() {
     if (fetching) { return; }
     fetching = true;
 
-    const response = fetch(`${API_HOST}/api/traffic-impacts`, {
+    fetch(`${API_HOST}/api/traffic-impacts`, {
       headers: { 'Accept': 'application/json' }
     }).then((response) => response.json())
       .then((data) => {
