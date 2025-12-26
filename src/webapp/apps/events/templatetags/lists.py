@@ -9,7 +9,7 @@ def sortable(context, column, field=None):
     size = context['view'].get_paginate_by()
     sort = None
     if order.endswith(field):
-        sort = 'desc' if order[:1] == '-' else 'asc'
+        sort = 'desc' if order.startswith('-') else 'asc'
     return { 'sort': sort, 'column': column, 'field': field, 'size': size, 'page': context['page_obj'] }
 
 
@@ -22,16 +22,16 @@ def paginate(context, on_each_side=2, on_ends=2):
         page.number, on_each_side=on_each_side, on_ends=on_ends
     )
 
-    previous = page.previous_page_number() if page.has_previous() else None
-    next = page.next_page_number() if page.has_next() else None
+    previous_page = page.previous_page_number() if page.has_previous() else None
+    next_page = page.next_page_number() if page.has_next() else None
 
     return {
         'page_range': page_range,
         'ordering': context['view'].get_ordering(),
         'size': context['view'].get_paginate_by(),
         'ellipsis': paginator.ELLIPSIS,
-        'previous': previous,
-        'next': next,
+        'previous': previous_page,
+        'next': next_page,
         'current': page.number,
         'request': context['request']
     }
