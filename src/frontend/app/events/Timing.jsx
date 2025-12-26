@@ -1,4 +1,3 @@
-import { useId, useState } from 'react';
 import { format } from 'date-fns';
 
 import Tooltip from './Tooltip';
@@ -33,9 +32,10 @@ export default function EventTiming({ errors, event, dispatch }) {
     </div>
 
     <div className="input">
-      <label>Next Update Time</label>
+      <label htmlFor='nextUpdateTime'>Next Update Time</label>
       <div className="row">
         <input
+          id='nextUpdateTime'
           type="datetime-local"
           defaultValue={normalized(event.timing.nextUpdate)}
           onBlur={(e) => dispatch({ type: 'set', section: 'timing', value: [{ nextUpdate: e.target.value, section: 'timing' }, { nextUpdateIsDefault: false, section: 'timing' }]})}
@@ -59,9 +59,10 @@ export default function EventTiming({ errors, event, dispatch }) {
     </div>
 
     <div className="input">
-      <label>End Time</label>
+      <label htmlFor="endTime">End Time</label>
       <div className="row">
         <input
+          id="endTime"
           type="datetime-local"
           defaultValue={normalized(event.timing.endTime)}
           onBlur={(e) => dispatch({ type: 'set', section: 'timing', value: [{ endTime: e.target.value, section: 'timing' }]})}

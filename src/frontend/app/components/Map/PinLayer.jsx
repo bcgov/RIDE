@@ -163,7 +163,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.start.dra = { properties: event.location.start }
         map.pins.getSource().addFeature(map.start);
       }
-      // map.start.updateInfobox(map);
     } else if (map.start) { // no start location but start pin exists
       map.pins.getSource().removeFeature(map.start);
       map.start = null;
@@ -180,7 +179,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.end.dra = { properties: event.location.end }
         map.pins.getSource().addFeature(map.end);
       }
-      // map.end.updateInfobox(map);
 
       const route = event.geometry?.geometries[2]?.coordinates;
       if (route && route.length > 0) {
