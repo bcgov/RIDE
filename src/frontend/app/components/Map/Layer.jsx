@@ -236,7 +236,6 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
             label: 'View history',
             action: (e) => {
               setContextMenu([]);
-              // dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: true });
             }
           }
         ]);
@@ -305,7 +304,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
     }
   }, [map]);
 
-  return <>
+  return (
     <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} myevent={event} />
-  </>;
+  );
 }
