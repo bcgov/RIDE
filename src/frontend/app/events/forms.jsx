@@ -1,6 +1,4 @@
-import { useCallback, useContext, useState, useRef } from 'react';
-
-import { getTransform } from 'ol/proj';
+import { useContext, useState } from 'react';
 
 import Conditions from './Conditions.jsx';
 import Details from './Details.jsx';
@@ -34,9 +32,9 @@ const ONE_WEEK = ONE_HOUR * 24 * 7
 function getLater(severity) {
   if (!severity) { return null; }
   if (severity.startsWith('Major')) {
-    return new Date(new Date().getTime() + ONE_HOUR);
+    return new Date(Date.now() + ONE_HOUR);
   } else if (severity.startsWith('Minor')) {
-    return new Date(new Date().getTime() + ONE_WEEK);
+    return new Date(Date.now() + ONE_WEEK);
   }
   return null;
 }
@@ -55,7 +53,7 @@ export function eventReducer(event, action) {
   switch (action.type) {
     case 'update event': {
       if (event.id !== action.value.id) { return event; }
-      return Object.assign({}, event, action.value);
+      return {...event, ...action.value};
     }
 
     case 'set': {
@@ -68,37 +66,37 @@ export function eventReducer(event, action) {
           event = { ...event, ...value, }
         }
       });
-      return Object.assign({}, event);
+      return {...event};
     }
     case 'set start': {
       event.location.start = { ...event.location.start, ...action.value };
-      return Object.assign({}, event);
+      return {...event};
     }
     case 'set end': {
       event.location.end = { ...LOCATION_BLANK, ...event.location.end, ...action.value };
-      return Object.assign({}, event);
+      return {...event};
     }
     case 'set alias': {
       event.location[action.key].alias = action.value;
-      return Object.assign({}, event);
+      return {...event};
     }
     case 'toggle alias': {
       event.location[action.key].useAlias = action.value;
-      return Object.assign({}, event);
+      return {...event};
     }
     case 'set other': {
       event.location[action.key].other = action.value;
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'toggle checked': {
       const nearby = event.location[action.key].nearby[action.value];
       nearby.include = !action.checked;
-      return Object.assign({}, event);
+      return {...event};
     }
     case 'toggle other': {
       event.location[action.key].useOther = !action.checked;
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'toggle days': {
@@ -113,7 +111,7 @@ export function eventReducer(event, action) {
       } else {
         event.timing.schedules[action.index].error = 'Must have at least one day selected';
       }
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'set days': {
@@ -121,25 +119,25 @@ export function eventReducer(event, action) {
       for (const day of days_of_the_week) { schedule[day] = false; }
       const days = Array.isArray(action.days) ? action.days : [action.days];
       for (const day of days) { schedule[day] = true; }
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'set schedule': {
       const schedule = event.timing.schedules[action.index];
       event.timing.schedules[action.index] = { ...schedule, ...action.value };
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'remove schedule': {
       event.timing.schedules = event.timing.schedules.filter((s) => s.id !== action.id);
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'add schedule': {
       if (event.timing.schedules.length === action.currentLength) {
         event.timing.schedules.push(addId(structuredClone(SCHEDULE_BLANK)));
       }
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'set severity': {
@@ -147,14 +145,14 @@ export function eventReducer(event, action) {
       if (event.timing.nextUpdateIsDefault) {
         event.timing.nextUpdate = convert(getLater(action.value));
       }
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'set category': {
       if (action.value === action.previous) { return event; }
       event.details.category = action.value;
       event.details.situation = null;
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'set situation': {
@@ -162,7 +160,7 @@ export function eventReducer(event, action) {
       if (!event.details.category) {
         event.details.category = FORM_PHRASE_CATEGORY[event.type][action.value];
       }
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'update list': {
@@ -180,7 +178,7 @@ export function eventReducer(event, action) {
       if (action.section === 'impacts') {
         event.is_closure = items.filter((item) => item.closed).length > 0;
       }
-      return Object.assign({}, event, {[action.section]: items});
+      return {...event, ...{[action.section]: items}};
     }
 
     case 'remove from list': {
@@ -201,7 +199,7 @@ export function eventReducer(event, action) {
         }
         return item;
       })
-      return Object.assign({}, event, {[action.section]: items});
+      return {...event, ...{[action.section]: items}};
     }
 
     case 'change order': {
@@ -210,7 +208,7 @@ export function eventReducer(event, action) {
       const final = segments.pop();
       for (const segment of segments) { obj = obj[segment]; }
       obj[final] = action.value;
-      return Object.assign({}, event);
+      return {...event};
     }
 
     case 'set additional': {
