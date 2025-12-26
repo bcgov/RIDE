@@ -25,7 +25,7 @@ export default function EditUserForm(props) {
 
   // Effects
   useEffect(() => {
-    {submitting && submitForm()}
+    submitting && submitForm();
   }, [submitting]);
 
   /* Helpers */

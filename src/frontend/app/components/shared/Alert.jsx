@@ -15,7 +15,7 @@ export default function Alert() {
   /* Setup */
   // Context
   const { alertContext, setAlertContext } = useContext(AlertContext);
-  
+
   // States
   const [visible, setVisible] = useState(false);
   const [renderedAlert, setRenderedAlert] = useState(alertContext);
@@ -47,7 +47,7 @@ export default function Alert() {
 
   /* Main rendering function */
   return renderedAlert && (
-    <div className={`alert fade-out ${!visible ? 'hidden' : ''}`}>
+    <div className={`alert fade-out ${visible ? '' : 'hidden'}`}>
       <div className="content">
         <div className="content__text">
           {renderedAlert.message

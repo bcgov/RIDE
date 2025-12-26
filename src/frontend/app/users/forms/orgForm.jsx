@@ -37,7 +37,7 @@ export default function OrgForm(props) {
   }, [initialOrg]);
 
   useEffect(() => {
-    {submitting && submitForm()}
+    submitting && submitForm()
   }, [submitting]);
 
   /* Helpers */

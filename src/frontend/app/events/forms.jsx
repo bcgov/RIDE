@@ -359,9 +359,7 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
       coordinates: form.location.start.coords,
     }];
 
-    if (!form.location.end?.name) {
-      form.location.end = null;
-    } else {
+    if (form.location.end?.name) {
       geometries.push({
         type: "Point",
         coordinates: form.location.end.coords,
@@ -377,6 +375,8 @@ export default function EventForm({ map, preview, cancel, event, dispatch, goToF
         type: "Linestring",
         coordinates: route,
       });
+    } else {
+      form.location.end = null;
     }
     form.geometry = {
       type: "GeometryCollection",
