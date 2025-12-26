@@ -58,7 +58,7 @@
     scrollbar-color: #999 #f3f2f1;
   }
 
-  input, select, textbox {
+  input, select {
     border: solid 1px #000;
     border-radius: 4px;
     padding-left: 5px;
@@ -66,10 +66,6 @@
 
   input::placeholder {
     font-size: 0.8rem;
-  }
-
-  textbox {
-    display: block;
   }
 
   form {

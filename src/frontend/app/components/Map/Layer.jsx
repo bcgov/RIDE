@@ -101,14 +101,12 @@ function getStyle(event, isRoute=false) {
     } else if (event.details.severity === 'Minor') {
       path.push('minorEvents');
     }
-  } else {
-    if (event.is_closure) {
-      path.push('closures');
-    } else if (event.details.severity === 'Major') {
-      path.push('major_generic_delays');
-    } else if (event.details.severity === 'Minor') {
-      path.push('generic_delays');
-    }
+  } else if (event.is_closure) {
+    path.push('closures');
+  } else if (event.details.severity === 'Major') {
+    path.push('major_generic_delays');
+  } else if (event.details.severity === 'Minor') {
+    path.push('generic_delays');
   }
   return path.join('.');
 }
