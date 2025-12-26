@@ -84,10 +84,6 @@ div.controls *:first-child {
   font-size: larger;
 }
 
-.page-size {
-
-}
-
 .dj_map_wrapper {
   height: 30rem;
   width: 60rem;
@@ -102,7 +98,7 @@ div.controls *:first-child {
 .dj_map_wrapper textarea {
   width: 30rem;
   padding: 0.5rem;
-  font-size: 0.7rem;;
+  font-size: 0.7rem;
   font-family: 'Roboto Mono', monospace;
 }
 

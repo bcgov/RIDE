@@ -255,7 +255,7 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
     }
   };
 
-  return <>
+  return (
     <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} />
-  </>;
+  );
 }

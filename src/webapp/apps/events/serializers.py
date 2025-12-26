@@ -127,13 +127,6 @@ class NoteSerializer(VersionSerializer):
         model = Note
         fields = '__all__'
 
-    def validate_event(self, value):
-
-        # if Event.objects.filter(id=value).count() == 0:
-        #     raise serializers.ValidationError("Event not found for ID")
-
-        return value
-
     def to_internal_value(self, data):
         validated = super().to_internal_value(data)
 

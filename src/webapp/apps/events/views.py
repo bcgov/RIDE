@@ -7,7 +7,6 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-# from .forms import EventForm
 from .models import Event, Note, TrafficImpact
 from .serializers import EventSerializer, NoteSerializer, PendingSerializer
 from .serializers import TrafficImpactSerializer

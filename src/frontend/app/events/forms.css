@@ -498,10 +498,6 @@
             }
           }
 
-          button + button {
-            /* margin-left: 1rem; */
-          }
-
           &.add-note {
             text-align: right;
             button {
@@ -528,12 +524,10 @@
 
             .buttons {
               text-align: right;
-              /* width: 25%; */
             }
 
             .updated {
               font-size: 0.675rem;
-              /* width: 25%; */
             }
           }
         }

@@ -1,5 +1,5 @@
 import { Feature } from 'ol';
-import { Circle, Fill, Icon, Stroke, Style } from 'ol/style';
+import { Icon, Style } from 'ol/style';
 
 import Styles, { normalStyle, hoverStyle, activeStyle } from './styles';
 import * as eStyles from '../../events/featureStyleDefinitions';
@@ -159,9 +159,5 @@ export class PinFeature extends RideFeature {
         this.ref.current.style.visibility = 'hidden';
       }
     }
-  }
-
-  upHandler(e) {
-    // this.updateInfobox(e.map);
   }
 }

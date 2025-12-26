@@ -82,7 +82,7 @@ export default function Preview({ event, dispatch, mapRef }) {
 
         { isLinear ?
           <>
-            { startNearbies.length > 1 ?
+            { (startNearbies.length > 1 || endNearbies.length > 1) ?
               <>
                 <p>starts:</p>
                 <ul className="unboxed">
@@ -91,7 +91,7 @@ export default function Preview({ event, dispatch, mapRef }) {
               </> :
               <>{ startNearbies.length === 1 && <p>starts {startNearbies[0]}</p> }</>
             }
-            { endNearbies.length > 1 ?
+            { (startNearbies.length > 1 || endNearbies.length > 1) ?
               <>
                 <p>ends:</p>
                 <ul className="unboxed">
@@ -105,12 +105,6 @@ export default function Preview({ event, dispatch, mapRef }) {
             { startNearbies.map((loc, ii) => <p key={`loc ${ii}`}>{loc}</p>) }
           </>
         }
-        {/* { event.location.start.nearby.map((loc, ii) => (
-          loc.include && <p key={`loc ${ii}`}>{loc.phrase}</p>
-        ))}
-        { event.location.start.useOther && event.location.start.other &&
-          <p>{event.location.start.other}</p>
-        } */}
 
         { event.impacts.length > 0 &&
           <>

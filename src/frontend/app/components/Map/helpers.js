@@ -155,14 +155,12 @@ export function createMap() {
       )),
     };
 
-    // console.log(glStyle);
     applyStyle(vectorLayer, glStyle, 'esri');
     applyStyle(symbolLayer, symbolsStyle, 'esri');
   });
 
   // create map
   const map = new Map({
-    // layers: [vectorLayer, symbolLayer],
     layers: [vectorLayer],
     view: view,
     moveTolerance: 7,

@@ -209,8 +209,6 @@ class Event(VersionedModel):
 
     additional = models.TextField(blank=True, null=True)
     link = models.URLField(max_length=None, blank=True, null=True)
-    # is_closure = models.BooleanField(default=False)
-    # tlids = models.JSONField(default=list, null=True)
 
     # override VersionedModel's .current manager to use latest_approved
     # rather than latest (still available via the .last manager)
