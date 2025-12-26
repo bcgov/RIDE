@@ -102,9 +102,9 @@ class MapWidget {
     this.map.on('click', this.clickHandler);
     this.map.on('contextmenu', this.rightClickHandler);
 
-    window.m = this.map;
-    window.c = this.featureCollection;
-    window.w = this;
+    globalThis.m = this.map;
+    globalThis.c = this.featureCollection;
+    globalThis.w = this;
   }
 
 
