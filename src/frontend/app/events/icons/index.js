@@ -536,6 +536,7 @@ let curr, prev;
     curr = curr[severity];
     ['present', 'future'].forEach((tense) => {
       const prev = curr;
+      if (!curr[tense]) { return; }
       curr = curr[tense];
       ['open', 'closure'].forEach((closure)=> {
         if (!curr) { // incident-major has no future events

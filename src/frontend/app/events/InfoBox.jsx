@@ -3,7 +3,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import './InfoBox.css';
 
-const classify = (text) => text.replace(/[()0-9]/g, '').trim().replace(/\s/g, '-').toLowerCase();
+const classify = (text) => text.replaceAll(/[()0-9]/, '').trim().replaceAll(/\s/, '-').toLowerCase();
 
 export default function InfoBox({ className, point, ref }) {
   let streetName =  point?.ROAD_NAME_FULL;
