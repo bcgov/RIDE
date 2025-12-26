@@ -25,7 +25,7 @@ export default function Preview({ event, dispatch, mapRef }) {
   if (end.other && end.useOther) { endNearbies.push(end.other); }
 
   const lastUpdated = new Date(event.last_updated);
-  const cleared = event.status === 'Inactive' && (!event.approved || lastUpdated > new Date() - 60000 * 15);  // TODO: time window move to env variable
+  const cleared = event.status === 'Inactive' && (!event.approved || lastUpdated > Date.now() - 60000 * 15);  // TODO: time window move to env variable
 
   const icon = getPlainIcon(event);
   const nextUpdate = new Date(event?.timing?.nextUpdate);

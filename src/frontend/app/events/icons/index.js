@@ -581,7 +581,7 @@ export function getIcon(event, state='static', includePending=true) {
 
       if (status === 'inactive') { // TODO: cleared determine by time of last inactivation
         const lastUpdated = new Date(event.last_updated);
-        if (!event.approved || lastUpdated > new Date() - 60000 * 15) {  // TODO: time window move to env variable
+        if (!event.approved || lastUpdated > Date.now() - 60000 * 15) {  // TODO: time window move to env variable
           status = 'clearing';
         }
       }
