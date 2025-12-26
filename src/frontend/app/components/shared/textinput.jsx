@@ -12,7 +12,7 @@ export default function RIDETextInput(props) {
   /* Rendering */
   // Main Component
   return (
-    <div className={`ride-textinput ${extraClasses ? extraClasses : ''}`}>
+    <div className={`ride-textinput ${extraClasses || ''}`}>
       <Field className={'ride-textinput-container'}>
         <Label className={'ride-textinput-label'}>{label}</Label>
 

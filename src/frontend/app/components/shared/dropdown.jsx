@@ -17,7 +17,7 @@ export default function RIDEDropdown(props) {
 
   /* Hooks */
   // States
-  const [ selected, setSelected ] = useState(value ? value : null);
+  const [ selected, setSelected ] = useState(value || null);
 
   // Effects
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function RIDEDropdown(props) {
   /* Rendering */
   // Main Component
   return (
-    <Menu as="div" className={`ride-dropdown ${extraClasses ? extraClasses : ''}`}>
+    <Menu as="div" className={`ride-dropdown ${extraClasses || ''}`}>
       <p className={'ride-dropdown-label'}>{label}</p>
 
       <MenuButton disabled={!items?.length} className="ride-dropdown-button">

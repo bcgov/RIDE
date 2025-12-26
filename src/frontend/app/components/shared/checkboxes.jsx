@@ -16,7 +16,7 @@ export default function RIDECheckBoxes(props) {
   /* Rendering */
   // Main Component
   return (
-    <div className={`ride-checkboxes ${extraClasses ? extraClasses : ''}`}>
+    <div className={`ride-checkboxes ${extraClasses || ''}`}>
       <span className={'ride-checkboxes-label'}>{label}</span>
 
       <div className={'ride-checkboxes-items'}>
