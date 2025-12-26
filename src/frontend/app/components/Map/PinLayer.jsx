@@ -132,7 +132,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.addLayer(layer);
       map.pins = layer;
       map.set('pins', layer);
-      // map.on('click', clickHandler);
       map.on('contextmenu', contextHandler);
       map.getInteractions().extend([
         new Drag({ endHandler, menuRef, resetContextMenu: () => setContextMenu([]), dispatch })
@@ -193,42 +192,6 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.end = null;
     }
   }, [event]);
-
-  /* If there's no feature at the click, create a start point if none exists, an
-   * end point if a start point is present, or nothing if both are present.
-   */
-  const clickHandler = (e) => {
-    const feature = e.map.getFeaturesAtPixel(e.pixel,{
-      layerFilter: (layer) => layer.listenForClicks,
-    })[0];
-
-    if (!feature) {
-      const coords = getSnapped(e.coordinate, e.pixel, e.map);
-      if (!e.map.start) {
-        e.map.start = new PinFeature({
-          style: 'start',
-          geometry: new Point(coords),
-          ref: startRef,
-          action: 'set start',
-        });
-        e.map.pins.getSource().addFeature(e.map.start);
-        e.map.getView().animate({ center: coords, duration: 250, easing: linear });
-        endHandler(e, e.map.start, dispatch);
-      } else if (!e.map.end) {
-        e.map.end = new PinFeature({
-          style: 'end',
-          geometry: new Point(coords),
-          ref: endRef,
-          action: 'set end',
-        });
-        e.map.pins.getSource().addFeature(e.map.end);
-        const ex = boundingExtent([coords, e.map.start.getGeometry().getCoordinates()]);
-        e.map.getView().animate({ center: getCenter(ex), duration: 500, easing: linear });
-        endHandler(e, e.map.end, dispatch);
-        updateRoute(e.map);
-      }
-    }
-  };
 
   /* Remove a pin from the map and update the event.  If the pin removed is the
    * start pin and there's an end pin, make the end pin the new start pin.
