@@ -290,12 +290,12 @@ function handleMoveEvent(evt) {
  * @return {boolean} `false` to stop the drag sequence.
  */
 function handleUpEvent(e) {
-  if (e.originalEvent?.button > 0) { return false; } // right or middle click
-
-  this.endHandler(e, this.feature_, this.dispatch);
-  this.coordinate_ = null;
-  if (this.feature_.upHandler) { this.feature_.upHandler(e) }
-  this.feature_ = null;
+  if (e.originalEvent?.button === 0) { // ignore right or middle click
+    this.endHandler(e, this.feature_, this.dispatch);
+    this.coordinate_ = null;
+    if (this.feature_.upHandler) { this.feature_.upHandler(e) }
+    this.feature_ = null;
+  }
   return false;
 }
 
