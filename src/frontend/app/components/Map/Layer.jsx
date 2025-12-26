@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useCallback, useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 
 import * as turf from '@turf/turf';
 
@@ -7,13 +7,12 @@ import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { linear } from 'ol/easing';
-import { Point, LineString, Polygon } from 'ol/geom';
-import { Circle, Fill, Icon, Stroke, Style } from 'ol/style';
-import * as ol from 'ol';
+import { Point, LineString } from 'ol/geom';
+import { Icon, Style } from 'ol/style';
 
 import { MapContext } from '../../contexts';
 
-import { ll2g, g2ll } from './helpers.js';
+import { ll2g, selectFeature } from './helpers.js';
 import RideFeature, { PinFeature } from './feature.js';
 import ContextMenu from '../../events/ContextMenu';
 import { getInitialEvent } from '../../events/forms';
@@ -22,7 +21,6 @@ import { API_HOST } from '../../env.js';
 import { getIcon } from '../../events/icons';
 import { endHandler } from './PinLayer';
 import { patch } from '../../shared/helpers';
-import { selectFeature } from './helpers.js';
 
 
 export function addEvent(event, map, dispatch) {
@@ -221,7 +219,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
       if (!event.showForm) {
 
         // TODO: add permission based checks on these items
-        items.push(...[
+        items.push(
           {
             label: 'Edit event',
             action: (e) => {
@@ -236,7 +234,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
               setContextMenu([]);
             }
           }
-        ]);
+        );
 
         if (feature.get('raw').status === 'Active') {
           items.push({
@@ -271,7 +269,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
         }
       }
 
-      items.push(...[
+      items.push(
         {
           label: 'Dump feature to console',
           debugging: true,
@@ -288,7 +286,7 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
             setContextMenu([]);
           }
         },
-      ]);
+      );
     }
 
     setContextMenu(items);

@@ -299,81 +299,9 @@ const icons = {
           },
         },
       },
-      future: {
-        open: {
-          active: {
-            static: incidentMajorActiveStatic,
-            hover: incidentMajorActiveHover,
-            active: incidentMajorActiveActive,
-          },
-          clearing: {
-            static: incidentMajorClearingStatic,
-            hover: incidentMajorClearingHover,
-            active: incidentMajorClearingActive,
-          },
-          inactive: {
-            static: incidentMajorInactiveStatic,
-            hover: incidentMajorInactiveHover,
-            active: incidentMajorInactiveActive,
-          },
-        },
-        closure: {
-          active: {
-            static: incidentMajorClosureActiveStatic,
-            hover: incidentMajorClosureActiveHover,
-            active: incidentMajorClosureActiveActive,
-          },
-          clearing: {
-            static: incidentMajorClosureClearingStatic,
-            hover: incidentMajorClosureClearingHover,
-            active: incidentMajorClosureClearingActive,
-          },
-          inactive: {
-            static: incidentMajorClosureInactiveStatic,
-            hover: incidentMajorClosureInactiveHover,
-            active: incidentMajorClosureInactiveActive,
-          },
-        },
-      },
     },
     minor: {
       present: {
-        open: {
-          active: {
-            static: incidentMinorActiveStatic,
-            hover: incidentMinorActiveHover,
-            active: incidentMinorActiveActive,
-          },
-          clearing: {
-            static: incidentMinorClearingStatic,
-            hover: incidentMinorClearingHover,
-            active: incidentMinorClearingActive,
-          },
-          inactive: {
-            static: incidentMinorInactiveStatic,
-            hover: incidentMinorInactiveHover,
-            active: incidentMinorInactiveActive,
-          },
-        },
-        closure: {
-          active: {
-            static: incidentMinorClosureActiveStatic,
-            hover: incidentMinorClosureActiveHover,
-            active: incidentMinorClosureActiveActive,
-          },
-          clearing: {
-            static: incidentMinorClosureClearingStatic,
-            hover: incidentMinorClosureClearingHover,
-            active: incidentMinorClosureClearingActive,
-          },
-          inactive: {
-            static: incidentMinorClosureInactiveStatic,
-            hover: incidentMinorClosureInactiveHover,
-            active: incidentMinorClosureInactiveActive,
-          },
-        },
-      },
-      future: {
         open: {
           active: {
             static: incidentMinorActiveStatic,

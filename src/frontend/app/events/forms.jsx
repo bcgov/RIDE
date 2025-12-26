@@ -178,7 +178,7 @@ export function eventReducer(event, action) {
       if (action.section === 'impacts') {
         event.is_closure = items.filter((item) => item.closed).length > 0;
       }
-      return {...event, ...{[action.section]: items}};
+      return {...event, [action.section]: items};
     }
 
     case 'remove from list': {
@@ -199,7 +199,7 @@ export function eventReducer(event, action) {
         }
         return item;
       })
-      return {...event, ...{[action.section]: items}};
+      return {...event, [action.section]: items};
     }
 
     case 'change order': {
