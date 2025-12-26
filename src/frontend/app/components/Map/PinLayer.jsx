@@ -19,10 +19,10 @@ import { routeNormalStyle, routeActiveStyle, routeHoverStyle } from './styles.js
 import ContextMenu from '../../events/ContextMenu';
 import InfoBox from '../../events/InfoBox';
 
-window.ol = ol;
-window.Circle = Circle;
-window.Polygon = Polygon;
-window.circular = circular;
+globalThis.ol = ol;
+globalThis.Circle = Circle;
+globalThis.Polygon = Polygon;
+globalThis.circular = circular;
 
 import { PinFeature } from './feature.js';
 

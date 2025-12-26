@@ -350,11 +350,11 @@ export const IMPACTS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
 export const RESTRICTIONS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
 export const CONDITIONS_FORMS = ['Road condition'];
 
-export const FORMS = []; window.FORMS = FORMS;
-export const FORM_CATEGORIES = {}; window.FORM_CATEGORIES = FORM_CATEGORIES;
-export const FORM_PHRASES = {}; window.FORM_PHRASES = FORM_PHRASES;
-export const FORM_PHRASE_CATEGORY = {}; window.FORM_PHRASE_CATEGORY = FORM_PHRASE_CATEGORY;
-export const PHRASES_LOOKUP = {}; window.PHRASES_LOOKUP = PHRASES_LOOKUP;
+export const FORMS = []; globalThis.FORMS = FORMS;
+export const FORM_CATEGORIES = {}; globalThis.FORM_CATEGORIES = FORM_CATEGORIES;
+export const FORM_PHRASES = {}; globalThis.FORM_PHRASES = FORM_PHRASES;
+export const FORM_PHRASE_CATEGORY = {}; globalThis.FORM_PHRASE_CATEGORY = FORM_PHRASE_CATEGORY;
+export const PHRASES_LOOKUP = {}; globalThis.PHRASES_LOOKUP = PHRASES_LOOKUP;
 export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
   const form = row[0];
   const category = row[1];
@@ -382,5 +382,5 @@ export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
 // the list of phrases for each incident type needs to alphabetic (DBC22-5063)
 Object.keys(FORM_PHRASES).forEach((key) => FORM_PHRASES[key].sort((a, b) => a.phrase < b.phrase ? -1 : 1));
 
-window.FORM_CATEGORY_PHRASE = FORM_CATEGORY_PHRASE
+globalThis.FORM_CATEGORY_PHRASE = FORM_CATEGORY_PHRASE
 

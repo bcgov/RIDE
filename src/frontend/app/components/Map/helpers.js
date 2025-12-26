@@ -136,7 +136,7 @@ export function createMap() {
     extent: transformedExtent,
     enableRotation: false
   });
-  window.view = view;
+  globalThis.view = view;
 
   // Apply the basemap style from the arcgis resource
   post(MAP_STYLE_URL).then(function (glStyle) {
@@ -314,8 +314,8 @@ function getPoint(coords) {
   return new RideFeature({ geometry: new Point(coords)})
 }
 
-export const g2ll = getTransform('EPSG:3857', 'EPSG:4326'); window.g2ll = g2ll;
-export const ll2g = getTransform('EPSG:4326', 'EPSG:3857'); window.ll2g = ll2g;
+export const g2ll = getTransform('EPSG:3857', 'EPSG:4326'); globalThis.g2ll = g2ll;
+export const ll2g = getTransform('EPSG:4326', 'EPSG:3857'); globalThis.ll2g = ll2g;
 export const bc2ll = (coords) => proj4('EPSG:3005', 'EPSG:4326', coords);
 export const ll2bc = (coords) => proj4('EPSG:4326', 'EPSG:3005', coords);
 export const bc2g = (coords) => proj4('EPSG:3005', 'EPSG:3857', coords);

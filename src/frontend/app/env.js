@@ -1,5 +1,5 @@
-// Values are injected at runtime into window.__ENV__ by nginx-served /env.js.
-const runtimeEnv = (typeof window !== 'undefined' && window.__ENV__) || {};
+// Values are injected at runtime into globalThis.__ENV__ by nginx-served /env.js.
+const runtimeEnv = (typeof window !== 'undefined' && globalThis.__ENV__) || {};
 const getEnv = (key, fallback = '') => runtimeEnv[key] ?? import.meta.env?.[`VITE_${key}`] ?? fallback;
 
 export const API_HOST = `${getEnv('API_HOST')}`;

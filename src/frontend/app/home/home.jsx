@@ -56,7 +56,7 @@ export default function Home() {
             onSubmit={handleFormSubmit}>
 
             <input type='hidden' name='csrfmiddlewaretoken' value={getCookie('csrftoken')} />
-            <input type='hidden' name='next' value={window.location.href} />
+            <input type='hidden' name='next' value={globalThis.location.href} />
             <button type='submit' autoFocus={true}>Sign-in with IDIR</button>
           </form>
 
@@ -67,7 +67,7 @@ export default function Home() {
             onSubmit={handleFormSubmit}>
 
             <input type='hidden' name='csrfmiddlewaretoken' value={getCookie('csrftoken')} />
-            <input type='hidden' name='next' value={window.location.href} />
+            <input type='hidden' name='next' value={globalThis.location.href} />
             <button type='submit' autoFocus={true}>Sign-in with BCeID</button>
           </form>
 
@@ -79,7 +79,7 @@ export default function Home() {
               onSubmit={handleFormSubmit}>
 
               <input type='hidden' name='csrfmiddlewaretoken' value={getCookie('csrftoken')} />
-              <input type='hidden' name='next' value={window.location.href} />
+              <input type='hidden' name='next' value={globalThis.location.href} />
               <button type='submit' autoFocus={true}>Dev Sign-in with Django</button>
             </form>
           }

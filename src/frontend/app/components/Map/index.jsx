@@ -75,7 +75,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
     })
     setMap(map);
   }, []);
-  window.map = map;
+  globalThis.map = map;
 
   return (
     <div ref={elementRef} className="map-container">

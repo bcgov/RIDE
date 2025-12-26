@@ -133,7 +133,7 @@ async function updateEvents(map, dispatch) {
       }
 
       const source = map.get('majorEvents').getSource();
-      window.s = source; window.vl = map.get('majorEvents');
+      globalThis.s = source; globalThis.vl = map.get('majorEvents');
 
       const eventIds = {};
       data.forEach((event) => {

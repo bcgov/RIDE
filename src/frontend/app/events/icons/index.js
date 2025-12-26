@@ -402,7 +402,7 @@ function generateIconDictionary() {
   }
   return JSON.stringify(icons).replaceAll('"', '');
 }
-window.generateIconDictionary = generateIconDictionary;
+globalThis.generateIconDictionary = generateIconDictionary;
 
 const icons = {
   incident: {
@@ -740,7 +740,7 @@ const icons = {
     },
   },
 };
-window.icons = icons;
+globalThis.icons = icons;
 export default icons;
 
 let curr, prev;

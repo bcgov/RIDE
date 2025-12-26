@@ -51,7 +51,7 @@ const DEFAULT_HEADERS = {
 
 const request = (url, params={}, headers={}, include_credentials=true, method="GET") => {
   // Check if this is an external API call
-  const isExternalAPI = url.startsWith('http') && !url.includes(window.location.hostname);
+  const isExternalAPI = url.startsWith('http') && !url.includes(globalThis.location.hostname);
 
   // For external APIs, use minimal headers
   if (isExternalAPI) {
@@ -75,8 +75,8 @@ const request = (url, params={}, headers={}, include_credentials=true, method="G
   // Only add CSRF token for same-origin requests
   if (!isExternalAPI) {
     try {
-      const parsedUrl = new URL(url, window.location.origin);
-      if (parsedUrl.hostname === window.location.hostname) {
+      const parsedUrl = new URL(url, globalThis.location.origin);
+      if (parsedUrl.hostname === globalThis.location.hostname) {
         headers['X-CSRFToken'] = getCookie('csrftoken');
       }
     } catch (e) {
