@@ -538,6 +538,10 @@ let curr, prev;
       const prev = curr;
       curr = curr[tense];
       ['open', 'closure'].forEach((closure)=> {
+        if (!curr) { // incident-major has no future events
+          return;
+        }
+
         const prev = curr;
         curr = curr[closure];
         curr.pending = structuredClone(curr.active);
