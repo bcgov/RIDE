@@ -1,16 +1,7 @@
 from django.contrib.gis.db import models
 
-from apps.events.models import BaseModel
-
-
-class Area(BaseModel):
-    id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=255)
-    sorting_order = models.PositiveIntegerField()
-    parent_area = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
-    segments = models.ManyToManyField('segments.Segment', related_name='areas', blank=True)
-
-    last_updated = models.DateTimeField(auto_now=True, editable=False, null=True, blank=True)
+from apps.shared.models import BaseModel, VersionedModel
+from config import settings
 
 
 class Route(BaseModel):
@@ -20,8 +11,7 @@ class Route(BaseModel):
     last_updated = models.DateTimeField(auto_now=True, editable=False, null=True, blank=True)
 
 
-class Segment(BaseModel):
-    id = models.PositiveIntegerField(primary_key=True)
+class Segment(VersionedModel):
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     name = models.CharField(max_length=90)
     description = models.CharField(max_length=255)
@@ -32,4 +22,5 @@ class Segment(BaseModel):
     secondary_point = models.PointField()
     geometry = models.LineStringField(null=True, blank=True)
 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True, editable=False, null=True, blank=True)

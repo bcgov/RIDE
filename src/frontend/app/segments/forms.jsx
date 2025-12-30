@@ -1,0 +1,176 @@
+// React
+import React from 'react';
+
+// Internal imports
+import { bulkUpdateRcs } from "../shared/data/roadConditions.js";
+import Conditions from "../events/Conditions.jsx";
+import EventTiming from "../events/Timing.jsx";
+import AdditionalMessaging from "../events/Additional.jsx";
+import EventForm, {getInitialEvent} from "../events/forms.jsx";
+
+// External imports
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/pro-regular-svg-icons';
+
+// Styling
+import './forms.scss';
+import {convertToDateTimeLocalString as convert} from "../components/Map/helpers.js";
+
+const getDefaultNextUpdate = () => {
+  const now = new Date();
+  
+  // Add 30 minutes buffer - overflow is handled automatically
+  now.setMinutes(now.getMinutes() + 30);
+  now.setSeconds(0, 0);
+  
+  const month = now.getMonth() + 1; // JavaScript months are 0-indexed
+  const day = now.getDate();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const year = now.getFullYear();
+  
+  // October 1 - April 30 is winter season
+  // (month > 9 or month < 5) or (month == 10 and day >= 1) or (month == 4 and day <= 30)
+  const inWinterSeason = (month > 9 || month < 5) || (month === 10 && day >= 1) || (month === 4 && day <= 30);
+  if (inWinterSeason) {
+    const times = [5, 7, 16]; // 5:00, 7:00, 16:00
+    const candidates = [];
+    
+    const currentMinutes = hour * 60 + minute;
+    
+    for (const candidateHour of times) {
+      let candidateDay = day;
+      let candidateMonth = month;
+      let candidateYear = year;
+      
+      // If candidate time is <= current time, add 1 day
+      const candidateMinutes = candidateHour * 60;
+      if (candidateMinutes <= currentMinutes) {
+        // Add 1 day - handle month/year rollover
+        candidateDay++;
+        const daysInMonth = new Date(candidateYear, candidateMonth, 0).getDate();
+        if (candidateDay > daysInMonth) {
+          candidateDay = 1;
+          candidateMonth++;
+
+          if (candidateMonth > 12) {
+            candidateMonth = 1;
+            candidateYear++;
+          }
+        }
+      }
+      
+      // Create date with candidate time (seconds set to 0)
+      const candidate = new Date(candidateYear, candidateMonth - 1, candidateDay, candidateHour, 0, 0);
+      candidates.push(candidate);
+    }
+    
+    // Return the minimum (earliest) candidate
+    const minCandidate = new Date(Math.min(...candidates.map(d => d.getTime())));
+    return convert(minCandidate);
+
+    } else {
+    // Use now + 1 day outside of winter season
+    const nextDay = new Date(now);
+    nextDay.setDate(nextDay.getDate() + 1);
+    return convert(nextDay);
+  }
+}
+
+export function getInitialRc() {
+  const rc = getInitialEvent();
+  rc.timing.nextUpdate = getDefaultNextUpdate();
+  rc.type = 'ROAD_CONDITION'
+  rc.showPreview = true;
+  rc.showForm = true;
+
+  return rc;
+}
+
+export default class RcsForm extends EventForm {
+  /* Handlers */
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const { segPks, event, callback } = this.props;
+    const errors = {};
+
+    // Validate nextUpdate time cannot be null
+    if (!event.timing.nextUpdate) {
+      errors['nextUpdate'] = 'Next update time is required';
+    }
+
+    // Validate at least one condition must be selected
+    if (!event.conditions || event.conditions.length === 0) {
+      errors['Conditions'] = 'At least one condition must be selected';
+    }
+
+    if (event.timing.nextUpdate) {
+      event.timing.nextUpdate = new Date(event.timing.nextUpdate).toISOString();
+    }
+
+    // Set errors and prevent submission if validation fails
+    this.setState({ errors });
+    
+    // Only proceed if there are no validation errors
+    if (Object.keys(errors).length === 0) {
+      bulkUpdateRcs(segPks, event).then((response) => {
+        if (response.status === 202) {
+          callback(response);
+        }
+      });
+    }
+  }
+
+  /* Rendering */
+  // Main Component
+  render() {
+    const { event, dispatch, preview, cancel } = this.props;
+    const { errors } = this.state;
+
+    return (
+      <div className="form">
+        <form id='event-form' className={'rcs-form'}>
+          <div className="section form-header">
+            <div className="title">
+              <button type="button" onClick={cancel}>
+               <FontAwesomeIcon icon={faArrowLeft} aria-hidden={true} />
+              </button>
+
+              <div className={'text'}>Road condition details</div>
+            </div>
+
+            <button type="button" onClick={() => preview()}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z"/></svg>
+              Preview
+            </button>
+          </div>
+
+          <div className="form-body">
+            <div className="section conditions">
+              <Conditions errors={errors} event={event} dispatch={dispatch} />
+            </div>
+
+            <div className="section additional">
+              <AdditionalMessaging event={event} dispatch={dispatch} />
+            </div>
+
+            <div className="section timing">
+              <EventTiming errors={errors} event={event} dispatch={dispatch} bulkRc={true} />
+            </div>
+
+            <div className="section buttons">
+              <button type="button" onClick={(e) => this.handleSubmit(e)}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM404.4 276.7C411.4 265.5 408 250.7 396.8 243.6C385.6 236.5 370.8 240 363.7 251.2L302.3 349.5L275.3 313.5C267.3 302.9 252.3 300.7 241.7 308.7C231.1 316.7 228.9 331.7 236.9 342.3L284.9 406.3C289.6 412.6 297.2 416.2 305.1 415.9C313 415.6 320.2 411.4 324.4 404.6L404.4 276.6z"/></svg>
+                {this.getLabel()}
+              </button>
+              <button type="button" className="cancel" onClick={cancel}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M135.5 169C126.1 159.6 126.1 144.4 135.5 135.1C144.9 125.8 160.1 125.7 169.4 135.1L320.4 286.1L471.4 135.1C480.8 125.7 496 125.7 505.3 135.1C514.6 144.5 514.7 159.7 505.3 169L354.3 320L505.3 471C514.7 480.4 514.7 495.6 505.3 504.9C495.9 514.2 480.7 514.3 471.4 504.9L320.4 353.9L169.4 504.9C160 514.3 144.8 514.3 135.5 504.9C126.2 495.5 126.1 480.3 135.5 471L286.5 320L135.5 169z"/></svg>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    );
+  }
+}

@@ -42,3 +42,5 @@ if env('ENABLE_DEBUG_LOGGING', default=False):
             },
         },
     }
+
+RIDE_USERS_STRING = env('RIDE_USERS_STRING', default="")

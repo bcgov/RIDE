@@ -85,8 +85,8 @@
   { "model": "segments.route", "pk": 122, "fields": { "name": "Highway 37N" } },
   {
     "model": "segments.segment",
-    "pk": 6,
     "fields": {
+      "id": "6",
       "route": 13,
       "name": "Hwy 18 - Paldi Rd to Tansor Rd",
       "description": "Highway 18, between Paldi Rd and Drinkwater Rd (15 to 21 miles east of Lake Cowichan)",
@@ -100,8 +100,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 8,
     "fields": {
+      "id": "8",
       "route": 103,
       "name": "Road 40 (Hwy 40) - Mission Dam to Goldbridge",
       "description": "Road 40 (Lillooet-Pioneer Rd), between Haylmore Ave and Michelmoon FSR (42 to 99 miles west of Lillooet)",
@@ -115,8 +115,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 10,
     "fields": {
+      "id": "10",
       "route": 114,
       "name": "Westside Rd - Shelter Cove to Junction with Hwy 97",
       "description": "Westside Rd, between Sneena Rd (2 miles west of West Kelowna) and Deighton Rd (17 miles east of West Kelowna)",
@@ -130,8 +130,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 11,
     "fields": {
+      "id": "11",
       "route": 1,
       "name": "Hwy 1 - Boundary Rd to Brunette Ave",
       "description": "Highway 1, between Highway 7 (near Vancouver) and Exit 40: Brunette Ave (near Coquitlam)",
@@ -145,8 +145,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 12,
     "fields": {
+      "id": "12",
       "route": 1,
       "name": "Hwy 1 - 264th St to Abbotsford",
       "description": "Highway 1, between 248 St (near Langley - District) and Exit 92: Highway 11 (near Abbotsford)",
@@ -160,8 +160,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 13,
     "fields": {
+      "id": "13",
       "route": 1,
       "name": "Hwy 1 - Hope to Yale",
       "description": "Highway 1, between Highway 7 (1 mile east of Hope) and Regent St (near Yale)",
@@ -175,8 +175,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 14,
     "fields": {
+      "id": "14",
       "route": 4,
       "name": "Hwy 11 - BC/Washington Border to Hwy 7 in Mission",
       "description": "Highway 11, between the start of Highway 11 (British Columbia and USA Border) and Cedar Valley Conn (Mission)",
@@ -190,8 +190,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 17,
     "fields": {
+      "id": "17",
       "route": 11,
       "name": "Hwy 16 - Masset to Port Clements",
       "description": "Highway 16 (on Haida Gwaii), between Old Beach Rd (near Masset) and Adams Rd (near Port Clements)",
@@ -205,8 +205,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 18,
     "fields": {
+      "id": "18",
       "route": 23,
       "name": "Hwy 3 - Junction Hwy 5A Princeton to Hedley",
       "description": "Highway 3, between Highway 5A (near Princeton) and Daly Ave (Hedley)",
@@ -220,8 +220,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 21,
     "fields": {
+      "id": "21",
       "route": 40,
       "name": "Hwy 7 - Junction Hwy 1A to Mary Hill Bypass",
       "description": "Highway 7, between Highway 1A (Vancouver) and Highway 7B (near Port Coquitlam)",
@@ -235,8 +235,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 22,
     "fields": {
+      "id": "22",
       "route": 40,
       "name": "Hwy 7 - Pitt River Bridge to 222nd St",
       "description": "Highway 7, between Ottawa St (near Port Coquitlam) and Haney Bypass (near Maple Ridge)",
@@ -250,8 +250,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 23,
     "fields": {
+      "id": "23",
       "route": 40,
       "name": "Hwy 7 - 222nd St to Ruskin",
       "description": "Highway 7, between 221 St and 287 St (near Maple Ridge)",
@@ -265,8 +265,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 26,
     "fields": {
+      "id": "26",
       "route": 23,
       "name": "Hwy 3 - Sumallo Rd to Sunday Summit FSR",
       "description": "Highway 3, between First Avalanche Gate (17 miles east of Hope) and Saturday Creek (3 miles west of Sunday Summit)",
@@ -280,8 +280,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 27,
     "fields": {
+      "id": "27",
       "route": 23,
       "name": "Hwy 3 - Hope to Sumallo Rd",
       "description": "Highway 3, between Highway 1 and Sunshine Valley (17 miles east of Hope)",
@@ -295,8 +295,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 28,
     "fields": {
+      "id": "28",
       "route": 38,
       "name": "Hwy 52E - Junction Hwy 2 Tupper to Thunder",
       "description": "Highway 52 E, between Highway 2 and Stone Creek Rd (79 to 144 miles east of Tumbler Ridge)",
@@ -310,8 +310,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 29,
     "fields": {
+      "id": "29",
       "route": 38,
       "name": "Hwy 52E - Thunder to Tumbler Ridge",
       "description": "Highway 52 E, between Kelly Lake Rd (79 miles east of Tumbler Ridge) and Highway 52 N; Highway 29 (Tumbler Ridge)",
@@ -325,8 +325,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 30,
     "fields": {
+      "id": "30",
       "route": 118,
       "name": "Hwy 52N - Brassey to Junction with Hwy 97 (Arras)",
       "description": "Highway 52 N (Heritage Highway), between Highway 97 and Brassey Rd (77 to 94 miles north of Tumbler Ridge)",
@@ -340,8 +340,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 31,
     "fields": {
+      "id": "31",
       "route": 1,
       "name": "Hwy 1 - Kamloops to Monte Creek",
       "description": "Highway 1, between Valleyview Dr and Miners Bluff Rd (6 miles east of Kamloops)",
@@ -355,8 +355,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 41,
     "fields": {
+      "id": "41",
       "route": 102,
       "name": "Likely Rd - Junction with Horsefly Rd to Likely",
       "description": "Likely Rd, between Horsefly Rd (78 miles south of Likely) and Quesnel Forks Rd (Likely)",
@@ -370,8 +370,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 45,
     "fields": {
+      "id": "45",
       "route": 9,
       "name": "Hwy 14 - Port Renfrew to Jordan River",
       "description": "Highway 14, between Cerantes Rd (Port Renfrew) and Trailhead Dr (1 mile west of Jordan River)",
@@ -385,8 +385,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 46,
     "fields": {
+      "id": "46",
       "route": 23,
       "name": "Hwy 3 - Elko to Fernie",
       "description": "Highway 3, between Junction Rd (19 miles east of Jaffray) and 4th St (near Fernie)",
@@ -400,8 +400,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 47,
     "fields": {
+      "id": "47",
       "route": 23,
       "name": "Hwy 3 - Cranbrook to Wardner",
       "description": "Highway 3, between 7th Ave S (near Cranbrook) and White Cloud Pit Rd (9 miles west of Jaffray)",
@@ -415,8 +415,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 48,
     "fields": {
+      "id": "48",
       "route": 23,
       "name": "Hwy 3 - Wardner to Elko",
       "description": "Highway 3, between Bull Rd (9 miles west of Jaffray) and Highway 93 (19 miles east of Jaffray)",
@@ -430,8 +430,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 49,
     "fields": {
+      "id": "49",
       "route": 1,
       "name": "Hwy 1 - Des Frosse Rd to Monte Creek Junction",
       "description": "Highway 1, between Highway 97 (6 miles east of Kamloops) and Coubeaux Rd (15 miles east of Chase)",
@@ -445,8 +445,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 50,
     "fields": {
+      "id": "50",
       "route": 1,
       "name": "Hwy 1 - Bernie Rd to Des Frosse Rd",
       "description": "Highway 1, between Waverly Park Frtg (15 miles east of Chase) and Bernie Rd (8 miles west of Sicamous)",
@@ -460,8 +460,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 51,
     "fields": {
+      "id": "51",
       "route": 1,
       "name": "Hwy 1 - Brunette Ave to Port Mann Bridge",
       "description": "Highway 1, between Exit 38: North Rd and United Blvd (near Coquitlam)",
@@ -475,8 +475,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 52,
     "fields": {
+      "id": "52",
       "route": 1,
       "name": "Hwy 1 - Port Mann Bridge",
       "description": "Highway 1, between Highway 7B (near Coquitlam) and Highway 17 (near Surrey)",
@@ -490,8 +490,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 53,
     "fields": {
+      "id": "53",
       "route": 1,
       "name": "Hwy 1 - 200th St to 264th St",
       "description": "Highway 1, between Exit 55: 192 St and Exit 73: Highway 13 (near Langley - District)",
@@ -505,8 +505,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 54,
     "fields": {
+      "id": "54",
       "route": 1,
       "name": "Hwy 1 - Port Mann Bridge to 200th St in Langley",
       "description": "Highway 1, between Port Mann Bridge (near Surrey) and Exit 58: 200 St (near Langley - District)",
@@ -520,8 +520,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 55,
     "fields": {
+      "id": "55",
       "route": 44,
       "name": "Hwy 91 - Delta Junction with Hwy 99 in Delta to Alex Fraser Bridge",
       "description": "Highway 91, between the start of Highway 91 (Richmond) and Exit 9: Cliveden Ave (near Delta)",
@@ -535,8 +535,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 56,
     "fields": {
+      "id": "56",
       "route": 44,
       "name": "Hwy 91 - Alex Fraser Bridge",
       "description": "Highway 91, between Exit 11: Highway 91A and Exit 8: Nordel Way (near Delta)",
@@ -550,8 +550,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 61,
     "fields": {
+      "id": "61",
       "route": 1,
       "name": "Hwy 1 - Kamloops to 10 km East of Cache Creek",
       "description": "Highway 1, between Back Valley Rd (8 miles east of Cache Creek) and Comazzetto Rd (near Kamloops)",
@@ -565,8 +565,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 62,
     "fields": {
+      "id": "62",
       "route": 19,
       "name": "Hwy 24 - 13 km East of Bridge Lake to Lone Bute",
       "description": "Highway 24, between Lone Butte Horse Lake Rd (near Lone Butte) and Eagle Island Rd (34 miles west of Little Fort)",
@@ -580,8 +580,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 63,
     "fields": {
+      "id": "63",
       "route": 19,
       "name": "Hwy 24 - Lone Bute to Junction with Hwy 97",
       "description": "Highway 24, between Highway 97 (8 miles west of Lone Butte) and Watch Lake Rd (near Lone Butte)",
@@ -595,8 +595,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 68,
     "fields": {
+      "id": "68",
       "route": 20,
       "name": "Hwy 26 - Cottonwood to Junction Hwy 97 Quesnel",
       "description": "Highway 26, between Highway 97 and Norton Creek Rd (25 miles east of Quesnel)",
@@ -610,8 +610,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 69,
     "fields": {
+      "id": "69",
       "route": 52,
       "name": "Hwy 19 - Hamm Rd to Roberts Lake",
       "description": "Highway 19, between Sayward Rd (51 miles north of Campbell River) and Hamm Rd (12 miles south of Campbell River)",
@@ -625,8 +625,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 70,
     "fields": {
+      "id": "70",
       "route": 52,
       "name": "Hwy 19 - Cook Creek Rd to Hamm Rd",
       "description": "Highway 19, between Hamm Rd (12 miles south of Campbell River) and Cook Creek Rd (28 miles south of Cumberland)",
@@ -640,8 +640,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 71,
     "fields": {
+      "id": "71",
       "route": 53,
       "name": "Hwy 19A - Cook Creek Rd to Oyster River Bridge",
       "description": "Highway 19A, between Jamieson Rd (12 miles south of Buckley Bay Ferry Terminal) and Glenmore Rd (11 miles south of Campbell River)",
@@ -655,8 +655,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 73,
     "fields": {
+      "id": "73",
       "route": 32,
       "name": "Hwy 4 - Sutton Pass Summit to Port Alberni",
       "description": "Highway 4, between Toquart Bay Rd (2 miles west of Sutton Pass Summit) and Beaver Creek Rd (near Port Alberni)",
@@ -670,8 +670,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 75,
     "fields": {
+      "id": "75",
       "route": 1,
       "name": "Hwy 1 - Tolmie Ave to McKenzie Ave",
       "description": "Highway 1 (on Vancouver Island), between Tolmie Lane and Exit 8: Helmcken Rd (near Saanich)",
@@ -685,8 +685,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 76,
     "fields": {
+      "id": "76",
       "route": 1,
       "name": "Hwy 1 - McKenzie Ave to Helmcken Rd",
       "description": "Highway 1 (on Vancouver Island), between Exit 6: Admirals Rd (near Saanich) and Exit 8: Helmcken Rd (near View Royal)",
@@ -700,8 +700,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 77,
     "fields": {
+      "id": "77",
       "route": 1,
       "name": "Hwy 1 - Helmcken Rd to Hwy 1A",
       "description": "Highway 1 (on Vancouver Island), between Exit 6: Admirals Rd and Exit 10: Burnside Rd W (near View Royal)",
@@ -715,8 +715,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 78,
     "fields": {
+      "id": "78",
       "route": 1,
       "name": "Hwy 1 - Hwy 1A to Millstream Rd",
       "description": "Highway 1 (on Vancouver Island), between Old Island Hwy (near View Royal) and Exit 14: Highway 14 (near Langford)",
@@ -730,8 +730,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 79,
     "fields": {
+      "id": "79",
       "route": 1,
       "name": "Hwy 1 - Millstream Rd to Finlayson Arm Rd",
       "description": "Highway 1 (on Vancouver Island), between Exit 11: Six Mile Rd and Finlayson Arm Rd (near Langford)",
@@ -745,8 +745,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 80,
     "fields": {
+      "id": "80",
       "route": 1,
       "name": "Hwy 1 - Finlayson Arm Rd to Shawnigan Lake Rd",
       "description": "Highway 1 (on Vancouver Island), between West Shore Pky (near Langford) and Shawnigan Lake Rd (4 miles south of Malahat Summit)",
@@ -760,8 +760,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 81,
     "fields": {
+      "id": "81",
       "route": 1,
       "name": "Hwy 1 - Shawnigan Lake Rd to Split Rock Lookout, Malahat Summit",
       "description": "Highway 1 (on Vancouver Island), between Shawnigan Lake Rd (4 miles south of Malahat Summit) and Mill Bay Rd (1 mile north of Malahat Summit)",
@@ -775,8 +775,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 82,
     "fields": {
+      "id": "82",
       "route": 1,
       "name": "Hwy 1 - Split Rock Lookout to Mill Bay Rd",
       "description": "Highway 1 (on Vancouver Island), between Whittaker Rd (1 mile north of Malahat Summit) and Shawnigan-Mill Bay Rd (near Mill Bay)",
@@ -790,8 +790,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 83,
     "fields": {
+      "id": "83",
       "route": 1,
       "name": "Hwy 1 - Mill Bay Rd to Bench Rd",
       "description": "Highway 1 (on Vancouver Island), between Deloume Rd (near Mill Bay) and Bench Rd (3 miles north of Cobble Hill)",
@@ -805,8 +805,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 84,
     "fields": {
+      "id": "84",
       "route": 9,
       "name": "Hwy 14 - Gillespie Rd to Kangaroo Rd",
       "description": "Highway 14, between Gillespie Rd (near Sooke) and Kangaroo Rd (near Metchosin)",
@@ -820,8 +820,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 85,
     "fields": {
+      "id": "85",
       "route": 9,
       "name": "Hwy 14 - Otter Point Rd to Gillespie Rd",
       "description": "Highway 14, between Murray Rd and Connie Rd (near Sooke)",
@@ -835,8 +835,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 86,
     "fields": {
+      "id": "86",
       "route": 9,
       "name": "Hwy 14 - Kangaroo Rd to Happy Valley Rd",
       "description": "Highway 14, between Impala Rd (near Metchosin) and Glen Lake Rd (near Langford)",
@@ -850,8 +850,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 87,
     "fields": {
+      "id": "87",
       "route": 9,
       "name": "Hwy 14 - Happy Valley Rd to Veterans Memorial Parkway",
       "description": "Highway 14, between Ronald Rd (near Langford) and Veterans Memorial Pky (near Colwood)",
@@ -865,8 +865,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 88,
     "fields": {
+      "id": "88",
       "route": 9,
       "name": "Hwy 14 - Veterans Memorial Parkway to Hwy 1",
       "description": "Highway 14, between Fulton Rd (near Colwood) and Highway 1 (Langford)",
@@ -880,8 +880,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 89,
     "fields": {
+      "id": "89",
       "route": 13,
       "name": "Hwy 18 - Skutz Falls Rd to Paldi Rd",
       "description": "Highway 18, between Skutz Falls Rd and Westwood Rd (6 to 15 miles east of Lake Cowichan)",
@@ -895,8 +895,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 90,
     "fields": {
+      "id": "90",
       "route": 13,
       "name": "Hwy 18 - Youbou Rd to Skutz Falls Rd",
       "description": "Highway 18, between North Shore Rd E and Paldi Rd (6 miles east of Lake Cowichan)",
@@ -910,8 +910,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 91,
     "fields": {
+      "id": "91",
       "route": 14,
       "name": "Hwy 2 - BC/AB Border to Junction Hwy 97 Dawson Creek",
       "description": "Highway 2, between the start of Highway 2 (British Columbia and Alberta Border) and Highway 97 (Dawson Creek)",
@@ -925,8 +925,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 93,
     "fields": {
+      "id": "93",
       "route": 1,
       "name": "Hwy 1 - Golden to West Boundary of Yoho National Park",
       "description": "Highway 1, between Highway 95 (near Golden) and West Boundary of Yoho National Park (near West Boundary of Yoho National Park)",
@@ -940,8 +940,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 100,
     "fields": {
+      "id": "100",
       "route": 86,
       "name": "Atlin Hwy - Atlin to BC/Yukon Border",
       "description": "Atlin Hwy, between Discovery Ave (Atlin) and the end of Atlin Hwy (British Columbia and Yukon Border)",
@@ -955,8 +955,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 101,
     "fields": {
+      "id": "101",
       "route": 52,
       "name": "Hwy 19 - Beaver Cove Road to Port Hardy",
       "description": "Highway 19, between Port Hardy Ferry (Port Hardy) and Reload Railway S Overpass (15 miles south of Port McNeill)",
@@ -970,8 +970,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 102,
     "fields": {
+      "id": "102",
       "route": 52,
       "name": "Hwy 19 - Roberts Lake to Eve River",
       "description": "Highway 19, between Hoomac Lake Restarea (35 miles south of Woss) and Rainbow Rd (51 miles north of Campbell River)",
@@ -985,8 +985,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 103,
     "fields": {
+      "id": "103",
       "route": 52,
       "name": "Hwy 19 - Eve River to Beaver Cove Road",
       "description": "Highway 19, between Beaver Cove Rd (15 miles south of Port McNeill) and Eve River Restarea (35 miles south of Woss)",
@@ -1000,8 +1000,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 105,
     "fields": {
+      "id": "105",
       "route": 22,
       "name": "Hwy 28 - Buttle Narrows to Gold River",
       "description": "Highway 28, between the start of Highway 28 (Gold River) and Western Mine Rd (37 miles west of Campbell River)",
@@ -1015,8 +1015,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 106,
     "fields": {
+      "id": "106",
       "route": 32,
       "name": "Hwy 4 - Ucluelet to Sutton Pass Summit",
       "description": "Highway 4, between Wick Rd (1 mile east of Southern Boundary of Pacific Rim National Park) and Taylor River Restarea (2 miles west of Sutton Pass Summit)",
@@ -1030,8 +1030,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 107,
     "fields": {
+      "id": "107",
       "route": 32,
       "name": "Hwy 4 - Tofino to Ucluelet",
       "description": "Highway 4, between Fourth St (Tofino) and Tofino-Ucluelet Hwy (1 mile east of Southern Boundary of Pacific Rim National Park)",
@@ -1045,8 +1045,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 109,
     "fields": {
+      "id": "109",
       "route": 23,
       "name": "Hwy 3 - Moyie to Cranbrook",
       "description": "Highway 3, between Sunrise Rd (near Moyie) and 9th Ave S (near Cranbrook)",
@@ -1060,8 +1060,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 110,
     "fields": {
+      "id": "110",
       "route": 11,
       "name": "Hwy 16 - Crescent Spur to West Twin",
       "description": "Highway 16, between Road 081 FSR and Lamco Rd (28 to 49 miles west of McBride)",
@@ -1075,8 +1075,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 111,
     "fields": {
+      "id": "111",
       "route": 11,
       "name": "Hwy 16 - West Twin to McBride",
       "description": "Highway 16, between West Twin Creek Bridge (28 miles west of McBride) and Main St (McBride)",
@@ -1090,8 +1090,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 114,
     "fields": {
+      "id": "114",
       "route": 1,
       "name": "Hwy 1 - Hwy 99 Junction at Horseshoe Bay to Taylor Way",
       "description": "Highway 1, between Horseshoe Bay Ferry Terminal and Exit 13: Highway 99 (West Vancouver)",
@@ -1105,8 +1105,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 118,
     "fields": {
+      "id": "118",
       "route": 87,
       "name": "Blackwater Rd - North Fraser Rd (Quesnel) to TFL Forest Service Rd",
       "description": "Blackwater Rd, between North Fraser Rd and TFL Road FSR (45 to 134 miles south of Prince George)",
@@ -1120,8 +1120,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 121,
     "fields": {
+      "id": "121",
       "route": 119,
       "name": "Cecil Lake Rd (Hwy 103) - Road 101 to Cecil Lake",
       "description": "Cecil Lake Rd (Highway 103), between Rose Prairie Rd (22 miles west of Cecil Lake) and 243 Rd (1 mile east of Cecil Lake)",
@@ -1135,8 +1135,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 122,
     "fields": {
+      "id": "122",
       "route": 119,
       "name": "Cecil Lake Rd (Hwy 103) - Cecil Lake to Alberta Border",
       "description": "Cecil Lake Rd (Highway 103), between 243 Rd (1 mile east of Cecil Lake) and the end of Cecil Lake Rd (Highway 103) (British Columbia and Alberta Border)",
@@ -1150,8 +1150,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 124,
     "fields": {
+      "id": "124",
       "route": 91,
       "name": "Dog Creek Road",
       "description": "Dog Creek Rd, between Gang Ranch Rd (89 miles south of Williams Lake) and Highway 20 (near Williams Lake)",
@@ -1165,8 +1165,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 125,
     "fields": {
+      "id": "125",
       "route": 93,
       "name": "Head Bay Road - Gold River to Tahsis",
       "description": "Head Bay Rd, between Gold River Rd (60 miles east of Tahsis) and Harbour View Rd (Tahsis)",
@@ -1180,8 +1180,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 128,
     "fields": {
+      "id": "128",
       "route": 3,
       "name": "Hwy 101 - Sechelt to Langdale",
       "description": "Highway 101, between Ocean Ave (Sechelt) and Port Mellon Hwy (4 miles east of Gibsons)",
@@ -1195,8 +1195,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 129,
     "fields": {
+      "id": "129",
       "route": 3,
       "name": "Hwy 101 - Earl's Cove to Sechelt",
       "description": "Highway 101, between Saltery Bay (46 miles west of Sechelt) and Ocean Ave (Sechelt)",
@@ -1210,8 +1210,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 130,
     "fields": {
+      "id": "130",
       "route": 6,
       "name": "Hwy 118 - Topley to Granisle",
       "description": "Highway 118, between Highway 16; Highway 16 Topley (Topley) and Babine Lake Access; Babine Lake (Granisle)",
@@ -1225,8 +1225,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 131,
     "fields": {
+      "id": "131",
       "route": 8,
       "name": "Hwy 13 - Junction Hwy 1 to US Border",
       "description": "Highway 13, between the start of Highway 13 (British Columbia and Washington Border, South of Osoyoos) and Highway 1 (Langley - District)",
@@ -1240,8 +1240,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 133,
     "fields": {
+      "id": "133",
       "route": 10,
       "name": "Hwy 15 - BC/Washington Border to Hwy 1 in Surrey",
       "description": "Highway 15, between the start of Highway 15 (British Columbia and Washington Border South of Douglas) and Highway 1 (Surrey)",
@@ -1255,8 +1255,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 134,
     "fields": {
+      "id": "134",
       "route": 11,
       "name": "Hwy 16 - BC Ferries Terminal (Prince Rupert) to Prince Rupert",
       "description": "Highway 16, between Prince Rupert Ferry Terminal and 3rd Ave E (near Prince Rupert)",
@@ -1270,8 +1270,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 137,
     "fields": {
+      "id": "137",
       "route": 13,
       "name": "Hwy 18 - Tansor Rd to Junction with Hwy 1 (North Cowichan)",
       "description": "Highway 18, between Tansor Rd and Highway 1 (21 to 25 miles east of Lake Cowichan)",
@@ -1285,8 +1285,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 138,
     "fields": {
+      "id": "138",
       "route": 52,
       "name": "Hwy 19 - Duke Point to Nanaimo (Hwy 1)",
       "description": "Highway 19, between Highway 1 (Nanaimo) and the end of Highway 19 (Duke Point BC Ferries Terminal)",
@@ -1300,8 +1300,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 139,
     "fields": {
+      "id": "139",
       "route": 53,
       "name": "Hwy 19A - Hammond Bay Rd to Departure Bay Ferry Terminal",
       "description": "Highway 19A, between Highway 1 (Departure Bay BC Ferries Terminal, in Nanaimo) and Highway 19 (near Parksville)",
@@ -1315,8 +1315,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 140,
     "fields": {
+      "id": "140",
       "route": 53,
       "name": "Hwy 19A - Oyster River Bridge to Campbell River",
       "description": "Highway 19A, between Catherwood Rd (11 miles south of Campbell River) and Highway 28 (Campbell River)",
@@ -1330,8 +1330,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 141,
     "fields": {
+      "id": "141",
       "route": 54,
       "name": "Hwy 1A - Hwy 1 to Grofton Rd",
       "description": "Highway 1A, between Highway 1 (near Langford) and Davis Rd (Ladysmith)",
@@ -1345,8 +1345,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 143,
     "fields": {
+      "id": "143",
       "route": 15,
       "name": "Hwy 20 - Riske Creek to Williams Lake",
       "description": "Highway 20, between Bald Mountain Road FSR (44 miles west of Williams Lake) and Highway 97 (Williams Lake)",
@@ -1360,8 +1360,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 144,
     "fields": {
+      "id": "144",
       "route": 15,
       "name": "Hwy 20 - Bella Coola to Hagensborg",
       "description": "Highway 20, between N Bentinck FSR and Gross Rd (16 miles east of Bella Coola)",
@@ -1375,8 +1375,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 145,
     "fields": {
+      "id": "145",
       "route": 15,
       "name": "Hwy 20 - Hagensborg to 40km west of Anahim Lake",
       "description": "Highway 20, between Olsen Dr (16 miles east of Bella Coola) and Rainbow Range Trailhead (39 miles west of Anahim Lake)",
@@ -1390,8 +1390,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 146,
     "fields": {
+      "id": "146",
       "route": 15,
       "name": "Hwy 20 - Tatla Lake  to Puntzi Lake Rd",
       "description": "Highway 20, between Graham Lake Access No 2 Rd and Puntzi Lake Rd (48 miles east of Tatla Lake)",
@@ -1405,8 +1405,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 147,
     "fields": {
+      "id": "147",
       "route": 15,
       "name": "Hwy 20 - Alexis Creek to Riske Creek",
       "description": "Highway 20, between Graham St (near Alexis Creek) and Stack Valley Rd (44 miles west of Williams Lake)",
@@ -1420,8 +1420,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 148,
     "fields": {
+      "id": "148",
       "route": 15,
       "name": "Hwy 20 - Puntzi Lake Rd  to Alexis Creek",
       "description": "Highway 20, between Puntzi Airport Rd (48 miles east of Tatla Lake) and Stum Lake Rd (near Alexis Creek)",
@@ -1435,8 +1435,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 149,
     "fields": {
+      "id": "149",
       "route": 15,
       "name": "Hwy 20 - Anahim Lake  to Tatla Lake",
       "description": "Highway 20, between Anahim Lake Rd (near Anahim Lake) and Sawmill Creek Rd (Tatla Lake)",
@@ -1450,8 +1450,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 150,
     "fields": {
+      "id": "150",
       "route": 15,
       "name": "Hwy 20 - 40km west of Anahim Lake to Anahim Lake",
       "description": "Highway 20, between Hunlen Falls Turner Lakes Trailhead (39 miles west of Anahim Lake) and Kappan Mtn Rd (near Anahim Lake)",
@@ -1465,8 +1465,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 153,
     "fields": {
+      "id": "153",
       "route": 20,
       "name": "Hwy 26 - Barkerville to Cottonwood",
       "description": "Highway 26, between Sorum Rd (25 miles east of Quesnel) and Barkerville Hwy (6 miles east of Wells)",
@@ -1480,8 +1480,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 154,
     "fields": {
+      "id": "154",
       "route": 22,
       "name": "Hwy 28 - Campbell River to Buttle Narrows",
       "description": "Highway 28, between Gold River Hwy (37 miles west of Campbell River) and Highway 19A (Campbell River)",
@@ -1495,8 +1495,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 156,
     "fields": {
+      "id": "156",
       "route": 12,
       "name": "Hwy 17 - Tolmie Ave to McKenzie Ave",
       "description": "Highway 17, between Tolmie Ave (near Victoria) and McKenzie Ave (Saanich)",
@@ -1510,8 +1510,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 157,
     "fields": {
+      "id": "157",
       "route": 12,
       "name": "Hwy 17 - McKenzie Ave to Mt Newton Cross Rd",
       "description": "Highway 17, between McKenzie Ave (Saanich) and Exit 21: Mt Newton Cross Rd (Central Saanich)",
@@ -1525,8 +1525,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 158,
     "fields": {
+      "id": "158",
       "route": 12,
       "name": "Hwy 17 - BC Ferries Terminal in Tsawwassen to Hwy 99 in Delta",
       "description": "Highway 17, between Tsawwassen Ferry Terminal and Exit 13 (Delta)",
@@ -1540,8 +1540,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 159,
     "fields": {
+      "id": "159",
       "route": 12,
       "name": "Hwy 17 - Junction Hwy 99 Delta to Junction Hwy 1  Surrey",
       "description": "Highway 17, between Exit 13 (Delta) and the end of Highway 17 (Surrey)",
@@ -1555,8 +1555,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 160,
     "fields": {
+      "id": "160",
       "route": 51,
       "name": "Hwy 17A - Junction Hwy 17 to Verdier Ave",
       "description": "Highway 17A, between Royal Oak Dr (Saanich) and Verdier Ave (Central Saanich)",
@@ -1570,8 +1570,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 161,
     "fields": {
+      "id": "161",
       "route": 51,
       "name": "Hwy 17A - Verdier Ave to McTavish Rd",
       "description": "Highway 17A, between Verdier Ave (Central Saanich) and McTavish Rd (North Saanich)",
@@ -1585,8 +1585,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 162,
     "fields": {
+      "id": "162",
       "route": 51,
       "name": "Hwy 17A - McTavish Rd to Hwy 17",
       "description": "Highway 17A, between McTavish Rd and 28 Ave Overpass (North Saanich)",
@@ -1600,8 +1600,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 164,
     "fields": {
+      "id": "164",
       "route": 23,
       "name": "Hwy 3 - Sparwood to Crows Nest",
       "description": "Highway 3, between Michel Mouth Bridge (Sparwood) and BC/AB Border (British Columbia and Alberta Border)",
@@ -1615,8 +1615,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 165,
     "fields": {
+      "id": "165",
       "route": 23,
       "name": "Hwy 3 - Fernie to Sparwood",
       "description": "Highway 3, between Riverside Dr (near Fernie) and Michel Mouth Bridge (Sparwood)",
@@ -1630,8 +1630,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 166,
     "fields": {
+      "id": "166",
       "route": 24,
       "name": "Hwy 30 - Port Alice to Island Highway 19",
       "description": "Highway 30, between the start of Highway 30 and the end of Highway 30 (28 miles north of Port Alice)",
@@ -1645,8 +1645,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 167,
     "fields": {
+      "id": "167",
       "route": 28,
       "name": "Hwy 35 - Francois Lake to Burns Lake",
       "description": "Highway 35, between Francois Lake Ferry (Northbank) and the end of Highway 35 (Burns Lake)",
@@ -1660,8 +1660,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 170,
     "fields": {
+      "id": "170",
       "route": 32,
       "name": "Hwy 4 - Port Alberni to Junction Hwy 19",
       "description": "Highway 4, between Beaver Creek Rd (near Port Alberni) and the end of Highway 4 (Qualicum Beach)",
@@ -1675,8 +1675,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 172,
     "fields": {
+      "id": "172",
       "route": 35,
       "name": "Hwy 49 - Dawson Creek to BC and AB Border",
       "description": "Highway 49, between the start of Highway 49 (Dawson Creek) and the end of Highway 49 (British Columbia and Alberta Border)",
@@ -1690,8 +1690,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 173,
     "fields": {
+      "id": "173",
       "route": 36,
       "name": "Hwy 4A - Coombs (Hwy 4) to Parksville (Hwy 19A)",
       "description": "Highway 4A, between the start of Highway 4A (10 miles west of Parksville) and the end of Highway 4A (Parksville)",
@@ -1705,8 +1705,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 174,
     "fields": {
+      "id": "174",
       "route": 118,
       "name": "Hwy 52N - Tumbler Ridge to Brassey",
       "description": "Highway 52 N (Heritage Highway), between 200 Rd (77 miles north of Tumbler Ridge) and the end of Highway 52 N (Heritage Highway) (Tumbler Ridge)",
@@ -1720,8 +1720,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 178,
     "fields": {
+      "id": "178",
       "route": 42,
       "name": "Hwy 7B - Junction with Hwy 1 to Junction with Hwy 7",
       "description": "Highway 7B, between the start of Highway 7B (Coquitlam) and the end of Highway 7B (Port Coquitlam)",
@@ -1735,8 +1735,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 179,
     "fields": {
+      "id": "179",
       "route": 64,
       "name": "Hwy 9 - Junction Hwy 7 to Harrison Hot Springs",
       "description": "Highway 9, between Pioneer Ave (Kent) and Esplanade Ave (Harrison Hot Springs)",
@@ -1750,8 +1750,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 180,
     "fields": {
+      "id": "180",
       "route": 64,
       "name": "Hwy 9 - Bridal Falls to Junction Hwy 7",
       "description": "Highway 9, between the start of Highway 9 (4 miles south of Kent) and Hot Springs Rd (Kent)",
@@ -1765,8 +1765,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 181,
     "fields": {
+      "id": "181",
       "route": 44,
       "name": "Hwy 91 - Cliveden Ave in Delta to Hwy 99 Junction in Richmond",
       "description": "Highway 91, between Nordel Crt and the end of Highway 91 (near Delta)",
@@ -1780,8 +1780,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 182,
     "fields": {
+      "id": "182",
       "route": 45,
       "name": "Hwy 91A - Hwy 91 to New West",
       "description": "Highway 91A, between the start of Highway 91A and the end of Highway 91A (New Westminster)",
@@ -1795,8 +1795,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 183,
     "fields": {
+      "id": "183",
       "route": 66,
       "name": "Hwy 95 - Brisco to Golden",
       "description": "Highway 95, between Brisco Rd (Brisco) and the end of Highway 95 (Golden)",
@@ -1810,8 +1810,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 184,
     "fields": {
+      "id": "184",
       "route": 66,
       "name": "Hwy 95 - Radium Hot Springs to Brisco",
       "description": "Highway 95, between Trainor Rd (Radium Hot Springs) and Brisco Rd (Brisco)",
@@ -1825,8 +1825,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 185,
     "fields": {
+      "id": "185",
       "route": 46,
       "name": "Hwy 95A - Kimberley to Hwy 93/95 at Wasa Junction",
       "description": "Highway 95A, between Rotary Dr and Wasa Junction (27 miles north of Kimberley)",
@@ -1840,8 +1840,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 186,
     "fields": {
+      "id": "186",
       "route": 46,
       "name": "Hwy 95A - Cranbrook to Kimberley",
       "description": "Highway 95A, between the start of Highway 95A (Cranbrook) and Rotary Dr (Kimberley)",
@@ -1855,8 +1855,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 187,
     "fields": {
+      "id": "187",
       "route": 47,
       "name": "Hwy 97A - King Baker Creek to Hwy 1/Hwy 97A Junction",
       "description": "Highway 97A, between Davidson Dr (5 miles south of Sicamous) and the end of Highway 97A (Sicamous)",
@@ -1870,8 +1870,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 188,
     "fields": {
+      "id": "188",
       "route": 47,
       "name": "Hwy 97A - Junction Hwy 97 to King Baker Creek",
       "description": "Highway 97A, between the start of Highway 97A (26 miles south of Enderby) and Davidson Dr (5 miles south of Sicamous)",
@@ -1885,8 +1885,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 189,
     "fields": {
+      "id": "189",
       "route": 48,
       "name": "Hwy 97B - Hwy97A/Hwy97B Junction to Black Rd",
       "description": "Highway 97B, between the start of Highway 97B (9 miles south of Salmon Arm) and Black Rd (Salmon Arm)",
@@ -1900,8 +1900,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 190,
     "fields": {
+      "id": "190",
       "route": 48,
       "name": "Hwy 97B - Black Rd to Hwy1/Hwy97B Junction",
       "description": "Highway 97B, between Black Rd and the end of Highway 97B (Salmon Arm)",
@@ -1915,8 +1915,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 193,
     "fields": {
+      "id": "193",
       "route": 97,
       "name": "Horsefly Rd - Horsefly to Junction with Likely Rd-E of 150 Mile House",
       "description": "Horsefly Rd, between the start of Horsefly Rd (2 miles west of Dugan Lake) and Horsefly Lake Rd (1 mile east of Horsefly)",
@@ -1930,8 +1930,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 194,
     "fields": {
+      "id": "194",
       "route": 96,
       "name": "Horsefly-Likely Rd - Junction with Horsefly Rd to 150 Mile House",
       "description": "Horsefly-Likely Rd, between the start of Horsefly-Likely Rd and the end of Horsefly-Likely Rd (4 miles north of 150 Mile House)",
@@ -1945,8 +1945,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 195,
     "fields": {
+      "id": "195",
       "route": 110,
       "name": "Mount Washington Road - Inland Island Highway 19 to Mt. Washington",
       "description": "Mount Washington Rd, between Alpine Rd and Dove Creek Rd (18 miles east of Mount Washington Ski Resort)",
@@ -1960,8 +1960,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 196,
     "fields": {
+      "id": "196",
       "route": 107,
       "name": "Mountain House Road",
       "description": "Mountain House Rd, between the start of Mountain House Rd and the end of Mountain House Rd",
@@ -1975,8 +1975,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 197,
     "fields": {
+      "id": "197",
       "route": 103,
       "name": "Road 40 (Hwy 40) - Lillooet to Mission Dam",
       "description": "Road 40 (Lillooet-Pioneer Rd), between Mission Mountain Rd (42 miles west of Lillooet) and Moha Rd (Lillooet)",
@@ -1990,8 +1990,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 198,
     "fields": {
+      "id": "198",
       "route": 117,
       "name": "Telegraph Cr Rd - Burnt Trailer/Tanzilla Access to Dease Lake",
       "description": "Telegraph Creek Rd (Highway 51), between Burnt Trailer/Tanzilla Acc (51 miles west of Dease Lake) and Boulder Ave (Dease Lake)",
@@ -2005,8 +2005,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 200,
     "fields": {
+      "id": "200",
       "route": 114,
       "name": "Westside Rd - Hwy97/Westside Rd Junction to Shelter Cove",
       "description": "Westside Rd, between Shelter Cove and Highway 97 North (17 to 60 miles east of West Kelowna)",
@@ -2020,8 +2020,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 203,
     "fields": {
+      "id": "203",
       "route": 65,
       "name": "Hwy 93 - US Border at Roosville to Hwy 3 at Elko Junction",
       "description": "Highway 93, between BC/US Border (British Columbia and Montana Border) and Mission Ft Steele Rd (7 miles south of Fort Steele)",
@@ -2035,8 +2035,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 204,
     "fields": {
+      "id": "204",
       "route": 65,
       "name": "Hwy 93 - Hwy 3 at Fort Steele Interchange to Junction Hwy 95A",
       "description": "Highway 93, between Back Rd (7 miles south of Fort Steele) and Wasa Junction (3 miles north of Wasa)",
@@ -2050,8 +2050,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 205,
     "fields": {
+      "id": "205",
       "route": 65,
       "name": "Hwy 93 - Wasa Junction to Canal Flats Bridge",
       "description": "Highway 93, between Wasa Junction (3 miles north of Wasa) and Canal Flats Cut-Off Rd (Canal Flats)",
@@ -2065,8 +2065,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 206,
     "fields": {
+      "id": "206",
       "route": 65,
       "name": "Hwy 93 - Canal Flats Bridge to Radium Hot Springs",
       "description": "Highway 93, between Canal Flats Cut-Off Rd (Canal Flats) and Stanley St (Radium Hot Springs)",
@@ -2080,8 +2080,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 207,
     "fields": {
+      "id": "207",
       "route": 67,
       "name": "Hwy 97 - Penticton to Summerland",
       "description": "Highway 97, between Riverside Dr (Penticton) and Bridgeman Rd (Summerland)",
@@ -2095,8 +2095,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 208,
     "fields": {
+      "id": "208",
       "route": 67,
       "name": "Hwy 97 - Summerland to Junction 97C",
       "description": "Highway 97, between Bridgeman Rd (Summerland) and Drought Rd (Peachland)",
@@ -2110,8 +2110,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 209,
     "fields": {
+      "id": "209",
       "route": 67,
       "name": "Hwy 97 - Junction 97C to Westside Rd",
       "description": "Highway 97, between Drought Rd (Peachland) and William R Bennett Bridge (Kelowna)",
@@ -2125,8 +2125,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 213,
     "fields": {
+      "id": "213",
       "route": 67,
       "name": "Hwy 97 - Grandview Flats Rd to Monte Creek Junction",
       "description": "Highway 97, between Grandview Flats Rd N (17 miles north of Vernon) and Monte Creek (Monte Creek)",
@@ -2140,8 +2140,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 214,
     "fields": {
+      "id": "214",
       "route": 67,
       "name": "Hwy 97 - Hwy 1 Cache Creek to Loon Lake Rd",
       "description": "Highway 97, between Monte Creek (Cache Creek) and Loon Lake Rd (17 miles south of Clinton)",
@@ -2155,8 +2155,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 215,
     "fields": {
+      "id": "215",
       "route": 67,
       "name": "Hwy 97 - Loon Lake Rd to Clinton",
       "description": "Highway 97, between Loon Lake Rd (17 miles south of Clinton) and Cariboo Hwy (Clinton)",
@@ -2170,8 +2170,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 216,
     "fields": {
+      "id": "216",
       "route": 67,
       "name": "Hwy 97 - Clinton to 93 Mile",
       "description": "Highway 97, between Cariboo Hwy (Clinton) and Elefson Rd (6 miles south of 100 Mile House)",
@@ -2185,8 +2185,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 217,
     "fields": {
+      "id": "217",
       "route": 67,
       "name": "Hwy 97 - 93 Mile to 100 Mile House",
       "description": "Highway 97, between Elefson Rd (6 miles south of 100 Mile House) and First St (100 Mile House)",
@@ -2200,8 +2200,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 218,
     "fields": {
+      "id": "218",
       "route": 67,
       "name": "Hwy 97 - 100 Mile House to 20 km North of Lac La Hache",
       "description": "Highway 97, between First St (100 Mile House) and Butler Rd (32 miles south of 150 Mile House)",
@@ -2215,8 +2215,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 219,
     "fields": {
+      "id": "219",
       "route": 67,
       "name": "Hwy 97 - 20 km North of Lac La Hache to Williams Lake",
       "description": "Highway 97, between Butler Rd (32 miles south of 150 Mile House) and Toop Rd (Williams Lake)",
@@ -2230,8 +2230,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 220,
     "fields": {
+      "id": "220",
       "route": 67,
       "name": "Hwy 97 - Williams Lake to 22 km North of Williams Lake",
       "description": "Highway 97, between Toop Rd (Williams Lake) and Kragbak Rd (8 miles north of Wildwood)",
@@ -2245,8 +2245,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 221,
     "fields": {
+      "id": "221",
       "route": 67,
       "name": "Hwy 97 - Quesnel to Olson",
       "description": "Highway 97, between North Star Rd (Quesnel) and Olson Rd (24 miles south of Hixon)",
@@ -2260,8 +2260,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 222,
     "fields": {
+      "id": "222",
       "route": 67,
       "name": "Hwy 97 - Chetwynd to East Pine Rest Area",
       "description": "Highway 97, between 52nd St NW and Watkins Rd (33 miles north of Chetwynd)",
@@ -2275,8 +2275,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 223,
     "fields": {
+      "id": "223",
       "route": 67,
       "name": "Hwy 97 - East Pine Rest Area to Junction Hwy 52 Arras",
       "description": "Highway 97, between Watkins Rd (33 miles north of Chetwynd) and 241 Rd (18 miles south of Dawson Creek)",
@@ -2290,8 +2290,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 224,
     "fields": {
+      "id": "224",
       "route": 67,
       "name": "Hwy 97 - Junction Hwy 52 Arras to Dawson Creek",
       "description": "Highway 97, between 245 Rd (18 miles south of Dawson Creek) and Gordon Calder Way (Dawson Creek)",
@@ -2305,8 +2305,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 225,
     "fields": {
+      "id": "225",
       "route": 67,
       "name": "Hwy 97 - Dawson Creek to Taylor",
       "description": "Highway 97, between Gordon Calder Way (Dawson Creek) and Peace River Bridge (Taylor)",
@@ -2320,8 +2320,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 226,
     "fields": {
+      "id": "226",
       "route": 67,
       "name": "Hwy 97 - Mile 54 to Mile 83",
       "description": "Highway 97, between Bluebird Rd (12 miles north of Fort St John) and Kitt Rd (24 miles south of Wonowon)",
@@ -2335,8 +2335,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 228,
     "fields": {
+      "id": "228",
       "route": 67,
       "name": "Hwy 97 - Muskwa River Bridge to North Fort Nelson Boundary",
       "description": "Highway 97, between Sikanni Rd (1 mile south of Fort Nelson) and Pipeline Mainline (1 mile north of Fort Nelson)",
@@ -2350,8 +2350,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 234,
     "fields": {
+      "id": "234",
       "route": 69,
       "name": "Hwy 99 - BC/Washington border to Massey Tunnel",
       "description": "Highway 99, between the start of Highway 99 (British Columbia and Washington Border) and Massey Tunnel (Richmond)",
@@ -2365,8 +2365,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 235,
     "fields": {
+      "id": "235",
       "route": 69,
       "name": "Hwy 99 - Massey Tunnel to Oak St Bridge",
       "description": "Highway 99, between Massey Tunnel (Richmond) and Oak Street Bridge (Vancouver)",
@@ -2380,8 +2380,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 236,
     "fields": {
+      "id": "236",
       "route": 69,
       "name": "Hwy 99 - Oak Street Bridge to Vancouver",
       "description": "Highway 99, between Oak Street Bridge and Granville Bridge (Vancouver)",
@@ -2395,8 +2395,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 237,
     "fields": {
+      "id": "237",
       "route": 69,
       "name": "Hwy 99 - Vancouver to Junction Hwy 1",
       "description": "Highway 99, between Granville Bridge (Vancouver) and Ansell Pl (West Vancouver)",
@@ -2410,8 +2410,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 238,
     "fields": {
+      "id": "238",
       "route": 69,
       "name": "Hwy 99 - Hwy 1 Junction at Horseshoe Bay to Lions Bay",
       "description": "Highway 99, between Inglewood Ave (West Vancouver) and Lions Bay Ave (Lions Bay)",
@@ -2425,8 +2425,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 239,
     "fields": {
+      "id": "239",
       "route": 69,
       "name": "Hwy 99 - Lions Bay to Squamish",
       "description": "Highway 99, between Lions Bay Ave (Lions Bay) and Clarke Dr (Squamish)",
@@ -2440,8 +2440,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 240,
     "fields": {
+      "id": "240",
       "route": 69,
       "name": "Hwy 99 - Squamish to Whistler Village",
       "description": "Highway 99, between Clarke Dr (Squamish) and Autumn Dr (Whistler)",
@@ -2455,8 +2455,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 241,
     "fields": {
+      "id": "241",
       "route": 69,
       "name": "Hwy 99 - Whistler Village to Pemberton",
       "description": "Highway 99, between Trudys Landing (Whistler) and Kwetsa Rd (Pemberton)",
@@ -2470,8 +2470,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 242,
     "fields": {
+      "id": "242",
       "route": 69,
       "name": "Hwy 99 - Pemberton to Duffey Lake",
       "description": "Highway 99, between Kwetsa Rd (Pemberton) and Seton Lake Rd (38 miles south of Lillooet)",
@@ -2485,8 +2485,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 243,
     "fields": {
+      "id": "243",
       "route": 69,
       "name": "Hwy 99 - Kane Creek Bridge to Lillooet",
       "description": "Highway 99, between Lil'wat Pl (38 miles south of Lillooet) and Seton Lake Rd (Lillooet)",
@@ -2500,8 +2500,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 244,
     "fields": {
+      "id": "244",
       "route": 69,
       "name": "Hwy 99 - Lillooet to Hwy 99 - Hat Creek Corner",
       "description": "Highway 99, between Seton Lake Rd and Hat Creek Rd (50 miles north of Lillooet)",
@@ -2515,8 +2515,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 245,
     "fields": {
+      "id": "245",
       "route": 69,
       "name": "Hwy 99 - Hat Creek Corner to Junction with Hwy 97",
       "description": "Highway 99, between Hat Creek Rd and the end of Highway 99 (50 to 71 miles north of Lillooet)",
@@ -2530,8 +2530,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 250,
     "fields": {
+      "id": "250",
       "route": 1,
       "name": "Hwy 1 - Glacier Nat Park Summit to East Boundary Glacier National Park",
       "description": "Highway 1, between Rogers Pass Summit (Rogers Pass Summit) and Glacier Park East Boundary (East Boundary of Glacier National Park)",
@@ -2545,8 +2545,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 251,
     "fields": {
+      "id": "251",
       "route": 1,
       "name": "Hwy 1 - East Boundary Glacier National Park to Quartz Creek",
       "description": "Highway 1, between Glacier Park East Boundary and Quartz Creek Bridge (Structure) (14 miles east of East Boundary of Glacier National Park)",
@@ -2560,8 +2560,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 252,
     "fields": {
+      "id": "252",
       "route": 1,
       "name": "Hwy 1 - Donald to Golden",
       "description": "Highway 1, between Donald Rd (24 miles west of Golden) and Golden Donald Upper Rd (near Golden)",
@@ -2575,8 +2575,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 253,
     "fields": {
+      "id": "253",
       "route": 1,
       "name": "Hwy 1 - Quartz Creek to Donald",
       "description": "Highway 1, between Quartz Creek Bridge (Structure) (14 miles east of East Boundary of Glacier National Park) and Donald Rd (24 miles west of Golden)",
@@ -2590,8 +2590,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 256,
     "fields": {
+      "id": "256",
       "route": 11,
       "name": "Hwy 16 - Prince George to Purden",
       "description": "Highway 16, between Ferry Ave (Prince George) and Bowron River Rest Area (Purden Lake)",
@@ -2605,8 +2605,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 257,
     "fields": {
+      "id": "257",
       "route": 11,
       "name": "Hwy 16 - Purden Lake to Slim Creek",
       "description": "Highway 16, between Bowron River Rest Area and Dome Creek Rd (53 miles east of Purden Lake)",
@@ -2620,8 +2620,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 258,
     "fields": {
+      "id": "258",
       "route": 11,
       "name": "Hwy 16 - Slim Creek to Crescent Spur",
       "description": "Highway 16, between Dome Creek Camp (53 miles east of Purden Lake) and Loos Rd (49 miles west of McBride)",
@@ -2635,8 +2635,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 259,
     "fields": {
+      "id": "259",
       "route": 30,
       "name": "Hwy 39 - Junction Hwy 97 to Mackenzie",
       "description": "Highway 39, between the start of Highway 39 (Mackenzie Junction) and McIntyre Dr (Mackenzie)",
@@ -2650,8 +2650,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 261,
     "fields": {
+      "id": "261",
       "route": 67,
       "name": "Hwy 97 - Stoner to Prince George",
       "description": "Highway 97, between Stoner Pit Rd (22 miles south of Pineview) and Pine Centre Rd (Prince George)",
@@ -2665,8 +2665,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 262,
     "fields": {
+      "id": "262",
       "route": 67,
       "name": "Hwy 97 - Prince George to Salmon Valley",
       "description": "Highway 97, between Pine Centre Rd and Mitchell Rd (22 miles north of Prince George)",
@@ -2680,8 +2680,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 263,
     "fields": {
+      "id": "263",
       "route": 56,
       "name": "Hwy 29 - Tumbler to Gwillim",
       "description": "Highway 29, between the start of Highway 29 and Lone Prairie Rd (42 miles north of Tumbler Ridge)",
@@ -2695,8 +2695,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 264,
     "fields": {
+      "id": "264",
       "route": 56,
       "name": "Hwy 29 - Gwillim to Chetwynd",
       "description": "Highway 29, between Bullmoose Rd (42 miles north of Tumbler Ridge) and 53rd Ave NE (near Chetwynd)",
@@ -2710,8 +2710,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 265,
     "fields": {
+      "id": "265",
       "route": 56,
       "name": "Hwy 29 - Junction with Hwy 97 (Chetwynd) to Hudson's Hope",
       "description": "Highway 29, between Weiland Rd (near Chetwynd) and Peace Canyon Access Rd (6 miles south of Hudson's Hope)",
@@ -2725,8 +2725,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 266,
     "fields": {
+      "id": "266",
       "route": 67,
       "name": "Hwy 97 - McLeod Lake to Junction Hwy 39",
       "description": "Highway 97, between Carp Lake Rd (McLeod Lake) and Kloss Rd (1 mile south of Mackenzie Junction)",
@@ -2740,8 +2740,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 267,
     "fields": {
+      "id": "267",
       "route": 67,
       "name": "Hwy 97 - Junction Hwy 39 to Pine Pass Summit",
       "description": "Highway 97, between Tudyah Lake Provincial Pk (1 mile south of Mackenzie Junction) and Old Hasler Rd (near Pine Pass Summit)",
@@ -2755,8 +2755,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 268,
     "fields": {
+      "id": "268",
       "route": 67,
       "name": "Hwy 97 - Pine Pass Summit to Hasler",
       "description": "Highway 97, between Powder King Rd (near Pine Pass Summit) and Old Hasler Rd (24 miles south of Chetwynd)",
@@ -2770,8 +2770,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 269,
     "fields": {
+      "id": "269",
       "route": 67,
       "name": "Hwy 97 - Hasler to Chetwynd",
       "description": "Highway 97, between Powder King Rd (24 miles south of Chetwynd) and Weiland Rd (Chetwynd)",
@@ -2785,8 +2785,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 274,
     "fields": {
+      "id": "274",
       "route": 41,
       "name": "Hwy 77 - Junction Hwy 97 to Fort Nelson River Bridge",
       "description": "Highway 77, between the start of Highway 77 and Fort Nelson River Bridge (96 to 138 miles south of British Columbia and Northwest Territory Border)",
@@ -2800,8 +2800,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 275,
     "fields": {
+      "id": "275",
       "route": 41,
       "name": "Hwy 77 - Fort Nelson River Bridge to NWT Border",
       "description": "Highway 77, between Fort Nelson River Bridge (96 miles south of British Columbia and Northwest Territory Border) and the end of Highway 77 (British Columbia and Northwest Territory Border)",
@@ -2815,8 +2815,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 276,
     "fields": {
+      "id": "276",
       "route": 11,
       "name": "Hwy16 - Wakefield Road to Houston",
       "description": "Highway 16, between Wakefield Rd (16 miles east of Telkwa) and Butler Ave (Houston)",
@@ -2830,8 +2830,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 277,
     "fields": {
+      "id": "277",
       "route": 11,
       "name": "Hwy 16 - Houston to 6 Mile Brake Check",
       "description": "Highway 16, between Butler Ave (Houston) and 6 Mile Hill Brakecheck (9 miles east of Topley)",
@@ -2845,8 +2845,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 278,
     "fields": {
+      "id": "278",
       "route": 11,
       "name": "Hwy 16 - 6 Mile Brake Check to Burns Lake",
       "description": "Highway 16, between 6 Mile Hill Brakecheck (9 miles east of Topley) and Center St (Burns Lake)",
@@ -2860,8 +2860,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 279,
     "fields": {
+      "id": "279",
       "route": 11,
       "name": "Hwy 16 - New Hazelton to Witset/Moricetown",
       "description": "Highway 16, between New Hazelton Hi-Level Rd (near New Hazelton) and Moricetown Overhead Bridge (Witset (Moricetown))",
@@ -2875,8 +2875,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 280,
     "fields": {
+      "id": "280",
       "route": 11,
       "name": "Hwy 16 - Smithers to Wakefield Road",
       "description": "Highway 16, between Main St - Smithers (Smithers) and Wakefield Rd (16 miles east of Telkwa)",
@@ -2890,8 +2890,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 281,
     "fields": {
+      "id": "281",
       "route": 11,
       "name": "Hwy 16 - Witset/Moricetown to Smithers",
       "description": "Highway 16, between Moricetown Overhead Bridge (Witset (Moricetown)) and Main St - Smithers (Smithers)",
@@ -2905,8 +2905,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 284,
     "fields": {
+      "id": "284",
       "route": 5,
       "name": "Hwy 113 - Gingolx to New Aiyansh",
       "description": "Nisga'a Hwy (Highway 113), between Broad St (Gingolx) and Nass Rd (Gitlaxt'aamiks (New Aiyanish))",
@@ -2920,8 +2920,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 285,
     "fields": {
+      "id": "285",
       "route": 5,
       "name": "Hwy 113 - New Aiyansh to Big Cedar Bridge",
       "description": "Nisga'a Hwy (Highway 113), between Nass Rd (Gitlaxt'aamiks (New Aiyanish)) and Big Cedar Bridge (41 miles south of Gitlaxt'aamiks (New Aiyanish))",
@@ -2935,8 +2935,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 286,
     "fields": {
+      "id": "286",
       "route": 5,
       "name": "Hwy 113 - Big Cedar Bridge to Terrace",
       "description": "Nisga'a Hwy (Highway 113), between Big Cedar Bridge (41 miles south of Gitlaxt'aamiks (New Aiyanish)) and the end of Nisga'a Hwy (Highway 113) (Terrace)",
@@ -2950,8 +2950,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 287,
     "fields": {
+      "id": "287",
       "route": 11,
       "name": "Hwy 16 - Prince Rupert to Port Edward Turnoff",
       "description": "Highway 16, between 1st St (near Prince Rupert) and Port Edward Turnoff (7 miles east of Prince Rupert)",
@@ -2965,8 +2965,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 288,
     "fields": {
+      "id": "288",
       "route": 11,
       "name": "Hwy 16 - Port Edward Turnoff to Rainbow Pass (28km East of Prince Rupert)",
       "description": "Highway 16, between Port Edward Turnoff and Rainbow Chain Up (7 to 29 miles east of Prince Rupert)",
@@ -2980,8 +2980,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 289,
     "fields": {
+      "id": "289",
       "route": 11,
       "name": "Hwy 16 - Rainbow Pass to SA27/26 Mtnc Boundary",
       "description": "Highway 16, between Rainbow Chain Up and Maintenance Boundary SA26 (29 to 63 miles east of Prince Rupert)",
@@ -2995,8 +2995,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 290,
     "fields": {
+      "id": "290",
       "route": 11,
       "name": "Hwy 16 - Port Clements to Skidegate",
       "description": "Highway 16 (on Haida Gwaii), between Nadu Rd (near Port Clements) and Skidgate Ferry Terminal (Skidegate)",
@@ -3010,8 +3010,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 301,
     "fields": {
+      "id": "301",
       "route": 21,
       "name": "Hwy 27 - Fort St. James to Junction with Hwy 16",
       "description": "Highway 27, between the start of Highway 27 (53 miles south of Fort St James) and Tachie Rd (1 mile north of Fort St James)",
@@ -3025,8 +3025,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 302,
     "fields": {
+      "id": "302",
       "route": 11,
       "name": "Hwy 16 - Bednesti to Prince George",
       "description": "Highway 16, between Lloyd Dr (1 mile west of Bednesti Norman) and Upland St (Prince George)",
@@ -3040,8 +3040,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 303,
     "fields": {
+      "id": "303",
       "route": 11,
       "name": "Hwy 16 - Burns Lake to Priestly Hill",
       "description": "Highway 16, between Center St (Burns Lake) and SA24/23 Maintenance Boundary (Priestly Hill)",
@@ -3055,8 +3055,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 306,
     "fields": {
+      "id": "306",
       "route": 66,
       "name": "Hwy 95 - US Border at Kingsgate to Hwy 3 at Curzon Junction",
       "description": "Highway 95, between BC/US Border (Kingsgate) and Sinclair Creek Loop Rd (Curzon Junction)",
@@ -3070,8 +3070,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 309,
     "fields": {
+      "id": "309",
       "route": 11,
       "name": "Hwy 16 - SA 26-27 Maintenance Boundary ( 76 kms West of Terrace) to Terrace",
       "description": "Highway 16, between Maintenance Boundary SA26 (63 miles east of Prince Rupert) and Kenney St (near Terrace)",
@@ -3085,8 +3085,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 310,
     "fields": {
+      "id": "310",
       "route": 11,
       "name": "Hwy 16 - Terrace to SA 26-25 Maintenance Boundary (47kms East of Terrace)",
       "description": "Highway 16, between Frank St (near Terrace) and Maintenance Boundary SA25 (24 miles west of Cedarvale)",
@@ -3100,8 +3100,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 313,
     "fields": {
+      "id": "313",
       "route": 17,
       "name": "Hwy 22 - Trail to Castlegar",
       "description": "Highway 22, between Second St (near Trail) and the end of Highway 22 (Castlegar)",
@@ -3115,8 +3115,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 314,
     "fields": {
+      "id": "314",
       "route": 23,
       "name": "Hwy 3 - Eholt Summit to Grand Forks",
       "description": "Highway 3, between Gowrie St (2 miles west of Eholt Summit) and Bluff St (near Grand Forks)",
@@ -3130,8 +3130,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 315,
     "fields": {
+      "id": "315",
       "route": 23,
       "name": "Hwy 3 - Grand Forks to 7.5km east of Christina Lake",
       "description": "Highway 3, between Riverside Dr (near Grand Forks) and Paulson Cross Country Recsite (near Christina Lake)",
@@ -3145,8 +3145,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 316,
     "fields": {
+      "id": "316",
       "route": 23,
       "name": "Hwy 3 - 7.5km east of Christina Lake to Paulson Bridge",
       "description": "Highway 3, between 68th Ave (near Christina Lake) and Paulson Cross Country Recsite (15 miles east of Christina Lake)",
@@ -3160,8 +3160,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 318,
     "fields": {
+      "id": "318",
       "route": 58,
       "name": "Hwy 3A - Castlegar to Brilliant",
       "description": "Highway 3A, between Marron Valley Rd (1 mile west of Castlegar) and Brilliant Powerplant Rd (1 mile east of Brilliant)",
@@ -3175,8 +3175,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 319,
     "fields": {
+      "id": "319",
       "route": 59,
       "name": "Hwy 3B - Trail to Junction Hwy 3 Meadows Junction",
       "description": "Highway 3B, between Highway 22 Jct E (Trail) and Highway 3 Jct E (14 miles east of Fruitvale)",
@@ -3190,8 +3190,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 320,
     "fields": {
+      "id": "320",
       "route": 1,
       "name": "Hwy 1 - Yale to Jackass Mountain",
       "description": "Highway 1, between Albert St (near Yale) and Jackass Summit (2 miles east of Jackass Mountain Summit)",
@@ -3205,8 +3205,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 321,
     "fields": {
+      "id": "321",
       "route": 67,
       "name": "Hwy 97 - Bear Lake to McLeod Lake",
       "description": "Highway 97, between Grizzly Ave (57 miles north of Prince George) and Carp Lake Rd (McLeod Lake)",
@@ -3220,8 +3220,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 322,
     "fields": {
+      "id": "322",
       "route": 67,
       "name": "Hwy 97 - Salmon Valley to Bear Lake",
       "description": "Highway 97, between Mitchell Rd and Grizzly Ave (22 to 57 miles north of Prince George)",
@@ -3235,8 +3235,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 326,
     "fields": {
+      "id": "326",
       "route": 1,
       "name": "Hwy 1 - 10 km East of Cache Creek to Spences Bridge",
       "description": "Highway 1, between Nicoamen River Rd (near Spences Bridge) and Juniper Beach Prov Park Access Rd (8 miles east of Cache Creek)",
@@ -3250,8 +3250,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 334,
     "fields": {
+      "id": "334",
       "route": 49,
       "name": "Hwy 97D - Exit 336 to Junction w/ Hwy 97C (Seg 14)",
       "description": "Highway 97D, between the start of Highway 97D (near Logan Lake) and Meadow Creek Rd (22 miles east of Logan Lake)",
@@ -3265,8 +3265,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 335,
     "fields": {
+      "id": "335",
       "route": 1,
       "name": "Hwy 1 - Three Valley Gap to Revelstoke",
       "description": "Highway 1, between Rutherford-Three Valley Rest Area and Victoria Rd W (Revelstoke)",
@@ -3280,8 +3280,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 342,
     "fields": {
+      "id": "342",
       "route": 1,
       "name": "Hwy 1 - Chemainus to Ladysmith",
       "description": "Highway 1 (on Vancouver Island), between Panorama Ridge Rd (near Chemainus) and 1st Ave (near Ladysmith)",
@@ -3295,8 +3295,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 343,
     "fields": {
+      "id": "343",
       "route": 1,
       "name": "Hwy 1 - Ladysmith to Departure Bay",
       "description": "Highway 1 (on Vancouver Island), between Buller St (near Ladysmith) and Departure Bay Ferry Terminal (Nanaimo)",
@@ -3310,8 +3310,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 344,
     "fields": {
+      "id": "344",
       "route": 1,
       "name": "Hwy 1 - Yoho West Gate to Field",
       "description": "Highway 1, between Beaverfoot Rd (near West Boundary of Yoho National Park) and Field and Visitor Centre Access Rd (near Field)",
@@ -3325,8 +3325,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 345,
     "fields": {
+      "id": "345",
       "route": 1,
       "name": "Hwy 1 - Field to BC/AB Border",
       "description": "Highway 1, between Emerald Lake Rd and BC/Alberta Border (Field)",
@@ -3340,8 +3340,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 348,
     "fields": {
+      "id": "348",
       "route": 12,
       "name": "Hwy 17 - Beacon Ave to Swartz Bay",
       "description": "Highway 17, between Exit 28: Beacon Ave (Sidney) and Swartz Bay Ferry Terminal (North Saanich)",
@@ -3355,8 +3355,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 349,
     "fields": {
+      "id": "349",
       "route": 12,
       "name": "Hwy 17 - Mt Newton Cross Rd to Beacon Ave",
       "description": "Highway 17, between Exit 21: Mt Newton Cross Rd (Central Saanich) and Exit 28: Beacon Ave (Sidney)",
@@ -3370,8 +3370,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 350,
     "fields": {
+      "id": "350",
       "route": 67,
       "name": "Hwy 97 - Thorley Road (Hixon) to Stone Creek",
       "description": "Highway 97, between Thorley Rd (Hixon) and Chamulak Rd (22 miles south of Pineview)",
@@ -3385,8 +3385,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 351,
     "fields": {
+      "id": "351",
       "route": 67,
       "name": "Hwy 97 - Olson to Thorley Road (Hixon)",
       "description": "Highway 97, between Olson Rd and Thorley Rd (Hixon)",
@@ -3400,8 +3400,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 352,
     "fields": {
+      "id": "352",
       "route": 108,
       "name": "Nazko Rd/Highway 59 - Quesnel to Bluestone",
       "description": "Nazko Rd, between the start of Nazko Rd and Yetta Rd (Nazko)",
@@ -3415,8 +3415,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 353,
     "fields": {
+      "id": "353",
       "route": 108,
       "name": "Nazko Rd/Highway 59 - Bluestone to Nazko",
       "description": "Nazko Rd, between Bluestone Rd and Baezaeko Rd (Nazko)",
@@ -3430,8 +3430,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 355,
     "fields": {
+      "id": "355",
       "route": 67,
       "name": "Hwy 97 - Mountain House Road to Beaver Lake Road (McLeese Lake)",
       "description": "Highway 97, between Kragbak Rd and Beaver Lake Rd (Wildwood)",
@@ -3445,8 +3445,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 356,
     "fields": {
+      "id": "356",
       "route": 67,
       "name": "Hwy 97 - Beaver Lake Road (McLeese Lake) to Fridlington Road",
       "description": "Highway 97, between Beaver Lake Rd (30 miles north of Wildwood) and Lavally Rd (47 miles south of Quesnel)",
@@ -3460,8 +3460,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 357,
     "fields": {
+      "id": "357",
       "route": 67,
       "name": "Hwy 97 - Edwards Road (Kersley) to Quesnel",
       "description": "Highway 97, between Edwards Rd and North Star Rd (Quesnel)",
@@ -3475,8 +3475,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 358,
     "fields": {
+      "id": "358",
       "route": 11,
       "name": "Hwy 16 - Top of Priestly Hill to Fraser Lake",
       "description": "Highway 16, between SA24/23 Maintenance Boundary (Priestly Hill) and Chowsunket St (Fraser Lake)",
@@ -3490,8 +3490,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 359,
     "fields": {
+      "id": "359",
       "route": 11,
       "name": "Hwy 16 - Fraser Lake to Fort Fraser",
       "description": "Highway 16, between Chowsunket St (Fraser Lake) and Corporation St (Fort Fraser)",
@@ -3505,8 +3505,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 360,
     "fields": {
+      "id": "360",
       "route": 11,
       "name": "Hwy 16 - Fort Fraser to Vanderhoof",
       "description": "Highway 16, between Corporation St (Fort Fraser) and Burrard Ave (Vanderhoof)",
@@ -3520,8 +3520,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 361,
     "fields": {
+      "id": "361",
       "route": 11,
       "name": "Hwy 16 - Vanderhoof to Bednesti",
       "description": "Highway 16, between Burrard Ave (Vanderhoof) and Lloyd Dr (1 mile west of Bednesti Norman)",
@@ -3535,8 +3535,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 362,
     "fields": {
+      "id": "362",
       "route": 1,
       "name": "Hwy 1 - Bench Rd to Allenby Rd",
       "description": "Highway 1 (on Vancouver Island), between Whippletree Frtg (3 miles north of Cobble Hill) and Allenby Rd (1 mile south of Duncan)",
@@ -3550,8 +3550,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 363,
     "fields": {
+      "id": "363",
       "route": 1,
       "name": "Hwy 1 - Drinkwater Rd to Hwy 1A",
       "description": "Highway 1 (on Vancouver Island), between Drinkwater Rd (near Duncan) and Mt Sicker Rd (2 miles south of Chemainus)",
@@ -3565,8 +3565,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 364,
     "fields": {
+      "id": "364",
       "route": 1,
       "name": "Hwy 1 - Allenby Rd to Drinkwater Rd",
       "description": "Highway 1 (on Vancouver Island), between Allenby Rd and Drinkwater Rd (Duncan)",
@@ -3580,8 +3580,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 367,
     "fields": {
+      "id": "367",
       "route": 9,
       "name": "Hwy 14 - Jordan River to Kemp Lake Rd",
       "description": "Highway 14, between Petrel Dr (1 mile west of Jordan River) and Carpenter Rd (1 mile west of Sooke)",
@@ -3595,8 +3595,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 368,
     "fields": {
+      "id": "368",
       "route": 9,
       "name": "Hwy 14 - Kemp Lake Rd to Otter Point Rd",
       "description": "Highway 14, between Kemp Lake Rd and Townsend Rd (Sooke)",
@@ -3610,8 +3610,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 369,
     "fields": {
+      "id": "369",
       "route": 23,
       "name": "Hwy 3 - Hedley to Keremeos",
       "description": "Highway 3, between Snazaist St (Hedley) and Innis Pl (near Keremeos)",
@@ -3625,8 +3625,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 371,
     "fields": {
+      "id": "371",
       "route": 58,
       "name": "Hwy 3A - Green Mountain Rd to KM 22.5",
       "description": "Highway 3A, between Green Mountain Rd and Bobcat Rd (Keremeos)",
@@ -3640,8 +3640,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 372,
     "fields": {
+      "id": "372",
       "route": 58,
       "name": "Hwy 3A - Keremeos to Green Mountain Rd.",
       "description": "Highway 3A, between Keremeos and Green Mountain Rd (Keremeos)",
@@ -3655,8 +3655,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 373,
     "fields": {
+      "id": "373",
       "route": 58,
       "name": "Hwy 3A - KM 22.5 to Kaleden Junction",
       "description": "Highway 3A, between Resolute Rd and Junction Hwy 3 (Castlegar) (Keremeos)",
@@ -3670,8 +3670,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 374,
     "fields": {
+      "id": "374",
       "route": 67,
       "name": "Hwy 97 - Junction 3A to Penticton",
       "description": "Highway 97, between White Lake Rd (5 miles north of Okanagan Falls) and Riverside Dr (Penticton)",
@@ -3685,8 +3685,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 375,
     "fields": {
+      "id": "375",
       "route": 67,
       "name": "Hwy 97 - Taylor to Fort St. John",
       "description": "Highway 97, between Peace River Bridge (Taylor) and 100 St (near Fort St John)",
@@ -3700,8 +3700,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 376,
     "fields": {
+      "id": "376",
       "route": 67,
       "name": "Hwy 97 - Fort St. John to Mile 54",
       "description": "Highway 97, between 96A St and Ptarmigan Rd (Fort St John)",
@@ -3715,8 +3715,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 378,
     "fields": {
+      "id": "378",
       "route": 67,
       "name": "Hwy 97 - Oliver to Hwy 3A",
       "description": "Highway 97, between Fairview Rd (Oliver) and Junction Hwy 3A (Kaleden Junction) (5 miles north of Okanagan Falls)",
@@ -3730,8 +3730,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 379,
     "fields": {
+      "id": "379",
       "route": 67,
       "name": "Hwy 97 - US Border to Oliver",
       "description": "Highway 97, between the start of Highway 97 (BC and WA Border, South of Osoyoos) and Fairview Rd (Oliver)",
@@ -3745,8 +3745,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 380,
     "fields": {
+      "id": "380",
       "route": 67,
       "name": "Hwy 97 - Fridlington Road to Edwards Road (Kersley)",
       "description": "Highway 97, between Lavally Rd and Edwards Rd (Quesnel)",
@@ -3760,8 +3760,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 381,
     "fields": {
+      "id": "381",
       "route": 1,
       "name": "Hwy 1 - Hwy 1A to Panorama Ridge Rd",
       "description": "Highway 1 (on Vancouver Island), between Mt Sicker Rd and Radford Rd (Chemainus)",
@@ -3775,8 +3775,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 385,
     "fields": {
+      "id": "385",
       "route": 53,
       "name": "Hwy 19A - Cook Creek Rd to Junction Hwy 19 Parksville",
       "description": "Highway 19A, between Mary Ellen Dr (near Parksville) and Cook Creek Rd (12 miles south of Buckley Bay Ferry Terminal)",
@@ -3790,8 +3790,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 404,
     "fields": {
+      "id": "404",
       "route": 23,
       "name": "Hwy 3 - Sunday Summit to Mine Hill Brake Check",
       "description": "Highway 3, between Garret Rd and Kennedy Lake Rd (Princeton)",
@@ -3805,8 +3805,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 405,
     "fields": {
+      "id": "405",
       "route": 17,
       "name": "Hwy 22 - Paterson Border Xing to Rossland",
       "description": "Highway 22, between US Border (BC and WA Border, South of Rossland) and Columbia Ave (near Rossland)",
@@ -3820,8 +3820,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 406,
     "fields": {
+      "id": "406",
       "route": 17,
       "name": "Hwy 22 - Rossland to Trail",
       "description": "Highway 22, between Junction Highway 3B (Rossland) (near Rossland) and Warfield Hill Rd (near Trail)",
@@ -3835,8 +3835,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 408,
     "fields": {
+      "id": "408",
       "route": 18,
       "name": "Hwy 22A - Waneta Border Xing to Jct Hwy 3B Waneta",
       "description": "Highway 22A, between US Border (BC and WA Border, South of Trail) and Highway 3B (Trail)",
@@ -3850,8 +3850,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 410,
     "fields": {
+      "id": "410",
       "route": 23,
       "name": "Hwy 3 - Greenwood to Eholt Summit",
       "description": "Highway 3, between Gowrie St (1 mile east of Greenwood) and Wilgress South Rd (2 miles west of Eholt Summit)",
@@ -3865,8 +3865,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 411,
     "fields": {
+      "id": "411",
       "route": 23,
       "name": "Hwy 3 - Junction Hwy 33 Rock Creek to Greenwoo",
       "description": "Highway 3, between Junction Hwy 33 (near Rock Creek) and Boundary Cr Rd (1 mile east of Greenwood)",
@@ -3880,8 +3880,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 412,
     "fields": {
+      "id": "412",
       "route": 23,
       "name": "Hwy 3 - Paulson Bridge to Hwy 3B Junction",
       "description": "Highway 3, between East Lake Dr (15 miles east of Christina Lake) and Mannix Rd (24 miles west of Castlegar)",
@@ -3895,8 +3895,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 413,
     "fields": {
+      "id": "413",
       "route": 23,
       "name": "Hwy 3 - Hwy 3B Junction to Castlegar",
       "description": "Highway 3, between Highway 3B and Columbia Ave (Castlegar)",
@@ -3910,8 +3910,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 414,
     "fields": {
+      "id": "414",
       "route": 23,
       "name": "Hwy 3 -  Castlegar to Jct Hwy 3B Meadows",
       "description": "Highway 3, between Junction Hwy 22 (near Castlegar) and Meadows Rd (10 miles west of Salmo)",
@@ -3925,8 +3925,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 415,
     "fields": {
+      "id": "415",
       "route": 27,
       "name": "Hwy 33 - Junction Hwy 3 Rock Creek to Westbridge",
       "description": "Highway 33, between Junction Hwy 3 (Rock Creek) and Wild Horse Creek Rd (near Westbridge)",
@@ -3940,8 +3940,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 416,
     "fields": {
+      "id": "416",
       "route": 27,
       "name": "Hwy 33 -  Beaverdell to McCulloch Road",
       "description": "Highway 33, between Beaverdell Station Rd (near Beaverdell) and McCulloch Rd (30 miles south of Kelowna)",
@@ -3955,8 +3955,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 417,
     "fields": {
+      "id": "417",
       "route": 27,
       "name": "Hwy 33 - Westbridge to Beaverdell",
       "description": "Highway 33, between Christian Valley Rd (near Westbridge) and Carmi Station (near Beaverdell)",
@@ -3970,8 +3970,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 418,
     "fields": {
+      "id": "418",
       "route": 31,
       "name": "Hwy 395 -  Cascade Border Xing to Christina Lake",
       "description": "Highway 395, between US Border (British Columbia and USA Border) and Highway 3 (Christina Lake)",
@@ -3985,8 +3985,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 419,
     "fields": {
+      "id": "419",
       "route": 121,
       "name": "Ocean View Dr - Daajing Giids to Skidegate Landing",
       "description": "Ocean View Dr, between the start of Ocean View Dr (Skidegate) and Queen Charlotte Mainline (Queen Charlotte)",
@@ -4000,8 +4000,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 420,
     "fields": {
+      "id": "420",
       "route": 59,
       "name": "Hwy 3B - Rossland to Hwy 3 Junction  at Nancy Greene",
       "description": "Highway 3B, between Highway 22 Jct W (Rossland) and Highway 3 Jct W (8 miles north of Nancy Greene Summit)",
@@ -4015,8 +4015,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 421,
     "fields": {
+      "id": "421",
       "route": 33,
       "name": "Hwy 41 - Carson border Xing to Junction with Hwy 3",
       "description": "Highway 41, between US Border (British Columbia and USA Border) and Junction Hwy 3 (Grand Forks)",
@@ -4030,8 +4030,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 422,
     "fields": {
+      "id": "422",
       "route": 16,
       "name": "Hwy 21 - Rykerts Border Xing to Creston",
       "description": "Highway 21, between Porthill Rd (British Columbia and Idaho Border) and Junction Hwy 3 (3 miles north of Creston)",
@@ -4045,8 +4045,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 423,
     "fields": {
+      "id": "423",
       "route": 55,
       "name": "Hwy 23 - Nakusp to Burnham Road",
       "description": "Highway 23, between Junction Hwy 6 and Butnham Rd (Nakusp)",
@@ -4060,8 +4060,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 424,
     "fields": {
+      "id": "424",
       "route": 55,
       "name": "Hwy 23 - Burnham Road to Galena Bay",
       "description": "Highway 23, between Butnham Rd and Shelter Bay Provincial Pk (Nakusp)",
@@ -4075,8 +4075,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 425,
     "fields": {
+      "id": "425",
       "route": 23,
       "name": "Hwy 3 - Jct Hwy 3B Meadows to Salmo",
       "description": "Highway 3, between Junction Hwy 3B and 9th St (Salmo)",
@@ -4090,8 +4090,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 426,
     "fields": {
+      "id": "426",
       "route": 23,
       "name": "Hwy 3 - Jct Hwy 6 at Salmo to Tailings Road",
       "description": "Highway 3, between Junction Hwy 6NS (Salmo) and Junction Hwy 6NS (Salmo)",
@@ -4105,8 +4105,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 427,
     "fields": {
+      "id": "427",
       "route": 23,
       "name": "Hwy 3 - Tailings Road to KP West Avalanche Gate",
       "description": "Highway 3, between Tailings Rd (14 miles east of Salmo) and East Avalanche Gate (10 miles west of Kootenay Pass)",
@@ -4120,8 +4120,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 430,
     "fields": {
+      "id": "430",
       "route": 23,
       "name": "Hwy 3 - Creston to Goatfell",
       "description": "Highway 3, between Pine St (near Creston) and Goatfell (5 miles west of Curzon Junction)",
@@ -4135,8 +4135,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 431,
     "fields": {
+      "id": "431",
       "route": 23,
       "name": "Hwy 3 - Goatfel to Moyie",
       "description": "Highway 3, between Wright Rd (5 miles west of Curzon Junction) and Tavistock St (near Moyie)",
@@ -4150,8 +4150,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 432,
     "fields": {
+      "id": "432",
       "route": 25,
       "name": "Hwy 31 - Kaslo to Meadow Creek",
       "description": "Highway 31, between Kaslo (near Kaslo) and Block Rd (Meadow Creek)",
@@ -4165,8 +4165,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 433,
     "fields": {
+      "id": "433",
       "route": 25,
       "name": "Hwy 31 - Balfour to Kaslo",
       "description": "Highway 31, between Balfour (Balfour) and 7th St (near Kaslo)",
@@ -4180,8 +4180,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 434,
     "fields": {
+      "id": "434",
       "route": 25,
       "name": "Hwy 31 - Meadow Creek to Gerrard Bridge",
       "description": "Highway 31, between Block Rd (Meadow Creek) and Goat Range Provincial Pk (25 miles south of Trout Lake)",
@@ -4195,8 +4195,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 435,
     "fields": {
+      "id": "435",
       "route": 25,
       "name": "Hwy 31 - Gerrard Bridge to Jct Hwy 23 Galena Bay",
       "description": "Highway 31, between Goat Range Provincial Pk and Junction Hwy 23 (Trout Lake)",
@@ -4210,8 +4210,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 436,
     "fields": {
+      "id": "436",
       "route": 26,
       "name": "Hwy 31A - Jct Hwy 6 New Denver to Kaslo Creek South Fork Road (Retallack)",
       "description": "Highway 31A, between Junction Hwy 6NS and Kaslo Creek South Fork Rd (New Denver)",
@@ -4225,8 +4225,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 437,
     "fields": {
+      "id": "437",
       "route": 26,
       "name": "Hwy 31A - Kaslo Creek South Fork Road (Retallack) to Jct Hwy 31 Kaslo",
       "description": "Highway 31A, between Retallak (19 miles east of New Denver) and Junction Hwy 31 (Kaslo)",
@@ -4240,8 +4240,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 438,
     "fields": {
+      "id": "438",
       "route": 58,
       "name": "Hwy 3A - Brilliant to Nelson",
       "description": "Highway 3A, between Brilliant Powerplant Rd (1 mile east of Brilliant) and Baker St (near Nelson)",
@@ -4255,8 +4255,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 439,
     "fields": {
+      "id": "439",
       "route": 58,
       "name": "Hwy 3A - Nelson to Balfour Ferry",
       "description": "Highway 3A, between Junction Hwy 6NS (near Nelson) and Kootenay Bay Ferry (Balfour)",
@@ -4270,8 +4270,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 440,
     "fields": {
+      "id": "440",
       "route": 120,
       "name": "Hwy 6 EW - Monashee Summit to Needles Ferry",
       "description": "Highway 6 EW, between Monashee Summit (Monashee Summit) and Needles Ferry (Needles)",
@@ -4285,8 +4285,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 441,
     "fields": {
+      "id": "441",
       "route": 120,
       "name": "Hwy 6 EW - Fauquier to Junction Hwy 23 Nakusp",
       "description": "Highway 6 EW, between Needles Ferry (Needles) and Junction Hwy 23 (Nakusp)",
@@ -4300,8 +4300,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 442,
     "fields": {
+      "id": "442",
       "route": 62,
       "name": "Hwy 6 NS - Junction Hwy 23 Nakusp to Summit Lake",
       "description": "Highway 6 NS, between the start of Highway 6 NS (Nakusp) and Summit Lake Rd (Summit Lake)",
@@ -4315,8 +4315,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 443,
     "fields": {
+      "id": "443",
       "route": 62,
       "name": "Hwy 6 NS - Summit Lake to Jct Hwy 31A New Denver",
       "description": "Highway 6 NS, between Summit Lake Rd (Summit Lake) and Junction Hwy 31A (near New Denver)",
@@ -4330,8 +4330,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 444,
     "fields": {
+      "id": "444",
       "route": 62,
       "name": "Hwy 6 NS - Jct Hwy 31A New Denver to Cape Horn",
       "description": "Highway 6 NS, between 7th Ave (near New Denver) and Gravel Pit Rd (2 miles south of Slocan)",
@@ -4345,8 +4345,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 445,
     "fields": {
+      "id": "445",
       "route": 62,
       "name": "Hwy 6 NS - Slocan Park Junction with Hwy 3A Playmore",
       "description": "Highway 6 NS, between Slocan Park Rd (3 miles south of Passmore) and Junction Hwy 3A (Playmor Junction)",
@@ -4360,8 +4360,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 446,
     "fields": {
+      "id": "446",
       "route": 62,
       "name": "Hwy 6 NS - Cape Horn to Slocan Park",
       "description": "Highway 6 NS, between Gravel Pit Rd (2 miles south of Slocan) and Slocan Park Rd (3 miles south of Passmore)",
@@ -4375,8 +4375,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 447,
     "fields": {
+      "id": "447",
       "route": 62,
       "name": "Hwy 6 NS - Nelson to Ymir",
       "description": "Highway 6 NS, between Junction Hwy 3A (Nelson) and Spruce St (11 miles north of Salmo)",
@@ -4390,8 +4390,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 448,
     "fields": {
+      "id": "448",
       "route": 62,
       "name": "Hwy 6 NS - Ymir to Salmo",
       "description": "Highway 6 NS, between Spruce St and Junction Hwy 3 (Salmo)",
@@ -4405,8 +4405,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 449,
     "fields": {
+      "id": "449",
       "route": 62,
       "name": "Hwy 6 NS - Nelway Border Xing to Jct Hwy 3 Nelway",
       "description": "Highway 6 NS, between Junction Hwy 3 and US Border (BC and WA Border, South of Osoyoos)",
@@ -4420,8 +4420,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 451,
     "fields": {
+      "id": "451",
       "route": 120,
       "name": "Hwy 6 EW - Gibson Rd to Cherryville",
       "description": "Highway 6 EW, between Gibson Rd (6 miles east of Lumby) and North Fork Rd (Cherryville)",
@@ -4435,8 +4435,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 452,
     "fields": {
+      "id": "452",
       "route": 120,
       "name": "Hwy 6 EW - Cherryville to Monashee Summit",
       "description": "Highway 6 EW, between North Fork Rd (Cherryville) and Monashee Summit (Monashee Summit)",
@@ -4450,8 +4450,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 456,
     "fields": {
+      "id": "456",
       "route": 23,
       "name": "Hwy 3A - Keremeos to Nighthawk Rd",
       "description": "Highway 3, between Keremeos (near Keremeos) and Nighthawk Rd (20 miles west of Osoyoos)",
@@ -4465,8 +4465,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 457,
     "fields": {
+      "id": "457",
       "route": 23,
       "name": "Hwy 3 - Nighthawk Rd to Osoyoos",
       "description": "Highway 3, between Nighthawk Rd and 87th St (Osoyoos)",
@@ -4480,8 +4480,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 458,
     "fields": {
+      "id": "458",
       "route": 23,
       "name": "Hwy 3 - Osoyoos to Nine Mile Pit",
       "description": "Highway 3, between 89th St and Wagon Wheel Rd (Osoyoos)",
@@ -4495,8 +4495,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 459,
     "fields": {
+      "id": "459",
       "route": 23,
       "name": "Hwy 3 - Anarchist Summit to Junction Hwy 33 Rock Creek",
       "description": "Highway 3, between Nine Mile Place Rd (20 miles east of Osoyoos) and Beadman Rd (near Rock Creek)",
@@ -4510,8 +4510,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 460,
     "fields": {
+      "id": "460",
       "route": 27,
       "name": "Hwy 33 - McCulloch Rd to Mission Creek Bridge",
       "description": "Highway 33, between Rupert Mainline and Three Forks Rd (Kelowna)",
@@ -4525,8 +4525,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 461,
     "fields": {
+      "id": "461",
       "route": 27,
       "name": "Hwy 33 - Mission Creek Bridge to Junction Hwy 97 Kelowna",
       "description": "Highway 33, between Mission Creek Bridge and Highway 97 (Kelowna)",
@@ -4540,8 +4540,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 463,
     "fields": {
+      "id": "463",
       "route": 67,
       "name": "Hwy 97 - Crystal Waters Rd to Grandview Flats Rd",
       "description": "Highway 97, between Crystal Waters Rd (13 miles south of Coldstream) and Grandview Flats Rd N (17 miles north of Vernon)",
@@ -4555,8 +4555,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 464,
     "fields": {
+      "id": "464",
       "route": 117,
       "name": "Telegraph Cr Rd - Glenora Rd to Burnt Trailer-Tanzilla Access",
       "description": "Telegraph Creek Rd (Highway 51), between Stikine Ave (Telegraph Creek) and Riverview Dr (51 miles west of Dease Lake)",
@@ -4570,8 +4570,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 465,
     "fields": {
+      "id": "465",
       "route": 58,
       "name": "Hwy 3A - Kootenay Bay Ferry to Jct Hwy 3 Creston",
       "description": "Highway 3A, between Kootenay Bay Ferry (near Kootenay Bay Ferry Landing in Crawford Bay) and Junction Hwy 3 (Creston)",
@@ -4585,8 +4585,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 466,
     "fields": {
+      "id": "466",
       "route": 68,
       "name": "Hwy 97C - Junction Hwy 97 to Brenda Mine Rd",
       "description": "Highway 97C, between Junction Hwy 97 (West Kelowna) and Brenda Mine Rd (10 miles east of Pennask Summit)",
@@ -4600,8 +4600,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 467,
     "fields": {
+      "id": "467",
       "route": 68,
       "name": "Hwy 97C - Brenda Mine Rd to Pennask Summit",
       "description": "Highway 97C, between Trepanier Rd and Pennask Summit (Pennask Summit)",
@@ -4615,8 +4615,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 468,
     "fields": {
+      "id": "468",
       "route": 68,
       "name": "Hwy 97C - Pennask Summit to Loon Lake Rd (Seg 10)",
       "description": "Highway 97C, between Pennask Summit and Loon Lake Rd (Pennask Summit)",
@@ -4630,8 +4630,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 469,
     "fields": {
+      "id": "469",
       "route": 68,
       "name": "Hwy 97C - Loon Lake Rd to Junction Hwy 5A (Seg 11)",
       "description": "Highway 97C, between Loon Lake Rd (34 miles west of Pennask Summit) and Aspen Grove (23 miles east of Merritt)",
@@ -4645,8 +4645,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 470,
     "fields": {
+      "id": "470",
       "route": 68,
       "name": "Hwy 97C - Junction Hwy 5A to Merritt (Seg 12)",
       "description": "Highway 97C, between Loon Lake Rd and Eight Mile Rd (Merritt)",
@@ -4660,8 +4660,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 472,
     "fields": {
+      "id": "472",
       "route": 68,
       "name": "Hwy 97C - Highland Valley Mine to Junction Hwy 1",
       "description": "Highway 97C, between Highland Valley Copper Mine and the end of Highway 97C (Ashcroft)",
@@ -4675,8 +4675,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 478,
     "fields": {
+      "id": "478",
       "route": 11,
       "name": "Hwy 16 - McBride to Horsey Creek Bridge",
       "description": "Highway 16, between Main St (McBride) and Horsey Creek Bridge (23 miles west of Tete Jaune)",
@@ -4690,8 +4690,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 480,
     "fields": {
+      "id": "480",
       "route": 11,
       "name": "Hwy 16 - Horsey Creek to Hwy 5/16 JCT",
       "description": "Highway 16, between Read Rd East Access and Hwy 5/16 JCT at Tete Jaune (Tete Jaune)",
@@ -4705,8 +4705,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 481,
     "fields": {
+      "id": "481",
       "route": 11,
       "name": "Hwy 16 - Hwy 5/16 JCT to BC/AB Border",
       "description": "Highway 16, between Hwy 5/16 JCT at Tete Jaune (Tete Jaune) and BC AB Border (British Columbia and Alberta Border)",
@@ -4720,8 +4720,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 483,
     "fields": {
+      "id": "483",
       "route": 56,
       "name": "Hwy 29 - Halfway River Bridge to Mile 54",
       "description": "Highway 29, between Halfway River Bridge and the end of Highway 29 (Halfway Rest Area)",
@@ -4735,8 +4735,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 484,
     "fields": {
+      "id": "484",
       "route": 56,
       "name": "Hwy 29 - Hudson's Hope to Halfway River Bridge",
       "description": "Highway 29, between Johnson Creek Rd (6 miles south of Hudson's Hope) and Halfway River Bridge (near Halfway Rest Area)",
@@ -4750,8 +4750,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 486,
     "fields": {
+      "id": "486",
       "route": 34,
       "name": "Hwy 43 - Junction Hwy 3 to to Elkford",
       "description": "Highway 43, between the start of Highway 43 (Sparwood) and Alpine Way (Elkford)",
@@ -4765,8 +4765,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 491,
     "fields": {
+      "id": "491",
       "route": 52,
       "name": "Hwy 19 - Cook Creek Rd to 19A",
       "description": "Highway 19, between Cook Creek Rd (29 miles south of Cumberland) and Parksville Exit (Highway 19A) (Parksville)",
@@ -4780,8 +4780,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 492,
     "fields": {
+      "id": "492",
       "route": 52,
       "name": "Hwy 19 - Junction Hwy 19A Parksville to Nanaimo",
       "description": "Highway 19, between Church Rd (Parksville) and Wilkinson Rd (Nanaimo)",
@@ -4795,8 +4795,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 522,
     "fields": {
+      "id": "522",
       "route": 61,
       "name": "Hwy 5A - Merrit to Stump Lake Ranch",
       "description": "Highway 5A, between Exit 290: Highway 5 (Merritt) and Exit 290 (30 miles south of Kamloops)",
@@ -4810,8 +4810,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 523,
     "fields": {
+      "id": "523",
       "route": 61,
       "name": "Hwy 5A - Junction with Hwy 3 in Princeton to Gulliford Lk Rest Area",
       "description": "Highway 5A, between the start of Highway 5A (Princeton) and Gulliford Lake Rest Area (2 miles south of Gulliford Lake Rest Area)",
@@ -4825,8 +4825,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 525,
     "fields": {
+      "id": "525",
       "route": 61,
       "name": "Hwy 5A - Stump Lake to Hwy 1 (Kamloops)",
       "description": "Highway 5A, between Planet Mine Rd and Hillside Way (Kamloops)",
@@ -4840,8 +4840,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 526,
     "fields": {
+      "id": "526",
       "route": 57,
       "name": "Hwy 37 - Kitimat to Terrace",
       "description": "Highway 37S, between Nalabila Blvd and Terrace (Kitimat)",
@@ -4855,8 +4855,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 533,
     "fields": {
+      "id": "533",
       "route": 122,
       "name": "Hwy 37 - Deltaic Creek to Bob Quinn",
       "description": "Highway 37N, between Deltaic Cr Bridge (26 miles south of Bell II) and Bob Quinn Camp (Bob Quinn)",
@@ -4870,8 +4870,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 534,
     "fields": {
+      "id": "534",
       "route": 122,
       "name": "Hwy 37 - Junc Hwy 16 Kitwanga to Cranberry River",
       "description": "Highway 37N, between Kitwanga and Cranberry Bridge #2 (Kitwanga)",
@@ -4885,8 +4885,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 535,
     "fields": {
+      "id": "535",
       "route": 122,
       "name": "Hwy 37 - Cranberry River to Nass River",
       "description": "Highway 37N, between Cranberry Bridge #2 (70 miles north of Kitwanga) and Nass River Bridge (14 miles south of Meziadin)",
@@ -4900,8 +4900,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 536,
     "fields": {
+      "id": "536",
       "route": 122,
       "name": "Hwy 37 - Bell Irving River #1 to Deltaic Creek",
       "description": "Highway 37N, between Bell 1 Bridge (32 miles north of Meziadin) and Deltaic Cr Bridge (26 miles south of Bell II)",
@@ -4915,8 +4915,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 537,
     "fields": {
+      "id": "537",
       "route": 122,
       "name": "Hwy 37 - Nass River to Bell Irving River #1",
       "description": "Highway 37N, between Nass River Bridge and Bell 1 Bridge (Meziadin)",
@@ -4930,8 +4930,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 538,
     "fields": {
+      "id": "538",
       "route": 122,
       "name": "Hwy 37 - Bob Quinn to Burrage River",
       "description": "Highway 37N, between Bob Quinn Camp and Burrage River Bridge (Bob Quinn)",
@@ -4945,8 +4945,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 539,
     "fields": {
+      "id": "539",
       "route": 122,
       "name": "Hwy 37 - Burrage River to Tatogga",
       "description": "Highway 37N, between Burrage River Bridge (35 miles north of Bob Quinn) and Tatogga Lake Resort (Tatogga)",
@@ -4960,8 +4960,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 540,
     "fields": {
+      "id": "540",
       "route": 122,
       "name": "Hwy 37 - Tatogga to Stikine River",
       "description": "Highway 37N, between Tatogga Lake Resort (Tatogga) and Stikine Bridge (30 miles north of Iskut)",
@@ -4975,8 +4975,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 541,
     "fields": {
+      "id": "541",
       "route": 122,
       "name": "Hwy 37 - Stikine River to Dease Lake",
       "description": "Highway 37N, between Stikine Bridge (30 miles north of Iskut) and Commercial Dr (Dease Lake)",
@@ -4990,8 +4990,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 542,
     "fields": {
+      "id": "542",
       "route": 122,
       "name": "Hwy 37 - Dease Lake to Dease River",
       "description": "Highway 37N, between Commercial Dr (Dease Lake) and Dease River Bridge (46 miles south of Jade City)",
@@ -5005,8 +5005,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 543,
     "fields": {
+      "id": "543",
       "route": 122,
       "name": "Hwy 37 - Dease River to Jade City",
       "description": "Highway 37N, between Dease River Bridge and Cassiar Rd (Jade City)",
@@ -5020,8 +5020,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 544,
     "fields": {
+      "id": "544",
       "route": 122,
       "name": "Hwy 37 - Jade City to BC/Yukon Border",
       "description": "Highway 37N, between Cassiar Rd (2 miles north of Jade City) and the end of Highway 37N (British Columbia and Yukon Border)",
@@ -5035,8 +5035,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 545,
     "fields": {
+      "id": "545",
       "route": 11,
       "name": "Hwy 16 - West boundary to Junct Hwy 37 at Kitwanga",
       "description": "Highway 16 (Yellowhead Highway), between Maintenance Boundary SA25 (24 miles west of Cedarvale) and Kitwanga (17 miles west of Gitsegukla)",
@@ -5050,8 +5050,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 546,
     "fields": {
+      "id": "546",
       "route": 11,
       "name": "Hwy 16 - Junc Hwy 37 at Kitwanga to New Hazelton",
       "description": "Highway 16 (Yellowhead Highway), between Cedarvale Ferry Rd (17 miles west of Gitsegukla) and Fielding St (near New Hazelton)",
@@ -5065,8 +5065,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 547,
     "fields": {
+      "id": "547",
       "route": 29,
       "name": "Hwy 37A - BC/AK Border to Pearly Avalanche Gates",
       "description": "Highway 37A, between Hyder (British Columbia and Alaska Border) and Pearly Gates (12 miles east of Stewart)",
@@ -5080,8 +5080,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 548,
     "fields": {
+      "id": "548",
       "route": 29,
       "name": "Hwy 37A - Pearly Avalanche Gates to Junc Hwy 37 at Meziadin",
       "description": "Highway 37A, between Pearly Gates (12 miles east of Stewart) and Highway 37 Junction (Meziadin)",
@@ -5095,8 +5095,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 549,
     "fields": {
+      "id": "549",
       "route": 1,
       "name": "Hwy 1 - Revelstoke to Albert Canyon Chainup",
       "description": "Highway 1 (TransCanada Highway), between Victoria Rd W (Revelstoke) and Albert Canyon Chain Up Area (3 miles east of East Boundary of Mount Revelstoke National Park)",
@@ -5110,8 +5110,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 551,
     "fields": {
+      "id": "551",
       "route": 1,
       "name": "Hwy 1 - Albert Canyon Chainup to Glacier National Park West Boundary",
       "description": "Highway 1 (TransCanada Highway), between Albert Canyon Chain Up Area (3 miles east of East Boundary of Mount Revelstoke National Park) and Glacier National Park West Boundary (near West Boundary of Glacier National Park)",
@@ -5125,8 +5125,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 552,
     "fields": {
+      "id": "552",
       "route": 1,
       "name": "Hwy 1 - Glacier National Park West Boundary to Glacier National Park Summit",
       "description": "Highway 1 (TransCanada Highway), between Glacier National Park West Boundary (near West Boundary of Glacier National Park) and Glacier National Park Summit (Rogers Pass Summit)",
@@ -5140,8 +5140,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 554,
     "fields": {
+      "id": "554",
       "route": 55,
       "name": "Hwy 23 - Revelstoke to Downie Creek Bridge",
       "description": "Highway 23, between Junction Highway 1 and Downie Ck. Bridge (Revelstoke)",
@@ -5155,8 +5155,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 557,
     "fields": {
+      "id": "557",
       "route": 55,
       "name": "Hwy 23 - Shelter Bay to Revelstoke",
       "description": "Highway 23, between Junction Hwy 31 and Junction Highway 1 (Revelstoke)",
@@ -5170,8 +5170,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 561,
     "fields": {
+      "id": "561",
       "route": 1,
       "name": "Hwy 1 - Hwy 1 - Cassiar Tunnel to Boundary Rd",
       "description": "Highway 1 (TransCanada Highway), between Cassiar Tunnel and Exit 28: Boundary Rd (Vancouver)",
@@ -5185,8 +5185,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 562,
     "fields": {
+      "id": "562",
       "route": 1,
       "name": "Hwy 1 - Taylor Way to Cassiar Tunnel",
       "description": "Highway 1 (TransCanada Highway), between Exit 13 (West Vancouver) and Cassiar Tunnel (Vancouver)",
@@ -5200,8 +5200,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 563,
     "fields": {
+      "id": "563",
       "route": 3,
       "name": "Hwy 101 - Lund to Powell River",
       "description": "Highway 101, between Lund Rd and Sutherland Ave (Powell River)",
@@ -5215,8 +5215,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 565,
     "fields": {
+      "id": "565",
       "route": 3,
       "name": "Hwy 101 - Powell River",
       "description": "Highway 101, between Sutherland Ave and Rifle Range Rd (Powell River)",
@@ -5230,8 +5230,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 566,
     "fields": {
+      "id": "566",
       "route": 3,
       "name": "Hwy 101 - Powell River to Saltery Bay",
       "description": "Highway 101, between Rifle Range Rd and Saltery Bay (Powell River)",
@@ -5245,8 +5245,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 573,
     "fields": {
+      "id": "573",
       "route": 2,
       "name": "Hwy 10 - Junction with Hwy 91 to Junction with Hwy 1 in Langley",
       "description": "Highway 10, between Junction Hwy 91 (Delta) and the end of Highway 10 (Langley - District)",
@@ -5260,8 +5260,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 574,
     "fields": {
+      "id": "574",
       "route": 51,
       "name": "Hwy 17A - Ladner",
       "description": "Highway 17A, between Junction Highway 17 Delta and 62B St (Delta)",
@@ -5275,8 +5275,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 575,
     "fields": {
+      "id": "575",
       "route": 94,
       "name": "Hemlock Valley Road",
       "description": "Hemlock Valley Rd, between the start of Hemlock Valley Rd and End of Route (Sasquatch Mountain Resort)",
@@ -5290,8 +5290,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 579,
     "fields": {
+      "id": "579",
       "route": 40,
       "name": "Hwy 7 - Junc Hwy 9 to Junc Hwy 1",
       "description": "Highway 7 (Lougheed Highway), between Junction with Highway 9 (Kent) and the end of Highway 7 (Lougheed Highway) (1 mile east of Hope)",
@@ -5305,8 +5305,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 584,
     "fields": {
+      "id": "584",
       "route": 1,
       "name": "Hwy 1 - Jackass Summit to Junc Hwy 12",
       "description": "Highway 1 (TransCanada Highway), between Jackass Summit (2 miles north of Jackass Mountain Summit) and Junction Hwy 12 (Lytton)",
@@ -5320,8 +5320,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 585,
     "fields": {
+      "id": "585",
       "route": 1,
       "name": "Hwy 1 - Junc Hwy 12 to Spences Bridge",
       "description": "Highway 1 (TransCanada Highway), between Junction Hwy 12 (Lytton) and Colvin Rd (near Spences Bridge)",
@@ -5335,8 +5335,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 586,
     "fields": {
+      "id": "586",
       "route": 68,
       "name": "Hwy 97C - Junc Hwy 8 and Junc Hwy 97D",
       "description": "Highway 97C, between Merritt and Witches Brook Rd (Ashcroft)",
@@ -5350,8 +5350,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 587,
     "fields": {
+      "id": "587",
       "route": 68,
       "name": "Hwy 97C - Junc Hwy 97D to Highland Valley Mine",
       "description": "Highway 97C, between Brolin Rd and Highland Valley Copper Mine (Ashcroft)",
@@ -5365,8 +5365,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 599,
     "fields": {
+      "id": "599",
       "route": 60,
       "name": "Hwy 5 - Junc Hwy 97D to Kamloops",
       "description": "Highway 5 (Coquihalla North), between Exit 336: Walloper Interchange (14 miles north of Surrey Lake Summit) and Exit 362: Afton Interchange (Kamloops)",
@@ -5380,8 +5380,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 600,
     "fields": {
+      "id": "600",
       "route": 60,
       "name": "Hwy 5 - Kamloops to McLure",
       "description": "Highway 5, between East Kamloops (Kamloops) and McLure Ferry Rd (15 miles south of Barriere)",
@@ -5395,8 +5395,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 603,
     "fields": {
+      "id": "603",
       "route": 60,
       "name": "Hwy 5 - McLure to Junc Hwy 24",
       "description": "Highway 5, between McLure Ferry Rd (15 miles south of Barriere) and Bean Rd (near Little Fort)",
@@ -5410,8 +5410,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 605,
     "fields": {
+      "id": "605",
       "route": 60,
       "name": "Hwy 5 - Junc Hwy 24 (Little Fort) to McMurphy",
       "description": "Highway 5, between Church St (near Little Fort) and McMurphy Pullout; SA Boundary (18 miles south of Avola)",
@@ -5425,8 +5425,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 607,
     "fields": {
+      "id": "607",
       "route": 60,
       "name": "Hwy 5 - McMurphy Pullout to Blue River",
       "description": "Highway 5, between McMurphy Pullout; SA Boundary (18 miles south of Avola) and Blue River Bridge (near Blue River)",
@@ -5440,8 +5440,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 609,
     "fields": {
+      "id": "609",
       "route": 60,
       "name": "Hwy 5 - Blue River to Clemina",
       "description": "Highway 5, between Blue River Bridge (near Blue River) and Clemina Overhead Bridge (29 miles south of Valemount)",
@@ -5455,8 +5455,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 611,
     "fields": {
+      "id": "611",
       "route": 60,
       "name": "Hwy 5 - Clemina to Valemount",
       "description": "Highway 5, between Clemina Overhead Bridge and 5th Ave; Pine Rd (Valemount)",
@@ -5470,8 +5470,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 612,
     "fields": {
+      "id": "612",
       "route": 60,
       "name": "Hwy 5 - Valemount to Tete Jaune Cache at Junc Hwy 16",
       "description": "Highway 5, between 5th Ave; Pine Rd (Valemount) and the end of Highway 5 (Tete Jaune)",
@@ -5485,8 +5485,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 615,
     "fields": {
+      "id": "615",
       "route": 60,
       "name": "Hwy 5 - Exit 315 (Helmer) to Exit 336 (Walloper)",
       "description": "Highway 5 (Coquihalla North), between Exit 315: Helmer Rd and Exit 336: Walloper Interchange (Surrey Lake Summit)",
@@ -5500,8 +5500,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 617,
     "fields": {
+      "id": "617",
       "route": 60,
       "name": "Hwy 5 - Exit 286 (Merritt) to Exit 315 (Helmer)",
       "description": "Highway 5 (Coquihalla South), between Exit 286: Merritt - 97C (Merritt) and Exit 315: Helmer Rd (7 miles south of Surrey Lake Summit)",
@@ -5515,8 +5515,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 618,
     "fields": {
+      "id": "618",
       "route": 60,
       "name": "Hwy 5 - Exit 256 to Exit 286 (Merritt)",
       "description": "Highway 5 (Coquihalla South), between Exit 256: Coldwater Rd and Exit 286: Merritt - 97C (Merritt)",
@@ -5530,8 +5530,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 619,
     "fields": {
+      "id": "619",
       "route": 60,
       "name": "Hwy 5 - Hope to Portia",
       "description": "Highway 5 (Coquihalla South), between the start of Highway 5 (Coquihalla South) (Hope) and Exit 202: Portia (11 miles south of Great Bear Snowshed)",
@@ -5545,8 +5545,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 621,
     "fields": {
+      "id": "621",
       "route": 60,
       "name": "Hwy 5 - Exit 202 (Portia) to Exit 228",
       "description": "Highway 5 (Coquihalla South), between Exit 202: Portia (11 miles south of Great Bear Snowshed) and Exit 228: Coquihalla Lakes Rd (9 miles north of Coquihalla Summit)",
@@ -5560,8 +5560,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 622,
     "fields": {
+      "id": "622",
       "route": 60,
       "name": "Hwy 5 - Exit 228 to Exit 256",
       "description": "Highway 5 (Coquihalla South), between Exit 228: Coquihalla Lakes Rd (9 miles north of Coquihalla Summit) and Exit 256: Coldwater Rd (29 miles south of Merritt)",
@@ -5575,8 +5575,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 624,
     "fields": {
+      "id": "624",
       "route": 19,
       "name": "Hwy 24 - Lac des Roches to Lemieux Creek Bridge #3",
       "description": "Highway 24, between Cottage Lane and Lemieux Creek Rd (Little Fort)",
@@ -5590,8 +5590,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 625,
     "fields": {
+      "id": "625",
       "route": 19,
       "name": "Hwy 24 - Lemieux Creek Bridge #3 to Junction with Hwy 5",
       "description": "Highway 24, between Lemieux Creek Rd and the end of Highway 24 (Little Fort)",
@@ -5605,8 +5605,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 626,
     "fields": {
+      "id": "626",
       "route": 55,
       "name": "Hwy 23 - Downie Creek Bridge to Goldstream River Bridge",
       "description": "Highway 23, between Downie Ck. Bridge (59 miles north of Revelstoke) and Goldstream River Bridge (47 miles south of Mica Dam)",
@@ -5620,8 +5620,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 627,
     "fields": {
+      "id": "627",
       "route": 55,
       "name": "Hwy 23 - Goldstream River Bridge and Mica Dam",
       "description": "Highway 23, between Goldstream River Bridge and Mica Dam (Mica Dam)",
@@ -5635,8 +5635,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 628,
     "fields": {
+      "id": "628",
       "route": 1,
       "name": "Hwy 1 - Bernie Rd to Perry River Bridge",
       "description": "Highway 1 (TransCanada Highway), between Canoe Beach Dr NE and Perry River Bridge (Sicamous)",
@@ -5650,8 +5650,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 629,
     "fields": {
+      "id": "629",
       "route": 1,
       "name": "Hwy 1 - Perry River to Three Valley Gap",
       "description": "Highway 1 (TransCanada Highway), between Perry River Bridge (25 miles east of Sicamous) and Three Valley Avalanche Gate (18 miles west of Revelstoke)",
@@ -5665,8 +5665,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 630,
     "fields": {
+      "id": "630",
       "route": 23,
       "name": "Hwy 3 - Whipsaw Bridge to Junction Hwy 5A Princeton",
       "description": "Highway 3 (Crowsnest Highway), between Kennedy Lake Rd and Copper Mountain Rd (Princeton)",
@@ -5680,8 +5680,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 631,
     "fields": {
+      "id": "631",
       "route": 23,
       "name": "Hwy 3 - Mine Hill Brake Check to Whipsaw Bridge",
       "description": "Highway 3 (Crowsnest Highway), between Saturday Creek and Whipsaw Creek Rd (Princeton)",
@@ -5695,8 +5695,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 632,
     "fields": {
+      "id": "632",
       "route": 23,
       "name": "Hwy 3 - Kootenay Pass West Avalanche Gt to East Avalanche Gate",
       "description": "Highway 3 (Crowsnest Highway), between West Avalanche Gate and West Creston Rd (Kootenay Pass)",
@@ -5710,8 +5710,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 633,
     "fields": {
+      "id": "633",
       "route": 23,
       "name": "Hwy 3 - Kootenay Pass East Avalanche Gate to Creston",
       "description": "Highway 3 (Crowsnest Highway), between East Avalanche Gate (8 miles east of Kootenay Pass) and Cook St (near Creston)",
@@ -5725,8 +5725,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 634,
     "fields": {
+      "id": "634",
       "route": 61,
       "name": "Hwy 5A - Gulliford Lake Rest Area to Junc Hwy 97C",
       "description": "Highway 5A, between Gulliford Lake Rest Area (2 miles south of Gulliford Lake Rest Area) and Junction Hwy 97C (1 mile north of Aspen Grove)",
@@ -5740,8 +5740,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 635,
     "fields": {
+      "id": "635",
       "route": 120,
       "name": "Hwy 6 EW - Hwy 6/Hwy 97 Junction to Aberdeen Rd",
       "description": "Highway 6 EW, between 25 Ave (Vernon) and Aberdeen Rd (Coldstream)",
@@ -5755,8 +5755,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 636,
     "fields": {
+      "id": "636",
       "route": 120,
       "name": "Hwy 6 EW - Aberdeen Rd to Gibson Rd",
       "description": "Highway 6 EW, between Aberdeen Rd (Coldstream) and Gibson Rd (6 miles east of Lumby)",
@@ -5770,8 +5770,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 637,
     "fields": {
+      "id": "637",
       "route": 43,
       "name": "Hwy 8 - Junc Hwy 1 to Dot Ranch",
       "description": "Highway 8, between the start of Highway 8 (Spences Bridge) and Dot Ranch Cut-Off Rd West (29 miles west of Merritt)",
@@ -5785,8 +5785,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 638,
     "fields": {
+      "id": "638",
       "route": 43,
       "name": "Hwy 8 - Dot Ranch to Exit 286 Junction W/Hwy 5",
       "description": "Highway 8, between Dot Ranch Cut-Off Rd West and Junction Highway 5 (Merritt)",
@@ -5800,8 +5800,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 639,
     "fields": {
+      "id": "639",
       "route": 7,
       "name": "Hwy 12 - Lytton to Junc Hwy 99 (Lillooet)",
       "description": "Highway 12, between Six Mile Rd (27 miles north of Lytton) and the end of Highway 12 (Lillooet)",
@@ -5815,8 +5815,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 640,
     "fields": {
+      "id": "640",
       "route": 7,
       "name": "Hwy 12 - Junc Hwy 1 to Lytton",
       "description": "Highway 12, between the start of Highway 12 and Kirbys Flat Rd (Lytton)",
@@ -5830,8 +5830,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 641,
     "fields": {
+      "id": "641",
       "route": 65,
       "name": "Hwy 93 - Radium Hot Springs to Vermilion Crossing",
       "description": "Highway 93, between Stanley St (Radium Hot Springs) and Simpson River Trail (36 miles south of British Columbia and Alberta Border)",
@@ -5845,8 +5845,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 642,
     "fields": {
+      "id": "642",
       "route": 65,
       "name": "Hwy 93 - Vermilion Crossing to BC/AB Border",
       "description": "Highway 93, between Simpson River Trail and the end of Highway 93 (British Columbia and Alberta Border)",
@@ -5860,8 +5860,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 643,
     "fields": {
+      "id": "643",
       "route": 67,
       "name": "Hwy 97 - Westside Rd to Airport Way",
       "description": "Highway 97, between William R Bennett Bridge and Airport Way (Kelowna)",
@@ -5875,8 +5875,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 644,
     "fields": {
+      "id": "644",
       "route": 67,
       "name": "Hwy 97 - Airport Way to Crystal Waters Rd",
       "description": "Highway 97, between Airport Way (Kelowna) and Crystal Waters Rd (13 miles south of Coldstream)",
@@ -5890,8 +5890,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 652,
     "fields": {
+      "id": "652",
       "route": 1,
       "name": "Hwy 1 - Abbotsford  to Veddar Canal Bridge",
       "description": "Highway 1 (TransCanada Highway), between Riverside Rd and Dyke Crest Rd (Abbotsford)",
@@ -5905,8 +5905,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 653,
     "fields": {
+      "id": "653",
       "route": 1,
       "name": "Hwy 1 - Exit 118 (Chilliwack) to Junc Hwy 9",
       "description": "Highway 1 (TransCanada Highway), between Exit 118: Evans Rd and Exit 135 (Chilliwack)",
@@ -5920,8 +5920,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 654,
     "fields": {
+      "id": "654",
       "route": 1,
       "name": "Hwy 1 - Vedder Canal Bridge to Exit 118 (Chilliwack)",
       "description": "Highway 1 (TransCanada Highway), between Exit 104: No 3 Rd (near Abbotsford) and Exit 118: Evans Rd (Chilliwack)",
@@ -5935,8 +5935,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 655,
     "fields": {
+      "id": "655",
       "route": 1,
       "name": "Hwy 1 - Junc Hwy 9 to Hunter Creek Rd",
       "description": "Highway 1 (TransCanada Highway), between Exit 135 (2 miles east of Chilliwack) and Exit 160: Hunter Creek Rd (1 mile west of Hope)",
@@ -5950,8 +5950,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 656,
     "fields": {
+      "id": "656",
       "route": 1,
       "name": "Hwy 1 - Hunter Creek Rd to Hope",
       "description": "Highway 1 (TransCanada Highway), between Exit 160: Hunter Creek Rd and K St (Hope)",
@@ -5965,8 +5965,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 658,
     "fields": {
+      "id": "658",
       "route": 40,
       "name": "Hwy 7 - Ruskin to Hatzic",
       "description": "Highway 7 (Lougheed Highway), between 287 St (near Maple Ridge) and Sylvester Rd (1 mile east of Mission)",
@@ -5980,8 +5980,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 661,
     "fields": {
+      "id": "661",
       "route": 40,
       "name": "Hwy 7 - Hatzic to Lake Errock",
       "description": "Highway 7 (Lougheed Highway), between Sylvester Rd (1 mile east of Mission) and Holachten Dr (11 miles west of Kent)",
@@ -5995,8 +5995,8 @@
   },
   {
     "model": "segments.segment",
-    "pk": 662,
     "fields": {
+      "id": "662",
       "route": 40,
       "name": "Hwy 7 - Lake Errock to Junc Hwy 9",
       "description": "Highway 7 (Lougheed Highway), between Brooks Rd and Junction with Highway 9 (Kent)",
@@ -6006,396 +6006,6 @@
       "secondary_mp": 117.163,
       "secondary_point": "SRID=4326;POINT (-121.766602133853 49.2405677030164)",
       "geometry": "SRID=4326;LINESTRING (-122.04147 49.20124, -122.04072 49.20147, -122.04048 49.20155, -122.04031 49.20159, -122.03768 49.20235, -122.03756 49.20239, -122.03651 49.20269, -122.03544 49.2029, -122.03473 49.20296, -122.03319 49.20295, -122.03256 49.2029, -122.03252 49.2029, -122.03217 49.20287, -122.03184 49.20285, -122.03155 49.20282, -122.03094 49.20283, -122.03055 49.20287, -122.03015 49.20291, -122.02901 49.20311, -122.02841 49.20328, -122.02775 49.20354, -122.02514 49.20489, -122.02404 49.20551, -122.0234 49.20592, -122.02082 49.20802, -122.01888 49.20952, -122.01811 49.21031, -122.01784 49.21059, -122.01677 49.21208, -122.01406 49.21586, -122.01321 49.21704, -122.01139 49.21956, -122.01118 49.22008, -122.01118 49.22016, -122.01116 49.22075, -122.01137 49.2214, -122.0115 49.22164, -122.01173 49.22206, -122.01178 49.22213, -122.01212 49.22261, -122.01253 49.22303, -122.01402 49.22435, -122.01491 49.22514, -122.01537 49.22562, -122.01542 49.22566, -122.01589 49.22643, -122.01602 49.22702, -122.01603 49.22764, -122.01581 49.22838, -122.01548 49.22889, -122.01506 49.22935, -122.01464 49.22967, -122.01411 49.23, -122.01395 49.2301, -122.012 49.23092, -122.01043 49.23155, -122.0097 49.23187, -122.00849 49.23259, -122.0053 49.23566, -122.00442 49.23652, -122.00305 49.23786, -122.00257 49.23837, -122.0009 49.23999, -122.0007 49.24018, -122.00008 49.24078, -122.00001 49.24085, -121.99982 49.24098, -121.99934 49.24131, -121.99879 49.24161, -121.99826 49.24183, -121.99774 49.24204, -121.99647 49.24255, -121.99596 49.24276, -121.9954 49.24296, -121.99511 49.24307, -121.99439 49.24324, -121.99298 49.2435, -121.99104 49.24381, -121.9902 49.24396, -121.98939 49.2441, -121.98709 49.24441, -121.98548 49.24457, -121.98232 49.24482, -121.98095 49.24498, -121.97864 49.24531, -121.97653 49.24578, -121.97484 49.24611, -121.97317 49.24635, -121.97084 49.24649, -121.9702 49.24665, -121.96952 49.24701, -121.96886 49.24751, -121.9679 49.24816, -121.96696 49.24871, -121.96568 49.24923, -121.96389 49.2496, -121.96145 49.25006, -121.96025 49.25033, -121.9591 49.25068, -121.95882 49.25078, -121.95854 49.25087, -121.95749 49.2511, -121.95648 49.25124, -121.95562 49.25129, -121.95522 49.25129, -121.95485 49.25129, -121.95386 49.25121, -121.95303 49.25109, -121.95209 49.25084, -121.95202 49.25082, -121.9514 49.25061, -121.9506 49.25025, -121.94999 49.24993, -121.94924 49.2494, -121.94865 49.24882, -121.94758 49.24765, -121.94642 49.24638, -121.94635 49.24631, -121.94537 49.24524, -121.94484 49.24481, -121.94422 49.24429, -121.94306 49.24351, -121.94131 49.24261, -121.9395 49.24189, -121.93923 49.24181, -121.93812 49.24149, -121.93671 49.24114, -121.93542 49.24089, -121.92992 49.23976, -121.92792 49.23935, -121.92492 49.23864, -121.91892 49.23719, -121.91848 49.2371, -121.91824 49.23705, -121.91808 49.23701, -121.91742 49.23697, -121.91677 49.23706, -121.91628 49.23721, -121.9158 49.23745, -121.91423 49.23855, -121.91381 49.23878, -121.9136 49.23889, -121.91332 49.23899, -121.91303 49.23908, -121.91244 49.23922, -121.91238 49.23922, -121.91229 49.23923, -121.91178 49.23928, -121.91109 49.23928, -121.91026 49.23917, -121.90977 49.23902, -121.90937 49.2389, -121.9088 49.23861, -121.9086 49.23851, -121.90824 49.23822, -121.9065 49.23682, -121.90623 49.23661, -121.90453 49.23523, -121.90439 49.23512, -121.90188 49.23364, -121.90097 49.23313, -121.90035 49.2328, -121.90025 49.23274, -121.90011 49.23266, -121.90003 49.23262, -121.89915 49.23215, -121.89846 49.23191, -121.89829 49.23186, -121.89772 49.23171, -121.89696 49.23164, -121.89657 49.23163, -121.89271 49.23153, -121.89183 49.2314, -121.89102 49.23121, -121.88976 49.23095, -121.88944 49.23088, -121.88888 49.23081, -121.88804 49.2308, -121.88768 49.23084, -121.88626 49.23101, -121.88536 49.23112, -121.88481 49.23112, -121.88424 49.23112, -121.88199 49.23059, -121.88148 49.23043, -121.88078 49.23012, -121.88007 49.22974, -121.87959 49.22951, -121.87906 49.22937, -121.87834 49.22928, -121.87622 49.22913, -121.87561 49.22907, -121.87418 49.22878, -121.87337 49.2287, -121.87265 49.22871, -121.87175 49.22884, -121.87112 49.22896, -121.86931 49.22968, -121.86925 49.2297, -121.86827 49.22983, -121.86712 49.22982, -121.86624 49.22989, -121.86553 49.23008, -121.86437 49.23042, -121.8635 49.23073, -121.86285 49.23115, -121.86262 49.23149, -121.86238 49.23177, -121.8618 49.23202, -121.86127 49.2322, -121.86061 49.23235, -121.85975 49.23225, -121.85903 49.23222, -121.8585 49.2325, -121.85831 49.23307, -121.85823 49.23365, -121.85812 49.23398, -121.85766 49.23475, -121.8574 49.23541, -121.85735 49.23555, -121.85706 49.23666, -121.85705 49.2367, -121.85701 49.23686, -121.85694 49.23714, -121.85679 49.2377, -121.85596 49.23929, -121.85588 49.23942, -121.85524 49.24047, -121.85513 49.24066, -121.85497 49.24085, -121.85458 49.24131, -121.85452 49.24138, -121.85388 49.24201, -121.85176 49.24366, -121.85067 49.24445, -121.84993 49.24488, -121.84861 49.24549, -121.84716 49.24599, -121.84541 49.24632, -121.84401 49.24645, -121.84371 49.24645, -121.84249 49.24646, -121.83851 49.24608, -121.82346 49.24462, -121.82315 49.24459, -121.82104 49.24439, -121.81969 49.24425, -121.81715 49.24418, -121.81707 49.24417, -121.817 49.24417, -121.8 49.24423, -121.79553 49.24424, -121.79386 49.24425, -121.79117 49.24425, -121.78679 49.24424, -121.78629 49.24432, -121.78549 49.2445, -121.78475 49.24482, -121.78404 49.24528, -121.78369 49.2456, -121.78332 49.24613, -121.78315 49.24657, -121.7831 49.24703, -121.78297 49.24714, -121.78288 49.24722, -121.78277 49.24729, -121.77887 49.24728, -121.77826 49.2472, -121.77792 49.24714, -121.77772 49.2471, -121.77717 49.24692, -121.77663 49.24667, -121.7727 49.24425, -121.77073 49.24309, -121.77046 49.24292, -121.77007 49.24268, -121.76811 49.24147, -121.7675 49.24111, -121.7666 49.24057, -121.7666 49.24057)"
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 3,
-    "fields": {
-      "name": "04 - Howe Sound",
-      "sorting_order": 4,
-      "parent_area": 50,
-      "segments": [114, 238, 239, 240, 241, 242, 562]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 4,
-    "fields": {
-      "name": "05 - Sunshine Coast",
-      "sorting_order": 5,
-      "parent_area": 50,
-      "segments": [128, 129, 563, 565, 566]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 5,
-    "fields": {
-      "name": "06 - Lower Mainland",
-      "sorting_order": 6,
-      "parent_area": 50,
-      "segments": [11, 21, 22, 23, 51, 52, 53, 54, 55, 56, 131]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 6,
-    "fields": {
-      "name": "07 - Fraser Valley",
-      "sorting_order": 7,
-      "parent_area": 50,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 8,
-    "fields": {
-      "name": "01 - South Island",
-      "sorting_order": 1,
-      "parent_area": 46,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 9,
-    "fields": {
-      "name": "02 - Central Island",
-      "sorting_order": 2,
-      "parent_area": 46,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 10,
-    "fields": {
-      "name": "03 - North Island",
-      "sorting_order": 3,
-      "parent_area": 46,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 12,
-    "fields": {
-      "name": "11 - East Kootenay",
-      "sorting_order": 11,
-      "parent_area": 47,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 13,
-    "fields": {
-      "name": "12 - Selkirk",
-      "sorting_order": 12,
-      "parent_area": 47,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 15,
-    "fields": {
-      "name": "09 - Kootenay",
-      "sorting_order": 9,
-      "parent_area": 44,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 16,
-    "fields": {
-      "name": "10 - Central Kootenay",
-      "sorting_order": 10,
-      "parent_area": 44,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 18,
-    "fields": {
-      "name": "08 - South Okanagan",
-      "sorting_order": 8,
-      "parent_area": 41,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 19,
-    "fields": {
-      "name": "13 - Okanagan / Shuswap",
-      "sorting_order": 13,
-      "parent_area": 41,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 21,
-    "fields": {
-      "name": "14 - Nicola",
-      "sorting_order": 14,
-      "parent_area": 42,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 22,
-    "fields": {
-      "name": "15 - Thompson",
-      "sorting_order": 15,
-      "parent_area": 42,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 24,
-    "fields": {
-      "name": "16 - South Cariboo",
-      "sorting_order": 16,
-      "parent_area": 48,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 25,
-    "fields": {
-      "name": "17 - Central Cariboo",
-      "sorting_order": 17,
-      "parent_area": 48,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 26,
-    "fields": {
-      "name": "18 - North Cariboo",
-      "sorting_order": 18,
-      "parent_area": 48,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 28,
-    "fields": {
-      "name": "21 - South Peace",
-      "sorting_order": 21,
-      "parent_area": 51,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 29,
-    "fields": {
-      "name": "22 - North Peace",
-      "sorting_order": 22,
-      "parent_area": 51,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 31,
-    "fields": {
-      "name": "19 - Fort George",
-      "sorting_order": 19,
-      "parent_area": 45,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 32,
-    "fields": {
-      "name": "20 - Robson",
-      "sorting_order": 20,
-      "parent_area": 45,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 33,
-    "fields": {
-      "name": "23 - Nechako",
-      "sorting_order": 23,
-      "parent_area": 45,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 35,
-    "fields": {
-      "name": "24 - Lakes",
-      "sorting_order": 24,
-      "parent_area": 43,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 36,
-    "fields": {
-      "name": "25 - Bulkley Nass",
-      "sorting_order": 25,
-      "parent_area": 43,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 37,
-    "fields": {
-      "name": "28 - Stikine",
-      "sorting_order": 28,
-      "parent_area": 43,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 39,
-    "fields": {
-      "name": "26 - Skeena",
-      "sorting_order": 26,
-      "parent_area": 49,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 40,
-    "fields": {
-      "name": "27 - North Coast",
-      "sorting_order": 27,
-      "parent_area": 49,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 41,
-    "fields": {
-      "name": "05 - Okanagan-Shuswap",
-      "sorting_order": 5,
-      "parent_area": null,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 42,
-    "fields": {
-      "name": "06 - Thompson-Nicola",
-      "sorting_order": 6,
-      "parent_area": null,
-      "segments": []
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 43,
-    "fields": {
-      "name": "10 - Bulkley-Stikine",
-      "sorting_order": 10,
-      "parent_area": null,
-      "segments": [538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 44,
-    "fields": {
-      "name": "04 - West Kootenay",
-      "sorting_order": 4,
-      "parent_area": null,
-      "segments": [313, 314, 315, 316, 318, 319, 405, 406, 408, 410, 411, 412, 413, 414, 415, 416, 417, 418, 420, 421, 422, 423, 424, 425, 426, 427, 430, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 459, 465, 632, 633]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 45,
-    "fields": {
-      "name": "09 - Fort George",
-      "sorting_order": 9,
-      "parent_area": null,
-      "segments": [110, 111, 256, 257, 258, 259, 261, 262, 266, 301, 302, 321, 322, 358, 359, 360, 361, 478, 480, 481, 607, 609, 611, 612]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 46,
-    "fields": {
-      "name": "02 - Vancouver Island",
-      "sorting_order": 2,
-      "parent_area": null,
-      "segments": [6, 45, 69, 70, 71, 73, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 101, 102, 103, 105, 106, 107, 125, 137, 138, 139, 140, 141, 154, 156, 157, 160, 161, 162, 166, 170, 173, 195, 342, 343, 348, 349, 362, 363, 364, 367, 368, 381, 385, 491, 492]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 47,
-    "fields": {
-      "name": "03 - Rocky Mountain",
-      "sorting_order": 3,
-      "parent_area": null,
-      "segments": [46, 47, 48, 93, 109, 164, 165, 183, 184, 185, 186, 203, 204, 205, 206, 250, 251, 252, 253, 306, 335, 344, 345, 431, 486, 549, 551, 552, 554, 557, 626, 627, 629, 641, 642]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 48,
-    "fields": {
-      "name": "07 - Cariboo",
-      "sorting_order": 7,
-      "parent_area": null,
-      "segments": [8, 41, 62, 63, 68, 118, 124, 143, 144, 145, 146, 147, 148, 149, 150, 153, 193, 194, 196, 197, 214, 215, 216, 217, 218, 219, 220, 221, 243, 244, 245, 326, 350, 351, 352, 353, 355, 356, 357, 380, 472, 639]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 49,
-    "fields": {
-      "name": "11 - Skeena",
-      "sorting_order": 11,
-      "parent_area": null,
-      "segments": [17, 134, 284, 285, 286, 287, 288, 289, 290, 309, 310, 419, 526]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 50,
-    "fields": {
-      "name": "01 - Lower Mainland",
-      "sorting_order": 1,
-      "parent_area": null,
-      "segments": [11, 12, 13, 14, 21, 22, 23, 26, 27, 51, 52, 53, 54, 55, 56, 114, 128, 129, 131, 133, 158, 159, 178, 179, 180, 181, 182, 234, 235, 236, 237, 238, 239, 240, 241, 242, 320, 561, 562, 563, 565, 566, 573, 574, 575, 579, 619, 652, 653, 654, 655, 656, 658, 661, 662]
-    }
-  },
-  {
-    "model": "segments.area",
-    "pk": 51,
-    "fields": {
-      "name": "08 - Peace",
-      "sorting_order": 8,
-      "parent_area": null,
-      "segments": [28, 29, 30, 91, 121, 122, 172, 174, 222, 223, 224, 225, 226, 228, 263, 264, 265, 267, 268, 269, 274, 275, 375, 376, 483, 484]
     }
   }
 ]

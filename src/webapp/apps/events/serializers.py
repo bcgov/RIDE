@@ -1,14 +1,13 @@
 import copy
-from datetime import datetime, timezone
 import logging
-from pprint import pprint
+from datetime import datetime, timezone
 
 from django.contrib.auth import get_user_model
 from rest_framework import fields, serializers
-from rest_framework.serializers import Serializer, ModelSerializer, Field
+from rest_framework.serializers import ModelSerializer
 from rest_framework_gis.fields import GeometryField
 
-from .models import Event, Note, TrafficImpact
+from .models import Event, Note, TrafficImpact, Condition
 
 log = logging.getLogger('debug')
 
@@ -16,7 +15,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'first_name', 'last_name', 'email']
+        fields = ['id', 'first_name', 'last_name', 'email', 'username']
 
 
 class VersionSerializer(ModelSerializer):
@@ -310,3 +309,50 @@ class TrafficImpactSerializer(ModelSerializer):
     class Meta:
         model = TrafficImpact
         fields = ['id', 'label', 'order', 'closed']
+
+
+class ConditionSerializer(ModelSerializer):
+    class Meta:
+        model = Condition
+        fields = "__all__"
+
+
+class RcSerializer(EventSerializer):
+    first_reported = serializers.SerializerMethodField()
+
+    def get_first_reported(self, obj):
+        first_approved_event = Event.objects.filter(approved=True, id=obj.id).order_by('version').first()
+        return {
+            'user': UserSerializer(first_approved_event.user).data,
+            'date': first_approved_event.created,
+        }
+
+    def to_representation(self, instance):
+        """Override to convert condition IDs to labels in output"""
+        obj = super().to_representation(instance)
+        # Convert condition IDs to labels for output
+        if 'conditions' in obj and obj['conditions']:
+            obj['conditions'] = list(Condition.objects.filter(id__in=obj['conditions']).values_list('label', flat=True))
+        return obj
+
+    class Meta:
+        model = Event
+        fields = "__all__"
+        keys_to_move = {
+            '__orig__': 'meta.source',
+            'type': 'event_type',
+            'location.start': 'start',
+            'location.end': 'end',
+            'details.direction': 'direction',
+            'details.severity': 'severity',
+            'details.category': 'category',
+            'details.situation': 'situation',
+            'delays.amount': 'delay_amount',
+            'delays.unit': 'delay_unit',
+            'timing.nextUpdate': 'next_update',
+            'timing.startTime': 'start_time',
+            'timing.endTime': 'end_time',
+            'timing.ongoing': 'ongoing',
+            'timing.schedules': 'schedules',
+            'external.url': 'link',
+        }

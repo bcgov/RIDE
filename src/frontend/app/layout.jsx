@@ -112,6 +112,10 @@ export default function Layout() {
             {authContext.is_superuser &&
               <NavLink to="/users/">Users</NavLink>
             }
+
+            {authContext.is_superuser &&
+              <NavLink to="/segments/">Road Conditions</NavLink>
+            }
           </>
         }
 

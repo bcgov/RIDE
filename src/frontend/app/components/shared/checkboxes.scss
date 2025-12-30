@@ -15,38 +15,6 @@
     &-row {
       display: flex;
       align-items: center;
-
-      .checkbox {
-        display: flex;
-        width: 14px;
-        height: 14px;
-        padding: 2px;
-        border-radius: 2px;
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid black;
-        margin: 0 .4rem;
-
-        cursor: pointer;
-      }
-
-      .checkbox:focus:not([data-focus]) {
-        outline: none;
-      }
-
-      .checkbox[data-checked]:after {
-        content: '✓';
-        position: relative;
-        bottom: 8px;
-        right: 2px;
-      }
-
-      .checkbox[data-focus] {
-        outline: solid 2px black;
-        outline-offset: 2px;
-      }
     }
-
   }
-
-
 }
