@@ -155,6 +155,13 @@
         width: 50%;
       }
     }
+
+    .conditions {
+      .condition-icon {
+        width: 20px;
+        margin-right: 1rem;
+      }
+    }
   }
 
   .footer {

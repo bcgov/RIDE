@@ -138,6 +138,23 @@ import roadconditionInactiveStatic from './roadcondition-inactive-static.svg';
 import roadconditionInactiveHover from './roadcondition-inactive-hover.svg';
 import roadconditionInactiveActive from './roadcondition-inactive-active.svg';
 
+import {
+  faIcicles,
+  faSnowflake,
+  faSnowBlowing,
+  faCloudRain,
+  faWind,
+  faEye,
+  faEyeSlash,
+  faTriangleExclamation,
+  faRoad,
+  faDroplet,
+  faCloud,
+  faSun,
+  faMountain,
+  faWater
+} from '@fortawesome/pro-regular-svg-icons';
+
 import chainup from './chainup.svg';
 import closure from './closure.svg';
 import majordelay from './majordelay.svg';
@@ -564,6 +581,47 @@ let curr, prev;
   curr = prev;
 });
 
+export function getConditionIcon(condition) {
+  const { id } = condition;
+
+  const iconMap = {
+    1: faIcicles,           // Black ice
+    2: faSnowBlowing,          // Blowing snow
+    3: faIcicles,           // Compact ice
+    4: faSnowflake,     // Compact snow
+    5: faTriangleExclamation, // Debris on road
+    6: faCloud,         // Dense fog
+    7: faSnowflake,     // Drifting snow
+    8: faWind,          // Dust storms
+    9: faSun,           // Fog clearing
+    10: faCloud,        // Fog patches
+    11: faCloudRain,    // Freezing rain
+    12: faRoad,         // Frost heaves
+    13: faCloudRain,    // Heavy rain
+    14: faDroplet,       // Heavy slush
+    15: faSnowflake,    // Heavy snowfall
+    16: faMountain,     // High avalanche hazard
+    17: faWater,        // High flood warning
+    18: faWind,         // High winds
+    19: faCloud,        // Ice fog
+    20: faEyeSlash,      // Limited visibility with fog
+    21: faEyeSlash,      // Limited visibility with smoke
+    22: faEyeSlash,      // Limited visibility with snow
+    23: faRoad,         // Muddy Sections
+    24: faCloudRain,    // Rain on compact snow
+    25: faRoad,         // Slippery sections
+    26: faDroplet,       // Slushy sections
+    27: faRoad,         // Slushy with slippery sections
+    28: faSnowflake,    // Snowing
+    29: faWind,         // Strong crosswinds
+    30: faEye,          // Visibility improved
+    31: faWater,        // Water pooling
+    32: faSnowflake,    // Winter driving conditions
+  };
+  
+  return iconMap[id] || faIcicles;
+}
+
 export function getPlainIcon(event, state='static') {
   return getIcon(event, state, false);
 }
@@ -571,7 +629,7 @@ export function getPlainIcon(event, state='static') {
 export function getIcon(event, state='static', includePending=true) {
   let type, status, severity, tense, closure;
   try {
-    type = event.type.toLowerCase() || 'incident';
+    type = event.type.toLowerCase().replaceAll(/\s/g, '').replaceAll(/_/g, '') || 'incident';
     if (type === 'planned event') { type = 'planned' ; }
     status = event.status.toLowerCase() || 'active';
     if (event.approved === false && includePending) { status = 'pending'; }

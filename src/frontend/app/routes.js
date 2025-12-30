@@ -15,5 +15,9 @@ export default [
       index("./users/home.jsx"),
       route("test", "./users/test.jsx"),
     ]),
+    route("segments", "./segments/layout.jsx", [
+      index("./segments/home.jsx"),
+      route("test", "./segments/test.jsx"),
+    ]),
   ]),
 ];

@@ -1,12 +1,18 @@
-import { ReactComponent } from 'react';
+// React
+import React, { useState } from 'react';
+
+// External imports
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { format } from 'date-fns';
 
-import './Preview.css';
-import { PHRASES_LOOKUP, TrafficImpacts } from './references';
+// Internal imports
 import { desc } from './Schedule';
+import { getConditionIcon, getPlainIcon } from './icons';
+import { PHRASES_LOOKUP, TrafficImpacts } from './references';
 import { selectFeature } from '../components/Map/helpers';
 
-import { getPlainIcon } from './icons';
+// Styling
+import './Preview.css';
 
 const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   acc[curr.id] = curr;
@@ -15,7 +21,7 @@ const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
 
 const sd = (date) => date ? format(new Date(date), 'MMM d, y') : '';
 
-export default function Preview({ event, dispatch, mapRef }) {
+export default function Preview({ event, dispatch, mapRef, segments }) {
   const start = event.location.start || {};
   const end = event.location.end || {};
   const isLinear = !!end.name;
@@ -24,12 +30,15 @@ export default function Preview({ event, dispatch, mapRef }) {
   let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase);
   if (end.other && end.useOther) { endNearbies.push(end.other); }
 
-  const lastUpdated = new Date(event.last_updated);
+  const lastUpdated = event.last_updated ? new Date(event.last_updated) : new Date(Date.now());
   const cleared = event.status === 'Inactive' && (!event.approved || lastUpdated > Date.now() - 60000 * 15);  // TODO: time window move to env variable
 
   const icon = getPlainIcon(event);
   const nextUpdate = new Date(event?.timing?.nextUpdate);
   const banner = event.approved === false && 'Event awaiting approval';
+
+  // States
+  const [selectedSeg, setSelectedSeg] = useState(segments ? segments[0] : null);
 
   return (
     <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'} ${event.status.toLowerCase()} ${cleared ? 'cleared' : ''}`}>
@@ -58,18 +67,36 @@ export default function Preview({ event, dispatch, mapRef }) {
             </svg>
           </div>
           <h3>{ PHRASES_LOOKUP[event.details.situation] }</h3>
-          <p>{ event.details.severity} {event.type === 'Incident' ? 'incident' : 'delay' }</p>
+
+          {event.type === 'ROAD_CONDITION' ?
+            <p>Road condition</p> :
+            <p>{ event.details.severity } {event.type === 'Incident' ? 'incident' : 'delay' }</p>
+          }
         </div>
       </div>
 
       <div className="body">
-        <h3 className="direction">
-          {event.details?.direction} on&nbsp;
-          {start.name}
-          {isLinear && end.name !== start.name &&
-            <>&nbsp;to {end.name}</>
-          }
-        </h3>
+        {!segments &&
+          <h3 className="direction">
+            {event.details?.direction} on&nbsp;
+            {start.name}
+            {isLinear && end.name !== start.name &&
+              <>&nbsp;to {end.name}</>
+            }
+          </h3>
+        }
+
+        {selectedSeg &&
+          <div>
+            <h3 className="direction">
+              {selectedSeg.name}
+            </h3>
+
+            <p>
+              {selectedSeg.description}
+            </p>
+          </div>
+        }
 
         { start.useAlias &&
           <p className="direction">
@@ -175,9 +202,24 @@ export default function Preview({ event, dispatch, mapRef }) {
           </>
         }
 
+        {event.conditions.length > 0 &&
+          <div className={'conditions'}>
+            <h5>Conditions</h5>
+            <ul>
+              {event.conditions.map((condition, ii) => {
+                return (
+                  <li key={'item ' + ii}>
+                    <FontAwesomeIcon icon={getConditionIcon(condition)} className={'condition-icon'}/>{condition.label}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        }
+
         { (event.additional || event?.external?.url) &&
           <>
-            <h5>Additional Information</h5>
+            <h5>{event.type === 'ROAD_CONDITION' ? 'Notes' : 'Additional Information'}</h5>
             { event.additional &&
               <div className="additional">{event.additional}</div>
             }
@@ -208,7 +250,8 @@ export default function Preview({ event, dispatch, mapRef }) {
               {lastUpdated.toLocaleString()}
             </div>
           }
-          { event.type === 'Incident' &&
+
+          { (event.type === 'Incident' || event.type === 'ROAD_CONDITION') &&
             <div className="time">
               <strong>Next update</strong><br />
               {!isNaN(nextUpdate) && nextUpdate.toLocaleString()}

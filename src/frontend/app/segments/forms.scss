@@ -1,0 +1,42 @@
+.form {
+  width: 446px;
+
+  #event-form {
+    &.rcs-form {
+      .form-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+
+        .title {
+          align-items: center;
+
+          .text {
+            font-size: 20px;
+            line-height: 34px;
+            padding-top: 4px;
+          }
+
+        }
+      }
+
+      .form-body {
+        padding: 0 12px;
+        position: relative;
+        overflow: hidden;
+
+        .section {
+          &.buttons {
+            box-shadow: 0 6.4px 14.4px 0 #00000021;
+            width: calc(100% - 24px);
+            position: absolute;
+            bottom: 0;
+          }
+        }
+      }
+    }
+  }
+
+}
+

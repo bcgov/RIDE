@@ -68,14 +68,85 @@ impacts = [
   { 'id': 68, 'label': 'Westbound lane closure', 'closed': False },
 ]
 
-from pprint import pprint
-from django.core.management.base import BaseCommand, CommandError
+# Black ice
+# Blowing snow
+# Compact ice
+# Compact snow
+# Debris on road
+# Dense fog
+# Drifting snow
+# Dust storms
+# Fog clearing
+# Fog patches
+# Freezing rain
+# Frost heaves (swelling frozen soil)
+# Heavy rain
+# Heavy slush
+# Heavy snowfall
+# High avalanche hazard
+# High flood warning
+# High winds
+# Ice fog (ice crystals in air)
+# Limited visibility with fog
+# Limited visibility with smoke
+# Limited visibility with snow
+# Muddy Sections
+# Rain on compact snow
+# Slippery sections
+# Slushy sections
+# Slushy with slippery sections
+# Snowing
+# Strong crosswinds
+# Visibility improved
+# Water pooling
+# Winter driving conditions
+conditions = [
+  { 'id': 1, 'label': 'Black ice', },
+  { 'id': 2, 'label': 'Blowing snow', },
+  { 'id': 3, 'label': 'Compact ice', },
+  { 'id': 4, 'label': 'Compact snow', },
+  { 'id': 5, 'label': 'Debris on road', },
+  { 'id': 6, 'label': 'Dense fog', },
+  { 'id': 7, 'label': 'Drifting snow', },
+  { 'id': 8, 'label': 'Dust storms', },
+  { 'id': 9, 'label': 'Fog clearing', },
+  { 'id': 10, 'label': 'Fog patches', },
+  { 'id': 11, 'label': 'Freezing rain', },
+  { 'id': 12, 'label': 'Frost heaves (swelling frozen soil)', },
+  { 'id': 13, 'label': 'Heavy rain', },
+  { 'id': 14, 'label': 'Heavy slush', },
+  { 'id': 15, 'label': 'Heavy snowfall', },
+  { 'id': 16, 'label': 'High avalanche hazard', },
+  { 'id': 17, 'label': 'High flood warning', },
+  { 'id': 18, 'label': 'High winds', },
+  { 'id': 19, 'label': 'Ice fog (ice crystals in air)', },
+  { 'id': 20, 'label': 'Limited visibility with fog', },
+  { 'id': 21, 'label': 'Limited visibility with smoke', },
+  { 'id': 22, 'label': 'Limited visibility with snow', },
+  { 'id': 23, 'label': 'Muddy Sections', },
+  { 'id': 24, 'label': 'Rain on compact snow', },
+  { 'id': 25, 'label': 'Slippery sections', },
+  { 'id': 26, 'label': 'Slushy sections', },
+  { 'id': 27, 'label': 'Slushy with slippery sections', },
+  { 'id': 28, 'label': 'Snowing', },
+  { 'id': 29, 'label': 'Strong crosswinds', },
+  { 'id': 30, 'label': 'Visibility improved', },
+  { 'id': 31, 'label': 'Water pooling', },
+  { 'id': 32, 'label': 'Winter driving conditions', },
+]
 
-from apps.events.models import TrafficImpact
+from django.core.management.base import BaseCommand
+
+from apps.events.models import TrafficImpact, Condition
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
+        TrafficImpact.objects.all().delete()
+        Condition.objects.all().delete()
+
         for impact in impacts:
             TrafficImpact.objects.update_or_create(**impact, order=impact['id'])
+
+        for condition in conditions:
+            Condition.objects.update_or_create(**condition, order=condition['id'])
