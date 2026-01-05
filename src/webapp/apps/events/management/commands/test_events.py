@@ -16,7 +16,7 @@ NEW_EVENT = {
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        user = RIDEUser.objects.get(username='approver')
+        # user = RIDEUser.objects.get(username='approver')
 
 
         Event.objects.filter(id='DBC-100006').delete()

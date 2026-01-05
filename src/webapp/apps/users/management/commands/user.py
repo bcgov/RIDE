@@ -67,7 +67,7 @@ class Command(BaseCommand):
             user.is_superuser = False
 
         if options['details']:
-            groups = list(group.name for group in user.groups.all())
+            groups = [group.name for group in user.groups.all()]
             print(DETAILS.format(**vars(user), groups=groups))
 
         user.save()

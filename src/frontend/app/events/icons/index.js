@@ -243,8 +243,7 @@ function generateIconDictionary() {
                 }
                 if (closure === 'closure') { path.push(tc(closure)); }
               }
-              path.push(tc(status));
-              path.push(tc(state));
+              path.push(tc(status), tc(state));
               current[state] = path.join('');
             }
             current = parent;
