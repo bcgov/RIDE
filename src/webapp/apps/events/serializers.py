@@ -245,6 +245,7 @@ class EventSerializer(KeyMoveSerializer):
 
         impacts = data.get('impacts')
         severity = data.get('severity')
+        currently_major = False
 
         if self.instance is not None:
             if severity is None:
@@ -252,9 +253,11 @@ class EventSerializer(KeyMoveSerializer):
             if impacts is None:
                 impacts = self.instance.impacts
 
+            currently_major = self.instance.severity == 'Major'
+
         is_closure = len([el for el in (impacts or []) if el.get('closed', False)]) > 0
 
-        if severity == 'Minor' and not is_closure:
+        if severity == 'Minor' and not is_closure and not currently_major:
             return True
 
         request = self.context.get('request')
