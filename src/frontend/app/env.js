@@ -1,4 +1,3 @@
-// Values are injected at runtime into globalThis.__ENV__ by nginx-served /env.js.
 const runtimeEnv = (typeof globalThis !== 'undefined' && globalThis.__ENV__) || {};
 const getEnv = (key, fallback = '') => runtimeEnv[key] ?? import.meta.env?.[`VITE_${key}`] ?? fallback;
 

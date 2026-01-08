@@ -1,16 +1,15 @@
 #!/bin/sh
 set -e
 
-# This runs as an init container; outputs to shared volume for main container
-
-# Source the vault secrets
 . /vault/secrets/secrets.env
 
-# Generate runtime env.js in shared volume (consumed at runtime via window.__ENV__)
 SHARED_CONFIG="/shared-config"
-mkdir -p "$SHARED_CONFIG"
 
-cat > "${SHARED_CONFIG}/env.js" <<EOF
+echo "Copying /usr/share/nginx/html/ to ${SHARED_CONFIG}..."
+cp -r /usr/share/nginx/html/* "${SHARED_CONFIG}/"
+
+cat > "${SHARED_CONFIG}/config_snippet.html" <<EOF
+<script>
 window.__ENV__ = {
   API_HOST: '${VITE_API_HOST}',
   GEOCODER_HOST: '${VITE_GEOCODER_HOST}',
@@ -24,15 +23,21 @@ window.__ENV__ = {
   BRANCH: '${BRANCH}',
   ALLOW_LOCAL_ACCOUNTS: '${VITE_ALLOW_LOCAL_ACCOUNTS}',
 };
+</script>
 EOF
 
-echo "Generated env.js with runtime configuration"
+CONFIG_ONE_LINE=$(tr -d '\n' < "${SHARED_CONFIG}/config_snippet.html")
+TARGET_INDEX="${SHARED_CONFIG}/index.html"
 
-# Gzip the env.js file for nginx to serve compressed version
-gzip -9 -c "${SHARED_CONFIG}/env.js" > "${SHARED_CONFIG}/env.js.gz"
-echo "Created gzipped version: env.js.gz"
+echo "Injecting runtime config into ${TARGET_INDEX}..."
+sed -i "s~<head>~<head>${CONFIG_ONE_LINE}~" "$TARGET_INDEX"
 
-# Copy the default nginx config from the container image to shared volume
+echo "Re-compressing index.html..."
+rm "${TARGET_INDEX}.gz"
+gzip -9 -k "$TARGET_INDEX"
+
+rm "${SHARED_CONFIG}/config_snippet.html"
+
 cp /etc/nginx/conf.d/default.conf "${SHARED_CONFIG}/default.conf"
 
 # --- Handle Debug Route ---
@@ -48,5 +53,5 @@ fi
 echo "Setting the Environment for connecting to the backend to '$ENVIRONMENT'"
 sed -i "s~{ENVIRONMENT}~$ENVIRONMENT~g" "${SHARED_CONFIG}/default.conf"
 
-echo "Configuration files ready in ${SHARED_CONFIG}:"
-ls -la "${SHARED_CONFIG}/"
+echo "Done. Files in ${SHARED_CONFIG}:"
+ls -lh "${SHARED_CONFIG}"
