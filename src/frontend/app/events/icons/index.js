@@ -1,3 +1,5 @@
+import { Fill, Stroke, Style } from 'ol/style.js';
+
 import incidentMajorActiveStatic from './majorincident-default-static.svg';
 import incidentMajorActiveHover from './majorincident-default-hover.svg';
 import incidentMajorActiveActive from './majorincident-default-active.svg';
@@ -200,7 +202,7 @@ import './icons.scss';
  * For chainups and road conditions, severity, tense and closure are removed.
  */
 
-function tc (text) {
+function tc(text) {
   return text[0].toUpperCase() + text.substr(1);
 }
 
@@ -274,7 +276,165 @@ function generateIconDictionary() {
   }
   return JSON.stringify(icons).replaceAll('"', '');
 }
-globalThis.generateIconDictionary = generateIconDictionary;
+
+const MAJOR = {
+  static: {
+    stroke: new Stroke({
+      color: 'rgba(204, 0, 0, 0.5)',
+      width: 8,
+    }),
+  },
+  hover: {
+    stroke: new Stroke({
+      color: 'rgba(204, 0, 0, 0.8)',
+      width: 10,
+      zIndex: 900,
+    }),
+  },
+  active: {
+    stroke: new Stroke({
+      color: 'rgba(204, 0, 0, 0.65)',
+      width: 10,
+    }),
+  }
+};
+
+const CLEARING = {
+  static: {
+    stroke: new Stroke({
+      color: 'rgba(43, 136, 64, 0.5)',
+      width: 8,
+    }),
+  },
+  hover: {
+    stroke: new Stroke({
+      color: 'rgba(43, 136, 64, 0.75)',
+      width: 10,
+      zIndex: 300,
+    }),
+  },
+  active: {
+    stroke: new Stroke({
+      color: 'rgba(43, 136, 64, 0.9)',
+      width: 10,
+    }),
+  }
+};
+
+const PENDING = {
+  static: {
+    stroke: new Stroke({
+      color: 'rgba(52, 112, 177, 0.5)',
+      width: 8,
+    }),
+  },
+  hover: {
+    stroke: new Stroke({
+      color: 'rgba(52, 112, 177, 0.75)',
+      width: 10,
+      zIndex: 300,
+    }),
+  },
+  active: {
+    stroke: new Stroke({
+      color: 'rgba(52, 112, 177, 0.9)',
+      width: 10,
+    }),
+    zIndex: 10,
+  }
+};
+
+const INACTIVE = {
+  static: {
+    stroke: new Stroke({
+      color: 'rgba(96, 94, 92, 0.5)',
+      width: 8,
+    }),
+  },
+  hover: {
+    stroke: new Stroke({
+      color: 'rgba(96, 94, 92, 0.75)',
+      width: 10,
+      zIndex: 300,
+    }),
+  },
+  active: {
+    stroke: new Stroke({
+      color: 'rgba(96, 94, 92, 0.9)',
+      width: 10,
+    }),
+    zIndex: 10,
+  }
+};
+
+const MINOR = {
+  static: {
+    stroke: new Stroke({
+      color: 'rgba(232 ,192 ,97, 0.5)',
+      width: 8,
+    }),
+  },
+  hover: {
+    stroke: new Stroke({
+      color: 'rgba(232 ,192 ,97, 0.75)',
+      width: 10,
+      zIndex: 300,
+    }),
+  },
+  active: {
+    stroke: new Stroke({
+      color: 'rgba(252 ,186 ,25, 0.9)',
+      width: 10,
+    }),
+    zIndex: 10,
+  }
+};
+
+const strokes = {
+  major: {
+    active: MAJOR,
+    clearing: CLEARING,
+    pending: PENDING,
+    inactive: INACTIVE,
+  },
+  minor: {
+    active: MINOR,
+    clearing: CLEARING,
+    inactive: INACTIVE,
+  },
+  roadConditions: {
+    static: {
+      stroke: new Stroke({
+        color: 'rgba(100, 74, 10, 0.5)',
+        width: 2,
+        lineDash: [6, 3],
+        lineCap: 'butt',
+        lineJoin: 'miter',
+      }),
+      fill: new Fill({ color: 'rgba(255,181,0,0.1)' }),
+    },
+    hover: {
+      stroke: new Stroke({
+        color: 'rgba(100, 74, 10, 0.75)',
+        width: 3,
+        lineDash: [6, 3],
+        lineCap: 'butt',
+        lineJoin: 'miter',
+      }),
+      fill: new Fill({ color: 'rgba(255, 181, 0, 0.35)' }),
+    },
+    active: {
+      stroke: new Stroke({
+        color: 'rgba(100, 74, 10, 1)',
+        width: 3,
+        lineDash: [6, 3],
+        lineCap: 'butt',
+        lineJoin: 'miter',
+      }),
+      fill: new Fill({ color: 'rgba(255, 181, 0, 0.25)' }),
+    },
+  },
+}
 
 const icons = {
   incident: {
@@ -540,9 +700,10 @@ const icons = {
     },
   },
 };
-globalThis.icons = icons;
 export default icons;
 
+// TEMPORARY: fix for lack of "pending" design for icons.  Dynamically add icons
+// for pending state by copying major active events and replacing colors
 let curr, prev;
 ['incident', 'planned'].forEach((type) => {
   const prev = curr;
@@ -618,24 +779,25 @@ export function getConditionIcon(condition) {
     31: faWater,        // Water pooling
     32: faSnowflake,    // Winter driving conditions
   };
-  
+
   return iconMap[id] || faIcicles;
 }
 
 export function getPlainIcon(event, state='static') {
-  return getIcon(event, state, false);
+  return getIconAndStroke(event, state, false)[0];
 }
 
-export function getIcon(event, state='static', includePending=true) {
+export function getIconAndStroke(event, state='static', includePending=true) {
   let type, status, severity, tense, closure;
   try {
     type = event.type.toLowerCase().replaceAll(/\s/g, '').replaceAll(/_/g, '') || 'incident';
-    if (type === 'planned event') { type = 'planned' ; }
+    if (type === 'plannedevent') { type = 'planned' ; }
     status = event.status.toLowerCase() || 'active';
     if (event.approved === false && includePending) { status = 'pending'; }
+    severity = event.details.severity.toLowerCase() || 'minor';
+    if (type === 'roadcondition') { severity = 'roadConditions'; }
 
     if (['incident', 'planned'].includes(type)) {
-      severity = event.details.severity.toLowerCase() || 'minor';
 
       if (status === 'inactive') { // TODO: cleared determine by time of last inactivation
         const lastUpdated = new Date(event.last_updated);
@@ -644,12 +806,18 @@ export function getIcon(event, state='static', includePending=true) {
         }
       }
 
-      // TOOD: determine future tense once schedules are implemented
       tense = type === 'incident' ? 'present' : 'future';
       closure = event.is_closure ? 'closure' : 'open';
-      return icons[type][severity][tense][closure][status][state];
-    } else {
-      return icons[type][status][state];
+
+      return [
+        icons[type][severity][tense][closure][status][state],
+        strokes[severity][status][state],
+      ];
+    } else { // road conditions, chain ups
+      return [
+        icons[type][status][state],
+        strokes[severity][state],
+      ];
     }
   } catch (err) {
     console.log(err);

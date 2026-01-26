@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useContext, useEffect, useState, useRef } from 'react';
 
 import * as turf from '@turf/turf';
@@ -7,39 +6,37 @@ import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { linear } from 'ol/easing';
-import { Point, LineString } from 'ol/geom';
+import { Point, LineString, GeometryCollection, MultiPolygon, Polygon } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
 
 import { MapContext } from '../../contexts';
 
-import { ll2g, selectFeature } from './helpers.js';
+import { ll2g, selectFeature, pointerMove } from './helpers.js';
 import RideFeature, { PinFeature } from './feature.js';
 import ContextMenu from '../../events/ContextMenu';
 import { getInitialEvent } from '../../events/forms';
 
 import { API_HOST } from '../../env.js';
-import { getIcon } from '../../events/icons';
+import { getIconAndStroke } from '../../events/icons';
 import { endHandler } from './PinLayer';
 import { patch } from '../../shared/helpers';
 
 
 export function addEvent(event, map, dispatch) {
-  // TODO: remove earlier feature if exists
-  const source = map.get('majorEvents').getSource();
+  const source = map.get('events').getSource();
   const existing = source.get(event.id);
 
   if (existing) {
     if (event.version <= existing.get('version')) { return; }
 
     source.unset(event.id, true);
-    if (existing.paired) { source.removeFeature(existing.paired); }
     source.removeFeature(existing);
   }
 
   let coords = event.location.start.coords;
   if (Array.isArray(coords[0])) { coords = coords[0]; }
   const g = event.geometry.geometries;
-  let start, end, mid, route;
+  let start, mid, route;
   g.forEach((geo) => {
     if (geo.type === 'Point') {
       if (!start) {
@@ -53,83 +50,63 @@ export function addEvent(event, map, dispatch) {
 
   const styles = {};
   ['static', 'hover', 'active'].forEach((state) => {
-    styles[state] = new Style({ image: new Icon({ src: getIcon(event, state) }) });
+    const [icon, stroke] = getIconAndStroke(event, state);
+    styles[state] = [new Style({ image: new Icon({ src: icon }), ...stroke, })];
   });
 
-  const pointFeature = new RideFeature({
-    feat2: styles,
+  const feature = new RideFeature({
+    styles,
     type: 'event',
     raw: structuredClone(event),
     version: event.version,
-    geometry: new Point(mid || start),
+    geometry: new GeometryCollection([new Point(mid || start)]),
   });
-  pointFeature.pointFeature = pointFeature;
-  pointFeature.setId(event.id);
+  feature.setId(event.id);
 
-  if (pointFeature.getGeometry().getCoordinates()[0] > -1000) {
-    pointFeature.getGeometry().transform('EPSG:4326', map.getView().getProjection().getCode());
+  if (feature.getGeometry().getGeometries()[0].getCoordinates()[0] > -1000) {
+    feature.getGeometry().getGeometries()[0].transform('EPSG:4326', map.getView().getProjection().getCode());
   }
+  feature.set('visible', getVisibility(event, map.get('visibleLayers')));
 
   if (route) {
-    route = new RideFeature({
-      feat: getStyle(event, true),
-      geometry: new LineString(route.geometry.coordinates.map((cc) => ll2g(cc))),
-    });
-    source.addFeature(route);
-    pointFeature.paired = route;
-    route.paired = pointFeature;
-    route.pointFeature = pointFeature;
+    const gg = feature.getGeometry().getGeometries();
+    if (event.type === 'ROAD_CONDITION') {
+      const poly = turf.buffer(route, 2000, { units: 'meters'});
+      gg.push(new Polygon([poly.geometry.coordinates[0].map((latLng) => ll2g(latLng))]));
+    } else {
+      gg.push(new LineString(route.geometry.coordinates.map((latLng) => ll2g(latLng))));
+    }
+    feature.getGeometry().setGeometries(gg);
   }
-  source.addFeature(pointFeature);
-  source.set(event.id, pointFeature, true);
+  source.set(event.id, feature, true);
+  source.addFeature(feature);
 
   if (map.selectedFeature && map.selectedFeature.getId() === event.id) {
     dispatch({ type: 'update event', value: event})
   }
 }
 
-function getStyle(event, isRoute=false) {
-  const path = ['eventStyles'];
-  if (isRoute) {
-    path.push('segments');
-    if (event.is_closure) {
-      path.push('closures');
-    } else if (event.details.severity === 'Major') {
-      path.push('majorEvents');
-    } else if (event.details.severity === 'Minor') {
-      path.push('minorEvents');
-    }
-  } else if (event.is_closure) {
-    path.push('closures');
-  } else if (event.details.severity === 'Major') {
-    path.push('major_generic_delays');
-  } else if (event.details.severity === 'Minor') {
-    path.push('generic_delays');
-  }
-  return path.join('.');
-}
-
-async function updateEvents(map, dispatch) {
+async function updateEvents(map, dispatch, layerStyle) {
   fetch(`${API_HOST}/api/events`, {
     headers: { 'Accept': 'application/json' },
     credentials: "include",
   }).then((response) => response.json())
     .then((data) => {
-      if (!map.get('majorEvents')) {
+      if (!map.get('events')) {
         const layer = new VectorLayer({
           classname: 'events',
           visible: true,
           source: new VectorSource({ format: new GeoJSON() }),
-          style: () => null
+          style: layerStyle,
+          renderBuffer: 30,
         });
         layer.listenForHover = true;
         layer.listenForClicks = true;
         map.addLayer(layer);
-        map.set('majorEvents', layer);
+        map.set('events', layer);
       }
 
-      const source = map.get('majorEvents').getSource();
-      globalThis.s = source; globalThis.vl = map.get('majorEvents');
+      const source = map.get('events').getSource();
 
       const eventIds = {};
       data.forEach((event) => {
@@ -143,14 +120,42 @@ async function updateEvents(map, dispatch) {
         if (!eventIds[key]) {
           const existing = source.get(key);
           source.unset(key, true);
-          if (existing.paired) { source.removeFeature(existing.paired); }
           source.removeFeature(existing);
         }
       });
     });
 }
 
-export default function Layer({ event, dispatch, startRef, endRef }) {
+
+function getVisibility(event, visibleLayers) {
+  const now = new Date()
+  const SEVEN_DAYS_AGO = now - 1000 * 60 * 60 * 24 * 7;
+  const FIFTEEN_MINUTES_AGO = now - 1000 * 60 * 15;
+
+  const last_inactivated = new Date(event.last_inactivated);
+  if (event.status === 'Active' || last_inactivated > FIFTEEN_MINUTES_AGO) {
+    if (event.is_closure) {
+      return visibleLayers.closures;
+    } else if (new Date(event.timing.startTime) > now) {
+      return visibleLayers.future;
+    } else if (event.type === 'Incident' || event.type === 'Planned event') {
+      return visibleLayers[event.details.severity.toLowerCase()];
+    } else if (event.type === 'ROAD_CONDITION') {
+      return visibleLayers.roadConditions;
+    }
+  } else if (event.status === 'Inactive') {
+    return visibleLayers.cleared7 && new Date(event.last_inactivated) > SEVEN_DAYS_AGO;
+  }
+  return true;
+}
+
+function layerStyle(feature, resolution) {
+  if (!feature.get('visible')) { return null; }
+  if (feature.get('selected')) { return feature.active; }
+  return feature.get('hovered') ? feature.hover : feature.normal;
+}
+
+export default function Layer({ visibleLayers, event, dispatch }) {
 
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
@@ -185,8 +190,8 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
             map.start = new PinFeature({
               style: 'start',
               geometry: new Point(coordinate),
-              ref: startRef,
               action: 'set start',
+              isVisible: true,
             });
             map.pins.getSource().addFeature(map.start);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -201,8 +206,8 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
             map.end = new PinFeature({
               style: 'end',
               geometry: new Point(coordinate),
-              ref: endRef,
               action: 'set end',
+              isVisible: true,
             });
             map.pins.getSource().addFeature(map.end);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -246,9 +251,9 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
                 `${API_HOST}/api/events/${event.id}`,
                 { status: 'Inactive' },
               ).then((event) => {
-                  feature.set('raw', event);
-                  dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
-                });
+                feature.set('raw', event);
+                dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
+              });
             }
           });
         } else if (feature.get('raw').approved) {
@@ -295,8 +300,16 @@ export default function Layer({ event, dispatch, startRef, endRef }) {
   useEffect(() => {
     if (!map) { return; }
     map.on('contextmenu', contextHandler);
+    map.on('propertychange', (e) => {
+      if (e.key !== 'visibleLayers') { return; }
+      const visibility = map.get('visibleLayers');
+      map.get('events').getSource().getFeatures().forEach((feature) => {
+        feature.set('visible', getVisibility(feature.get('raw'), visibility));
+      });
+    });
+    map.on('pointermove', pointerMove);
     if (!fetchInterval) {
-      setFetchInterval(setInterval(() => updateEvents(map, dispatch), 1000));
+      setFetchInterval(setInterval(() => updateEvents(map, dispatch, layerStyle), 1000));
     }
   }, [map]);
 

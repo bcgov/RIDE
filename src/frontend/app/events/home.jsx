@@ -1,24 +1,19 @@
 // React
-import { useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 // Navigation
 import { useNavigate } from 'react-router';
 
 // OpenLayers
-import { Point, LineString, Polygon } from 'ol/geom';
-import { circular } from 'ol/geom/Polygon';
-import { transform } from 'ol/proj';
 import { boundingExtent, getCenter } from 'ol/extent';
 
 // Internal imports
 import Map from '../components/Map';
 import Layer from '../components/Map/Layer';
+import Layers, { allLayers } from './Layers';
 import PinLayer from '../components/Map/PinLayer';
 import { AuthContext, MapContext } from '../contexts';
-import {
-  getCoords, getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, selectFeature
-} from '../components/Map/helpers.js';
-import RideFeature from '../components/Map/feature';
+import { ll2g, selectFeature } from '../components/Map/helpers.js';
 
 import EventForm, { eventReducer, getInitialEvent } from './forms';
 import Preview from './Preview';
@@ -34,6 +29,12 @@ export function meta() {
   ];
 }
 
+const layersInitial = () => {
+  const stored = localStorage.getItem('visibleLayers');
+  if (stored) { return JSON.parse(stored); }
+  return allLayers;
+}
+
 export default function Home() {
   /* Setup */
   // Navigation
@@ -45,13 +46,24 @@ export default function Home() {
 
   // Refs
   const mapRef = useRef();
-  const startRef = useRef();
-  const endRef = useRef();
+
+  const layersReducer = (visibleLayers, action) => {
+    if (action.layer !== visibleLayers.layer) {
+      const updated = { ...visibleLayers, [action.layer]: action.value };
+      localStorage.setItem("visibleLayers", JSON.stringify(updated));
+      if (mapRef.current) {
+        mapRef.current.set('visibleLayers', updated);
+      }
+      return updated;
+    }
+    return visibleLayers;
+  }
 
   // States
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
+  const [ visibleLayers, toggle ] = useReducer(layersReducer, layersInitial());
   const [ message, setMessage ] = useState('');
 
   // Effects
@@ -69,7 +81,6 @@ export default function Home() {
     if (!map || !coords ) { return; }
     if (!Array.isArray(coords[0])) { coords = [coords]; }
     coords = coords.filter(Boolean) // filter undefined elements, such as if end isn't set
-    // FIXME: test if lat/long, convert if so
     coords = coords.map((pair) => pair[0] > -180 ? ll2g(pair): pair);
     const extent = boundingExtent(coords);
 
@@ -102,7 +113,7 @@ export default function Home() {
 
     if (feature?.styleState) { // new selection
       selectFeature(e.map, feature);
-      const raw = feature.pointFeature.get('raw');
+      const raw = feature.get('raw');
       dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false });
     } else if (e.map.selectedFeature) { // deselect existing selection
       selectFeature(e.map, null);
@@ -112,6 +123,9 @@ export default function Home() {
   }
 
   mapRef.current = map;
+  if (mapRef.current && !mapRef.current.get('visibleLayers')) { mapRef.current.set('visibleLayers', visibleLayers); }
+
+  const showLayers = !(event.showPreview && event.location.start.name);
 
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
@@ -132,8 +146,9 @@ export default function Home() {
 
       <MapContext.Provider value={{ map, setMap }}>
         <Map dispatch={dispatch} event={event} clickHandler={clickHandler}>
-          <PinLayer event={event} dispatch={dispatch} startRef={startRef} endRef={endRef} />
-          <Layer name='events' event={event} dispatch={dispatch} startRef={startRef} endRef={endRef} />
+          <PinLayer event={event} dispatch={dispatch} />
+          <Layer visibleLayers={visibleLayers} event={event} dispatch={dispatch} />
+          { showLayers && <Layers visibleLayers={visibleLayers} dispatch={toggle} /> }
         </Map>
       </MapContext.Provider>
 

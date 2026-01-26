@@ -7,12 +7,10 @@ import VectorSource from 'ol/source/Vector';
 import { Point, LineString, Polygon, Circle } from 'ol/geom';
 import { circular } from 'ol/geom/Polygon';
 import * as ol from 'ol';
-import { boundingExtent, getCenter } from 'ol/extent';
-import { linear } from 'ol/easing';
 
 import { MapContext } from '../../contexts';
 import {
-  getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, Drag
+  getDRA, getNearby, fetchRoute, ll2g, g2ll, getSnapped, Drag, pointerMove,
 } from './helpers.js';
 import ContextMenu from '../../events/ContextMenu';
 
@@ -23,11 +21,17 @@ globalThis.circular = circular;
 
 import { PinFeature } from './feature.js';
 
+function layerStyle(feature, resolution) {
+  if (!feature.get('visible')) { return null; }
+  if (feature.get('selected')) { return feature.active; }
+  return feature.get('hovered') ? feature.hover : feature.normal;
+}
+
 const layer = new VectorLayer({
   classname: 'pins',
   visible: true,
   source: new VectorSource({ format: new GeoJSON() }),
-  style: () => null
+  style: layerStyle,
 });
 layer.listenForClicks = true;
 layer.listenForContext = true;
@@ -118,7 +122,7 @@ export const updateRoute = async (map) => {
 }
 
 
-export default function PinLayer({ event, dispatch, startRef, endRef }) {
+export default function PinLayer({ event, dispatch }) {
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
   const menuRef = useRef();
@@ -133,14 +137,16 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.pins = layer;
       map.set('pins', layer);
       map.on('contextmenu', contextHandler);
+      map.on('pointermove', pointerMove);
       map.getInteractions().extend([
         new Drag({ endHandler, menuRef, resetContextMenu: () => setContextMenu([]), dispatch })
       ]);
-      map.route = new PinFeature({ style: 'route', geometry: new LineString([])})
+      map.route = new PinFeature({ style: 'route', geometry: new LineString([]), isVisible: true})
       layer.getSource().addFeature(map.route);
       map.location = new PinFeature({
         style: 'location',
         geometry: new Point([]),
+        isVisible: true
       });
       map.location.noHover = true;
       map.location.noSelect = true;
@@ -158,7 +164,7 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
         map.start.getGeometry().setCoordinates(coords);
       } else {
         map.start = new PinFeature({
-          style: 'start', geometry: new Point(coords), ref: startRef, action: 'set start',
+          style: 'start', geometry: new Point(coords), action: 'set start', isVisible: true
         });
         map.start.dra = { properties: event.location.start }
         map.pins.getSource().addFeature(map.start);
@@ -168,13 +174,14 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.start = null;
     }
 
-    if (event.location.end?.name) { // end location but no pin
+    if (event.location.end?.name && event.showForm) { // end location but no pin
       const coords = ll2g(event.location.end.coords);
       if (map.end) {
         map.end.getGeometry().setCoordinates(coords);
       } else {
         map.end = new PinFeature({
-          style: 'end', geometry: new Point(coords), ref: endRef, action: 'set end',
+          style: 'end', geometry: new Point(coords), action: 'set end', isVisible: true,
+
         });
         map.end.dra = { properties: event.location.end }
         map.pins.getSource().addFeature(map.end);
@@ -200,13 +207,10 @@ export default function PinLayer({ event, dispatch, startRef, endRef }) {
       map.start = null;
 
       if (map.end) {
-        map.end.resetStyle('start');
-        map.end.ref = startRef;
-        endRef.current.style.visibility = 'hidden';
+        map.end.changeStyle('start');
         map.end.action = 'set start';
         map.start = map.end;
         map.end = null;
-        startRef.current.style.visibility = 'unset';
         dispatch({
           type: 'swap location',
           source: 'end',

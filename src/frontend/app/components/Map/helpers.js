@@ -5,7 +5,6 @@ import Map from 'ol/Map';
 import MVT from 'ol/format/MVT.js';
 import { ScaleLine } from 'ol/control.js';
 import { circular } from 'ol/geom/Polygon';
-import { Point, LineString, MultiLineString } from 'ol/geom';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
 import { fromLonLat, getTransform, transform, transformExtent } from 'ol/proj';
@@ -15,11 +14,9 @@ import proj4 from 'proj4';
 import * as turf from '@turf/turf';
 
 import overrides from './overrides.js';
-import RideFeature from './feature.js';
 import { BASE_MAP_URL, MAP_STYLE_URL, ROUTER_CLIENT_ID } from '../../env.js';
-import { get, post } from '../../shared/helpers'
+import { post } from '../../shared/helpers'
 
-import { dotStyle, dotStyle2, lineStyle } from './styles.js';
 
 proj4.defs([
   ["EPSG:3005", "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"],
@@ -32,29 +29,27 @@ proj4.defs([
 
 export const MapContext = createContext();
 
-export function pointerMove(evt) {
-  const feature = evt.map.getFeaturesAtPixel(evt.pixel, {
+export function pointerMove(e) {
+  const feature = e.map.getFeaturesAtPixel(e.pixel, {
     layerFilter: (layer) => layer.listenForHover,
   })[0];
   if (feature?.noHover) { return; }
   if (!feature?.styleState) {
-    if (evt.map.hoveredFeature) {
-      evt.map.hoveredFeature.hovered = false;
-      evt.map.hoveredFeature.updateStyle();
-      evt.map.hoveredFeature = null;
+    if (e.map.hoveredFeature) {
+      e.map.hoveredFeature.set('hovered', false);
+      e.map.hoveredFeature = null;
     }
     return;
   }
-  if (evt.map.hoveredFeature && evt.map.hoveredFeature !== feature) {
-    evt.map.hoveredFeature.hovered = false;
-    evt.map.hoveredFeature.updateStyle();
+  if (e.map.hoveredFeature && e.map.hoveredFeature !== feature) {
+    e.map.hoveredFeature.set('hovered', false);
   }
-  evt.map.hoveredFeature = feature;
-  if (!feature.hovered) {
-    feature.hovered = true;
-    feature.updateStyle();
+  e.map.hoveredFeature = feature;
+  if (!feature.get('hovered')) {
+    feature.set('hovered', true);
   }
 }
+
 
 /* This clickhandler is solely for toggling selection state on existing map
  * elements.  Hover is handled in the pointerMove handler.
@@ -80,15 +75,13 @@ export function click(evt, dispatch) {
 
 export function selectFeature(map, feature) {
   if (map.selectedFeature && map.selectedFeature !== feature) {
-    map.selectedFeature.selected = false;
-    map.selectedFeature.updateStyle();
+    map.selectedFeature.set('selected', false);
   }
 
   map.selectedFeature = feature;
 
   if (feature) {
-    feature.selected = true;
-    feature.updateStyle();
+    feature.set('selected', true);
   }
 }
 
@@ -238,10 +231,6 @@ function handleDownEvent(evt) {
     this.coordinate_ = evt.coordinate;
     feature.getGeometry().setCoordinates(evt.coordinate);
     this.feature_ = feature;
-    if (feature.ref.current) {
-      feature.ref.current.style.visibility = 'hidden';
-      feature.ref.current.querySelectorAll('.near').forEach((el) => el.style.display = 'none');
-    }
   }
 
   return !!feature;
@@ -303,10 +292,6 @@ export function getCoords(map, feature) {
     map.getView().getProjection().getCode(),
     'EPSG:4326'
   );
-}
-
-function getPoint(coords) {
-  return new RideFeature({ geometry: new Point(coords)})
 }
 
 export const g2ll = getTransform('EPSG:3857', 'EPSG:4326'); globalThis.g2ll = g2ll;
@@ -611,3 +596,14 @@ class CustomError extends Error {
     this.stack = (new Error()).stack; // Generate stack trace
   }
 }
+
+// take an object and a dotted path and return the nested value at that path
+export function get(obj, path, defaultValue=undefined) {
+  const travel = regexp =>
+    String.prototype.split
+      .call(path, regexp)
+      .filter(Boolean)
+      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+  const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+  return result === undefined || result === obj ? defaultValue : result;
+};

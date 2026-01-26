@@ -1,14 +1,11 @@
-import { createContext, useContext, useCallback, useEffect, useRef, useState } from 'react';
+import { useContext, useCallback, useEffect, useRef } from 'react';
 import { components } from 'react-select';
 import AsyncSelect from 'react-select/async';
 
-import { transform } from 'ol/proj';
-import { Point } from 'ol/geom';
 
 import { MapContext } from '../../contexts';
-import { click, createMap, ll2g, pointerMove } from './helpers';
+import { createMap, ll2g } from './helpers';
 import { get } from '../../shared/helpers';
-import { PinFeature } from './feature';
 
 import { GEOCODER_CLIENT_ID, GEOCODER_HOST } from '../../env';
 
@@ -67,12 +64,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
 
     const map = createMap();
     map.setTarget(elementRef.current);
-    map.on('pointermove', pointerMove);
     map.on('click', click);
-    map.on('movestart', (e) => {
-      if (e.map.start?.ref?.current) { e.map.start.ref.current.style.visibility = 'hidden'; }
-      if (e.map.end?.ref?.current) { e.map.end.ref.current.style.visibility = 'hidden'; }
-    })
     setMap(map);
   }, []);
   globalThis.map = map;

@@ -25,7 +25,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
   const start = event.location.start || {};
   const end = event.location.end || {};
   const isLinear = !!end.name;
-  let startNearbies = start.nearby.filter((loc) => loc.include).map((loc) => loc.phrase);
+  let startNearbies = start.nearby?.filter((loc) => loc.include).map((loc) => loc.phrase);
   if (start.other && start.useOther) { startNearbies.push(start.other); }
   let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase);
   if (end.other && end.useOther) { endNearbies.push(end.other); }
@@ -129,7 +129,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
             }
           </> :
           <>
-            { startNearbies.map((loc, ii) => <p key={`loc ${ii}`}>{loc}</p>) }
+            { startNearbies?.map((loc, ii) => <p key={`loc ${ii}`}>{loc}</p>) }
           </>
         }
 
@@ -246,12 +246,12 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
         <div className="timing">
           { !isNaN(lastUpdated) &&
             <div className="time">
-              <strong>Last updated</strong><br />
+              <strong>{event?.status === 'Inactive' ? 'Cleared' : 'Last updated'}</strong><br />
               {lastUpdated.toLocaleString()}
             </div>
           }
 
-          { (event.type === 'Incident' || event.type === 'ROAD_CONDITION') &&
+          { (event.type === 'Incident' || event.type === 'ROAD_CONDITION') && event?.status !== 'Inactive' &&
             <div className="time">
               <strong>Next update</strong><br />
               {!isNaN(nextUpdate) && nextUpdate.toLocaleString()}
