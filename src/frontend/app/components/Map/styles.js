@@ -54,30 +54,6 @@ export const lineStyle = new Style({
   })
 });
 
-const startTextStyle = new Text({
-  font: '9pt Arial',
-  fill: new Fill({ color: '#fff' }),
-  stroke: new Stroke({ color: '#000', width: 2, }),
-  backgroundFill: new Fill({ color: [0, 102, 51, 0.6 ] }),
-  padding: [4, 4, 4, 4],
-  textAlign: 'left',
-  textBaseline: 'top',
-  offsetX: 24,
-  offsetY: -20,
-});
-
-const endTextStyle = new Text({
-  font: '9pt Arial',
-  fill: new Fill({ color: '#fff' }),
-  stroke: new Stroke({ color: '#000', width: 2, }),
-  backgroundFill: new Fill({ color: [102, 51, 0, 0.7 ] }),
-  padding: [4, 4, 4, 4],
-  textAlign: 'left',
-  textBaseline: 'top',
-  offsetX: 24,
-  offsetY: -20,
-});
-
 export const pinStartNormalStyle = new Style({
   image: new Icon({
     src:'/pin-start.svg',
@@ -86,7 +62,6 @@ export const pinStartNormalStyle = new Style({
     opacity: 0.7,
     displacement: [0, 16],
   }),
-  text: startTextStyle,
 });
 
 export const pinStartHoverStyle = new Style({
@@ -97,7 +72,6 @@ export const pinStartHoverStyle = new Style({
     opacity: 1,
     displacement: [0, 16],
   }),
-  text: startTextStyle,
 });
 
 export const pinStartActiveStyle = new Style({
@@ -108,7 +82,6 @@ export const pinStartActiveStyle = new Style({
     opacity: 0.9,
     displacement: [0, 16],
   }),
-  text: startTextStyle,
 });
 
 export const pinLocationNormalStyle = new Style({
@@ -119,7 +92,6 @@ export const pinLocationNormalStyle = new Style({
     opacity: 0.7,
     displacement: [0, 16],
   }),
-  text: startTextStyle,
 });
 
 export const pinLocationHoverStyle = new Style({
@@ -130,7 +102,6 @@ export const pinLocationHoverStyle = new Style({
     opacity: 1,
     displacement: [0, 16],
   }),
-  text: startTextStyle,
 });
 
 export const pinLocationActiveStyle = new Style({
@@ -141,7 +112,6 @@ export const pinLocationActiveStyle = new Style({
     opacity: 0.9,
     displacement: [0, 16],
   }),
-  text: startTextStyle,
 });
 
 export const pinEndNormalStyle = new Style({
@@ -152,7 +122,6 @@ export const pinEndNormalStyle = new Style({
     opacity: 0.7,
     displacement: [0, 16],
   }),
-  text: endTextStyle,
 });
 
 export const pinEndHoverStyle = new Style({
@@ -163,7 +132,6 @@ export const pinEndHoverStyle = new Style({
     opacity: 1,
     displacement: [0, 16],
   }),
-  text: endTextStyle,
 });
 
 export const pinEndActiveStyle = new Style({
@@ -174,7 +142,6 @@ export const pinEndActiveStyle = new Style({
     opacity: 0.9,
     displacement: [0, 16],
   }),
-  text: endTextStyle,
 });
 
 export const routeNormalStyle = new Style({

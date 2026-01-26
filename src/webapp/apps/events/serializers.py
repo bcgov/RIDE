@@ -228,6 +228,9 @@ class EventSerializer(KeyMoveSerializer):
         # way in through key movement and to_internal_value()
         del obj['meta']
 
+        if obj['type'] == 'ROAD_CONDITION':
+            obj['location']['start']['name'] = instance.segment.name
+
         return obj
 
     def is_automatically_approved(self, data):
@@ -333,6 +336,7 @@ class RcSerializer(EventSerializer):
         # Convert condition IDs to labels for output
         if 'conditions' in obj and obj['conditions']:
             obj['conditions'] = list(Condition.objects.filter(id__in=obj['conditions']).values_list('label', flat=True))
+
         return obj
 
     class Meta:

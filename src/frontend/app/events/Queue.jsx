@@ -39,7 +39,7 @@ function Pending({ event, dispatch, goToFunc, map }) {
       onClick={() => {
         goToFunc(event.location.start.coords)
         dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
-        selectFeature(map, map.get('majorEvents').getSource().get(event.id));
+        selectFeature(map, map.get('events').getSource().get(event.id));
       }}
     >
       <header>{request}&nbsp;requested</header>
