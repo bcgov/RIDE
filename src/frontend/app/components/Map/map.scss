@@ -39,8 +39,8 @@
 
   .geosearch {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 20px;
+    left: 20px;
     z-index: 1;
     width: 300px;
 
@@ -48,6 +48,22 @@
       border: solid 1px grey;
       border-radius: 4px;
       background-color: white;
+    }
+  }
+
+  .toggle {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1;
+    background: white;
+    width: 100px;
+    height: 100px;
+    padding: 10px;
+    border: solid 1px grey;
+    border-radius: 4px;
+    img {
+      border: solid 1px black;
     }
   }
 }

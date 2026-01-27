@@ -1,4 +1,4 @@
-import { useContext, useCallback, useEffect, useRef } from 'react';
+import { useContext, useCallback, useEffect, useRef, useState } from 'react';
 import { components } from 'react-select';
 import AsyncSelect from 'react-select/async';
 
@@ -53,6 +53,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
   eventRef.current = event;
 
   const { map, setMap } = useContext(MapContext);
+  const [ base, setBase ] = useState('vector')
 
   const click = useCallback((e) => {
     clickHandler(e, eventRef.current);
@@ -65,9 +66,23 @@ export default function Map({ children, dispatch, event, clickHandler }) {
     const map = createMap();
     map.setTarget(elementRef.current);
     map.on('click', click);
+    map.on('propertychange', (e) => {
+      if (e.key !== 'base') { return; }
+      if (e.target.get('base') === 'vector') {
+        map.get('vector').set('visible', true);
+        map.get('aerial').set('visible', false);
+        map.get('roads').set('visible', false);
+      } else {
+        map.get('vector').set('visible', false);
+        map.get('aerial').set('visible', true);
+        map.get('roads').set('visible', true);
+      }
+    })
     setMap(map);
   }, []);
   globalThis.map = map;
+
+  const otherBase = base === 'vector' ? 'aerial' : 'vector';
 
   return (
     <div ref={elementRef} className="map-container">
@@ -93,6 +108,14 @@ export default function Map({ children, dispatch, event, clickHandler }) {
           }}
         />
       </div>
+      <button
+        type="button"
+        className="toggle"
+        onClick={() => {
+          map.set('base', otherBase);
+          setBase(otherBase);
+        }}
+      ><img src={`/images/${otherBase}.png`} alt='${otherBase}' /></button>
       {children}
     </div>
   );
