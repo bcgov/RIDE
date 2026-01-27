@@ -6,9 +6,11 @@ import MVT from 'ol/format/MVT.js';
 import { ScaleLine } from 'ol/control.js';
 import { circular } from 'ol/geom/Polygon';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
+import TileLayer from 'ol/layer/Tile.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
 import { fromLonLat, getTransform, transform, transformExtent } from 'ol/proj';
 import VectorTileSource from 'ol/source/VectorTile.js';
+import XYZ from 'ol/source/XYZ.js';
 import View from 'ol/View';
 import proj4 from 'proj4';
 import * as turf from '@turf/turf';
@@ -102,6 +104,13 @@ export function createMap() {
     displayCategory: 'basemap',
   });
 
+  // road layer
+  const roadLayer = new VectorTileLayer({
+    declutter: true,
+    source: tileSource,
+    style: function() { return null; }, // avoids displaying blueline default style before style loads
+  });
+
   // highway symbol layer
   const symbolLayer = new VectorTileLayer({
     declutter: true,
@@ -147,21 +156,41 @@ export function createMap() {
         layer.id.startsWith('TRANSPORTATION/DRA/Road Names')
       )),
     };
-
+    const roadsStyle = {
+      ...glStyle,
+      layers: glStyle.layers.filter((layer) => (
+        layer.id.startsWith('TRANSPORTATION') ||
+        (layer.id.startsWith('POLITICAL')) ||
+        (layer.id.startsWith('PARKS') && layer.id.indexOf('Fill') < 0)
+      )),
+    };
+    console.log(glStyle);
     applyStyle(vectorLayer, glStyle, 'esri');
+    applyStyle(roadLayer, roadsStyle, 'esri');
     applyStyle(symbolLayer, symbolsStyle, 'esri');
+  });
+
+  const aerialLayer = new TileLayer({
+    title: "ESRI World Imagery",
+    visible: false,
+    source: new XYZ({
+      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      attributions: "Tiles © <a target='_blank' href='https://services.arcgisonline.com/ArcGIS/rest/services/'>ESRI</a>"
+    })
   });
 
   // create map
   const map = new Map({
-    layers: [vectorLayer],
+    layers: [vectorLayer, aerialLayer, roadLayer, symbolLayer],
     view: view,
     moveTolerance: 7,
     controls: [new ScaleLine({ units: 'metric' })],
   });
 
-  map.set('layerNames', ['basemap', 'symbols']);
-  map.set('basemap', vectorLayer);
+  map.set('base', 'vector')
+  map.set('vector', vectorLayer);
+  map.set('roads', roadLayer);
+  map.set('aerial', aerialLayer);
   map.set('symbols', symbolLayer);
   return map;
 }
