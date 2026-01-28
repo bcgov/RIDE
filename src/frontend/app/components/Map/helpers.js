@@ -141,7 +141,7 @@ export function createMap() {
   post(MAP_STYLE_URL).then(function (glStyle) {
     // DBC22-2153
     glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
-
+    globalThis.glstyle = glStyle;
     // Overrides
     for (const layer of glStyle.layers) {
       overrides.merge(layer, overrides[layer.id] || {});
@@ -160,11 +160,12 @@ export function createMap() {
       ...glStyle,
       layers: glStyle.layers.filter((layer) => (
         layer.id.startsWith('TRANSPORTATION') ||
-        (layer.id.startsWith('POLITICAL')) ||
-        (layer.id.startsWith('PARKS') && layer.id.indexOf('Fill') < 0)
+        (layer.id.startsWith('POLITICAL') && !layer.id.includes('/Fill')) ||
+        (layer.id.startsWith('TOPOGRAPHIC') && !layer.id.includes('/Overlay') < 0) ||
+        (layer.id.startsWith('PARKS') && !layer.id.includes('/Fill'))
       )),
     };
-    console.log(glStyle);
+
     applyStyle(vectorLayer, glStyle, 'esri');
     applyStyle(roadLayer, roadsStyle, 'esri');
     applyStyle(symbolLayer, symbolsStyle, 'esri');
@@ -413,7 +414,6 @@ const PopulationCenterTypes = [
 async function filterByTypes(features, types, coords) {
   const results = [];
   for (const feature of features) {
-
     const index = types.indexOf(feature.properties.featureType);
     if (index < 0) { continue; }
 
@@ -446,7 +446,7 @@ export async function getNearby(coords) {
   const params = {
     featureClass: 1,
     official: 1,
-    itemsPerPage: 100,
+    itemsPerPage: 200,
     startIndex: 1,
     featurePoint: coords[0] + "," + coords[1],
     distance: 100, // km
