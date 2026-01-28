@@ -228,7 +228,7 @@ class EventSerializer(KeyMoveSerializer):
         # way in through key movement and to_internal_value()
         del obj['meta']
 
-        if obj['type'] == 'ROAD_CONDITION':
+        if obj['type'] == 'ROAD_CONDITION' and instance.segment:
             obj['location']['start']['name'] = instance.segment.name
 
         return obj

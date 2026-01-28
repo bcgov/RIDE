@@ -115,6 +115,11 @@ export const RoadConditions = [
   { 'id': 32, 'label': 'Winter driving conditions', },
 ];
 
+export const RoadConditionsLookup = RoadConditions.reduce((acc, condition) => {
+  acc[condition.id] = condition.label;
+  return acc;
+}, {});
+
 export const IncidentsList = [
   { id: 0, label: '', },
   { id: 1, label: '1 sailing wait (Ferries)', },

@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 // Internal imports
 import { desc } from './Schedule';
 import { getConditionIcon, getPlainIcon } from './icons';
-import { PHRASES_LOOKUP, TrafficImpacts } from './references';
+import { PHRASES_LOOKUP, TrafficImpacts, RoadConditionsLookup } from './references';
 import { selectFeature } from '../components/Map/helpers';
 
 // Styling
@@ -207,9 +207,17 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
             <h5>Conditions</h5>
             <ul>
               {event.conditions.map((condition, ii) => {
+                let id, label;
+                if (typeof(condition) === 'number') {
+                  id = condition;
+                  label = RoadConditionsLookup[condition];
+                } else {
+                  id = condition.id;
+                  label = condition.label;
+                }
                 return (
                   <li key={'item ' + ii}>
-                    <FontAwesomeIcon icon={getConditionIcon(condition)} className={'condition-icon'}/>{condition.label}
+                    <FontAwesomeIcon icon={getConditionIcon(id)} className={'condition-icon'}/>{label}
                   </li>
                 );
               })}
