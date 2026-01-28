@@ -18,31 +18,31 @@ import {convertToDateTimeLocalString as convert} from "../components/Map/helpers
 
 const getDefaultNextUpdate = () => {
   const now = new Date();
-  
+
   // Add 30 minutes buffer - overflow is handled automatically
   now.setMinutes(now.getMinutes() + 30);
   now.setSeconds(0, 0);
-  
+
   const month = now.getMonth() + 1; // JavaScript months are 0-indexed
   const day = now.getDate();
   const hour = now.getHours();
   const minute = now.getMinutes();
   const year = now.getFullYear();
-  
+
   // October 1 - April 30 is winter season
   // (month > 9 or month < 5) or (month == 10 and day >= 1) or (month == 4 and day <= 30)
   const inWinterSeason = (month > 9 || month < 5) || (month === 10 && day >= 1) || (month === 4 && day <= 30);
   if (inWinterSeason) {
     const times = [5, 7, 16]; // 5:00, 7:00, 16:00
     const candidates = [];
-    
+
     const currentMinutes = hour * 60 + minute;
-    
+
     for (const candidateHour of times) {
       let candidateDay = day;
       let candidateMonth = month;
       let candidateYear = year;
-      
+
       // If candidate time is <= current time, add 1 day
       const candidateMinutes = candidateHour * 60;
       if (candidateMinutes <= currentMinutes) {
@@ -59,12 +59,12 @@ const getDefaultNextUpdate = () => {
           }
         }
       }
-      
+
       // Create date with candidate time (seconds set to 0)
       const candidate = new Date(candidateYear, candidateMonth - 1, candidateDay, candidateHour, 0, 0);
       candidates.push(candidate);
     }
-    
+
     // Return the minimum (earliest) candidate
     const minCandidate = new Date(Math.min(...candidates.map(d => d.getTime())));
     return convert(minCandidate);
@@ -110,7 +110,7 @@ export default class RcsForm extends EventForm {
 
     // Set errors and prevent submission if validation fails
     this.setState({ errors });
-    
+
     // Only proceed if there are no validation errors
     if (Object.keys(errors).length === 0) {
       bulkUpdateRcs(segPks, event).then((response) => {
@@ -155,7 +155,7 @@ export default class RcsForm extends EventForm {
             </div>
 
             <div className="section timing">
-              <EventTiming errors={errors} event={event} dispatch={dispatch} bulkRc={true} />
+              <EventTiming errors={errors} event={event} dispatch={dispatch} isRoadCondition={true} />
             </div>
 
             <div className="section buttons">

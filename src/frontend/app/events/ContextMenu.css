@@ -19,6 +19,15 @@
     border-radius: 4px;
     padding: 0rem 0.25rem 0.1rem 0.25rem;
 
+    &.disabled {
+      color: #ccc;
+      &:hover {
+        background: inherit;
+        color: #ccc;
+        cursor: default;
+      }
+    }
+
     &:hover {
       background: blue;
       color: white;

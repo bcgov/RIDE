@@ -1,5 +1,7 @@
 import copy
+import json
 import logging
+
 from datetime import datetime, timezone
 
 from django.contrib.auth import get_user_model
@@ -216,6 +218,12 @@ class EventSerializer(KeyMoveSerializer):
                 now = datetime.now(tz=timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
                 data['meta']['last_inactivated'] = now
 
+        if self.instance and self.instance.segment:
+            data['geometry'] = {
+                "type": "GeometryCollection",
+                "geometries": [json.loads(self.instance.segment.geometry.json)]
+            }
+            log.info(data['geometry'])
         data['approved'] = self.is_automatically_approved(data)
 
         return super().to_internal_value(data)
@@ -228,8 +236,10 @@ class EventSerializer(KeyMoveSerializer):
         # way in through key movement and to_internal_value()
         del obj['meta']
 
-        if obj['type'] == 'ROAD_CONDITION' and instance.segment:
-            obj['location']['start']['name'] = instance.segment.name
+        if obj['type'] == 'ROAD_CONDITION':
+            if instance.segment:
+                obj['location']['start']['name'] = instance.segment.name
+            obj['polygon'] = instance.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2).coords[0]
 
         return obj
 

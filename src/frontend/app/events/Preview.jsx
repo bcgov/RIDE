@@ -41,6 +41,14 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
   // States
   const [selectedSeg, setSelectedSeg] = useState(segments ? segments[0] : null);
 
+  const conditions = (event.conditions || []).map((c) => {
+    if (typeof(c) === 'number') {
+      return { id: c, label: RoadConditionsLookup[c] };
+    }
+    return c;
+  });
+  const isRoadCondition = event.type === 'ROAD_CONDITION';
+
   return (
     <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'} ${event.status.toLowerCase()} ${cleared ? 'cleared' : ''}`}>
       {segments &&
@@ -80,8 +88,8 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
           </div>
           <h3>{ PHRASES_LOOKUP[event.details.situation] }</h3>
 
-          {event.type === 'ROAD_CONDITION' ?
-            <p>Road condition</p> :
+          {isRoadCondition ?
+            <p>{conditions[0]?.label || 'Road condition'}</p> :
             <p>{ event.details.severity } {event.type === 'Incident' ? 'incident' : 'delay' }</p>
           }
         </div>
@@ -90,7 +98,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
       <div className="body">
         {!segments &&
           <h3 className="direction">
-            {event.details?.direction} on&nbsp;
+            {!isRoadCondition && `${event.details?.direction} on `}
             {start.name}
             {isLinear && end.name !== start.name &&
               <>&nbsp;to {end.name}</>
@@ -110,7 +118,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
           </div>
         }
 
-        { start.useAlias &&
+        { start.useAlias && !isRoadCondition &&
           <p className="direction">
             {start.alias}
             {end.alias && end.useAlias && end.alias !== start.alias &&
@@ -214,7 +222,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
           </>
         }
 
-        {event.conditions.length > 0 &&
+        {conditions.length > 0 &&
           <div className={'conditions'}>
             <h5>Conditions</h5>
             <ul>

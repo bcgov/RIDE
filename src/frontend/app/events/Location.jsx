@@ -16,7 +16,7 @@ const REF_LOC_TEXT = `Sorted by population class, then by distance.
 5. Community (>50, uninc.)
 6. Locality (<50, uninc.)`;
 
-export default function Location({ event, dispatch, goToFunc }) {
+export default function Location({ errors, event, dispatch, goToFunc }) {
   const start = event.location.start;
   const end = event.location.end;
 
@@ -26,8 +26,18 @@ export default function Location({ event, dispatch, goToFunc }) {
   const startChange = (e) => setStartOther(e.target.value.substring(0, 100));
   const endChange = (e) => setEndOther(e.target.value.substring(0, 100));
 
+  if (event.segment) {
+    return (
+      <div>
+        <p><strong>Segment</strong></p>
+        <p>{event.location.start.name}</p>
+      </div>
+    );
+  }
+
   return <>
-    <div>
+    <div className={`title ${(errors['End location'] && !end?.name) ? 'error' : ''}`}>
+      <div>
         <strong>Location</strong>&nbsp;&nbsp;
         <Tooltip text="Zoom to include all points">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20"
@@ -37,17 +47,18 @@ export default function Location({ event, dispatch, goToFunc }) {
             <path fill="currentColor" d="M320 48C333.3 48 344 58.7 344 72L344 97.3C448.5 108.4 531.6 191.5 542.7 296L568 296C581.3 296 592 306.7 592 320C592 333.3 581.3 344 568 344L542.7 344C531.6 448.5 448.5 531.6 344 542.7L344 568C344 581.3 333.3 592 320 592C306.7 592 296 581.3 296 568L296 542.7C191.5 531.6 108.4 448.5 97.3 344L72 344C58.7 344 48 333.3 48 320C48 306.7 58.7 296 72 296L97.3 296C108.4 191.5 191.5 108.4 296 97.3L296 72C296 58.7 306.7 48 320 48zM496 320C496 222.8 417.2 144 320 144C222.8 144 144 222.8 144 320C144 417.2 222.8 496 320 496C417.2 496 496 417.2 496 320zM384 320C384 284.7 355.3 256 320 256C284.7 256 256 284.7 256 320C256 355.3 284.7 384 320 384C355.3 384 384 355.3 384 320zM208 320C208 258.1 258.1 208 320 208C381.9 208 432 258.1 432 320C432 381.9 381.9 432 320 432C258.1 432 208 381.9 208 320z"/>
           </svg>
         </Tooltip>
+      </div>
     </div>
 
     <div className="toggleable">
       <div className="toggle">
-          <Tooltip text="Center start pin">
-              <img
-                src={pinStart}
-                style={{ width: '20px' }}
-                onClick={(e) => goToFunc(start?.coords)}
-              />
-          </Tooltip>
+        <Tooltip text="Center start pin">
+          <img
+            src={pinStart}
+            style={{ width: '20px' }}
+            onClick={(e) => goToFunc(start?.coords)}
+          />
+        </Tooltip>
       </div>
 
       <div className="toggled">
@@ -119,6 +130,24 @@ export default function Location({ event, dispatch, goToFunc }) {
 
       </div>
     </div>
+
+    { errors['End location'] && !end?.name &&
+      <div className="toggleable">
+        <div className="toggle">
+          <Tooltip text="Center end pin">
+            <img
+              src={pinEnd}
+              style={{ width: '20px' }}
+              onClick={(e) => goToFunc(end?.coords)}
+            />
+          </Tooltip>
+        </div>
+
+        <div className="title error">
+          <p>{errors['End location']}</p>
+        </div>
+      </div>
+    }
 
     { end?.name &&
       <div className="toggleable">

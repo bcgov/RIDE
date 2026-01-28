@@ -19,29 +19,36 @@ function normalized(datestring) {
   return format(a, "yyyy-MM-dd'T'HH:mm");
 }
 
-export default function EventTiming({ errors, event, dispatch, bulkRc }) {
+export default function EventTiming({ errors, event, dispatch, isRoadCondition }) {
 
   const id = ++idc;
 
-  const timingError = bulkRc ? errors['nextUpdate'] : errors['Manage Timing By'];
-  
+  const timingError = isRoadCondition ? errors['nextUpdate'] : errors['Manage Timing By'];
+
   return <div key={'a' + id}>
     <div className={`title ${timingError ? 'error' : ''}`}>
       <p>
-        <strong>{bulkRc ? 'Next update' : 'Event Timing'}</strong>
+        <strong>{isRoadCondition ? 'Next update' : 'Event Timing'}</strong>
         <span className="error-message">{timingError}</span>
       </p>
     </div>
 
     <div className="input">
-      {!bulkRc && <label htmlFor='nextUpdateTime'>Next Update Time</label>}
+      {!isRoadCondition && <label htmlFor='nextUpdateTime'>Next Update Time</label>}
 
       <div className="row">
         <input
           id='nextUpdateTime'
           type="datetime-local"
           defaultValue={normalized(event.timing.nextUpdate)}
-          onBlur={(e) => dispatch({ type: 'set', section: 'timing', value: [{ nextUpdate: e.target.value, section: 'timing' }, { nextUpdateIsDefault: false, section: 'timing' }]})}
+          onBlur={(e) => dispatch({
+            type: 'set',
+            section: 'timing',
+            value: [
+              { nextUpdate: e.target.value, section: 'timing' },
+              { nextUpdateIsDefault: false, section: 'timing' }
+            ]})
+          }
         />
 
         <span className="timezone">{getTz(event.timing.nextUpdate)}</span>
@@ -61,7 +68,7 @@ export default function EventTiming({ errors, event, dispatch, bulkRc }) {
       </div>
     </div>
 
-    {!bulkRc &&
+    {!isRoadCondition &&
       <div className="input">
         <label htmlFor="endTime">End Time</label>
         <div className="row">

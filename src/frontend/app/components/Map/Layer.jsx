@@ -18,6 +18,7 @@ import { getInitialEvent } from '../../events/forms';
 
 import { API_HOST } from '../../env.js';
 import { getIconAndStroke } from '../../events/icons';
+import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers.js';
 import { endHandler } from './PinLayer';
 import { patch } from '../../shared/helpers';
 
@@ -36,6 +37,7 @@ export function addEvent(event, map, dispatch) {
   let coords = event.location.start.coords;
   if (Array.isArray(coords[0])) { coords = coords[0]; }
   const g = event.geometry.geometries;
+
   let start, mid, route;
   g.forEach((geo) => {
     if (geo.type === 'Point') {
@@ -47,6 +49,7 @@ export function addEvent(event, map, dispatch) {
       mid = ll2g(turf.along(route, turf.length(route) / 2).geometry.coordinates);
     }
   });
+  if (!start) { start = ll2g(coords); }
 
   const styles = {};
   ['static', 'hover', 'active'].forEach((state) => {
@@ -71,8 +74,7 @@ export function addEvent(event, map, dispatch) {
   if (route) {
     const gg = feature.getGeometry().getGeometries();
     if (event.type === 'ROAD_CONDITION') {
-      const poly = turf.buffer(route, 2000, { units: 'meters'});
-      gg.push(new Polygon([poly.geometry.coordinates[0].map((latLng) => ll2g(latLng))]));
+      gg.push(new Polygon([event.polygon.map((latLng) => ll2g(latLng))]));
     } else {
       gg.push(new LineString(route.geometry.coordinates.map((latLng) => ll2g(latLng))));
     }
@@ -181,7 +183,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     const items = [];
 
     if (!feature) {
-      if (!event.location.start?.name) {
+      if (!event.location.start?.name || !event.showForm) {
         items.push({
           label: 'Create event',
           action: (e) => {
@@ -221,8 +223,9 @@ export default function Layer({ visibleLayers, event, dispatch }) {
       e.stopPropagation();
       const map = e.map; // necessary to bind map for callback below
 
-      if (!event.showForm) {
+      const raw = feature.get('raw');
 
+      if (!event.showForm) {
         // TODO: add permission based checks on these items
         items.push(
           {
@@ -230,7 +233,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
             action: (e) => {
               setContextMenu([]);
               selectFeature(map, feature);
-              dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: true });
+              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true });
             }
           },
           {
@@ -242,33 +245,53 @@ export default function Layer({ visibleLayers, event, dispatch }) {
         );
 
         if (feature.get('raw').status === 'Active') {
+          if (feature.get('raw').type === 'ROAD_CONDITION') {
+            const pending = getPendingNextUpdate(raw);
+
+            items.push({
+              label: 'Reconfirm',
+              disabled: !pending,
+              action: (e) => {
+                setContextMenu([]);
+                if (pending) {
+                  patch(
+                    `${API_HOST}/api/events/${raw.id}`,
+                    { timing: { nextUpdate: pending.toISOString() } },
+                  ).then((updatedEvent) => {
+                    feature.set('raw', updatedEvent);
+                    dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
+                  });
+                }
+              }
+            });
+          }
+
           items.push({
             label: 'Clear event',
             action: (e) => {
               setContextMenu([]);
-              const event = feature.get('raw');
               patch(
-                `${API_HOST}/api/events/${event.id}`,
+                `${API_HOST}/api/events/${raw.id}`,
                 { status: 'Inactive' },
-              ).then((event) => {
-                feature.set('raw', event);
-                dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
+              ).then((updatedEvent) => {
+                feature.set('raw', updatedEvent);
+                dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
               });
             }
           });
-        } else if (feature.get('raw').approved) {
+        } else if (raw.approved) {
           items.push({
             label: 'Reactivate event',
+            debugging: true,
             action: (e) => {
               setContextMenu([]);
-              const event = feature.get('raw');
               patch(
-                `${API_HOST}/api/events/${event.id}`,
+                `${API_HOST}/api/events/${raw.id}`,
                 { status: 'Active' },
-              ).then((event) => {
-                  feature.set('raw', event);
-                  dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
-                });
+              ).then((updatedEvent) => {
+                feature.set('raw', updatedEvent);
+                dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
+              });
             }
           });
         }

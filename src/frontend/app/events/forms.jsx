@@ -1,5 +1,8 @@
 import { Component } from 'react';
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckDouble, faCircleCheck, faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
+
 import Conditions from './Conditions.jsx';
 import Details from './Details.jsx';
 import Delays from './Delays.jsx';
@@ -12,8 +15,9 @@ import Restrictions from './Restrictions.jsx';
 import AdditionalMessaging from './Additional.jsx';
 import External from './External.jsx';
 import {
-  CONDITIONS_FORMS, DELAYS_FORMS, DETAILS_FORMS, FORM_PHRASE_CATEGORY,
-  FORMS, IMPACTS_FORMS, RESTRICTIONS_FORMS,
+  CONDITIONS_FORMS, DELAYS_FORMS, DETAILS_FORMS, EXTERNAL_FORMS,
+  FORM_PHRASE_CATEGORY, FORMS, IMPACTS_FORMS, INTERNAL_FORMS,
+  RESTRICTIONS_FORMS, TIMING_FORMS,
 } from './references.js';
 import {
   convertToDateTimeLocalString as convert,
@@ -23,6 +27,7 @@ import { addEvent } from '../components/Map/Layer.jsx';
 import { getCookie } from './shared.jsx';
 import { API_HOST } from '../env';
 import { AuthContext } from '../contexts';
+import { patch, getNextUpdate, getPendingNextUpdate } from '../shared/helpers.js';
 
 import './forms.css';
 
@@ -68,6 +73,19 @@ export function eventReducer(event, action) {
       });
       return {...event};
     }
+
+    case 'set type': {
+      if (action.event_type === 'Road condition') {
+        event.type = 'ROAD_CONDITION';
+        event.timing.nextUpdate = getNextUpdate();
+      } else {
+        event.type = action.event_type;
+        event.timing.nextUpdate = getLater(event.details.severity);
+      }
+      event.timing.nextUpdateIsDefault = true;
+      return {...event};
+    }
+
     case 'set start': {
       event.location.start = { ...event.location.start, ...action.value };
       return {...event};
@@ -264,7 +282,7 @@ export function eventReducer(event, action) {
     }
 
     default: {
-      throw Error('Unrecognized action: ' + action?.type);
+      throw new Error('Unrecognized action: ' + action?.type);
     }
   }
 }
@@ -381,6 +399,8 @@ export default class EventForm extends Component {
         type: "Linestring",
         coordinates: route,
       });
+    } else if (form.type !== 'Road condition' && form.type === 'ROAD_CONDITION' && !form.segment) {
+      err['End location'] = 'An end location is required';
     } else {
       form.location.end = null;
     }
@@ -389,13 +409,15 @@ export default class EventForm extends Component {
       geometries,
     };
 
-    if (form.type !== 'condition') {
+    if (form.type !== 'Road condition' && form.type !== 'ROAD_CONDITION') {
       if (!form.details.direction) { err.direction = 'You must set a direction'; }
       if (!form.details.severity) { err.severity = 'You must set a severity'; }
       if (!form.details.category) { err.category = 'You must set a category'; }
       if (!form.details.situation) { err.situation = 'You must set a situation'; }
 
       if (form.impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'; }
+    } else if (form.conditions.length === 0) {
+      err['Conditions'] = 'Must include at least one';
     }
 
     if (form.type === 'Incident') {
@@ -440,6 +462,15 @@ export default class EventForm extends Component {
         return Object.keys(errors).length ? errors : null;
       }).filter(Boolean);
       if (scheduleErrors.length > 0) { err.schedules = scheduleErrors; }
+    } else if (form.type === 'Road Condition' || form.type === 'ROAD_CONDITION') {
+      form.type = 'ROAD_CONDITION';
+      if (form.timing.nextUpdate) {
+        form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+      } else {
+        err['nextUpdate'] = 'Next update time is required';
+      }
+      form.timing.startTime = null;
+      form.timing.schedules = [];
     }
 
     // submitting existing notes with form gets an error because notes are
@@ -478,10 +509,11 @@ export default class EventForm extends Component {
         body: JSON.stringify(form),
       }).then(response => response.json())
         .then(data => {
+          const event_type = event.type === 'ROAD_CONDITION' ? 'Road condition' : event.type;
           cancel();
           addEvent(data, map);
           dispatch({ type: 'reset form' });
-          setMessage(`${event.type} successfully ${label}`)
+          setMessage(`${event_type} successfully ${label}`);
           setTimeout(() => setMessage(''), 5000);
         });
     } else {
@@ -492,7 +524,7 @@ export default class EventForm extends Component {
   getLabel = () => {
     const { event } = this.props;
     const { authContext } = this.context;
-    
+
     if (authContext.is_approver) {
       if (!event.approved && event.status === 'Inactive') { return 'Clear'; }
       return 'Publish';
@@ -506,6 +538,8 @@ export default class EventForm extends Component {
     const { event, dispatch, preview, cancel, goToFunc, bulkRc } = this.props;
     const { errors } = this.state;
 
+    const pendingNextUpdate = getPendingNextUpdate(event);
+
     return (
     <div className="form">
       <form id='event-form'>
@@ -516,7 +550,12 @@ export default class EventForm extends Component {
             ? <h4>Edit { event.type.toLowerCase() } <span className="event-id">{event.id} v{event.version}</span></h4>
             : <h4>
                 Create&nbsp;
-                <select onChange={(e) => dispatch({ type: 'set', value: { type: e.target.value }})} defaultValue={event.type}>
+                <select
+                  onChange={(e) => dispatch({
+                    type: 'set type',
+                    event_type: e.target.value })
+                  }
+                  defaultValue={event.type}>
                   {FORMS.map((form) => (<option key={form}>{form}</option>))}
                 </select>
               </h4>
@@ -532,7 +571,7 @@ export default class EventForm extends Component {
         <div className="form-body">
           { event.location.start.name && <>
             <div className="section location">
-              <Location event={event} dispatch={dispatch} goToFunc={goToFunc} />
+              <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} />
             </div>
 
             { DETAILS_FORMS.includes(event.type) &&
@@ -565,13 +604,18 @@ export default class EventForm extends Component {
               </div>
             }
 
-            { event.type && event.type === 'Incident' &&
+            { TIMING_FORMS.includes(event.type) &&
               <div className="section timing">
-                <EventTiming errors={errors} event={event} dispatch={dispatch} />
+                <EventTiming
+                  errors={errors}
+                  event={event}
+                  dispatch={dispatch}
+                  isRoadCondition={CONDITIONS_FORMS.includes(event.type)}
+                />
               </div>
             }
 
-            { event.type && event.type === 'Planned event' &&
+            { event?.type === 'Planned event' &&
               <div className="section scheduled">
                 <Scheduled errors={errors} event={event} dispatch={dispatch} />
               </div>
@@ -583,13 +627,13 @@ export default class EventForm extends Component {
               </div>
             }
 
-            { event.type &&
+            { EXTERNAL_FORMS.includes(event.type) &&
               <div className="section external">
                 <External event={event} dispatch={dispatch} />
               </div>
             }
 
-            { event.type &&
+            { INTERNAL_FORMS.includes(event.type) &&
               <div className="section internal">
                 <InternalNotes event={event} dispatch={dispatch} />
               </div>
@@ -597,11 +641,50 @@ export default class EventForm extends Component {
 
             <div className="section buttons">
               <button type="button" onClick={(e) => this.handleSubmit(e, this.getLabel())}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM404.4 276.7C411.4 265.5 408 250.7 396.8 243.6C385.6 236.5 370.8 240 363.7 251.2L302.3 349.5L275.3 313.5C267.3 302.9 252.3 300.7 241.7 308.7C231.1 316.7 228.9 331.7 236.9 342.3L284.9 406.3C289.6 412.6 297.2 416.2 305.1 415.9C313 415.6 320.2 411.4 324.4 404.6L404.4 276.6z"/></svg>
+                  <FontAwesomeIcon icon={faCircleCheck} />
                 {this.getLabel()}
               </button>
+
+              { event.id && event.type === 'ROAD_CONDITION' &&
+                <button
+                  type="button"
+                  className={`secondary ${pendingNextUpdate ? '' : 'disabled'}`}
+                  onClick={() => {
+                    if (pendingNextUpdate) {
+                      patch(
+                        `${API_HOST}/api/events/${event.id}`,
+                        { timing: { nextUpdate: pendingNextUpdate.toISOString() } },
+                      ).then((event) => {
+                        dispatch({ type: 'reset form', cancel: true, value: event, showPreview: true, showForm: false });
+                      });
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon icon={faCheckDouble} />
+                  Reconfirm
+                </button>
+              }
+
+              { event.id && event.type === 'ROAD_CONDITION' &&
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => {
+                    patch(
+                      `${API_HOST}/api/events/${event.id}`,
+                      { status: 'Inactive' },
+                    ).then((updatedEvent) => {
+                      dispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: true, showForm: false });
+                    });
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTrashCan} />
+                  Clear
+                </button>
+              }
+
               <button type="button" className="cancel" onClick={cancel}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M135.5 169C126.1 159.6 126.1 144.4 135.5 135.1C144.9 125.8 160.1 125.7 169.4 135.1L320.4 286.1L471.4 135.1C480.8 125.7 496 125.7 505.3 135.1C514.6 144.5 514.7 159.7 505.3 169L354.3 320L505.3 471C514.7 480.4 514.7 495.6 505.3 504.9C495.9 514.2 480.7 514.3 471.4 504.9L320.4 353.9L169.4 504.9C160 514.3 144.8 514.3 135.5 504.9C126.2 495.5 126.1 480.3 135.5 471L286.5 320L135.5 169z"/></svg>
+                  <FontAwesomeIcon icon={faXmark} />
                 Cancel
               </button>
             </div>
