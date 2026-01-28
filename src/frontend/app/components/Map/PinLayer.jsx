@@ -158,7 +158,7 @@ export default function PinLayer({ event, dispatch }) {
   useEffect(() => {
     if (!map) { return; }
 
-    if (event.location.start?.name && event.showForm) { // start location but no pin
+    if (event.location.start?.name && event.showForm && !event.segment) { // start location but no pin
       const coords = ll2g(event.location.start.coords);
       if (map.start) {
         map.start.getGeometry().setCoordinates(coords);
@@ -174,7 +174,7 @@ export default function PinLayer({ event, dispatch }) {
       map.start = null;
     }
 
-    if (event.location.end?.name && event.showForm) { // end location but no pin
+    if (event.location.end?.name && event.showForm && !event.segment) { // end location but no pin
       const coords = ll2g(event.location.end.coords);
       if (map.end) {
         map.end.getGeometry().setCoordinates(coords);
@@ -195,6 +195,10 @@ export default function PinLayer({ event, dispatch }) {
     } else if (map.end) { // no end location but end pin exists
       map.pins.getSource().removeFeature(map.end);
       map.end = null;
+    }
+
+    if (!event.showForm) {
+        map.route.getGeometry().setCoordinates([])
     }
   }, [event]);
 

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 
 import Select from 'react-select';
 
-import { RoadConditions } from './references';
+import { RoadConditions, RoadConditionsLookup } from './references';
 import { DraggableRows } from './shared';
 import { selectStyle } from '../components/Map/helpers';
 
@@ -22,15 +22,22 @@ function Condition({ id, item, change, update, current, }) {
 }
 
 export default function Conditions({ errors, event, dispatch }) {
+  const displayErrors = event.conditions.length === 0 && errors['Conditions'] ? errors : {};
+  let conditions = event.conditions;
+  if (typeof(conditions[0]) === 'number') {
+    conditions = conditions.map((condition) => ({
+      id: condition, label: RoadConditionsLookup[condition],
+    }))
+  }
   return (
     <DraggableRows
       label="Conditions"
       limit={10}
       itemsSource={RoadConditions}
       Child={Condition}
-      items={event.conditions || []}
+      items={conditions || []}
       dispatch={dispatch}
-      errors={errors}
+      errors={displayErrors}
       section={'conditions'}
     />
   );

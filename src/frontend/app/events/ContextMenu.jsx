@@ -18,7 +18,11 @@ export default function ContextMenu({ ref, options, setContextMenu }) {
     >
       {items.map((item, ii) => (
         <div
-          className={`context-option ${ debuggingIsOn && item.debugging && 'debugging' }`}
+          className={`
+            context-option
+            ${ debuggingIsOn && item.debugging && 'debugging' }
+            ${ item.disabled ? 'disabled' : '' }
+          `}
           onClick={item.action} key={'option-' + ii}
         >
           {item.label}

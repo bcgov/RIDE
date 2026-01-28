@@ -364,11 +364,14 @@ export const PHRASES = [
   ['Road condition', '-', 'Road condition', 2, 'PHRASE', 2,' CHAIN_UP', 1, 'HAZARD'],
 ];
 
-export const DETAILS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
-export const DELAYS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
-export const IMPACTS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
-export const RESTRICTIONS_FORMS = ['Chain-up', 'Incident', 'Planned event'];
-export const CONDITIONS_FORMS = ['Road condition'];
+export const DETAILS_FORMS = ['Incident', 'Planned event'];
+export const DELAYS_FORMS = ['Incident', 'Planned event'];
+export const EXTERNAL_FORMS = ['Incident', 'Planned event'];
+export const IMPACTS_FORMS = ['Incident', 'Planned event'];
+export const INTERNAL_FORMS = ['Incident', 'Planned event'];
+export const RESTRICTIONS_FORMS = ['Incident', 'Planned event'];
+export const TIMING_FORMS = ['Incident', 'Road condition', 'ROAD_CONDITION'];
+export const CONDITIONS_FORMS = ['Road condition', 'ROAD_CONDITION'];
 
 export const FORMS = []; globalThis.FORMS = FORMS;
 export const FORM_CATEGORIES = {}; globalThis.FORM_CATEGORIES = FORM_CATEGORIES;

@@ -94,7 +94,7 @@
       margin-bottom: 0.5rem;
 
       &.error {
-        p {
+        p, strong {
 
           color: red;
 
@@ -554,6 +554,10 @@
           display: inline-block;
           vertical-align: text-bottom;
           margin-right: 0.5rem;
+
+          &.svg-inline--fa {
+            vertical-align: middle;
+          }
         }
 
         &:hover {
@@ -564,6 +568,43 @@
         &:active {
           border-color: 999;
           background: #999;
+        }
+
+        &.secondary {
+          background: white;
+          border-color: black;
+          color: black;
+
+          &:hover {
+            background: #eee;
+            border-color: #222;
+            color: #222;
+          }
+
+          &:active {
+            background: #ccc;
+            border-color: #666;
+            color: #666;
+          }
+
+          &.disabled {
+            cursor: default;
+            background: #eee;
+            border-color: #999;
+            color: #999;
+
+            &:hover {
+              background: #eee;
+              border-color: #999;
+              color: #999;
+            }
+
+            &:active {
+              background: #eee;
+              border-color: #999;
+              color: #999;
+            }
+          }
         }
 
         &.cancel {
