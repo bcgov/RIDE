@@ -35,6 +35,15 @@ echo "Created gzipped version: env.js.gz"
 # Copy the default nginx config from the container image to shared volume
 cp /etc/nginx/conf.d/default.conf "${SHARED_CONFIG}/default.conf"
 
+# --- Handle Debug Route ---
+if [ "$ENVIRONMENT" = "dev" ]; then
+    echo "Environment is 'dev'; Enabling __debug__ route."
+    # This changes the prefix match to a regex match including __debug__
+    sed -i 's|location \^~ /admin {|location ~ ^/(admin\|__debug__) {|' "${SHARED_CONFIG}/default.conf"
+else
+    echo "Environment is not 'dev'; not adding the debug toolbar route."
+fi
+
 # Update the environment placeholder in the copied config
 echo "Setting the Environment for connecting to the backend to '$ENVIRONMENT'"
 sed -i "s~{ENVIRONMENT}~$ENVIRONMENT~g" "${SHARED_CONFIG}/default.conf"
