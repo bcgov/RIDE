@@ -333,9 +333,13 @@ class RcSerializer(EventSerializer):
     def to_representation(self, instance):
         """Override to convert condition IDs to labels in output"""
         obj = super().to_representation(instance)
-        # Convert condition IDs to labels for output
-        if 'conditions' in obj and obj['conditions']:
-            obj['conditions'] = list(Condition.objects.filter(id__in=obj['conditions']).values_list('label', flat=True))
+
+        # Convert condition IDs to labels for output in the same order
+        condition_ids = obj.get('conditions') or []
+        if condition_ids:
+            qs = Condition.objects.filter(id__in=condition_ids).values_list('id', 'label')
+            id_to_label = {cid: label for cid, label in qs}
+            obj['conditions'] = [id_to_label[cid] for cid in condition_ids if cid in id_to_label]
 
         return obj
 

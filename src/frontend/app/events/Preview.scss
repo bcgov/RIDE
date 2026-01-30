@@ -1,8 +1,35 @@
+@use "../styles/variables.scss" as *;
+
 .preview {
   display: flex;
   flex-direction: column;
   overflow: hidden;
   z-index: 2;
+
+  .segments-tab {
+    background: $Type-Primary;
+
+    .ride-dropdown {
+      padding: .4rem 1rem;
+      margin: 0;
+
+      .ride-dropdown-label {
+        color: white;
+        font-size: 20px;
+        line-height: 34px;
+      }
+
+      .ride-dropdown-button{
+        max-width: 50%;
+
+        .selected-text {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
 
   .direction {
     color: #584215;

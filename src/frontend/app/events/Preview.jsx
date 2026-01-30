@@ -12,7 +12,8 @@ import { PHRASES_LOOKUP, TrafficImpacts, RoadConditionsLookup } from './referenc
 import { selectFeature } from '../components/Map/helpers';
 
 // Styling
-import './Preview.css';
+import './Preview.scss';
+import RIDEDropdown from "../components/shared/dropdown.jsx";
 
 const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   acc[curr.id] = curr;
@@ -42,6 +43,17 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
 
   return (
     <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'} ${event.status.toLowerCase()} ${cleared ? 'cleared' : ''}`}>
+      {segments &&
+        <div className={'segments-tab'}>
+          <RIDEDropdown
+            label={'Preview'}
+            extraClasses={`mr-5 user-form`}
+            items={segments}
+            value={selectedSeg}
+            handler={setSelectedSeg} />
+        </div>
+      }
+
       <div className="header">
         { banner && <div className="banner">{ banner }</div> }
         <div style={{padding: '1rem'}}>

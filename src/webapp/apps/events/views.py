@@ -68,7 +68,7 @@ class RoadConditions(Events):
             try:
                 segment = Segment.objects.get(uuid=seg_pk)
 
-                existing_event = Event.current.filter(segment=segment, event_type='Road Condition').first()
+                existing_event = Event.objects.filter(segment=segment, event_type=EventType.ROAD_CONDITION, latest=True, status='Active').first()
                 
                 # Convert segment geometry to GeoJSON format
                 geometry_geojson = None
