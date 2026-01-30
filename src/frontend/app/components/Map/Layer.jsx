@@ -309,7 +309,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     });
     map.on('pointermove', pointerMove);
     if (!fetchInterval) {
-      setFetchInterval(setInterval(() => updateEvents(map, dispatch, layerStyle), 1000));
+      setFetchInterval(setInterval(() => updateEvents(map, dispatch, layerStyle), 10000));
     }
   }, [map]);
 
