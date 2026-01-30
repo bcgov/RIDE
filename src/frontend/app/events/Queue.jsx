@@ -84,7 +84,7 @@ export default function Queue({ dispatch, goToFunc, map }) {
 
   return (
     <>
-      <PollingComponent runnable={pollEvents} interval={1000} runImmediately={true}/>
+      <PollingComponent runnable={pollEvents} interval={10000} runImmediately={true}/>
 
       <header className='events-header'><h3>Events</h3></header>
 
