@@ -122,6 +122,7 @@ jobs:
         insecure_skip_tls_verify: false
     - name: Helm upgrade on OpenShift Gold Environment
       run: |
+        helm dependency update ./infrastructure/main
         helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}"
 
   # GoldDR Runs after Gold Deployment due to GoldDR DB being read-only replica of Gold
@@ -152,4 +153,5 @@ jobs:
 
     - name: Helm upgrade on OpenShift GoldDR Environment
       run: |
+        helm dependency update ./infrastructure/main
         helm upgrade ${{ needs.setup.outputs.helm_release_name }} -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}-dr.yaml ./infrastructure/main --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" --set global.branch="${{ github.ref }}"
