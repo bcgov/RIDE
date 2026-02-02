@@ -42,7 +42,7 @@ const BUTTONS = {
   }
 }
 
-export const allLayers = Object.values(BUTTONS).flatMap((section) => Object.keys(section)).reduce((acc, curr) => { acc[curr] = false; return acc }, {});
+export const allLayers = Object.values(BUTTONS).flatMap((section) => Object.keys(section)).reduce((acc, curr) => { acc[curr] = true; return acc }, {});
 
 function Legend() {
   return (
