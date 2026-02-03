@@ -51,7 +51,7 @@ jobs:
             image_name: ${{ github.repository }}-static
             dockerfile: ./compose/frontend/StaticBuild
             build_args: |
-              DEBUG_BUILD=false
+              DEBUG_BUILD=true
             needs_fontawesome: true
 
 ### EVERYTHING PAST THIS POINT SHOULD BE THE SAME IN DEV, TEST AND UAT WORKFLOWS ###            
