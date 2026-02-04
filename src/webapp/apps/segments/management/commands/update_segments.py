@@ -6,4 +6,4 @@ from apps.segments.models import Segment
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        Segment.objects.all().update(last_updated=now())
+        Segment.objects.all().update(latest=True, last_updated=now())

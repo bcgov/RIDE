@@ -3,7 +3,7 @@
 from django.core.management import call_command
 from django.db import migrations
 
-from apps.events.models import TrafficImpact, Condition
+from apps.events.models import TrafficImpact, Condition, Event
 from apps.segments.models import Segment
 
 
@@ -15,7 +15,9 @@ def reverse_references(apps, schema_editor):
     Condition.objects.all().delete()
 
 def load_fixture(apps, schema_editor):
+    call_command('purge_segments', app_label='segments')
     call_command('loaddata', 'segments.json', app_label='segments')
+    call_command('update_segments', app_label='segments')
 
 def reverse_fixture(apps, schema_editor):
     Event.objects.all().delete()
