@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from apps.events.models import Event, Condition
 from apps.events.serializers import EventSerializer, ConditionSerializer
+from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment
 from .enums import EventType
 from .helpers import get_default_next_update
@@ -22,6 +23,25 @@ class Events(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
+def validate_allowed_segments(user, segPks):
+    if user.is_superuser:
+        return True
+
+    user_orgs = user.organizations.all()
+    user_areas = ServiceArea.objects.filter(organizations__in=user_orgs)
+    segment_ids = set()
+    for seg_ids_list in user_areas.values_list('segments', flat=True):
+        if seg_ids_list:
+            segment_ids.update(seg_ids_list)
+
+    allowed_seg_pks = Segment.current.filter(id__in=segment_ids).values_list('pk', flat=True)
+    for pk in segPks:
+        if pk not in [str(uuid) for uuid in allowed_seg_pks]:
+            return False
+
+    return True
+
+
 class RoadConditions(Events):
     queryset = Event.current.filter(event_type=EventType.ROAD_CONDITION)
     serializer_class = RcSerializer
@@ -31,6 +51,12 @@ class RoadConditions(Events):
         segPks = request.data.get('segPks', [])
         if not isinstance(segPks, list):
             return Response({'error': 'segPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not validate_allowed_segments(request.user, segPks):
+            return Response(
+                {'error': 'unauthorized', 'detail': 'Segment outside your service area.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         cleared_events = []
         existing_events = Event.current.filter(segment_id__in=segPks)
@@ -47,6 +73,12 @@ class RoadConditions(Events):
         if not isinstance(segPks, list):
             return Response({'error': 'segPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not validate_allowed_segments(request.user, segPks):
+            return Response(
+                {'error': 'unauthorized', 'detail': 'Segment outside your service area.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         confirmed_events = []
         existing_events = Event.current.filter(segment_id__in=segPks)
         for event in existing_events:
@@ -58,13 +90,19 @@ class RoadConditions(Events):
 
     @action(detail=False, methods=['post'], url_path='bulk_update')
     def bulk_update_rcs(self, request):
-        segment_pks = request.data.get('segPks', [])
+        segPks = request.data.get('segPks', [])
         event_data = request.data.get('eventData', {})
-        if not isinstance(segment_pks, list) or not isinstance(event_data, dict):
+        if not isinstance(segPks, list) or not isinstance(event_data, dict):
             return Response({'error': 'invalid segment_pks or event_data'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not validate_allowed_segments(request.user, segPks):
+            return Response(
+                {'error': 'unauthorized', 'detail': 'Segment outside your service area.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         updated_events = []
-        for seg_pk in segment_pks:
+        for seg_pk in segPks:
             try:
                 segment = Segment.objects.get(uuid=seg_pk)
 

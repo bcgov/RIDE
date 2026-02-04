@@ -56,6 +56,15 @@ class OrganizationAPIView(ModelViewSet):
 
 
 class ServiceAreaAPIView(ModelViewSet):
-    queryset = ServiceArea.objects.all().exclude(parent=None).order_by('sortingOrder')
     serializer_class = ServiceAreaSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            qs = ServiceArea.objects.all()
+
+        else:
+            user_orgs = self.request.user.organizations.all()
+            qs = ServiceArea.objects.filter(organizations__in=user_orgs)
+
+        return qs.exclude(parent=None).distinct().order_by('sortingOrder')
