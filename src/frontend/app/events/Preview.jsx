@@ -21,6 +21,7 @@ const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
 }, {});
 
 const sd = (date) => date ? format(new Date(date), 'MMM d, y') : '';
+const inEffectUntilFormat = (date) => date ? format(new Date(date), "h:mm a 'on' EEEE, MMMM d, yyyy") : '';
 
 export default function Preview({ event, dispatch, mapRef, segments }) {
   const start = event.location.start || {};
@@ -258,7 +259,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
           <>
             <h5>In effect until</h5>
             <ul>
-              <li>{event.timing.endTime}</li>
+              <li>{inEffectUntilFormat(event.timing.endTime)}</li>
             </ul>
           </>
         }
