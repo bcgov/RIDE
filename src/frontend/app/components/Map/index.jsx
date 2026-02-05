@@ -77,7 +77,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
         map.get('aerial').set('visible', true);
         map.get('roads').set('visible', true);
       }
-    })
+    });
     setMap(map);
   }, []);
   globalThis.map = map;

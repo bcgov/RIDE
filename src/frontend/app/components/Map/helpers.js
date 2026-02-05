@@ -124,18 +124,28 @@ export function createMap() {
   const extent = [-155.230138, 36.180153, -102.977437, 66.591323];
   const transformedExtent = transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
 
+  let center = localStorage.getItem('center') ? localStorage.getItem('center').split(',') : [-120.789719, 50.112778];
+  let resolution = localStorage.getItem('resolution') || 40;
+
   const view = new View({
     projection: 'EPSG:3857',
-    center: fromLonLat([-120.789719, 50.112778]), // merritt
-    // center: fromLonLat([-121.842954, 50.784370]), // lillooet
-    // center: fromLonLat([-116.519399, 51.366191]),
-    zoom: 12,
+    center: ll2g(center),
+    resolution,
     maxZoom: 22,
     minZoom: 5,
     extent: transformedExtent,
     enableRotation: false
   });
   globalThis.view = view;
+
+  // keep user changes
+  view.on('propertychange', (e) => {
+    if (e.key === 'center') {
+      localStorage.setItem('center', g2ll(e.target.getCenter()));
+    } else if (e.key === 'resolution') {
+      localStorage.setItem('resolution', e.target.getResolution());
+    }
+  })
 
   // Apply the basemap style from the arcgis resource
   post(MAP_STYLE_URL).then(function (glStyle) {
