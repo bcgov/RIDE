@@ -16,8 +16,7 @@ function normalized(datestring) {
   if (!datestring) { return ''; }
   const a = new Date(datestring)
   if (Number(a) === 0) { return ''; }
-  const b = new Date(a - a.getTimezoneOffset() * 60000);
-  return b.toISOString().replace('Z', '');
+  return format(a, "yyyy-MM-dd'T'HH:mm");
 }
 
 const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
@@ -47,40 +46,6 @@ function getDate(time) {
   date.setHours(parseInt(time[0]));
   date.setMinutes(parseInt(time[1]));
   return date;
-}
-
-/* The date input widget returns a date like "2025-11-24", which creates a JS
- * date in UTC; the local date is then "2025-11-23 16:00:00 GMT-800", and the
- * value in the widget is 2025-11-23, a day earlier.
- *
- * To cure this we append a time to the date string, which creates the date in
- * the local timezone, which then yields the expected UTC
- * ("2025-22-24T08:00:00Z"), localized back to 0 hour on the correct date in the
- * event's timezone.
- */
-function getStartDate(value) {
-  if (value) {
-    const date = new Date(`${value}T00:00:00`);
-    if (!isNaN(date)) { return date.toISOString(); }
-  }
-  return null;
-}
-
-/* The date input widget returns a date like "2025-11-24", which creates a JS
- * date in UTC; the local date is then "2025-11-23 16:00:00 GMT-800", and the
- * value in the widget is 2025-11-23, a day earlier.
- *
- * To cure this we append a time to the date string, which creates the date in
- * the local timezone, which then yields the expected UTC
- * ("2025-22-25T07:59:59Z"), localized back to 11:59:59 PM on the correct date
- * in the event's timezone.
- */
-function getEndDate(value) {
-  if (value) {
-    const date = new Date(`${value}T23:59:59`);
-    if (!isNaN(date)) { return date.toISOString(); }
-  }
-  return null;
 }
 
 function printTime(time) {
@@ -128,7 +93,7 @@ export function desc(schedule, short=false) {
   let final = names.join(', ');
 
   if (schedule.allDay) {
-    final = `All day, ${final}`;
+    final = `All day ${final}`;
   } else {
     const start = getDate(schedule.startTime);
     const end = getDate(schedule.endTime);
@@ -258,25 +223,25 @@ export default function Scheduled({ errors, event, dispatch }) {
       </div>
 
       <div className="row">
-        <div className="input">
+        <div className="input" style={{width: 'calc(50% - 0.25rem)'}}>
           <label className={errors?.startTime ? 'error' : undefined}>
             Start Date
             <span className="error-message">{errors.startTime}</span>
           </label>
-          <input type="date"
-            defaultValue={printDate(event.timing.startTime)}
-            onBlur={(e) => dispatch({ type: 'set', value: [{ startTime: getStartDate(e.target.value), section: 'timing' }]})}
+          <input type="datetime-local"
+            defaultValue={normalized(event.timing.startTime)}
+            onBlur={(e) => dispatch({ type: 'set', value: [{ startTime: e.target.value, section: 'timing' }]})}
           />
         </div>
 
-        <div className="input" style={{ visibility: event.timing.ongoing ? 'hidden' : 'visible' }}>
+        <div className="input" style={{ visibility: event.timing.ongoing ? 'hidden' : 'visible', width: 'calc(50% - 0.25rem)' }}>
           <label className={errors?.endTime ? 'error' : undefined}>
             End Date
             <span className="error-message">{errors.endTime}</span>
           </label>
-          <input type="date"
-            defaultValue={printDate(event.timing.endTime)}
-            onBlur={(e) => dispatch({ type: 'set', value: [{ endTime: getEndDate(e.target.value), section: 'timing' }]})}
+          <input type="datetime-local"
+            defaultValue={normalized(event.timing.endTime)}
+            onBlur={(e) => dispatch({ type: 'set', value: [{ endTime: e.target.value, section: 'timing' }]})}
           />
         </div>
       </div>

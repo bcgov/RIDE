@@ -427,6 +427,13 @@ export default class EventForm extends Component {
         }
       }
 
+      if (form.timing.startTime) {
+        form.timing.startTime = new Date(form.timing.startTime).toISOString();
+      }
+      if (form.timing.endTime) {
+        form.timing.endTime = new Date(form.timing.endTime).toISOString();
+      }
+
       const scheduleErrors = form.timing.schedules.map((schedule) => {
         const errors = {};
         if (!schedule.allDay) {
@@ -492,7 +499,7 @@ export default class EventForm extends Component {
   getLabel = () => {
     const { event } = this.props;
     const { authContext } = this.context;
-    
+
     if (authContext.is_approver) {
       if (!event.approved && event.status === 'Inactive') { return 'Clear'; }
       return 'Publish';
