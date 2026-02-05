@@ -102,7 +102,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
           onChange={(e) => {
             if (e?.location) {
               const coordinate = ll2g(e.location);
-              map.getView().animate({ center: coordinate, duration: 500 });
+              map.getView().animate({ center: coordinate, duration: 500, zoom: 12 });
               map.location.getGeometry().setCoordinates(coordinate);
             }
           }}
