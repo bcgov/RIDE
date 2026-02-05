@@ -21,7 +21,7 @@ const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
 }, {});
 
 const sd = (date) => date ? format(new Date(date), 'MMM d, y') : '';
-const inEffectUntilFormat = (date) => date ? format(new Date(date), "h:mm a 'on' EEEE, MMMM d, yyyy") : '';
+const inEffectUntilFormat = (date) => date ? format(new Date(date), "h:mm a 'on' EEE, MMM d, yyyy") : '';
 
 export default function Preview({ event, dispatch, mapRef, segments }) {
   const start = event.location.start || {};
@@ -168,14 +168,12 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
             <h5>In effect</h5>
             <div className="additional">
               <p>
-                { event.timing.startTime && `From ${sd(event.timing.startTime)}`}
-                { (event.timing.ongoing || (!event.timing.startTime && event.timing.endTime))
-                  ? ' until '
-                  : (sd(event.timing.endTime) && ' to ')
-                }
+                { event.timing.startTime && `From ${inEffectUntilFormat(event.timing.startTime)}`}
+
                 { event.timing.ongoing
-                  ? 'further notice'
-                  : sd(event.timing.endTime)}
+                  ? <p>until further notice</p>
+                  : <p>{` ${event.timing.startTime ? 'to' : 'until'} ${inEffectUntilFormat(event.timing.endTime)}`}</p>
+                }
               </p>
               <ul className='inner'>
                 { event.timing.schedules.map((schedule) => (
