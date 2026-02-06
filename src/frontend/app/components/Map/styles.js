@@ -49,8 +49,14 @@ export const dotStyle2 = new Style({
 
 export const lineStyle = new Style({
   stroke: new Stroke({
-    color: [100, 64, 10, 1],
-    width: 4,
+    color: [100, 64, 10, 0.5],
+    width: 5,
+  })
+});
+export const lineStyle2 = new Style({
+  stroke: new Stroke({
+    color: [200, 150, 10, 1],
+    width: 8,
   })
 });
 

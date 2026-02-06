@@ -84,13 +84,13 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
           </div>
         }
 
-        { !start?.nearby && start?.name && <Skeleton width={120} height={20} />}
-        { start?.nearby?.length > 0 &&
           <div>
             <div>
               Reference Location
               &nbsp;<Tooltip text={REF_LOC_TEXT} />
             </div>
+          { !start?.nearby && start?.name && <Skeleton width={250} height={20} />}
+          { start?.nearby?.length > 0 && <>
             { start.nearby.map((loc, ii) => (
               <div key={loc.name}>&nbsp;&nbsp;
                 <input
@@ -125,8 +125,9 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
               />&nbsp;&nbsp;
               <span className={startOther?.length === 100 ? 'bold' : ''}>{startOther?.length}/100</span>
             </div>
-          </div>
+          </>
         }
+        </div>
 
       </div>
     </div>
@@ -181,12 +182,13 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
             </div>
           }
 
-          { end?.nearby?.length > 0 &&
             <div>
               <div>
                 Reference Location
                 &nbsp;<Tooltip text={REF_LOC_TEXT} />
               </div>
+          { !end?.nearby && end?.name && <Skeleton width={250} height={20} />}
+          { end?.nearby?.length > 0 && <>
               { end.nearby.map((loc, ii) => (
                 <div key={loc.name}>&nbsp;&nbsp;
                   <input
@@ -222,8 +224,9 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
                 />&nbsp;&nbsp;
                 <span className={endOther.length === 100 ? 'bold' : ''}>{endOther.length}/100</span>
               </div>
+            </>
+            }
             </div>
-          }
 
         </div>
       </div>

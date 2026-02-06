@@ -27,9 +27,9 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
   const start = event.location.start || {};
   const end = event.location.end || {};
   const isLinear = !!end.name;
-  let startNearbies = start.nearby?.filter((loc) => loc.include).map((loc) => loc.phrase);
+  let startNearbies = start.nearby?.filter((loc) => loc.include).map((loc) => loc.phrase) || [];
   if (start.other && start.useOther) { startNearbies.push(start.other); }
-  let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase);
+  let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase) || [];
   if (end.other && end.useOther) { endNearbies.push(end.other); }
 
   const lastUpdated = event.last_updated ? new Date(event.last_updated) : new Date(Date.now());
