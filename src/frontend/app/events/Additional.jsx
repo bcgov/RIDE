@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export default function AdditionalMessaging({ event, dispatch }) {
-  const [text, setText] = useState(event.additional);
+  const [text, setText] = useState(event.additional || '');
 
   const change = (e) => {
     setText(e.target.value.substring(0, 400))

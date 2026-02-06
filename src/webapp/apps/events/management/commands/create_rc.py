@@ -27,6 +27,7 @@ class Command(BaseCommand):
             start={'coords': seg.primary_point.coords},
             geometry=GeometryCollection(seg.geometry),
             segment=seg,
+            severity='Minor',
             next_update=next_update,
             user_id=1,
             conditions=[1,2,3]
@@ -41,6 +42,7 @@ class Command(BaseCommand):
             start={'coords': seg2.primary_point.coords},
             geometry=GeometryCollection(seg2.geometry),
             segment=seg2,
+            severity='Minor',
             next_update=next_update_outdated,
             user_id=1,
             conditions=[3,4,5]
@@ -53,6 +55,7 @@ class Command(BaseCommand):
             start={'coords': seg3.primary_point.coords},
             geometry=GeometryCollection(seg3.geometry),
             segment=seg3,
+            severity='Minor',
             next_update=next_update_outdated,
             user_id=1,
             conditions=[7]
@@ -66,6 +69,7 @@ class Command(BaseCommand):
             start={'coords': seg4.primary_point.coords},
             geometry=GeometryCollection(seg4.geometry),
             segment=seg4,
+            severity='Minor',
             next_update=next_update,
             user_id=1,
             conditions=[9, 10]
@@ -79,6 +83,7 @@ class Command(BaseCommand):
             start={'coords': seg5.primary_point.coords},
             geometry=GeometryCollection(seg5.geometry),
             segment=seg5,
+            severity='Minor',
             next_update=next_update,
             user_id=1,
             conditions=[11, 13, 15]
