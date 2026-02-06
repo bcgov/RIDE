@@ -294,7 +294,7 @@ const LOCATION_BLANK = {
   useAlias: true,
   other: null,
   useOther: false,
-  nearby: [],
+  nearby: null,
 };
 
 const SCHEDULE_BLANK = {

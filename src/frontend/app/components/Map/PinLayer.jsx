@@ -59,7 +59,7 @@ export const endHandler = async (e, point, dispatch) => {
     props?.ROAD_NAME_ALIAS3,
     props?.ROAD_NAME_ALIAS4,
   ].filter(Boolean);
-  let name = props?.ROAD_NAME_FULL;
+  let name = props?.ROAD_NAME_FULL || 'Greenfield';
   if (props?.HIGHWAY_ROUTE_NUMBER) {
     name = `Hwy ${props?.HIGHWAY_ROUTE_NUMBER}`;
     aliases.unshift(props?.ROAD_NAME_FULL);
@@ -73,7 +73,9 @@ export const endHandler = async (e, point, dispatch) => {
       name,
       alias: aliases[0],
       aliases,
-      pending: false, nearbyPending: true
+      nearby: null,
+      pending: false,
+      nearbyPending: true
     }
   });
 
@@ -83,7 +85,7 @@ export const endHandler = async (e, point, dispatch) => {
   }
 
   if (point.dra.properties) {
-    point.nearby = await getNearby(g2ll(point.getGeometry().getCoordinates()));
+    point.nearby = await getNearby(g2ll(point.getGeometry().getCoordinates()), point === e.map.end);
     if (point.nearby[0]) { point.nearby[0].include = true; }
     dispatch({
       type: point.action,
@@ -170,8 +172,9 @@ export default function PinLayer({ event, dispatch }) {
         map.pins.getSource().addFeature(map.start);
       }
     } else if (map.start) { // no start location but start pin exists
-      map.pins.getSource().removeFeature(map.start);
-      map.start = null;
+      // map.pins.getSource().removeFeature(map.start);
+      // console.log('removing');
+      // map.start = null;
     }
 
     if (event.location.end?.name && event.showForm && !event.segment) { // end location but no pin
