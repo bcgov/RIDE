@@ -20,6 +20,7 @@ export default function Details({ errors, event, dispatch }) {
         <label>Direction</label>
         <select
          name="direction"
+         defaultValue={event.details.direction}
          onChange={(e) => dispatch({ type: 'set', value: { section: 'details', direction: e.target.value }})}
         >
           <option>Both directions</option>
