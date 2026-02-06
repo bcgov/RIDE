@@ -174,7 +174,7 @@
           color: red;
           font-weight: bold;
         }
-        select {
+        select, input {
           border-color: red;
         }
       }
