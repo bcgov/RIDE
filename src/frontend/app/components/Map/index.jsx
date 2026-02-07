@@ -3,7 +3,7 @@ import { components } from 'react-select';
 import AsyncSelect from 'react-select/async';
 
 
-import { MapContext } from '../../contexts';
+import { DebuggingContext, MapContext } from '../../contexts';
 import { createMap, ll2g } from './helpers';
 import { get } from '../../shared/helpers';
 
@@ -53,6 +53,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
   eventRef.current = event;
 
   const { map, setMap } = useContext(MapContext);
+  const debuggingIsOn = useContext(DebuggingContext);
   const [ base, setBase ] = useState('vector')
 
   const click = useCallback((e) => {
@@ -83,6 +84,10 @@ export default function Map({ children, dispatch, event, clickHandler }) {
   globalThis.map = map;
 
   const otherBase = base === 'vector' ? 'aerial' : 'vector';
+
+  if (map) {
+    map.get('debug').setVisible(debuggingIsOn);
+  }
 
   return (
     <div ref={elementRef} className="map-container">

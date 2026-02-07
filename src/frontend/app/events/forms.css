@@ -238,13 +238,13 @@
       }
       .toggleable {
         display: flex;
-        margin-bottom: 0.25rem;
-        &:last-child {
-          margin-bottom: 0;
-        }
+        margin-bottom: 0.5rem;
         .toggle {
           .unfold {
             display: none;
+          }
+          svg {
+            cursor: pointer;
           }
         }
 
@@ -254,15 +254,10 @@
             .unfold { display: inline-block; }
           }
           .toggled {
+            margin-bottom: 0.5rem;
             > div:not(:first-child) {
               display: none;
             }
-          }
-        }
-
-        .toggle {
-          svg {
-            cursor: pointer;
           }
         }
 

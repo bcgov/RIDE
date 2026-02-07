@@ -6,19 +6,25 @@ import MVT from 'ol/format/MVT.js';
 import { ScaleLine } from 'ol/control.js';
 import { circular } from 'ol/geom/Polygon';
 import VectorTileLayer from 'ol/layer/VectorTile.js';
+import GeoJSON from 'ol/format/GeoJSON.js';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
 import TileLayer from 'ol/layer/Tile.js';
 import PointerInteraction from 'ol/interaction/Pointer.js';
-import { fromLonLat, getTransform, transform, transformExtent } from 'ol/proj';
+import { getTransform, transform, transformExtent } from 'ol/proj';
 import VectorTileSource from 'ol/source/VectorTile.js';
 import XYZ from 'ol/source/XYZ.js';
 import View from 'ol/View';
 import proj4 from 'proj4';
 import * as turf from '@turf/turf';
+import { Point, MultiLineString } from 'ol/geom';
+import { Feature } from 'ol';
 
 import overrides from './overrides.js';
 import { BASE_MAP_URL, MAP_STYLE_URL, ROUTER_CLIENT_ID } from '../../env.js';
 import { post } from '../../shared/helpers'
 
+import { dotStyle, lineStyle, lineStyle2 } from './styles.js';
 
 proj4.defs([
   ["EPSG:3005", "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"],
@@ -198,6 +204,26 @@ export function createMap() {
     controls: [new ScaleLine({ units: 'metric' })],
   });
 
+  // layer for debug elements on map
+  const layer = new VectorLayer({
+    classname: 'debug',
+    visible: true,
+    source: new VectorSource({ format: new GeoJSON() }),
+    style: null,
+    renderBuffer: 30,
+  });
+  layer.listenForHover = true;
+  layer.listenForClicks = false;
+  map.addLayer(layer);
+  map.set('debug', layer);
+  layer.getSource().remove = (name) => {
+    layer.getSource().forEachFeature((feature) => {
+      if (feature.get('name') === name) {
+        layer.getSource().removeFeature(feature);
+      }
+    });
+  }
+
   map.set('base', 'vector')
   map.set('vector', vectorLayer);
   map.set('roads', roadLayer);
@@ -341,8 +367,6 @@ export const ll2bc = (coords) => proj4('EPSG:4326', 'EPSG:3005', coords);
 export const bc2g = (coords) => proj4('EPSG:3005', 'EPSG:3857', coords);
 export const g2bc = (coords) => proj4('EPSG:3857', 'EPSG:3005', coords);
 
-import { Feature } from 'ol';
-
 function eq(a, b) {
   return a[0] === b[0] && a[1] === b[1];
 }
@@ -421,20 +445,24 @@ const PopulationCenterTypes = [
   'City', // > 5,000
 ];
 
-async function filterByTypes(features, types, coords) {
+async function filterByTypes(features, types, coords, reverseRouteOrder) {
   const results = [];
   for (const feature of features) {
     const index = types.indexOf(feature.properties.featureType);
     if (index < 0) { continue; }
 
     const points = [
-      coords[0], coords[1],
       feature.geometry.coordinates[0], feature.geometry.coordinates[1],
     ];
+    if (reverseRouteOrder) {
+      points.push(coords[0], coords[1]);
+    } else {
+      points.unshift(coords[0], coords[1]);
+    }
     const route = await fetchRoute(points);
 
     if (!route || (route && route.distance < 0)) { continue; }
-    const direction = getCardinalDirection(points);
+    const direction = getCardinalDirection(points, reverseRouteOrder);
 
     results.push({
       source: "BCGNWS",
@@ -451,7 +479,7 @@ async function filterByTypes(features, types, coords) {
   return results;
 };
 
-export async function getNearby(coords) {
+export async function getNearby(coords, reverseRouteOrder) {
   const baseUrl = "https://apps.gov.bc.ca/pub/bcgnws/names/near";
   const params = {
     featureClass: 1,
@@ -471,12 +499,12 @@ export async function getNearby(coords) {
   try {
     const response = await fetch(apiUrl, {mode: 'cors'});
     const data = await response.json();
-    const results = await filterByTypes(data.features, PopulationCenterTypes, coords);
+    const results = await filterByTypes(data.features, PopulationCenterTypes, coords, reverseRouteOrder);
     if (results.length < 5) {
-      results.push(... await filterByTypes(data.features, ['', 'Community'], coords));
+      results.push(... await filterByTypes(data.features, ['', 'Community'], coords, reverseRouteOrder));
     }
     if (results.length < 5) {
-      results.push(... await filterByTypes(data.features, ['Locality'], coords));
+      results.push(... await filterByTypes(data.features, ['Locality'], coords, reverseRouteOrder));
     }
 
     results.sort((a, b) => b.priority - a.priority || a.distance - b.distance);
@@ -505,7 +533,7 @@ export async function fetchRoute(points) {
 /**
  * Get cardinal direction of route
  */
-function getCardinalDirection(points) {
+function getCardinalDirection(points, reverseRouteOrder) {
   const lat1 = points[1] * Math.PI / 180;
   const lat2 = points[3] * Math.PI / 180;
   const dLon = (points[2] - points[0]) * Math.PI / 180;
@@ -514,7 +542,8 @@ function getCardinalDirection(points) {
   const bearing = Math.atan2(y, x) * 180 / Math.PI;
   const normalized = (bearing + 360) % 360;
   const directions = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"];
-  const index = Math.round(normalized / 45) % 8;
+  const addend = reverseRouteOrder ? 4 : 0;
+  const index = (Math.round(normalized / 45) + addend) % 8;
   return directions[index];
 }
 
@@ -572,13 +601,32 @@ export const selectStyle = {
   },
 };
 
+function getLine(coords, name) {
+  const f = new Feature({
+    geometry: new MultiLineString(coords),
+    name,
+  });
+  f.setStyle(lineStyle);
+  f.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+  return f;
+}
+
+/* Finds the nearest road segment on the underlying vector tile to the
+ * coordinate, then finds the nearest point on that segment and returns that
+ * point.
+ */
 export function getSnapped(coordinate, pixel, map) {
   const point = turf.point(g2ll(coordinate));
   let closest;
+  const name = 'snapped lines';
+  map.get('debug').getSource().remove(name);
   map.getFeaturesAtPixel(pixel, { hitTolerance: 50 })
     .filter((f) => f.get('mvt:layer')?.startsWith('DRA Roads'))
     .map((f) => {
-      const line = turf.multiLineString(multi(f.getFlatCoordinates(), f.getEnds().map(a => a), g2ll));
+      const lines = multi(f.getFlatCoordinates(), f.getEnds().map(a => a), g2ll)
+      const line = turf.multiLineString(lines);
+      f.debugLine = getLine(lines, name);
+      map.get('debug').getSource().addFeature(f.debugLine);
       f.snapped = turf.nearestPointOnLine(line, point, { units: "meters" });
       f.closest = !closest || f.snapped.properties.dist < closest.dist;
       if (f.closest) {
@@ -597,6 +645,7 @@ export function getSnapped(coordinate, pixel, map) {
       ) { return; }
       map.pins.getSource().removeFeature(f);
     })
+    closest.debugLine.setStyle(lineStyle2);
   }
   return closest ? ll2g(closest.snapped.geometry.coordinates) : coordinate;
 }
@@ -610,14 +659,19 @@ function unflatten(l) {
 }
 
 const fun = (a) => a;
-function multi(l, ends, func = fun) {
+
+/* Takes a renderfeatures flat coordinates and returns a nest array of
+ * coordinate pairs with func applied to the pair (e.g., for transforming the
+ * pair from one projection to another).
+ */
+function multi(l, ends, func = (a) => a) {
   let curr = [];
   let end = ends.shift();
   const all = [curr];
   for (let ii = 0; ii < l.length; ii += 2) {
     if (ii === end) {
-      all.push(curr);
       curr = [];
+      all.push(curr);
       end = ends.shift();
     }
     curr.push(func([l[ii], l[ii + 1]]));
