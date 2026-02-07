@@ -3,6 +3,12 @@ from rest_framework import serializers
 from apps.organizations.models import Organization, ServiceArea
 
 
+class UserOrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ["id", "name"]
+
+
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization

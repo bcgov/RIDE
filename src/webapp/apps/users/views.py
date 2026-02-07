@@ -48,7 +48,11 @@ class RIDEUserAPIView(ModelViewSet):
     only those fields with changing values.
     '''
 
-    queryset = RIDEUser.objects.all()
+    queryset = RIDEUser.objects.prefetch_related(
+        'socialaccount_set',
+        'organizations',
+        'user_permissions',
+    ).all()
     serializer_class = RIDEUserSerializer
     permission_classes = [permissions.IsAdminUser]
     # permission_classes = [permissions.AllowAny]   # For development

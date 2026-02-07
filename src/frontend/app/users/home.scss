@@ -70,29 +70,34 @@
 
     }
 
-    .user-row {
-      display: grid;
-      padding: 8px;
-      align-items: center;
+    .users-rows {
+      height: calc(100vh - 230px);
+      overflow-y: scroll;
 
-      .user-btn {
-        font-size: .875rem;
-        color: $Grey80;
-        cursor: pointer;
+      .user-row {
+        display: grid;
+        padding: 8px;
+        align-items: center;
+
+        .user-btn {
+          font-size: .875rem;
+          color: $Grey80;
+          cursor: pointer;
+        }
+
+        p {
+          word-break: break-all;
+        }
       }
 
-      p {
-        word-break: break-all;
+      .user-row:nth-child(odd) {
+        background-color: #f9f9f9;
       }
-    }
 
-    .user-row:nth-child(odd) {
-      background-color: #f9f9f9;
-    }
-
-    /* Optional hover effect */
-    .user-row:hover {
-      background-color: #f1f1f1;
+      /* Optional hover effect */
+      .user-row:hover {
+        background-color: #f1f1f1;
+      }
     }
   }
 }
