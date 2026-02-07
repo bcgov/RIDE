@@ -1,12 +1,6 @@
 @use "../styles/variables.scss" as *;
 @use "tailwindcss";
 
-body {
-  main {
-    overflow-y: scroll;
-  }
-}
-
 .segments-home {
   padding: 1rem 1.5rem;
   font-size: 14px;
@@ -193,68 +187,73 @@ body {
 
     }
 
-    .segment-row {
-      display: grid;
-      padding: 8px;
-      align-items: center;
+    .segments-rows {
+      overflow-y: scroll;
+      height: calc(100vh - 256px);
 
-      .segment-cell {
-        display: flex;
-        flex-direction: column;
-        font-size: 16px;
+      .segment-row {
+        display: grid;
+        padding: 8px;
+        align-items: center;
 
-
-        p {
-          word-break: break-all;
-        }
-
-        .formatted-dt {
-          svg {
-            margin-right: .25rem;
-            width: 1.5rem;
-          }
-
-          .dt-row {
-            height: 24px;
-          }
-
-          &.expired {
-            color: $Error;
-          }
-        }
-      }
-
-      .main-cell {
-        .title-row, .action-row {
+        .segment-cell {
           display: flex;
-          align-items: center;
-        }
+          flex-direction: column;
+          font-size: 16px;
 
-        .action-row {
-          .action {
-            margin-top: .5rem;
-            margin-left: 1.5rem;
-            font-size: 14px;
-            color: $Grey80;
-            font-weight: 800;
-            cursor: pointer;
 
+          p {
+            word-break: break-all;
+          }
+
+          .formatted-dt {
             svg {
               margin-right: .25rem;
+              width: 1.5rem;
+            }
+
+            .dt-row {
+              height: 24px;
+            }
+
+            &.expired {
+              color: $Error;
             }
           }
         }
+
+        .main-cell {
+          .title-row, .action-row {
+            display: flex;
+            align-items: center;
+          }
+
+          .action-row {
+            .action {
+              margin-top: .5rem;
+              margin-left: 1.5rem;
+              font-size: 14px;
+              color: $Grey80;
+              font-weight: 800;
+              cursor: pointer;
+
+              svg {
+                margin-right: .25rem;
+              }
+            }
+          }
+        }
+
       }
 
-    }
+      .segment-row:nth-child(odd) {
+        background-color: #f9f9f9;
+      }
 
-    .segment-row:nth-child(odd) {
-      background-color: #f9f9f9;
-    }
-
-    /* Optional hover effect */
-    .segment-row:hover {
-      background-color: #f1f1f1;
+      /* Optional hover effect */
+      .segment-row:hover {
+        background-color: #f1f1f1;
+      }
     }
   }
 
