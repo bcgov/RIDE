@@ -427,26 +427,27 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Data columns */}
-          {!!displayedSegments.length && displayedSegments.map((seg) => {
-            const event = rcsMap[seg.uuid];
+          <div className={'segments-rows'}>
+            {/* Data columns */}
+            {!!displayedSegments.length && displayedSegments.map((seg) => {
+              const event = rcsMap[seg.uuid];
 
-            return (
-              <div key={seg.uuid} className='segment-row'>
-                <MainSegmentCell event={event} seg={seg} />
-                <div className={'segment-cell'}>{event && event.status === 'Active' && event.conditions.map(c => <p key={c}>{c}</p>)}</div>
-                <div className={'segment-cell'}>{event && event.status === 'Active' && event.id}</div>
-                <div className={'segment-cell'}>{event && event.status === 'Active' && <FormattedDt date={event.first_reported.date} user={event.first_reported.user} />}</div>
-                <div className={'segment-cell'}>{event && <FormattedDt date={event.last_updated} user={event.user} />}</div>
-                <div className={'segment-cell'}>{event && event.status === 'Active' && <FormattedDt date={event.timing.nextUpdate} />}</div>
-              </div>
-            );
-          })}
+              return (
+                <div key={seg.uuid} className='segment-row'>
+                  <MainSegmentCell event={event} seg={seg} />
+                  <div className={'segment-cell'}>{event && event.status === 'Active' && event.conditions.map(c => <p key={c}>{c}</p>)}</div>
+                  <div className={'segment-cell'}>{event && event.status === 'Active' && event.id}</div>
+                  <div className={'segment-cell'}>{event && event.status === 'Active' && <FormattedDt date={event.first_reported.date} user={event.first_reported.user} />}</div>
+                  <div className={'segment-cell'}>{event && <FormattedDt date={event.last_updated} user={event.user} />}</div>
+                  <div className={'segment-cell'}>{event && event.status === 'Active' && <FormattedDt date={event.timing.nextUpdate} />}</div>
+                </div>
+              );
+            })}
 
-          {/* Data columns */}
-          {!displayedSegments.length &&
-            <div className='empty-search ml-2 mt-4'>No segments found using current filters.</div>
-          }
+            {!displayedSegments.length &&
+              <div className='empty-search ml-2 mt-4'>No segments found using current filters.</div>
+            }
+          </div>
         </div>
       }
     </div>
