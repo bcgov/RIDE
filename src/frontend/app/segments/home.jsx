@@ -41,23 +41,29 @@ export default function Home() {
   const { setAlertContext } = useContext(AlertContext);
   const { authContext } = useContext(AuthContext);
 
-  // States
+  // Base States
   const [ segments, setSegments ] = useState();
-  const [ displayedSegments, setDisplayedSegments ] = useState()
   const [ serviceAreas, setServiceAreas ] = useState([]);
   const [ routes, setRoutes ] = useState([]);
+
+  // Displaying States
+  const [ displayedSegments, setDisplayedSegments ] = useState([]);
+  const [ displayedAreas, setDisplayedAreas ] = useState([]);
+  const [ displayedRoutes, setDisplayedRoutes ] = useState([]);
+
+  // Selected States
   const [ selectedRoute, setSelectedRoute ] = useState('All roads');
   const [ selectedArea, setSelectedArea ] = useState('All service areas');
+
+  // Helper States
   const [ rcsMap, setRcsMap ] = useState({});
 
-  // Segment selection states
+  // Selection states
   const [ checkedSegs, setCheckedSegs ] = useState([]);
   const [ showBulkBtns, setShowBulkBtns ] = useState(false);
-
-  // Conditions selection states
   const [ checkedConditions, setCheckedConditions ] = useState([]);
 
-  // Side panel state for event form
+  // Conditional states
   const [ showEventPanel, setShowEventPanel ] = useState(false);
 
   const initialEvent = getInitialEvent();
@@ -74,21 +80,30 @@ export default function Home() {
   }, [authContext]);
 
   useEffect(() => {
-    getSegments().then(data => {
-      // order by route, then sorting_order
-      const orderedSegs = data.sort((a, b) => {
-        if (a.route < b.route) return -1;
-        if (a.route > b.route) return 1;
+    Promise.all([getSegments(), getRoutes()]).then(([segData, routeData]) => {
+      // Build a map of route ID -> index in the routes API response
+      const routeIndex = {};
+      routeData.forEach((r, i) => { routeIndex[r.id] = i; });
+
+      // Sort by route order, then area, then sorting_order
+      const orderedSegs = segData.sort((a, b) => {
+        const ra = routeIndex[a.route] ?? Infinity;
+        const rb = routeIndex[b.route] ?? Infinity;
+        if (ra !== rb) return ra - rb;
+        if (a.area < b.area) return -1;
+        if (a.area > b.area) return 1;
         if (a.sorting_order < b.sorting_order) return -1;
         if (a.sorting_order >= b.sorting_order) return 1;
+        return 0;
       });
 
       setSegments(orderedSegs);
       setDisplayedSegments(orderedSegs);
+      setRoutes(routeData);
+      setDisplayedRoutes(routeData);
     });
 
-    getRoutes().then(data => setRoutes(data));
-    getServiceAreas().then(data => setServiceAreas(data));
+    getServiceAreas().then(data => { setServiceAreas(data); setDisplayedAreas(data); });
     getRcs().then(data => {
       const newRcsMap = {};
       data.forEach(rc => {
@@ -102,17 +117,46 @@ export default function Home() {
   useEffect(() => {
     let filteredSegs = segments;
 
-    // filter segments by route
+    // Filter segments by route
     if (selectedRoute !== 'All roads') {
       filteredSegs = segments.filter(seg => seg.route === selectedRoute.id);
     }
 
-    // filter segments by area
+    // Filter chainups by area
     if (selectedArea !== 'All service areas') {
-      filteredSegs = filteredSegs.filter(seg => seg.areas.includes(selectedArea.id));
+      // Include chainups from the selected area and any of its sub-areas
+      const areaIds = new Set([selectedArea.id]);
+      serviceAreas.forEach(sa => {
+        if (sa.parent === selectedArea.id) {
+          areaIds.add(sa.id);
+        }
+      });
+      filteredSegs = filteredSegs.filter(seg => areaIds.has(seg.area));
     }
 
     setDisplayedSegments(filteredSegs);
+
+    // Filter areas based on selected route
+    if (selectedRoute !== 'All roads') {
+      setDisplayedAreas(serviceAreas.filter(sa => sa.routes && sa.routes.includes(selectedRoute.id)));
+    } else {
+      setDisplayedAreas(serviceAreas);
+    }
+
+    // Filter routes based on selected area
+    if (selectedArea !== 'All service areas') {
+      const areaRouteIds = new Set();
+      serviceAreas.forEach(sa => {
+        if (sa.id === selectedArea.id || sa.parent === selectedArea.id) {
+          if (sa.routes) {
+            sa.routes.forEach(rid => areaRouteIds.add(rid));
+          }
+        }
+      });
+      setDisplayedRoutes(routes.filter(r => areaRouteIds.has(r.id)));
+    } else {
+      setDisplayedRoutes(routes);
+    }
   }, [selectedRoute, selectedArea]);
 
   /* Handlers */
@@ -345,14 +389,14 @@ export default function Home() {
           <RIDEDropdown
             label={''}
             extraClasses={'extra-margin-right'}
-            items={['All service areas', ...serviceAreas]}
+            items={['All service areas', ...displayedAreas]}
             handler={(area) => setSelectedArea(area)}
             value={selectedArea} />
 
           <RIDEDropdown
             label={''}
             extraClasses={'extra-margin-right'}
-            items={['All roads', ...routes]}
+            items={['All roads', ...displayedRoutes]}
             handler={(route) => setSelectedRoute(route)}
             value={selectedRoute} />
         </div>

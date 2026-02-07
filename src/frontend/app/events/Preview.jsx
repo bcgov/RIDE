@@ -48,8 +48,25 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
     }
     return c;
   });
-  const isRoadCondition = event.type === 'ROAD_CONDITION';
 
+  const isRoadCondition = event.type === 'ROAD_CONDITION';
+  const isChainup = event.type === 'CHAIN_UP';
+
+  /* Rendering */
+  // Sub-components
+  const EventHeader = () => {
+    if (isRoadCondition) {
+      return <p>{conditions[0]?.label || 'Road condition'}</p>;
+    }
+
+    if (isChainup) {
+      return <p>Commercial chain-up</p>;
+    }
+
+    return <p>{ event.details.severity } {event.type === 'Incident' ? 'incident' : 'delay' }</p>;
+  }
+
+  // Main component
   return (
     <div className={`preview ${event.details.severity.startsWith("Major") ? 'major' : 'minor'} ${event.status.toLowerCase()} ${cleared ? 'cleared' : ''}`}>
       {segments &&
@@ -89,15 +106,38 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
           </div>
           <h3>{ PHRASES_LOOKUP[event.details.situation] }</h3>
 
-          {isRoadCondition ?
-            <p>{conditions[0]?.label || 'Road condition'}</p> :
-            <p>{ event.details.severity } {event.type === 'Incident' ? 'incident' : 'delay' }</p>
-          }
+          <EventHeader />
         </div>
       </div>
 
       <div className="body">
-        {!segments &&
+        {isChainup &&
+          <div>
+            <h3 className="direction">
+              {event.name}
+            </h3>
+
+            <>
+              <h5>Detailed location</h5>
+              <ul>
+                <li>
+                  {event.description}
+                </li>
+              </ul>
+            </>
+
+            <>
+              <h5>Who does this impact?</h5>
+              <ul>
+                <li>
+                  Chain-up requirements apply to a commercial vehicle with a weight of 11,794 kg or greater
+                </li>
+              </ul>
+            </>
+          </div>
+        }
+
+        {!segments && !isChainup &&
           <h3 className="direction">
             {!isRoadCondition && `${event.details?.direction} on `}
             {start.name}
@@ -278,7 +318,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
             </div>
           }
 
-          { (event.type === 'Incident' || event.type === 'ROAD_CONDITION') && event?.status !== 'Inactive' &&
+          { ['Incident', 'ROAD_CONDITION', 'CHAIN_UP'].includes(event.type) && event?.status !== 'Inactive' &&
             <div className="time">
               <strong>Next update</strong><br />
               {!isNaN(nextUpdate) && nextUpdate.toLocaleString()}

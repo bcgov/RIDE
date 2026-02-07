@@ -10,6 +10,21 @@ EXCLUDED = [
 ]
 
 
+class LocationField(models.JSONField):
+    '''
+    Field for holding a GeoJSON location with supplementary information, and
+    validating it.
+    '''
+
+
+class OrderedListField(models.JSONField):
+    '''
+    Field for holding a list of keys, or objects with key values relating to
+    another model or contained extra data.  Order is always preserved.
+    '''
+
+
+
 class BaseModel(models.Model):
     created = models.DateTimeField(default=timezone.now, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
