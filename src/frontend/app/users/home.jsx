@@ -109,8 +109,8 @@ export default function Home() {
       // Determine values based on column key
       switch (key) {
         case 'Name':
-          valueA = `${a.first_name} ${a.last_name}`.toLowerCase();
-          valueB = `${b.first_name} ${b.last_name}`.toLowerCase();
+          valueA = `${a.first_name}${a.last_name}`.toLowerCase();
+          valueB = `${b.first_name}${b.last_name}`.toLowerCase();
           break;
         case 'ID':
           valueA = a.social_username?.toLowerCase();
@@ -160,7 +160,7 @@ export default function Home() {
 
     // Apply organization filter
     if (selectedOrg !== 'All organizations') {
-      filteredUsers = users.filter(user => (user.organization ? user.organization.name : '') === selectedOrg.name);
+      filteredUsers = users.filter(user => (user.organizations?.length ? user.organizations[0] : null) === selectedOrg.id);
     }
 
     // Apply search text filter
@@ -267,6 +267,11 @@ export default function Home() {
   ]
 
   // Main Component
+  const orgMap = orgs.reduce((res, org) => {
+      res[org.id] = org;
+      return res;
+  }, {});
+
   return (
     <div className='users-home p-4'>
       <div className={'toolbar'}>
@@ -347,45 +352,46 @@ export default function Home() {
           </div>
 
           {/* Data columns */}
-          {!!processedUsers.length && processedUsers.map((user) => user.is_active && (
-            <div key={user.id} className='user-row'>
-              <p>{`${user.first_name} ${user.last_name}`}</p>
-              <p>{user.social_username || user.username}</p>
-              <p>{user.email}</p>
-              <p>{user.organization ? user.organization.name : ''}</p>
-              <p>{getUserRole(user)}</p>
-              <p>{formatDate(user.date_joined)}</p>
-              <p>{formatDate(user.last_login)}</p>
+          <div className={'users-rows'}>
+            {!!processedUsers.length && processedUsers.map((user) => user.is_active && (
+              <div key={user.id} className='user-row'>
+                <p>{`${user.first_name} ${user.last_name}`}</p>
+                <p>{user.social_username || user.username}</p>
+                <p>{user.email}</p>
+                <p>{user.organizations?.length ? orgMap[user.organizations[0]].name : ''}</p>
+                <p>{getUserRole(user)}</p>
+                <p>{formatDate(user.date_joined)}</p>
+                <p>{formatDate(user.last_login)}</p>
 
-              <RIDEModal
-                title={'Edit RIDE User'}
-                confirmBtnText={'Update user'}
-                openButton={
-                  <div className={'user-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit</span></div>
-                }>
+                <RIDEModal
+                  title={'Edit RIDE User'}
+                  confirmBtnText={'Update user'}
+                  openButton={
+                    <div className={'user-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit</span></div>
+                  }>
 
-                <EditUserForm user={user} orgs={orgs} setUsers={setUsers} />
-              </RIDEModal>
+                  <EditUserForm user={user} orgs={orgs} setUsers={setUsers} />
+                </RIDEModal>
 
-              <div
-                className={'user-btn'}
-                tabIndex={0}
-                onClick={() => disableUserHandler(user)}
-                onKeyDown={(keyEvent) => {
-                  if (['Enter', 'NumpadEnter'].includes(keyEvent.key)) {
-                    disableUserHandler(user);
-                  }
-                }}>
+                <div
+                  className={'user-btn'}
+                  tabIndex={0}
+                  onClick={() => disableUserHandler(user)}
+                  onKeyDown={(keyEvent) => {
+                    if (['Enter', 'NumpadEnter'].includes(keyEvent.key)) {
+                      disableUserHandler(user);
+                    }
+                  }}>
 
-                <FontAwesomeIcon icon={faBan} /> <span>Remove</span>
+                  <FontAwesomeIcon icon={faBan} /> <span>Remove</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {/* Data columns */}
-          {!processedUsers.length &&
-            <div className='empty-search ml-2 mt-4'>No users found using current search and filters.</div>
-          }
+            {!processedUsers.length &&
+              <div className='empty-search ml-2 mt-4'>No users found using current search and filters.</div>
+            }
+          </div>
         </div>
       }
     </div>
