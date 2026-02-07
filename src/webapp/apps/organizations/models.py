@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.gis.db import models as gis
 
-from apps.events.models import BaseModel, OrderedListField
+from apps.shared.models import BaseModel, OrderedListField
 
 
 class Organization(BaseModel):
@@ -18,3 +18,4 @@ class ServiceArea(BaseModel):
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=False, related_name='children')
     geometry = gis.PolygonField(geography=True, srid=4326, blank=True, null=True)
     segments = OrderedListField(default=list)
+    routes = OrderedListField(default=list)
