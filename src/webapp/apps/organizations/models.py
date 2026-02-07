@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.gis.db import models as gis
 
-from apps.events.models import BaseModel, OrderedListField
+from apps.shared.models import BaseModel, OrderedListField
 
 
 class Organization(BaseModel):
