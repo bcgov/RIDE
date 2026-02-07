@@ -377,6 +377,10 @@ export default class EventForm extends Component {
     const { event, map, dispatch, cancel, setMessage } = this.props;
 
     const form = structuredClone(event);
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 2);
+    now.setSeconds(0);
+    now.setMilliseconds(0);
 
     const geometries = [{
       type: "Point",
@@ -425,10 +429,20 @@ export default class EventForm extends Component {
         err['Manage Timing By'] = 'Must set one or both';
       } else {
         if (form.timing.nextUpdate) {
-          form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+          const nextUpdate = new Date(form.timing.nextUpdate);
+          if (nextUpdate < now) {
+            err['nextUpdate'] = 'Must be in the future';
+          } else {
+            form.timing.nextUpdate = nextUpdate.toISOString();
+          }
         }
         if (form.timing.endTime) {
-          form.timing.endTime = new Date(form.timing.endTime).toISOString();
+          const endTime = new Date(form.timing.endTime);
+          if (endTime < now) {
+            err['endTime'] = 'Must be in the future';
+          } else {
+            form.timing.endTime = endTime.toISOString();
+          }
         }
       }
       form.timing.startTime = null;
@@ -472,7 +486,12 @@ export default class EventForm extends Component {
     } else if (form.type === 'Road Condition' || form.type === 'ROAD_CONDITION') {
       form.type = 'ROAD_CONDITION';
       if (form.timing.nextUpdate) {
-        form.timing.nextUpdate = new Date(form.timing.nextUpdate).toISOString();
+        const nextUpdate = new Date(form.timing.nextUpdate);
+        if (nextUpdate < now) {
+          err['nextUpdate'] = 'Must be in the future';
+        } else {
+          form.timing.nextUpdate = nextUpdate.toISOString();
+        }
       } else {
         err['nextUpdate'] = 'Next update time is required';
       }

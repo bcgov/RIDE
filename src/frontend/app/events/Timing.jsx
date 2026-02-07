@@ -23,18 +23,24 @@ export default function EventTiming({ errors, event, dispatch, isRoadCondition }
 
   const id = ++idc;
 
+  const hasErrors = errors['nextUpdate'] || errors.endTime || errors['Manage Timing By']
   const timingError = isRoadCondition ? errors['nextUpdate'] : errors['Manage Timing By'];
 
   return <div key={'a' + id}>
-    <div className={`title ${timingError ? 'error' : ''}`}>
+    <div className={`title ${hasErrors ? 'error' : ''}`}>
       <p>
         <strong>{isRoadCondition ? 'Next update' : 'Event Timing'}</strong>
         <span className="error-message">{timingError}</span>
       </p>
     </div>
 
-    <div className="input">
-      {!isRoadCondition && <label htmlFor='nextUpdateTime'>Next Update Time</label>}
+    <div className={`input ${errors.nextUpdate ? 'error' : ''}`}>
+      {!isRoadCondition && (
+        <label htmlFor='nextUpdateTime'>
+          Next Update Time
+          <span className="error-message">{errors['nextUpdate']}</span>
+        </label>
+      )}
 
       <div className="row">
         <input
@@ -69,8 +75,11 @@ export default function EventTiming({ errors, event, dispatch, isRoadCondition }
     </div>
 
     {!isRoadCondition &&
-      <div className="input">
-        <label htmlFor="endTime">End Time</label>
+      <div className={`input ${errors.endTime ? 'error' : ''}`}>
+        <label htmlFor="endTime">
+          End Time
+          <span className="error-message">{errors['endTime']}</span>
+        </label>
         <div className="row">
           <input
             id="endTime"
