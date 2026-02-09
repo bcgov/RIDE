@@ -15,9 +15,9 @@ def reverse_references(apps, schema_editor):
     Condition.objects.all().delete()
 
 def load_fixture(apps, schema_editor):
-    call_command('purge_segments', app_label='segments')
+    call_command('purge_segments')
     call_command('loaddata', 'segments.json', app_label='segments')
-    call_command('update_segments', app_label='segments')
+    call_command('update_segments')
 
 def reverse_fixture(apps, schema_editor):
     Event.objects.all().delete()
