@@ -358,7 +358,7 @@ export default function Home() {
                 <p>{`${user.first_name} ${user.last_name}`}</p>
                 <p>{user.social_username || user.username}</p>
                 <p>{user.email}</p>
-                <p>{user.organizations?.length ? orgMap[user.organizations[0]].name : ''}</p>
+                <p>{user.organizations?.length ? orgMap[user.organizations[0]]?.name : ''}</p>
                 <p>{getUserRole(user)}</p>
                 <p>{formatDate(user.date_joined)}</p>
                 <p>{formatDate(user.last_login)}</p>

@@ -140,10 +140,10 @@ function getVisibility(event, visibleLayers) {
       return visibleLayers.closures;
     } else if (new Date(event.timing.startTime) > now) {
       return visibleLayers.future;
-    } else if (event.type === 'Incident' || event.type === 'Planned event') {
-      return visibleLayers[event.details.severity.toLowerCase()];
     } else if (event.type === 'ROAD_CONDITION') {
       return visibleLayers.roadConditions;
+    } else if (event.type === 'Incident' || event.type === 'Planned event') {
+      return visibleLayers[event.details.severity.toLowerCase()];
     }
   } else if (event.status === 'Inactive') {
     return visibleLayers.cleared7 && new Date(event.last_inactivated) > SEVEN_DAYS_AGO;
