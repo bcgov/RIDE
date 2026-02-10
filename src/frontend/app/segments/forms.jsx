@@ -105,7 +105,17 @@ export default class RcsForm extends EventForm {
     }
 
     if (event.timing.nextUpdate) {
-      event.timing.nextUpdate = new Date(event.timing.nextUpdate).toISOString();
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + 2); // 2 minutes buffer
+      now.setSeconds(0);
+      now.setMilliseconds(0);
+
+      const nextUpdateDt = new Date(event.timing.nextUpdate);
+      if (nextUpdateDt < now) {
+        errors['nextUpdate'] = 'Must be in the future';
+      }
+
+      event.timing.nextUpdate = nextUpdateDt.toISOString();
     }
 
     // Set errors and prevent submission if validation fails
