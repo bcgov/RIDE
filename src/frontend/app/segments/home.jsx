@@ -12,7 +12,7 @@ import { getSegments, getRoutes } from "../shared/data/segments";
 import { RoadConditions } from "../events/references";
 import { eventReducer, getInitialEvent } from '../events/forms';
 import RIDEDropdown from '../components/shared/dropdown';
-import Preview from '../events/Preview';
+import Spinner from '../components/shared/spinner.jsx';
 
 // External imports
 import { Checkbox } from "@headlessui/react";
@@ -365,7 +365,7 @@ export default function Home() {
         <ConditionsPanel />
       }
 
-      {checkedSegs.length > 0 ?
+      {checkedSegs.length > 0 && displayedSegments &&
         <div className={'select-bar'}>
           <div className={'count'}>{checkedSegs.length} selected</div>
 
@@ -375,8 +375,10 @@ export default function Home() {
               <div className={'select-btn'} onClick={() => reconfirmConditions(checkedSegs)}>Reconfirm selected</div>
             </>
           }
-        </div> :
+        </div>
+      }
 
+      {displayedSegments &&
         <div className={'select-bar no-select'}>
           No segments selected
         </div>
@@ -416,7 +418,7 @@ export default function Home() {
         </>
       )}
 
-      {displayedSegments &&
+      {displayedSegments ?
         <div className={'segments-table'}>
           {/* Header row */}
           <div className='header-row'>
@@ -448,7 +450,7 @@ export default function Home() {
               <div className='empty-search'>No segments found using current filters.</div>
             }
           </div>
-        </div>
+        </div> : <Spinner />
       }
     </div>
   );

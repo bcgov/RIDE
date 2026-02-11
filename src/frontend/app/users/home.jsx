@@ -14,6 +14,7 @@ import RIDETextInput from '../components/shared/textinput';
 import RIDEModal from "../components/shared/modal";
 import EditUserForm from "./forms/editUser";
 import OrgForm from "./forms/orgForm";
+import Spinner from "../components/shared/spinner.jsx";
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -337,7 +338,7 @@ export default function Home() {
         </div>
       </div>
 
-      {processedUsers &&
+      {processedUsers ?
         <div className={'users-table'}>
           {/* Header row */}
           <div className='header-row'>
@@ -392,7 +393,7 @@ export default function Home() {
               <div className='empty-search'>No users found using current search and filters.</div>
             }
           </div>
-        </div>
+        </div> : <Spinner />
       }
     </div>
   );
