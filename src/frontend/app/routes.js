@@ -19,5 +19,8 @@ export default [
       index("./segments/home.jsx"),
       route("test", "./segments/test.jsx"),
     ]),
+    route("chainups", "./chainups/layout.jsx", [
+      index("./chainups/home.jsx"),
+    ]),
   ]),
 ];

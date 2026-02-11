@@ -2,8 +2,8 @@ from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet
 
 from apps.organizations.models import ServiceArea
-from apps.segments.models import Segment, Route
-from apps.segments.serializers import SegmentSerializer, RouteSerializer
+from apps.segments.models import Segment, Route, ChainUp
+from apps.segments.serializers import SegmentSerializer, RouteSerializer, ChainUpSerializer
 
 def get_user_segments(user):
     user_orgs = user.organizations.all()
@@ -25,6 +25,22 @@ class SegmentAPIView(ModelViewSet):
     def get_queryset(self):
         qs = Segment.current.all() if self.request.user.is_superuser \
             else get_user_segments(self.request.user)
+
+        return qs.extra(select={'id_int': 'CAST(id AS INTEGER)'}).order_by('id_int')
+
+
+class ChainUpAPIView(ModelViewSet):
+    queryset = ChainUp.current.all()
+    serializer_class = ChainUpSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            qs = ChainUp.current.all()
+        else:
+            user_orgs = self.request.user.organizations.all()
+            user_areas = ServiceArea.objects.filter(organizations__in=user_orgs)
+            qs = ChainUp.current.filter(area__in=user_areas)
 
         return qs.extra(select={'id_int': 'CAST(id AS INTEGER)'}).order_by('id_int')
 

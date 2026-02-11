@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.events.models import Event
 from apps.organizations.models import ServiceArea
-from apps.segments.models import Segment, Route
+from apps.segments.models import Segment, Route, ChainUp
 
 
 class SegmentSerializer(serializers.ModelSerializer):
@@ -15,6 +15,12 @@ class SegmentSerializer(serializers.ModelSerializer):
 
     def get_areas(self, obj):
         return ServiceArea.objects.filter(segments__contains=int(obj.id)).order_by('id').values_list('id', flat=True)
+
+
+class ChainUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChainUp
+        exclude = ["geometry"]
 
 
 class RouteSerializer(serializers.ModelSerializer):

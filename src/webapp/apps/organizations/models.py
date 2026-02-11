@@ -18,3 +18,4 @@ class ServiceArea(BaseModel):
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=False, related_name='children')
     geometry = gis.PolygonField(geography=True, srid=4326, blank=True, null=True)
     segments = OrderedListField(default=list)
+    routes = OrderedListField(default=list)
