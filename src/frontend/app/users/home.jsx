@@ -338,7 +338,7 @@ export default function Home() {
       </div>
 
       {processedUsers &&
-        <div className={'users-table mt-13'}>
+        <div className={'users-table'}>
           {/* Header row */}
           <div className='header-row'>
             {columns.map((row, index) => (
@@ -389,7 +389,7 @@ export default function Home() {
             ))}
 
             {!processedUsers.length &&
-              <div className='empty-search ml-2 mt-4'>No users found using current search and filters.</div>
+              <div className='empty-search'>No users found using current search and filters.</div>
             }
           </div>
         </div>
