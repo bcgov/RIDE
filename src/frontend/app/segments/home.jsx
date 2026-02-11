@@ -108,14 +108,21 @@ export default function Home() {
   useEffect(() => {
     let filteredSegs = segments;
 
-    // filter segments by route
+    // Filter segments by route
     if (selectedRoute !== 'All roads') {
       filteredSegs = segments.filter(seg => seg.route === selectedRoute.id);
     }
 
-    // filter segments by area
+    // Filter chainups by area
     if (selectedArea !== 'All service areas') {
-      filteredSegs = filteredSegs.filter(seg => seg.areas.includes(selectedArea.id));
+      // Include chainups from the selected area and any of its sub-areas
+      const areaIds = new Set([selectedArea.id]);
+      serviceAreas.forEach(sa => {
+        if (sa.parent === selectedArea.id) {
+          areaIds.add(sa.id);
+        }
+      });
+      filteredSegs = filteredSegs.filter(seg => areaIds.has(seg.area));
     }
 
     setDisplayedSegments(filteredSegs);

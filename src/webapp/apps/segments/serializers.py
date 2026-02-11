@@ -1,20 +1,20 @@
 from rest_framework import serializers
 
-from apps.events.models import Event
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, Route, ChainUp
 
 
 class SegmentSerializer(serializers.ModelSerializer):
-    areas = serializers.SerializerMethodField()
+    area = serializers.SerializerMethodField()
 
     class Meta:
         model = Segment
         # fields = "__all__"
         exclude = ["geometry"]
 
-    def get_areas(self, obj):
-        return ServiceArea.objects.filter(segments__contains=int(obj.id)).order_by('id').values_list('id', flat=True)
+    def get_area(self, obj):
+        sa = ServiceArea.objects.filter(segments__contains=int(obj.id)).exclude(parent=None).first()
+        return sa.id if sa else None
 
 
 class ChainUpSerializer(serializers.ModelSerializer):

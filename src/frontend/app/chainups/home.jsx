@@ -72,13 +72,14 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Filter chainups
     let filtered = chainups;
 
+    // Filter chainups by route
     if (selectedRoute !== 'All roads') {
       filtered = chainups.filter(cu => cu.route === selectedRoute.id);
     }
 
+    // Filter chainups by area
     if (selectedArea !== 'All service areas') {
       // Include chainups from the selected area and any of its sub-areas
       const areaIds = new Set([selectedArea.id]);
