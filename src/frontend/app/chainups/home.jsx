@@ -59,6 +59,8 @@ export default function Home() {
       const ordered = data.sort((a, b) => {
         if (a.route < b.route) return -1;
         if (a.route > b.route) return 1;
+        if (a.area < b.area) return -1;
+        if (a.area > b.area) return 1;
         if (a.sorting_order < b.sorting_order) return -1;
         if (a.sorting_order >= b.sorting_order) return 1;
       });
