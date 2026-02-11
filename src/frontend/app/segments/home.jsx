@@ -41,23 +41,29 @@ export default function Home() {
   const { setAlertContext } = useContext(AlertContext);
   const { authContext } = useContext(AuthContext);
 
-  // States
+  // Base States
   const [ segments, setSegments ] = useState();
-  const [ displayedSegments, setDisplayedSegments ] = useState()
   const [ serviceAreas, setServiceAreas ] = useState([]);
   const [ routes, setRoutes ] = useState([]);
+
+  // Displaying States
+  const [ displayedSegments, setDisplayedSegments ] = useState([]);
+  const [ displayedAreas, setDisplayedAreas ] = useState([]);
+  const [ displayedRoutes, setDisplayedRoutes ] = useState([]);
+
+  // Selected States
   const [ selectedRoute, setSelectedRoute ] = useState('All roads');
   const [ selectedArea, setSelectedArea ] = useState('All service areas');
+
+  // Helper States
   const [ rcsMap, setRcsMap ] = useState({});
 
-  // Segment selection states
+  // Selection states
   const [ checkedSegs, setCheckedSegs ] = useState([]);
   const [ showBulkBtns, setShowBulkBtns ] = useState(false);
-
-  // Conditions selection states
   const [ checkedConditions, setCheckedConditions ] = useState([]);
 
-  // Side panel state for event form
+  // Conditional states
   const [ showEventPanel, setShowEventPanel ] = useState(false);
 
   const initialEvent = getInitialEvent();
@@ -87,8 +93,8 @@ export default function Home() {
       setDisplayedSegments(orderedSegs);
     });
 
-    getRoutes().then(data => setRoutes(data));
-    getServiceAreas().then(data => setServiceAreas(data));
+    getRoutes().then(data => { setRoutes(data); setDisplayedRoutes(data); });
+    getServiceAreas().then(data => { setServiceAreas(data); setDisplayedAreas(data); });
     getRcs().then(data => {
       const newRcsMap = {};
       data.forEach(rc => {
@@ -113,6 +119,28 @@ export default function Home() {
     }
 
     setDisplayedSegments(filteredSegs);
+
+    // Filter areas based on selected route
+    if (selectedRoute !== 'All roads') {
+      setDisplayedAreas(serviceAreas.filter(sa => sa.routes && sa.routes.includes(selectedRoute.id)));
+    } else {
+      setDisplayedAreas(serviceAreas);
+    }
+
+    // Filter routes based on selected area
+    if (selectedArea !== 'All service areas') {
+      const areaRouteIds = new Set();
+      serviceAreas.forEach(sa => {
+        if (sa.id === selectedArea.id || sa.parent === selectedArea.id) {
+          if (sa.routes) {
+            sa.routes.forEach(rid => areaRouteIds.add(rid));
+          }
+        }
+      });
+      setDisplayedRoutes(routes.filter(r => areaRouteIds.has(r.id)));
+    } else {
+      setDisplayedRoutes(routes);
+    }
   }, [selectedRoute, selectedArea]);
 
   /* Handlers */
@@ -345,14 +373,14 @@ export default function Home() {
           <RIDEDropdown
             label={''}
             extraClasses={'extra-margin-right'}
-            items={['All service areas', ...serviceAreas]}
+            items={['All service areas', ...displayedAreas]}
             handler={(area) => setSelectedArea(area)}
             value={selectedArea} />
 
           <RIDEDropdown
             label={''}
             extraClasses={'extra-margin-right'}
-            items={['All roads', ...routes]}
+            items={['All roads', ...displayedRoutes]}
             handler={(route) => setSelectedRoute(route)}
             value={selectedRoute} />
         </div>
