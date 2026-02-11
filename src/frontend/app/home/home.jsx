@@ -41,11 +41,11 @@ export default function Home() {
   /* Rendering */
   // Main component
   return authContext.loginStateKnown && !authContext.username && (
-    <div className={'homepage gap-8 m-5'}>
-      <h1 className={'mt-5'}>Welcome to the Route Information and Data Entry (RIDE) site</h1>
+    <div className={'homepage'}>
+      <h1>Welcome to the Route Information and Data Entry (RIDE) site</h1>
 
-      <div className={'login-container grid-cols-8 gap-4'}>
-        <div className={'login-options col-span-4 gap-6'}>
+      <div className={'login-container'}>
+        <div className={'login-options'}>
           <p><b>Existing RIDE users</b></p>
           <p>Existing RIDE users can login using their IDIR or BCeID:</p>
 
@@ -85,15 +85,15 @@ export default function Home() {
           }
         </div>
 
-        <div className={'login-access col-span-4 gap-6'}>
+        <div className={'login-access'}>
           <p><b>Don’t have access to RIDE?</b></p>
           <p>To get access to RIDE you must have a BC Government IDIR or a <a href='https://www.bceid.ca/'>BCeID</a>.</p>
           <p>Once you have an IDIR or BCeID you’ll need to request access to RIDE by contacting <a href={'mailto:ride.support@gov.bc.ca'}>ride.support@gov.bc.ca</a>.</p>
         </div>
       </div>
 
-      <div className={'help-container gap-12 mt-16'}>
-        <div className={'help-idir gap-8'}>
+      <div className={'help-container'}>
+        <div className={'help-idir'}>
           <p><b>Need help with IDIR?</b></p>
           <p>
             IDIR users who have registered for MFA may reset their password via <a href={'https://aka.ms/sspr/'}>Self Service
@@ -106,7 +106,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className={'help-bceid gap-8'}>
+        <div className={'help-bceid'}>
           <p><b>Need help with BCeID?</b></p>
           <a href={'https://www.bceid.ca/aboutbceid/contact_us.aspx'}>Contact the BCeID Help Desk</a>
         </div>

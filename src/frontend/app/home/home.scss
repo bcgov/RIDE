@@ -1,10 +1,15 @@
 @use "../styles/variables.scss" as *;
-@use "tailwindcss";
 
 .homepage {
   display: flex;
   flex-direction: column;
-  padding: 0rem 1rem;
+  gap: 2rem;
+  margin: 1.25rem;
+  padding: 0 1rem;
+
+  h1 {
+    margin-top: 1.25rem;
+  }
 
   div {
     display: flex;
@@ -38,11 +43,30 @@
   }
 
   .login-container {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 1rem;
     flex-direction: row;
     justify-content: space-between;
 
     .login-options {
+      grid-column: span 4;
+      gap: 1.5rem;
       align-items: start;
+    }
+
+    .login-access {
+      grid-column: span 4;
+      gap: 1.5rem;
+    }
+  }
+
+  .help-container {
+    gap: 3rem;
+    margin-top: 4rem;
+
+    .help-idir, .help-bceid {
+      gap: 2rem;
     }
   }
 }
