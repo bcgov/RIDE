@@ -5,6 +5,10 @@
   padding: 1rem 1.5rem;
   font-size: 14px;
   color: $Type-Primary;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 
   .conditions-panel {
     display: flex;
@@ -156,9 +160,12 @@
   }
 
   .segments-table {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     border-collapse: collapse;
+    flex: 1;
+    min-height: 0;
 
     // Row widths
     .segment-row, .header-row {
@@ -188,8 +195,9 @@
     }
 
     .segments-rows {
-      overflow-y: scroll;
-      height: calc(100vh - 256px);
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
 
       .segment-row {
         display: grid;

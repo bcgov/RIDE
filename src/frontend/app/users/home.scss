@@ -3,6 +3,10 @@
 
 .users-home {
   padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 
   .toolbar {
     display: flex;
@@ -37,10 +41,13 @@
   }
 
   .users-table {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
+    flex: 1;
+    min-height: 0;
 
     // Row widths
     .user-row, .header-row {
@@ -75,8 +82,9 @@
     }
 
     .users-rows {
-      height: calc(100vh - 230px);
-      overflow-y: scroll;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
 
       .user-row {
         display: grid;
