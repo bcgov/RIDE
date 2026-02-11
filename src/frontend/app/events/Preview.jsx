@@ -56,7 +56,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
         <div className={'segments-tab'}>
           <RIDEDropdown
             label={'Preview'}
-            extraClasses={`mr-5 user-form`}
+            extraClasses={`extra-margin-right user-form`}
             items={segments}
             value={selectedSeg}
             handler={setSelectedSeg} />

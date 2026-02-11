@@ -89,21 +89,21 @@ export default function EditUserForm(props) {
 
         <RIDEDropdown
           label={'Organization: '}
-          extraClasses={`mr-5 user-form`}
+          extraClasses={`extra-margin-right user-form`}
           items={orgs}
           value={user.organization}
           handler={setSelectedOrg} />
 
         <RIDEDropdown
           label={'Role: '}
-          extraClasses={`mr-5 user-form`}
+          extraClasses={`extra-margin-right user-form`}
           items={['Submitter', 'Approver']}
           value={user.is_approver ? 'Approver' : 'Submitter'}
           handler={(value) => setSelectedRole(value === 'Approver')} />
 
         <RIDEDropdown
           label={'Superuser: '}
-          extraClasses={`mr-5 user-form`}
+          extraClasses={`extra-margin-right user-form`}
           items={['No', 'Yes']}
           value={user.is_superuser ? 'Yes' : 'No'}
           handler={(value) => setIsSuperuser(value === 'Yes')} />

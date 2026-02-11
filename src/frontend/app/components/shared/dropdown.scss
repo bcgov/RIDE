@@ -18,6 +18,10 @@
   display: flex;
   align-items: center;
 
+  &.extra-margin-right {
+    margin-right: 1rem;
+  }
+
   &-button {
     display: flex;
     align-items: center;

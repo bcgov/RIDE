@@ -138,14 +138,14 @@ export default function OrgForm(props) {
   return (
     <div className="org-form">
       <div className={'container'}>
-        <RIDETextInput label={'Organization name:'} extraClasses={'mr-5 org-form'} value={name} handler={setName} maxLength={30} />
+        <RIDETextInput label={'Organization name:'} extraClasses={'extra-margin-right org-form'} value={name} handler={setName} maxLength={30} />
         <RIDECheckBoxes
           label={'Service areas:'}
-          extraClasses={'mr-5 org-form'}
+          extraClasses={'extra-margin-right org-form'}
           itemsList={areas.map((area) => { return {...area, name: area.sortingOrder + ' - ' + area.name} })}
           itemsState={serviceAreas} setItemsState={setServiceAreas}/>
-        <RIDETextInput label={'Authoritative contact:'} extraClasses={'mr-5 org-form'} value={contactName} handler={setContactName} maxLength={30} />
-        <RIDETextInput label={'Contact IDIR/BCeID:'} extraClasses={'mr-5 org-form'} value={contactId} handler={setContactId} maxLength={30} />
+        <RIDETextInput label={'Authoritative contact:'} extraClasses={'extra-margin-right org-form'} value={contactName} handler={setContactName} maxLength={30} />
+        <RIDETextInput label={'Contact IDIR/BCeID:'} extraClasses={'extra-margin-right org-form'} value={contactId} handler={setContactId} maxLength={30} />
       </div>
     </div>
   );

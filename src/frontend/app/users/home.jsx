@@ -273,21 +273,21 @@ export default function Home() {
   }, {});
 
   return (
-    <div className='users-home p-4'>
+    <div className='users-home'>
       <div className={'toolbar'}>
         <div className={'left'}>
-          <RIDETextInput label={'Search:'} extraClasses={'mr-5'} value={searchText} handler={setSearchText} maxLength={100} />
+          <RIDETextInput label={'Search:'} extraClasses={'extra-margin-right'} value={searchText} handler={setSearchText} maxLength={100} />
 
           <RIDEDropdown
             label={'Organization'}
-            extraClasses={'mr-5'}
+            extraClasses={'extra-margin-right'}
             items={['All organizations', ...orgs]}
             handler={(filter) => setSelectedOrg(filter)}
             value={selectedOrg} />
 
           <RIDEDropdown
             label={'Sort'}
-            extraClasses={'mr-5'}
+            extraClasses={'extra-margin-right'}
             items={columns}
             handler={(column) => setSortKey(column)}
             value={'Name'} />

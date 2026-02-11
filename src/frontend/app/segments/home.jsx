@@ -337,21 +337,21 @@ export default function Home() {
   ]
 
   return (
-    <div className='segments-home p-4'>
+    <div className='segments-home'>
       <div className={'toolbar'}>
         <div className={'left'}>
           <span>Filter</span>
 
           <RIDEDropdown
             label={''}
-            extraClasses={'mr-5'}
+            extraClasses={'extra-margin-right'}
             items={['All service areas', ...serviceAreas]}
             handler={(area) => setSelectedArea(area)}
             value={selectedArea} />
 
           <RIDEDropdown
             label={''}
-            extraClasses={'mr-5'}
+            extraClasses={'extra-margin-right'}
             items={['All roads', ...routes]}
             handler={(route) => setSelectedRoute(route)}
             value={selectedRoute} />
@@ -445,7 +445,7 @@ export default function Home() {
             })}
 
             {!displayedSegments.length &&
-              <div className='empty-search ml-2 mt-4'>No segments found using current filters.</div>
+              <div className='empty-search'>No segments found using current filters.</div>
             }
           </div>
         </div>

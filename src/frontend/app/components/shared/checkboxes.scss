@@ -1,6 +1,14 @@
+.extra-margin-right {
+  margin-right: 1rem;
+}
+
 .ride-checkboxes {
   display: flex;
   margin-bottom: .75rem;
+
+  &.extra-margin-right {
+    margin-right: 1rem;
+  }
 
   &-label {
     width: 150px;

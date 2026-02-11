@@ -2,6 +2,10 @@
 @use "tailwindcss";
 
 .ride-textinput {
+  &.extra-margin-right {
+    margin-right: 1rem;
+  }
+
   &.org-form {
     .ride-textinput-label {
       width: 150px;
