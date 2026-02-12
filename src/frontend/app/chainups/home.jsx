@@ -5,8 +5,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from "react-router";
 
 // Internal imports
-import { AuthContext } from "../contexts";
-import { getChainUps } from "../shared/data/chainups";
+import { AlertContext, AuthContext } from "../contexts";
+import { getChainUps, toggleChainUps, reconfirmChainUps } from "../shared/data/chainups";
 import { getServiceAreas } from "../shared/data/organizations";
 import { getRoutes } from "../shared/data/segments";
 import RIDEDropdown from '../components/shared/dropdown';
@@ -14,7 +14,7 @@ import Spinner from "../components/shared/spinner.jsx";
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faCalendar, faUser } from '@fortawesome/pro-regular-svg-icons';
+import { faClock, faCalendar, faUser, faCheck, faToggleOn, faToggleOff, faEye } from '@fortawesome/pro-regular-svg-icons';
 
 // Styling
 import './home.scss';
@@ -30,6 +30,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   /* Hooks */
+  const { setAlertContext } = useContext(AlertContext);
   const { authContext } = useContext(AuthContext);
 
   // Base states
@@ -121,9 +122,39 @@ export default function Home() {
 
   }, [selectedRoute, selectedArea]);
 
+  /* Handlers */
+  const updateChainups = (response, message) => {
+    if (response.status === 202) {
+      const updatedMap = {};
+      response.data.forEach(cu => { updatedMap[cu.id] = cu; }); // use ID since UUID will be updated
+
+      const updateList = (list) =>
+        list.map(cu => updatedMap[cu.id] ? { ...cu, ...updatedMap[cu.id] } : cu);
+
+      setChainups(prev => updateList(prev));
+      setDisplayedChainups(prev => updateList(prev));
+
+      setAlertContext({ message });
+    }
+  };
+
+  const toggle = (uuid, currentActive) => {
+    toggleChainUps([uuid]).then((response) => {
+      updateChainups(response, currentActive ? 'Chain-up disabled' : 'Chain-up enabled');
+    });
+  };
+
+  const reconfirm = (uuid) => {
+    reconfirmChainUps([uuid]).then((response) => {
+      updateChainups(response, 'Chain-up reconfirmed');
+    });
+  };
+
   /* Rendering */
   const FormattedDt = ({date, user, showExpiredWarning}) => {
     if (!date) return null;
+    if (!user && !showExpiredWarning) return null;
+
     const dateObj = new Date(date);
 
     const dateFormatted = dateObj.toLocaleDateString('en-US', {
@@ -149,10 +180,12 @@ export default function Home() {
           <FontAwesomeIcon icon={faClock} aria-hidden="true" />
           {timeFormatted}
         </div>
+
         <div className={'dt-row'}>
           <FontAwesomeIcon icon={faCalendar} aria-hidden="true" />
           {dateFormatted}
         </div>
+
         {user &&
           <div className={'dt-row'}>
             <FontAwesomeIcon icon={faUser} aria-hidden="true" />
@@ -207,10 +240,30 @@ export default function Home() {
           <div className={'chainups-rows'}>
             {!!displayedChainups.length && displayedChainups.map((cu) => (
               <div key={cu.uuid} className='chainup-row'>
-                <div className={'chainup-cell'}>{cu.name}</div>
+                <div className={'chainup-cell main-cell'}>
+                  <div className={'name'}>{cu.name}</div>
+                    <div className={'action-row'}>
+                      <div className={'action'} onClick={() => toggle(cu.uuid, cu.active)}>
+                        <FontAwesomeIcon icon={cu.active ? faToggleOn : faToggleOff} aria-hidden="true" />
+                        {`${cu.active ? 'Disable' : 'Enable'} chain-up`}
+                      </div>
+
+                      <div className={'action'} onClick={() => {}}>
+                        <FontAwesomeIcon icon={faEye} aria-hidden="true" />
+                        Preview
+                      </div>
+
+                      {cu.active &&
+                        <div className={'action'} onClick={() => reconfirm(cu.uuid)}>
+                          <FontAwesomeIcon icon={faCheck} aria-hidden="true" />
+                          Reconfirm
+                        </div>
+                      }
+                    </div>
+                </div>
                 <div className={'chainup-cell'}>{cu.active ? 'Chain-up in effect' : ''}</div>
-                <div className={'chainup-cell'}><FormattedDt date={cu.created} /></div>
-                <div className={'chainup-cell'}><FormattedDt date={cu.last_updated} /></div>
+                <div className={'chainup-cell'}>{cu.user && <FormattedDt date={cu.first_reported.date} user={cu.first_reported.user} />}</div>
+                <div className={'chainup-cell'}><FormattedDt date={cu.last_updated} user={cu.user} /></div>
                 <div className={'chainup-cell'}><FormattedDt date={cu.next_update} showExpiredWarning={true} /></div>
               </div>
             ))}

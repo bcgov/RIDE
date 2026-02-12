@@ -1,9 +1,14 @@
-from rest_framework import permissions
+import datetime
+
+from rest_framework import permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, Route, ChainUp
 from apps.segments.serializers import SegmentSerializer, RouteSerializer, ChainUpSerializer
+from apps.users.permissions import Approver
 
 def get_user_segments(user):
     user_orgs = user.organizations.all()
@@ -32,7 +37,7 @@ class SegmentAPIView(ModelViewSet):
 class ChainUpAPIView(ModelViewSet):
     queryset = ChainUp.current.all()
     serializer_class = ChainUpSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [Approver]
 
     def get_queryset(self):
         if self.request.user.is_superuser:
@@ -43,6 +48,45 @@ class ChainUpAPIView(ModelViewSet):
             qs = ChainUp.current.filter(area__in=user_areas)
 
         return qs.extra(select={'id_int': 'CAST(id AS INTEGER)'}).order_by('id_int')
+
+    @action(detail=False, methods=['post'], url_path='toggle')
+    def toggle(self, request):
+        uuids = request.data.get('uuids', [])
+        if not isinstance(uuids, list):
+            return Response({'error': 'uuids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+
+        toggled = []
+        chainups = ChainUp.current.filter(uuid__in=uuids)
+        for chainup in chainups:
+            chainup.active = not chainup.active
+            chainup.user = request.user
+
+            if chainup.active:
+                chainup.next_update = datetime.datetime.now() + datetime.timedelta(days=1)
+
+            else:
+                chainup.next_update = None
+
+            chainup.save()
+            toggled.append(ChainUpSerializer(chainup).data)
+
+        return Response({'status': status.HTTP_202_ACCEPTED, 'data': toggled}, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=['post'], url_path='reconfirm')
+    def reconfirm(self, request):
+        uuids = request.data.get('uuids', [])
+        if not isinstance(uuids, list):
+            return Response({'error': 'uuids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+
+        reconfirmed = []
+        chainups = ChainUp.current.filter(uuid__in=uuids)
+        for chainup in chainups:
+            chainup.next_update = datetime.datetime.now() + datetime.timedelta(days=1)
+            chainup.user = request.user
+            chainup.save()
+            reconfirmed.append(ChainUpSerializer(chainup).data)
+
+        return Response({'status': status.HTTP_202_ACCEPTED, 'data': reconfirmed}, status=status.HTTP_202_ACCEPTED)
 
 
 class RouteAPIView(ModelViewSet):

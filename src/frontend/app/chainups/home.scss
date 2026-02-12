@@ -59,13 +59,33 @@
 
       .chainup-row {
         display: grid;
-        padding: 8px;
+        padding: 1rem;
         align-items: center;
 
         .chainup-cell {
           display: flex;
           flex-direction: column;
           font-size: 14px;
+        }
+
+        .main-cell {
+          .action-row {
+            display: flex;
+            align-items: center;
+            margin-top: .5rem;
+
+            .action {
+              margin-right: 1rem;
+              font-size: 14px;
+              color: $Grey80;
+              font-weight: 800;
+              cursor: pointer;
+
+              svg {
+                margin-right: .25rem;
+              }
+            }
+          }
         }
       }
 
