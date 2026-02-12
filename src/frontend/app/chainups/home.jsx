@@ -10,6 +10,7 @@ import { getChainUps } from "../shared/data/chainups";
 import { getServiceAreas } from "../shared/data/organizations";
 import { getRoutes } from "../shared/data/segments";
 import RIDEDropdown from '../components/shared/dropdown';
+import Spinner from "../components/shared/spinner.jsx";
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -32,12 +33,12 @@ export default function Home() {
   const { authContext } = useContext(AuthContext);
 
   // Base states
-  const [ chainups, setChainups ] = useState([]);
+  const [ chainups, setChainups ] = useState();
   const [ serviceAreas, setServiceAreas ] = useState([]);
   const [ routes, setRoutes ] = useState([]);
 
   // Displaying states
-  const [ displayedChainups, setDisplayedChainups ] = useState([]);
+  const [ displayedChainups, setDisplayedChainups ] = useState();
   const [ displayedAreas, setDisplayedAreas ] = useState([]);
   const [ displayedRoutes, setDisplayedRoutes ] = useState([]);
 
@@ -171,21 +172,21 @@ export default function Home() {
   ];
 
   return (
-    <div className='chainups-home p-4'>
+    <div className='chainups-home'>
       <div className={'toolbar'}>
         <div className={'left'}>
           <span>Filter</span>
 
           <RIDEDropdown
             label={''}
-            extraClasses={'mr-5'}
+            extraClasses={'extra-margin-right'}
             items={['All service areas', ...displayedAreas]}
             handler={(area) => setSelectedArea(area)}
             value={selectedArea} />
 
           <RIDEDropdown
             label={''}
-            extraClasses={'mr-5'}
+            extraClasses={'extra-margin-right'}
             items={['All roads', ...displayedRoutes]}
             handler={(route) => setSelectedRoute(route)}
             value={selectedRoute} />
@@ -215,10 +216,14 @@ export default function Home() {
             ))}
 
             {!displayedChainups.length &&
-              <div className='empty-search ml-2 mt-4'>No chain-up locations found using current filters.</div>
+              <div className='empty-search'>No chain-up locations found using current filters.</div>
             }
           </div>
         </div>
+      }
+
+      {!displayedChainups &&
+        <Spinner />
       }
     </div>
   );

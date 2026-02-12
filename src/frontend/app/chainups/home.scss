@@ -4,6 +4,10 @@
   padding: 1rem 1.5rem;
   font-size: 14px;
   color: $Type-Primary;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 
   .toolbar {
     display: flex;
@@ -20,10 +24,13 @@
   }
 
   .chainups-table {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     border-collapse: collapse;
     margin-top: 1.5rem;
+    flex: 1;
+    min-height: 0;
 
     .chainup-row, .header-row {
       grid-template-columns:
@@ -46,8 +53,9 @@
     }
 
     .chainups-rows {
-      overflow-y: scroll;
-      height: calc(100vh - 200px);
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
 
       .chainup-row {
         display: grid;
@@ -67,6 +75,11 @@
 
       .chainup-row:hover {
         background-color: #f1f1f1;
+      }
+
+      .empty-search {
+        margin-left: 0.5rem;
+        margin-top: 1rem;
       }
     }
   }
