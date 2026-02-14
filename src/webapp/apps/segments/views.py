@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -9,6 +10,7 @@ from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, Route, ChainUp
 from apps.segments.serializers import SegmentSerializer, RouteSerializer, ChainUpSerializer
 from apps.users.permissions import Approver
+
 
 def get_user_segments(user):
     user_orgs = user.organizations.all()
@@ -89,6 +91,16 @@ class ChainUpAPIView(ModelViewSet):
         return Response({'status': status.HTTP_202_ACCEPTED, 'data': reconfirmed}, status=status.HTTP_202_ACCEPTED)
 
 
+def route_sort_key(route):
+    """Sort highways first by number, then non-highways alphabetically."""
+    match = re.match(r'^Highway\s+(\d+)(.*)', route.name)
+    if match:
+        # (0, highway_number, suffix) — highways come first
+        return (0, int(match.group(1)), match.group(2))
+    # (1, 0, name) — non-highways come after, sorted alphabetically
+    return (1, 0, route.name)
+
+
 class RouteAPIView(ModelViewSet):
     serializer_class = RouteSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -102,4 +114,4 @@ class RouteAPIView(ModelViewSet):
             route_ids = segments.values_list('route_id', flat=True)
             qs = Route.objects.filter(id__in=route_ids).distinct()
 
-        return qs.order_by('id')
+        return sorted(qs, key=route_sort_key)

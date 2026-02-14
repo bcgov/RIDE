@@ -57,21 +57,29 @@ export default function Home() {
   }, [authContext]);
 
   useEffect(() => {
-    getChainUps().then(data => {
-      const ordered = data.sort((a, b) => {
-        if (a.route < b.route) return -1;
-        if (a.route > b.route) return 1;
+    Promise.all([getChainUps(), getRoutes()]).then(([cuData, routeData]) => {
+      // Build a map of route ID -> index in the routes API response
+      const routeIndex = {};
+      routeData.forEach((r, i) => { routeIndex[r.id] = i; });
+
+      // Sort by route order, then area, then sorting_order
+      const ordered = cuData.sort((a, b) => {
+        const ra = routeIndex[a.route] ?? Infinity;
+        const rb = routeIndex[b.route] ?? Infinity;
+        if (ra !== rb) return ra - rb;
         if (a.area < b.area) return -1;
         if (a.area > b.area) return 1;
         if (a.sorting_order < b.sorting_order) return -1;
         if (a.sorting_order >= b.sorting_order) return 1;
+        return 0;
       });
 
       setChainups(ordered);
       setDisplayedChainups(ordered);
+      setRoutes(routeData);
+      setDisplayedRoutes(routeData);
     });
 
-    getRoutes().then(data => { setRoutes(data); setDisplayedRoutes(data); });
     getServiceAreas().then(data => { setServiceAreas(data); setDisplayedAreas(data); });
   }, []);
 

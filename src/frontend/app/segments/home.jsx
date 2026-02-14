@@ -80,22 +80,29 @@ export default function Home() {
   }, [authContext]);
 
   useEffect(() => {
-    getSegments().then(data => {
-      // order by route, then sorting_order
-      const orderedSegs = data.sort((a, b) => {
-        if (a.route < b.route) return -1;
-        if (a.route > b.route) return 1;
+    Promise.all([getSegments(), getRoutes()]).then(([segData, routeData]) => {
+      // Build a map of route ID -> index in the routes API response
+      const routeIndex = {};
+      routeData.forEach((r, i) => { routeIndex[r.id] = i; });
+
+      // Sort by route order, then area, then sorting_order
+      const orderedSegs = segData.sort((a, b) => {
+        const ra = routeIndex[a.route] ?? Infinity;
+        const rb = routeIndex[b.route] ?? Infinity;
+        if (ra !== rb) return ra - rb;
         if (a.area < b.area) return -1;
         if (a.area > b.area) return 1;
         if (a.sorting_order < b.sorting_order) return -1;
         if (a.sorting_order >= b.sorting_order) return 1;
+        return 0;
       });
 
       setSegments(orderedSegs);
       setDisplayedSegments(orderedSegs);
+      setRoutes(routeData);
+      setDisplayedRoutes(routeData);
     });
 
-    getRoutes().then(data => { setRoutes(data); setDisplayedRoutes(data); });
     getServiceAreas().then(data => { setServiceAreas(data); setDisplayedAreas(data); });
     getRcs().then(data => {
       const newRcsMap = {};
