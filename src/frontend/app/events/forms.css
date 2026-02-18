@@ -16,12 +16,7 @@
 
   .form-header {
     h4 {
-      .event-id {
-        display: inline-block;
-        margin-left: 1rem;
-        font-size: 1rem;
-        font-weight: normal;
-      }
+      font-size: 24px;
     }
     button {
       border-radius: 4px;
@@ -51,10 +46,15 @@
     }
   }
 
+  .form-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
   .form-body {
     flex: 1;
     overflow: auto;
-    height: 100%;
     scrollbar-color: #999 #f3f2f1;
   }
 
@@ -91,7 +91,6 @@
     .title, .subtitle {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 0.5rem;
 
       &.error {
         p, strong {
@@ -105,6 +104,10 @@
           }
         }
       }
+    }
+
+    .subtitle {
+      font-size: 14px;
     }
 
     .is-closure {

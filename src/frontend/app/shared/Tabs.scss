@@ -1,0 +1,44 @@
+@use "../styles/variables.scss" as *;
+
+.tabs-control {
+  background: white;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .tabs-handles {
+    padding: 0 1rem;
+    border-bottom: solid 2px #ddd;
+    flex: 0;
+
+    .tab-handle {
+      cursor: pointer;
+      margin-right: 2rem;
+
+      &.active {
+        font-weight: bold;
+        cursor: default;
+        border-bottom: solid 2px $BC-Blue;
+        margin-bottom: -2px;
+      }
+    }
+  }
+
+  .tab-body {
+    display: none;
+    background: $Grey20;
+    overflow: hidden;
+    height: 100%;
+    flex: 1;
+
+    &.open {
+      display: block;
+    }
+
+    .tab-control {
+      overflow: hidden;
+      height: 100%;
+    }
+  }
+}

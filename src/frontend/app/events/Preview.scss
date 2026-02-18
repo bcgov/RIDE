@@ -75,6 +75,10 @@
       color: #faf9f8;
       background-color: #2d2d2d;
       padding: 0.5rem 1rem;
+
+      p {
+        color: inherit;
+      }
     }
 
     .icons {

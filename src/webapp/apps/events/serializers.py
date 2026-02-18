@@ -25,6 +25,14 @@ class VersionSerializer(ModelSerializer):
     user = UserSerializer(default=serializers.CurrentUserDefault())
 
 
+class HistorySerializer(VersionSerializer):
+
+    diff = fields.SerializerMethodField()
+
+    def get_diff(self, obj):
+        return obj.diff()
+
+
 class KeyMoveSerializer(VersionSerializer):
     '''
     A serializer for adjusting keys in the data argument prior to processing.
@@ -62,8 +70,10 @@ class KeyMoveSerializer(VersionSerializer):
             self.move_keys(kwargs['data'])
         super().__init__(*args, **kwargs)
 
-    def move_keys(self, data):
+    def move_keys(self, data, partial=False):
         ''' Modify `data`, moving values from one key to a different key. '''
+
+        partial = partial or self.partial
 
         for source, target in self.Meta.keys_to_move.items():
 
@@ -85,7 +95,7 @@ class KeyMoveSerializer(VersionSerializer):
                     current[key] = {}
                 current = current[key]
 
-            if actual is not None or not self.partial:
+            if actual is not None or not partial:
                 current[path[-1]] = actual
 
     def to_representation(self, instance):
@@ -201,6 +211,10 @@ class EventSerializer(KeyMoveSerializer):
         return False
 
     def to_internal_value(self, data):
+        request = self.context.get("request")
+        if self.instance and request and hasattr(request, "user"):
+            self.instance.user = request.user
+
         if data.get('id') is None and self.instance is None:  # creating
             data['id'] = self.get_id()
 
@@ -234,9 +248,10 @@ class EventSerializer(KeyMoveSerializer):
         # have to remove meta here to avoid sending it, rather than as an
         # excluded field, because otherwise meta doesn't get populated on the
         # way in through key movement and to_internal_value()
-        del obj['meta']
+        if 'meta' in obj:
+            del obj['meta']
 
-        if obj['type'] == 'ROAD_CONDITION':
+        if obj.get('type') == 'ROAD_CONDITION':
             if instance.segment:
                 obj['location']['start']['name'] = instance.segment.name
             obj['polygon'] = instance.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2).coords[0]
@@ -298,6 +313,17 @@ class EventSerializer(KeyMoveSerializer):
             return f'DBC-{int(event.id.split('-')[-1]) + 1}'
 
 
+class EventHistorySerializer(EventSerializer, HistorySerializer):
+    pass
+
+
+class EventDiffSerializer(EventSerializer, HistorySerializer):
+    class Meta:
+        model = Event
+        fields=['version', 'diff']
+        keys_to_move = {}
+
+
 class PendingSerializer(EventSerializer):
 
     latest_published_version = serializers.SerializerMethodField()
@@ -316,6 +342,7 @@ class PendingSerializer(EventSerializer):
             return True
 
         return False
+
 
 class TrafficImpactSerializer(ModelSerializer):
 

@@ -80,6 +80,12 @@ export const RestrictionsList = [
   { id: 9, label: 'Width', placeholder: 'Meters (max 10)' },
 ];
 
+export const RestrictionsLookup = RestrictionsList.reduce((acc, restriction) => {
+  acc[restriction.id] = restriction.label;
+  return acc;
+}, {});
+
+
 export const RoadConditions = [
   { 'id': 1, 'label': 'Black ice', },
   { 'id': 2, 'label': 'Blowing snow', },

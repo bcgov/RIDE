@@ -113,6 +113,7 @@ export function desc(schedule, short=false) {
 
 function Schedule({ id, item, change, update, current, dispatch, index, errors }) {
   const hasErrors = !!(errors || item.error);
+  const error = item?.error || errors?.item;
   return <>
     <div className="row">
       <span className={`row-title ${hasErrors && 'errors'}`}><strong>{desc(item)}</strong></span>
@@ -126,9 +127,9 @@ function Schedule({ id, item, change, update, current, dispatch, index, errors }
       </button>
     </div>
     <div className="input">
-      <label className={item.error ? 'error' : undefined}>
+      <label className={error ? 'error' : undefined}>
         Days affected
-        { item.error && <span className="error-message">{item.error}</span>}
+        { error && <span className="error-message">{error}</span>}
 
       </label>
       <div className="row">

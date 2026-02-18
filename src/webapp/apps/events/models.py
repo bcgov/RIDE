@@ -1,3 +1,9 @@
+import os
+from pprint import pprint
+from time import strftime, strptime
+
+from dictdiffer import diff
+
 from django.contrib.gis.db import models as gis
 from django.db import models, transaction
 from django.db.models import ForeignKey
@@ -5,7 +11,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 from apps.segments.models import Segment
-from apps.shared.models import BaseModel, VersionedModel, OrderedListField, LocationField
+from apps.shared.models import BaseModel, LocationField, OrderedListField, VersionedModel
 
 
 class PendingManager(models.Manager):
@@ -17,6 +23,112 @@ class PendingManager(models.Manager):
 class LatestApprovedManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(latest_approved=True, deleted=False)
+
+days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+DAY_NAMES = {
+  'mon': 'Monday',
+  'tue': 'Tuesday',
+  'wed': 'Wednesday',
+  'thu': 'Thursday',
+  'fri': 'Friday',
+  'sat': 'Saturday',
+  'sun': 'Sunday',
+}
+SHORT_DAY_NAMES = {
+  'mon': 'Mon',
+  'tue': 'Tue',
+  'wed': 'Wed',
+  'thu': 'Thu',
+  'fri': 'Fri',
+  'sat': 'Sat',
+  'sun': 'Sun',
+}
+
+# annoying platform difference in underlying C library strftime implementation
+TIME_FORMAT = '%-I:%M %p' if os.name != 'nt' else '%#I:%M %p'
+
+def parse_time(time):
+    '''
+    Return a time string of '17:04' as '5:04 pm'.  Return None on any input
+    failing to parse.
+    '''
+
+    try:
+        return strftime(TIME_FORMAT, strptime(time, '%H:%M'))
+    except:
+        return None
+
+def desc(schedule, short_days=False):
+    ''' Return a string describing the schedule '''
+
+    groups = []
+    current = []
+    groups.append(current)
+
+    for day in days_of_the_week:
+        if schedule[day]:
+            if short_days:
+                current.append(SHORT_DAY_NAMES[day])
+            else:
+                current.append(DAY_NAMES[day])
+        else:
+            current = []
+            groups.append(current)
+
+    names = []
+    for group in groups:
+        if len(group) == 0:
+            continue
+
+        if len(group) == 7:
+            names.append('every day' if schedule.get('allDay', False) else 'Every day')
+        elif len(group) > 2:
+            names.append(f'{group[0]} to {group[-1]}')
+        else:
+            names.extend(group)
+
+    final = ', '.join(names)
+
+    if schedule.get('allDay', False):
+        final = f'All day {final}'
+    else:
+        start = parse_time(schedule.get('startTime'))
+        end = parse_time(schedule.get('endTime'))
+        if start is not None:
+            if end is not None:
+                final = f'{final}, from {start} to {end}'
+            else:
+                final = f'{final}, from {start}'
+        elif end is not None:
+            final = f'{final}, until {end}'
+
+    if len(final) > 40 and not short_days:
+        return desc(schedule, True)
+
+    return final
+
+
+def schedule_diff(a, b):
+    a_scheds = {s['id']:desc(s) for s in a}
+    b_scheds = {s['id']:desc(s) for s in b}
+    diff = {}
+
+    for s in a:
+        if s['id'] not in b_scheds:
+            if 'remove' not in diff:
+                diff['remove'] = []
+            diff['remove'].append(a_scheds[s['id']])
+        elif a_scheds[s['id']] != b_scheds[s['id']]:
+            if 'change' not in diff:
+                diff['change'] = []
+            diff['change'].append([a_scheds[s['id']], b_scheds[s['id']]])
+    for s in b:
+        if s['id'] not in a_scheds:
+            if 'add' not in diff:
+                diff['add'] = []
+            diff['add'].append(b_scheds[s['id']])
+
+    return diff
 
 
 class Event(VersionedModel):
@@ -48,7 +160,7 @@ class Event(VersionedModel):
     impacts = OrderedListField(default=list)
     restrictions = OrderedListField(default=list)
     conditions = OrderedListField(default=list)
-    schedules = OrderedListField(default=list)
+    schedules = OrderedListField(default=list, diff=schedule_diff)
 
     segment = ForeignKey(Segment, on_delete=models.CASCADE, blank=True, null=True)
 
@@ -66,6 +178,8 @@ class Event(VersionedModel):
     # rather than latest (still available via the .last manager)
     current = LatestApprovedManager()
     pending = PendingManager()
+
+    ignored_fields = ['meta', 'latest_approved']
 
     def save(self, *args, **kwargs):
         '''
@@ -85,8 +199,13 @@ class Event(VersionedModel):
                     .update(latest_approved=False)
             super().save(*args, **kwargs)
 
+    def get_ignored_fields(self):
+        ignored = super().get_ignored_fields().copy()
+        ignored.extend(self.ignored_fields)
+        return ignored
+
     def __str__(self):
-        return f'{self.id} ({self.version}) {self.latest} {self.approved} {self.latest_approved}'
+        return f'{self.id} v{self.version}'
 
 
 class Note(VersionedModel):
