@@ -16,7 +16,7 @@ import RideFeature, { PinFeature } from './feature.js';
 import ContextMenu from '../../events/ContextMenu';
 import { getInitialEvent } from '../../events/forms';
 
-import { API_HOST } from '../../env.js';
+import { API_HOST, EVENT_POLLING_REFRESH } from '../../env.js';
 import { getIconAndStroke } from '../../events/icons';
 import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers.js';
 import { endHandler } from './PinLayer';
@@ -185,10 +185,42 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     if (!feature) {
       if (!event.location.start?.name || !event.showForm) {
         items.push({
-          label: 'Create event',
+          label: 'Create incident',
           action: (e) => {
             setContextMenu([]);
-            dispatch({ type: 'reset form', value: getInitialEvent(), showPreview: true, showForm: true });
+            dispatch({ type: 'reset form', value: () => getInitialEvent('Incident'), showPreview: true, showForm: true });
+            map.start = new PinFeature({
+              style: 'start',
+              geometry: new Point(coordinate),
+              action: 'set start',
+              isVisible: true,
+            });
+            map.pins.getSource().addFeature(map.start);
+            map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+            endHandler({ coordinate, pixel, map, }, map.start, dispatch);
+          }
+        });
+        items.push({
+          label: 'Create planned event',
+          action: (e) => {
+            setContextMenu([]);
+            dispatch({ type: 'reset form', value: () => getInitialEvent('Planned event'), showPreview: true, showForm: true });
+            map.start = new PinFeature({
+              style: 'start',
+              geometry: new Point(coordinate),
+              action: 'set start',
+              isVisible: true,
+            });
+            map.pins.getSource().addFeature(map.start);
+            map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+            endHandler({ coordinate, pixel, map, }, map.start, dispatch);
+          }
+        });
+        items.push({
+          label: 'Create road condition',
+          action: (e) => {
+            setContextMenu([]);
+            dispatch({ type: 'reset form', value: () => getInitialEvent('ROAD_CONDITION'), showPreview: true, showForm: true });
             map.start = new PinFeature({
               style: 'start',
               geometry: new Point(coordinate),
@@ -240,6 +272,8 @@ export default function Layer({ visibleLayers, event, dispatch }) {
             label: 'View history',
             action: (e) => {
               setContextMenu([]);
+              selectFeature(map, feature);
+              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true, showHistory: true });
             }
           }
         );
@@ -333,7 +367,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     map.on('pointermove', pointerMove);
     updateEvents(map, dispatch, layerStyle);
     if (!fetchInterval) {
-      setFetchInterval(setInterval(() => updateEvents(map, dispatch, layerStyle), 10000));
+      setFetchInterval(setInterval(() => updateEvents(map, dispatch, layerStyle), EVENT_POLLING_REFRESH || 10000));
     }
   }, [map]);
 

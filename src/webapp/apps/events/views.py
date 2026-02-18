@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.events.models import Event, Condition
-from apps.events.serializers import EventSerializer, ConditionSerializer
+from apps.events.serializers import EventSerializer, EventHistorySerializer, EventDiffSerializer, ConditionSerializer
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment
 from .enums import EventType
@@ -21,6 +21,25 @@ class Events(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
+
+    @action(detail=True)
+    def history(self, request, id):
+        event = self.get_object()
+        queryset = Event.objects.filter(id=event.id)
+        serializer = EventHistorySerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def diffs(self, request, id):
+        event = self.get_object()
+        queryset = Event.objects.filter(id=event.id)
+        serializer = EventDiffSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        # need to do this here, otherwise serializer doesn't pick up user via
+        # default field value
+        return super().partial_update(request, *args, **kwargs)
 
 
 def validate_allowed_segments(user, segPks):
@@ -107,7 +126,7 @@ class RoadConditions(Events):
                 segment = Segment.objects.get(uuid=seg_pk)
 
                 existing_event = Event.objects.filter(segment=segment, event_type=EventType.ROAD_CONDITION, latest=True, status='Active').first()
-                
+
                 # Convert segment geometry to GeoJSON format
                 geometry_geojson = None
                 if segment.geometry:
@@ -118,7 +137,7 @@ class RoadConditions(Events):
                             json.loads(segment.geometry.json)  # Convert LineString to GeoJSON
                         ]
                     }
-                
+
                 default_event_data = {
                     'id': existing_event.id if existing_event else None,
                     'conditions': [c['id'] for c in event_data['conditions']],
@@ -141,7 +160,7 @@ class RoadConditions(Events):
                     data=merged_data,
                     context={'request': request}
                 )
-            
+
                 if serializer.is_valid():
                     event = serializer.save()
                     updated_events.append(RcSerializer(event, context={'request': request}).data)
@@ -149,7 +168,7 @@ class RoadConditions(Events):
                     # Log validation errors for debugging
                     print(f"Validation errors for segment {seg_pk}: {serializer.errors}")
                     continue
-                
+
             except Segment.DoesNotExist:
                 # Skip segments that don't exist
                 continue

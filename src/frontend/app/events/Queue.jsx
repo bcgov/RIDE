@@ -86,8 +86,6 @@ export default function Queue({ dispatch, goToFunc, map }) {
     <>
       <PollingComponent runnable={pollEvents} interval={10000} runImmediately={true}/>
 
-      <header className='events-header'><h3>Events</h3></header>
-
       <div className='queue'>
         {pending.map((event) => (
           <Pending key={event.id} event={event} dispatch={dispatch} goToFunc={goToFunc} map={map} />

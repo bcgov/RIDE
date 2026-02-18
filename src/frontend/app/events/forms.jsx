@@ -28,6 +28,9 @@ import { getCookie } from './shared.jsx';
 import { API_HOST } from '../env';
 import { AuthContext } from '../contexts';
 import { patch, getNextUpdate, getPendingNextUpdate } from '../shared/helpers.js';
+import Tabs from '../shared/Tabs';
+import History from './History/History.jsx';
+
 
 import './forms.css';
 
@@ -233,6 +236,10 @@ export function eventReducer(event, action) {
       return { ...event, additional: action.value };
     }
 
+    case 'set preview': {
+      return { ...event, preview: action.value };
+    }
+
     case 'set note': {
       return { ...event, notes: [{ text: action.value }] };
     }
@@ -253,9 +260,10 @@ export function eventReducer(event, action) {
         return event; // disallow resetting if form is open
       }
       if (action.value) {
-        const event = structuredClone(action.value);
+        const event = structuredClone(typeof(action.value) === 'function' ? action.value() : action.value);
         event.showPreview = !!action.showPreview;
         event.showForm = !!action.showForm;
+        event.showHistory = !!action.showHistory;
         return event;
       } else if (action.showForm) {
         return { ...event, showPreview: false };
@@ -316,13 +324,13 @@ function addId(obj) {
   return obj;
 }
 
-export function getInitialEvent() {
+export function getInitialEvent(eventType = 'Incident') {
   return {
     showPreview: true,
     showForm: false,
     id: null,
     status: 'Active',
-    type: 'Incident',
+    type: eventType,
     waypoints: [],
     location: {
       start: structuredClone(LOCATION_BLANK),
@@ -360,6 +368,16 @@ export function getInitialEvent() {
   }
 }
 
+function getLabel(eventType) {
+  switch (eventType) {
+    case 'Incident':
+    case 'Planned event':
+    case 'Road condition':
+      return eventType.toLowerCase();
+    case 'ROAD_CONDITION':
+      return 'road condition';
+  }
+}
 
 export default class EventForm extends Component {
   static contextType = AuthContext;
@@ -466,12 +484,17 @@ export default class EventForm extends Component {
       if (form.timing.startTime) {
         form.timing.startTime = new Date(form.timing.startTime).toISOString();
       }
-      if (form.timing.endTime) {
+      if (!form.timing.ongoing && form.timing.endTime) {
         form.timing.endTime = new Date(form.timing.endTime).toISOString();
+      } else {
+        form.timing.endTime = null;
       }
 
       const scheduleErrors = form.timing.schedules.map((schedule) => {
         const errors = {};
+        if (days_of_the_week.filter((day) => schedule[day]).length === 0) {
+          errors.item = "Must have at least one day selected";
+        }
         if (!schedule.allDay) {
           if (!schedule.startTime) {
             errors.startTime = 'Must set start time';
@@ -571,152 +594,150 @@ export default class EventForm extends Component {
       <form id='event-form'>
         <div className="section form-header">
           <div className="title">
-
-          { event.id
-            ? <h4>Edit { event.type.toLowerCase() } <span className="event-id">{event.id} v{event.version}</span></h4>
-            : <h4>
-                Create&nbsp;
-                <select
-                  onChange={(e) => dispatch({
-                    type: 'set type',
-                    event_type: e.target.value })
-                  }
-                  defaultValue={event.type}>
-                  {FORMS.map((form) => (<option key={form}>{form}</option>))}
-                </select>
-              </h4>
-
-          }
-          <button type="button" onClick={() => dispatch({ type: 'set', value: { showPreview: !event.showPreview } })}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z"/></svg>
-            Preview
-          </button>
+            <h4>{event.id ? 'Edit' : 'Create'} { getLabel(event.type) }</h4>
+            <button type="button" onClick={() => dispatch({ type: 'set', value: { showPreview: !event.showPreview } })}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z"/></svg>
+              Preview
+            </button>
           </div>
+          { event.id && <div className="subtitle">{event.id} v{event.version}</div> }
         </div>
 
-        <div className="form-body">
-          { event.location.start.name && <>
-            <div className="section location">
-              <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} />
+        <Tabs>
+          <Tabs.Tab name='edit' label='Edit event'>
+            <div className="form-container">
+              <div className="form-body">
+                { event.location.start.name && <>
+                  <div className="section location">
+                    <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} />
+                  </div>
+
+                  { DETAILS_FORMS.includes(event.type) &&
+                    <div className="section details">
+                      <Details errors={errors} event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { IMPACTS_FORMS.includes(event.type) &&
+                    <div className="section impacts">
+                      <Impacts errors={errors} event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { DELAYS_FORMS.includes(event.type) &&
+                    <div className="section delays">
+                      <Delays errors={errors} event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { RESTRICTIONS_FORMS.includes(event.type) &&
+                    <div className="section restrictions">
+                      <Restrictions errors={errors} event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { CONDITIONS_FORMS.includes(event.type) &&
+                    <div className="section conditions">
+                      <Conditions errors={errors} event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { TIMING_FORMS.includes(event.type) &&
+                    <div className="section timing">
+                      <EventTiming
+                        errors={errors}
+                        event={event}
+                        dispatch={dispatch}
+                        isRoadCondition={CONDITIONS_FORMS.includes(event.type)}
+                      />
+                    </div>
+                  }
+
+                  { event?.type === 'Planned event' &&
+                    <div className="section scheduled">
+                      <Scheduled errors={errors} event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { event.type &&
+                    <div className="section additional">
+                      <AdditionalMessaging event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { EXTERNAL_FORMS.includes(event.type) &&
+                    <div className="section external">
+                      <External event={event} dispatch={dispatch} />
+                    </div>
+                  }
+
+                  { INTERNAL_FORMS.includes(event.type) &&
+                    <div className="section internal">
+                      <InternalNotes event={event} dispatch={dispatch} />
+                    </div>
+                  }
+                </>}
+              </div>
+
             </div>
+          </Tabs.Tab>
 
-            { DETAILS_FORMS.includes(event.type) &&
-              <div className="section details">
-                <Details errors={errors} event={event} dispatch={dispatch} />
-              </div>
-            }
+          <Tabs.Tab name='history' label='Event history' default={event.showHistory}>
+            <History event={event} dispatch={dispatch} />
+          </Tabs.Tab>
+        </Tabs>
 
-            { IMPACTS_FORMS.includes(event.type) &&
-              <div className="section impacts">
-                <Impacts errors={errors} event={event} dispatch={dispatch} />
-              </div>
-            }
+        { event.location.start.name &&
+          <div className="section buttons">
+            <button type="button" onClick={(e) => this.handleSubmit(e, this.getLabel())}>
+                <FontAwesomeIcon icon={faCircleCheck} />
+              {this.getLabel()}
+            </button>
 
-            { DELAYS_FORMS.includes(event.type) &&
-              <div className="section delays">
-                <Delays errors={errors} event={event} dispatch={dispatch} />
-              </div>
-            }
-
-            { RESTRICTIONS_FORMS.includes(event.type) &&
-              <div className="section restrictions">
-                <Restrictions errors={errors} event={event} dispatch={dispatch} />
-              </div>
-            }
-
-            { CONDITIONS_FORMS.includes(event.type) &&
-              <div className="section conditions">
-                <Conditions errors={errors} event={event} dispatch={dispatch} />
-              </div>
-            }
-
-            { TIMING_FORMS.includes(event.type) &&
-              <div className="section timing">
-                <EventTiming
-                  errors={errors}
-                  event={event}
-                  dispatch={dispatch}
-                  isRoadCondition={CONDITIONS_FORMS.includes(event.type)}
-                />
-              </div>
-            }
-
-            { event?.type === 'Planned event' &&
-              <div className="section scheduled">
-                <Scheduled errors={errors} event={event} dispatch={dispatch} />
-              </div>
-            }
-
-            { event.type &&
-              <div className="section additional">
-                <AdditionalMessaging event={event} dispatch={dispatch} />
-              </div>
-            }
-
-            { EXTERNAL_FORMS.includes(event.type) &&
-              <div className="section external">
-                <External event={event} dispatch={dispatch} />
-              </div>
-            }
-
-            { INTERNAL_FORMS.includes(event.type) &&
-              <div className="section internal">
-                <InternalNotes event={event} dispatch={dispatch} />
-              </div>
-            }
-
-            <div className="section buttons">
-              <button type="button" onClick={(e) => this.handleSubmit(e, this.getLabel())}>
-                  <FontAwesomeIcon icon={faCircleCheck} />
-                {this.getLabel()}
-              </button>
-
-              { event.id && event.type === 'ROAD_CONDITION' &&
-                <button
-                  type="button"
-                  className={`secondary ${pendingNextUpdate ? '' : 'disabled'}`}
-                  onClick={() => {
-                    if (pendingNextUpdate) {
-                      patch(
-                        `${API_HOST}/api/events/${event.id}`,
-                        { timing: { nextUpdate: pendingNextUpdate.toISOString() } },
-                      ).then((event) => {
-                        dispatch({ type: 'reset form', cancel: true, value: event, showPreview: true, showForm: false });
-                      });
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon icon={faCheckDouble} />
-                  Reconfirm
-                </button>
-              }
-
-              { event.id && event.type === 'ROAD_CONDITION' &&
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => {
+            { event.id && event.type === 'ROAD_CONDITION' &&
+              <button
+                type="button"
+                className={`secondary ${pendingNextUpdate ? '' : 'disabled'}`}
+                onClick={() => {
+                  if (pendingNextUpdate) {
                     patch(
                       `${API_HOST}/api/events/${event.id}`,
-                      { status: 'Inactive' },
-                    ).then((updatedEvent) => {
-                      dispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: true, showForm: false });
+                      { timing: { nextUpdate: pendingNextUpdate.toISOString() } },
+                    ).then((event) => {
+                      dispatch({ type: 'reset form', cancel: true, value: event, showPreview: true, showForm: false });
                     });
-                  }}
-                >
-                  <FontAwesomeIcon icon={faTrashCan} />
-                  Clear
-                </button>
-              }
-
-              <button type="button" className="cancel" onClick={cancel}>
-                  <FontAwesomeIcon icon={faXmark} />
-                Cancel
+                  }
+                }}
+              >
+                <FontAwesomeIcon icon={faCheckDouble} />
+                Reconfirm
               </button>
-            </div>
-          </>}
+            }
 
-        </div>
+            { event.id && event.type === 'ROAD_CONDITION' &&
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  patch(
+                    `${API_HOST}/api/events/${event.id}`,
+                    { status: 'Inactive' },
+                  ).then((updatedEvent) => {
+                    dispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: true, showForm: false });
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faTrashCan} />
+                Clear
+              </button>
+            }
+
+            <button type="button" className="cancel" onClick={cancel}>
+                <FontAwesomeIcon icon={faXmark} />
+              Cancel
+            </button>
+          </div>
+        }
       </form>
     </div>
     );

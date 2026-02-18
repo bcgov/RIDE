@@ -14,11 +14,13 @@ import Layers, { allLayers } from './Layers';
 import PinLayer from '../components/Map/PinLayer';
 import { AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
+import Tabs from '../shared/Tabs';
 
 import EventForm, { eventReducer, getInitialEvent } from './forms';
 import Preview from './Preview';
 import Message from './Message';
 import Queue from './Queue';
+import History from './History/History.jsx';
 
 // Styling
 import './home.scss';
@@ -140,7 +142,17 @@ export default function Home() {
               goToFunc={centerMap}
               setMessage={setMessage}
             />
-          : <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
+          : <>
+              <h3>Events</h3>
+              <Tabs>
+                <Tabs.Tab name='active' label='Active'>
+                  active
+                </Tabs.Tab>
+                <Tabs.Tab name='queue' label={<span>Awaiting Approval <span className='num'>3</span></span>}>
+                  <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
+                </Tabs.Tab>
+              </Tabs>
+            </>
         }
       </div>
 

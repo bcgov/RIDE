@@ -13,3 +13,4 @@ export const DEPLOYMENT_TAG = `${getEnv('DEPLOYMENT_TAG')}`;
 export const BRANCH = `${getEnv('BRANCH')}`;
 export const RELEASE = `${getEnv('RELEASE')}`;
 export const ALLOW_LOCAL_ACCOUNTS = `${getEnv('ALLOW_LOCAL_ACCOUNTS')}`;
+export const EVENT_POLLING_REFRESH = `${getEnv('EVENT_POLLING_REFRESH')}`;
