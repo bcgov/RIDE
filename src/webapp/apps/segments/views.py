@@ -1,6 +1,8 @@
 import datetime
 import re
 
+from zoneinfo import ZoneInfo
+
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -64,7 +66,7 @@ class ChainUpAPIView(ModelViewSet):
             chainup.user = request.user
 
             if chainup.active:
-                chainup.next_update = datetime.datetime.now() + datetime.timedelta(days=1)
+                chainup.next_update = datetime.datetime.now(tz=ZoneInfo("America/Vancouver")) + datetime.timedelta(days=1)
 
             else:
                 chainup.next_update = None
@@ -83,7 +85,7 @@ class ChainUpAPIView(ModelViewSet):
         reconfirmed = []
         chainups = ChainUp.current.filter(uuid__in=uuids)
         for chainup in chainups:
-            chainup.next_update = datetime.datetime.now() + datetime.timedelta(days=1)
+            chainup.next_update = datetime.datetime.now(tz=ZoneInfo("America/Vancouver")) + datetime.timedelta(days=1)
             chainup.user = request.user
             chainup.save()
             reconfirmed.append(ChainUpSerializer(chainup).data)
