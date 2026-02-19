@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('segments', '0005_alter_segment_options_chainup'),
+        ('organizations', '0007_auto_20260219_0100'),
     ]
 
     operations = [
