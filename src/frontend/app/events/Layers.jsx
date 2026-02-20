@@ -105,7 +105,7 @@ function Legend() {
       <div className='option'>
         Dynamic message signs
       </div>
-      <p>Current messaging on dynamic message signs.</p>
+      <p>Digital traffic signs that communicate travel information to drivers.</p>
 
       <div className='group'>Commercial vehicles</div>
 
