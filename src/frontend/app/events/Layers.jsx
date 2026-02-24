@@ -22,6 +22,7 @@ import plannedMinorFutureActiveStatic from './icons/minorfuture-default-static.s
 import plannedMinorFutureClosureActiveStatic from './icons/minorfutureclosure-default-static.svg';
 import chainupActiveStatic from './icons/chainup-default-static.svg';
 import roadconditionActiveStatic from './icons/roadcondition-default-static.svg';
+import dmsStatic from './icons/dms-static.svg';
 
 import './Layers.scss';
 
@@ -102,8 +103,8 @@ function Legend() {
       </div>
       <p>States of the road that may impact drivability.</p>
 
-      <div className='option'>
-        Dynamic message signs
+      <div className='option minor'>
+      <img src={dmsStatic} alt="" />Dynamic message signs
       </div>
       <p>Digital traffic signs that communicate travel information to drivers.</p>
 
