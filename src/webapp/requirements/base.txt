@@ -7,3 +7,4 @@ djangorestframework==3.16.0
 djangorestframework_gis
 gunicorn==23.0.0
 psycopg[binary]==3.2.6
+whitenoise==6.11.0
