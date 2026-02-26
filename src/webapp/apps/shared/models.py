@@ -1,7 +1,4 @@
 import uuid
-from pprint import pprint
-
-from dictdiffer import diff
 
 from django.conf import settings
 from django.db import models, transaction
@@ -23,6 +20,9 @@ class LocationField(models.JSONField):
 
     def get_internal_type(self):
         return "LocationField"
+
+    def db_type(self, connection):
+        return models.JSONField().db_type(connection)
 
     def diff(self, a, b):
 
@@ -97,6 +97,9 @@ class OrderedListField(models.JSONField):
 
     def get_internal_type(self):
         return "OrderedListField"
+
+    def db_type(self, connection):
+        return models.JSONField().db_type(connection)
 
     def diff(self, a, b):
         '''

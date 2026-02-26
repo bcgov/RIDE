@@ -357,6 +357,39 @@ class ConditionSerializer(ModelSerializer):
         fields = "__all__"
 
 
+class ChainUpEventSerializer(EventSerializer):
+    first_reported = serializers.SerializerMethodField()
+
+    def get_first_reported(self, obj):
+        first_approved_event = Event.objects.filter(approved=True, id=obj.id).order_by('version').first()
+        return {
+            'user': UserSerializer(first_approved_event.user).data if first_approved_event and first_approved_event.user else None,
+            'date': first_approved_event.created if first_approved_event else None,
+        }
+
+    class Meta:
+        model = Event
+        fields = "__all__"
+        keys_to_move = {
+            '__orig__': 'meta.source',
+            'type': 'event_type',
+            'location.start': 'start',
+            'location.end': 'end',
+            'details.direction': 'direction',
+            'details.severity': 'severity',
+            'details.category': 'category',
+            'details.situation': 'situation',
+            'delays.amount': 'delay_amount',
+            'delays.unit': 'delay_unit',
+            'timing.nextUpdate': 'next_update',
+            'timing.startTime': 'start_time',
+            'timing.endTime': 'end_time',
+            'timing.ongoing': 'ongoing',
+            'timing.schedules': 'schedules',
+            'external.url': 'link',
+        }
+
+
 class RcSerializer(EventSerializer):
     first_reported = serializers.SerializerMethodField()
 

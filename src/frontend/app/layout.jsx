@@ -114,7 +114,10 @@ export default function Layout() {
             }
 
             <NavLink to="/segments/">Road Conditions</NavLink>
-            <NavLink to="/chainups/">Chain-Ups</NavLink>
+
+            {authContext.is_approver &&
+              <NavLink to="/chainups/">Chain-Ups</NavLink>
+            }
           </>
         }
 

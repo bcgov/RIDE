@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
 
 // Internal imports
 import { AlertContext, AuthContext } from "../contexts";
-import { getChainUps, toggleChainUps, reconfirmChainUps } from "../shared/data/chainups";
+import { getChainUps, getChainUpEvents, getInitialChainUp, toggleChainUps, reconfirmChainUps } from "../shared/data/chainups";
 import { getServiceAreas } from "../shared/data/organizations";
 import { getRoutes } from "../shared/data/segments";
 import RIDEDropdown from '../components/shared/dropdown';
@@ -48,6 +48,9 @@ export default function Home() {
   const [ selectedRoute, setSelectedRoute ] = useState('All roads');
   const [ selectedArea, setSelectedArea ] = useState('All service areas');
 
+  // Helper states
+  const [ chainupsMap, setChainupsMap ] = useState({});
+
   // Preview state
   const [ previewChainup, setPreviewChainup ] = useState(null);
 
@@ -61,13 +64,13 @@ export default function Home() {
   }, [authContext]);
 
   useEffect(() => {
-    Promise.all([getChainUps(), getRoutes()]).then(([cuData, routeData]) => {
+    Promise.all([getChainUps(), getChainUpEvents(), getRoutes()]).then(([chainupData, chainupEventsData, routeData]) => {
       // Build a map of route ID -> index in the routes API response
       const routeIndex = {};
       routeData.forEach((r, i) => { routeIndex[r.id] = i; });
 
       // Sort by route order, then area, then sorting_order
-      const ordered = cuData.sort((a, b) => {
+      const orderedChainups = chainupData.sort((a, b) => {
         const ra = routeIndex[a.route] ?? Infinity;
         const rb = routeIndex[b.route] ?? Infinity;
         if (ra !== rb) return ra - rb;
@@ -78,8 +81,17 @@ export default function Home() {
         return 0;
       });
 
-      setChainups(ordered);
-      setDisplayedChainups(ordered);
+      const eventsByChainup = {};
+      chainupEventsData.forEach((event) => {
+        const chainupPk = event.chainup;
+        if (chainupPk) {
+          eventsByChainup[chainupPk] = event;
+        }
+      });
+
+      setChainups(orderedChainups);
+      setDisplayedChainups(orderedChainups);
+      setChainupsMap(eventsByChainup);
       setRoutes(routeData);
       setDisplayedRoutes(routeData);
     });
@@ -88,6 +100,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (!chainups) { return; }
     let filtered = chainups;
 
     // Filter chainups by route
@@ -132,32 +145,33 @@ export default function Home() {
       setDisplayedRoutes(routes);
     }
 
-  }, [selectedRoute, selectedArea]);
+  }, [selectedRoute, selectedArea, chainups, routes, serviceAreas]);
 
   /* Handlers */
   const updateChainups = (response, message) => {
     if (response.status === 202) {
-      const updatedMap = {};
-      response.data.forEach(cu => { updatedMap[cu.id] = cu; }); // use ID since UUID will be updated
-
-      const updateList = (list) =>
-        list.map(cu => updatedMap[cu.id] ? { ...cu, ...updatedMap[cu.id] } : cu);
-
-      setChainups(prev => updateList(prev));
-      setDisplayedChainups(prev => updateList(prev));
+      const newChainupsMap = { ...chainupsMap };
+      response.data.forEach(event => {
+        const chainupPk = event.chainup;
+        if (chainupPk) {
+          newChainupsMap[chainupPk] = event;
+        }
+      });
+      setChainupsMap(newChainupsMap);
 
       setAlertContext({ message });
     }
   };
 
-  const toggle = (uuid, currentActive) => {
-    toggleChainUps([uuid]).then((response) => {
+  const toggle = (chainupUuid, currentActive) => {
+    const event = getInitialChainUp();
+    toggleChainUps([chainupUuid], event).then((response) => {
       updateChainups(response, currentActive ? 'Chain-up disabled' : 'Chain-up enabled');
     });
   };
 
-  const reconfirm = (uuid) => {
-    reconfirmChainUps([uuid]).then((response) => {
+  const reconfirm = (chainupUuid) => {
+    reconfirmChainUps([chainupUuid]).then((response) => {
       updateChainups(response, 'Chain-up reconfirmed');
     });
   };
@@ -169,14 +183,17 @@ export default function Home() {
   }
 
   const toPreviewEvent = (cu) => {
+    const chainupPk = cu.uuid;
+    const event = chainupsMap[chainupPk];
+
     return ({
       type: 'CHAIN_UP',
       status: 'Active',
       approved: true,
-      last_updated: cu.last_updated,
+      last_updated: event?.last_updated,
       location: { start: {}, end: {} },
       details: { severity: 'Minor', situation: 0, direction: '' },
-      timing: { nextUpdate: cu.active ? cu.next_update : getDefaultNextUpdate() },
+      timing: { nextUpdate: event?.timing?.nextUpdate || getDefaultNextUpdate() },
       conditions: [],
       impacts: [],
       restrictions: [],
@@ -184,8 +201,8 @@ export default function Home() {
       additional: '',
       showForm: false,
       showPreview: true,
-      id: cu.id,
-      version: cu.version,
+      id: event ? event.id : 'DBC-000000',
+      version: event?.version || 0,
       name: cu.name,
       description: cu.description
     });
@@ -285,14 +302,19 @@ export default function Home() {
           </div>
 
           <div className={'chainups-rows'}>
-            {!!displayedChainups.length && displayedChainups.map((cu) => (
+            {!!displayedChainups.length && displayedChainups.map((cu) => {
+              const chainupPk = cu.uuid;
+              const event = chainupsMap[chainupPk];
+              const active = event?.status === 'Active';
+
+              return (
               <div key={cu.uuid} className='chainup-row'>
                 <div className={'chainup-cell main-cell'}>
                   <div className={'name'}>{cu.name}</div>
                     <div className={'action-row'}>
-                      <div className={'action'} onClick={() => toggle(cu.uuid, cu.active)}>
-                        <FontAwesomeIcon icon={cu.active ? faToggleOn : faToggleOff} aria-hidden="true" />
-                        {`${cu.active ? 'Disable' : 'Enable'} chain-up`}
+                      <div className={'action'} onClick={() => toggle(chainupPk, active)}>
+                        <FontAwesomeIcon icon={active ? faToggleOn : faToggleOff} aria-hidden="true" />
+                        {`${active ? 'Disable' : 'Enable'} chain-up`}
                       </div>
 
                       <div className={'action'} onClick={() => setPreviewChainup(cu)}>
@@ -300,20 +322,22 @@ export default function Home() {
                         Preview
                       </div>
 
-                      {cu.active &&
-                        <div className={'action'} onClick={() => reconfirm(cu.uuid)}>
+                      {active &&
+                        <div className={'action'} onClick={() => reconfirm(chainupPk)}>
                           <FontAwesomeIcon icon={faCheck} aria-hidden="true" />
                           Reconfirm
                         </div>
                       }
                     </div>
                 </div>
-                <div className={'chainup-cell'}>{cu.active ? 'Chain-up in effect' : ''}</div>
-                <div className={'chainup-cell'}>{cu.user && <FormattedDt date={cu.first_reported.date} user={cu.first_reported.user} />}</div>
-                <div className={'chainup-cell'}><FormattedDt date={cu.last_updated} user={cu.user} /></div>
-                <div className={'chainup-cell'}><FormattedDt date={cu.next_update} showExpiredWarning={true} /></div>
+                <div className={'chainup-cell'}>{active ? 'Chain-up in effect' : ''}</div>
+                <div className={'chainup-cell'}>
+                  {event?.first_reported?.date && <FormattedDt date={event.first_reported.date} user={event.first_reported.user} />}
+                </div>
+                <div className={'chainup-cell'}>{event && <FormattedDt date={event.last_updated} user={event.user} />}</div>
+                <div className={'chainup-cell'}>{active && <FormattedDt date={event?.timing?.nextUpdate} showExpiredWarning={true} />}</div>
               </div>
-            ))}
+            )})}
 
             {!displayedChainups.length &&
               <div className='empty-search'>No chain-up locations found using current filters.</div>

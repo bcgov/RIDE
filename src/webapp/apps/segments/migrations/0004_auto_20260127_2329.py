@@ -7,12 +7,6 @@ from apps.events.models import TrafficImpact, Condition, Event
 from apps.segments.models import Segment
 
 
-def load_references(apps, schema_editor):
-    call_command('load_references')
-
-def reverse_references(apps, schema_editor):
-    TrafficImpact.objects.all().delete()
-    Condition.objects.all().delete()
 
 def load_fixture(apps, schema_editor):
     call_command('purge_segments')
@@ -25,12 +19,11 @@ def reverse_fixture(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('segments', '0003_initial'),
+        ('events', '0010_condition_alter_event_managers_event_segment'),
     ]
 
     operations = [
-        migrations.RunPython(load_references, reverse_references),
         migrations.RunPython(load_fixture, reverse_fixture),
     ]
