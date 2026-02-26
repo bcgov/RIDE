@@ -7,6 +7,7 @@ class EventType(models.TextChoices):
     SPECIAL_EVENT = 'SPECIAL_EVENT', 'Special event'
     WEATHER_CONDITION = 'WEATHER_CONDITION', 'Weather condition'
     ROAD_CONDITION = 'ROAD_CONDITION', 'Road condition'
+    CHAIN_UP = 'CHAIN_UP', 'Chain-up'
 
 
 class EventSubtype(models.TextChoices):

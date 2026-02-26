@@ -1,4 +1,5 @@
 import json
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -8,11 +9,12 @@ from rest_framework.response import Response
 from apps.events.models import Event, Condition
 from apps.events.serializers import EventSerializer, EventHistorySerializer, EventDiffSerializer, ConditionSerializer
 from apps.organizations.models import ServiceArea
-from apps.segments.models import Segment
+from apps.segments.models import Segment, ChainUp
+from apps.users.permissions import Approver
 from .enums import EventType
-from .helpers import get_default_next_update
+from .helpers import get_default_next_update, get_chainup_next_update
 from .models import Note, TrafficImpact
-from .serializers import NoteSerializer, PendingSerializer, RcSerializer
+from .serializers import NoteSerializer, PendingSerializer, RcSerializer, ChainUpEventSerializer
 from .serializers import TrafficImpactSerializer
 
 
@@ -174,6 +176,92 @@ class RoadConditions(Events):
                 continue
 
         return Response({'status': status.HTTP_202_ACCEPTED, 'data': updated_events}, status=status.HTTP_202_ACCEPTED)
+
+
+class ChainUps(Events):
+    queryset = Event.current.filter(event_type=EventType.CHAIN_UP)
+    serializer_class = ChainUpEventSerializer
+    permission_classes = [Approver]
+
+    @action(detail=False, methods=['post'], url_path='toggle')
+    def toggle_chainups(self, request):
+        chainupPks = request.data.get('chainupPks', [])
+        event_data = request.data.get('eventData', {})
+        if not isinstance(chainupPks, list) or not isinstance(event_data, dict):
+            return Response({'error': 'invalid chainupPks or eventData'}, status=status.HTTP_400_BAD_REQUEST)
+
+        toggled_events = []
+        for chainup_pk in chainupPks:
+            try:
+                chainup = ChainUp.objects.get(uuid=chainup_pk)
+                existing_event = Event.objects.filter(chainup=chainup, event_type=EventType.CHAIN_UP, latest=True).first()
+
+                next_status = 'Inactive' if existing_event and existing_event.status == 'Active' else 'Active'
+
+                geometry_geojson = None
+                if chainup.geometry:
+                    geometry_geojson = {
+                        'type': 'GeometryCollection',
+                        'geometries': [json.loads(chainup.geometry.json)]
+                    }
+
+                default_event_data = {
+                    'id': existing_event.id if existing_event else None,
+                    'type': EventType.CHAIN_UP.value,
+                    'chainup': chainup_pk,
+                    'geometry': geometry_geojson,
+                    'location': {
+                        'start': {'coords': chainup.primary_point.coords},
+                        'end': {'coords': chainup.secondary_point.coords} if chainup.secondary_point else None
+                    },
+                    'status': next_status,
+                    'meta': {},
+                }
+
+                merged_data = {**event_data, **default_event_data}
+                merged_data.setdefault('timing', {})
+                merged_data['timing']['nextUpdate'] = (
+                    get_chainup_next_update().isoformat() if next_status == 'Active' else None
+                )
+
+                # Convert to JSON string and back to dict to ensure proper serialization
+                merged_data = json.loads(json.dumps(merged_data, cls=DjangoJSONEncoder))
+
+                serializer = ChainUpEventSerializer(
+                    instance=existing_event,
+                    data=merged_data,
+                    context={'request': request}
+                )
+
+                if serializer.is_valid():
+                    event = serializer.save()
+                    toggled_events.append(ChainUpEventSerializer(event, context={'request': request}).data)
+                else:
+                    # Log validation errors for debugging
+                    print(f"Validation errors for chainup {chainup_pk}: {serializer.errors}")
+
+            except ChainUp.DoesNotExist:
+                continue
+
+        return Response({'status': status.HTTP_202_ACCEPTED, 'data': toggled_events}, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=['post'], url_path='reconfirm')
+    def reconfirm_chainups(self, request):
+        chainupPks = request.data.get('chainupPks', [])
+        if not isinstance(chainupPks, list):
+            return Response({'error': 'chainupPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+
+        reconfirmed_events = []
+        existing_events = Event.current.filter(chainup_id__in=chainupPks, event_type=EventType.CHAIN_UP)
+        for event in existing_events:
+            if event.status != 'Active':
+                continue
+            event.next_update = get_chainup_next_update()
+            event.user = request.user
+            event.save()
+            reconfirmed_events.append(ChainUpEventSerializer(event, context={'request': request}).data)
+
+        return Response({'status': status.HTTP_202_ACCEPTED, 'data': reconfirmed_events}, status=status.HTTP_202_ACCEPTED)
 
 
 class Pending(viewsets.ModelViewSet):

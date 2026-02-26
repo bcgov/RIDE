@@ -1,8 +1,5 @@
 import os
-from pprint import pprint
 from time import strftime, strptime
-
-from dictdiffer import diff
 
 from django.contrib.gis.db import models as gis
 from django.db import models, transaction
@@ -10,7 +7,7 @@ from django.db.models import ForeignKey
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from apps.segments.models import Segment
+from apps.segments.models import Segment, ChainUp
 from apps.shared.models import BaseModel, LocationField, OrderedListField, VersionedModel
 
 
@@ -163,6 +160,7 @@ class Event(VersionedModel):
     schedules = OrderedListField(default=list, diff=schedule_diff)
 
     segment = ForeignKey(Segment, on_delete=models.CASCADE, blank=True, null=True)
+    chainup = ForeignKey(ChainUp, on_delete=models.CASCADE, blank=True, null=True)
 
     delay_amount = models.PositiveIntegerField(default=0)
     delay_unit = models.CharField(default='minutes')

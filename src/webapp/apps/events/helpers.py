@@ -23,3 +23,8 @@ def get_default_next_update():
 
     else:
         return now + datetime.timedelta(days=1)
+
+
+def get_chainup_next_update():
+    now = datetime.datetime.now(tz=ZoneInfo("America/Vancouver"))
+    return now + datetime.timedelta(days=1)

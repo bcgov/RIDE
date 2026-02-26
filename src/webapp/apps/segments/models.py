@@ -34,6 +34,4 @@ class Segment(SegmentBase):
 
 
 class ChainUp(SegmentBase):
-    active = models.BooleanField(default=False)
     area = models.ForeignKey(ServiceArea, on_delete=models.CASCADE)
-    next_update = models.DateTimeField(null=True)
