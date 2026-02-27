@@ -360,7 +360,7 @@ export default function Home() {
               }
             }}>
             <FontAwesomeIcon icon={faCheckCircle} aria-hidden={'true'} />
-            Apply to {checkedSegs.length} segments
+            Apply to {checkedSegs.length} {checkedSegs.length > 1 ? 'segments' : 'segment'}
           </div>
           <div className={'cancel-btn'} onClick={() => setCheckedSegs([])}>
             <FontAwesomeIcon icon={faXmark} aria-hidden={'true'} />
