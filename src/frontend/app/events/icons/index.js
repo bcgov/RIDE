@@ -742,9 +742,7 @@ let curr, prev;
   curr = prev;
 });
 
-export function getConditionIcon(condition) {
-  const { id } = condition;
-
+export function getConditionIcon(id) {
   const iconMap = {
     1: faIcicles,           // Black ice
     2: faSnowBlowing,          // Blowing snow
@@ -795,7 +793,7 @@ export function getIconAndStroke(event, state='static', includePending=true) {
     status = event.status.toLowerCase() || 'active';
     if (event.approved === false && includePending) { status = 'pending'; }
     severity = event.details.severity.toLowerCase() || 'minor';
-    if (type === 'roadcondition') { severity = 'roadConditions'; }
+    if (type === 'roadcondition') { severity = 'roadConditions'; state = 'hover'; }
 
     if (['incident', 'planned'].includes(type)) {
 
