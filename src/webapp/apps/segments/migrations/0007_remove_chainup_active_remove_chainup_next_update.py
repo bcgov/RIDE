@@ -5,13 +5,6 @@ from django.db import migrations
 from apps.segments.models import ChainUp
 
 class Migration(migrations.Migration):
-    def load_fixture(apps, schema_editor):
-        ChainUp.objects.all().delete()
-        call_command('loaddata', 'chainups.json', app_label='segments')
-
-    def reverse_fixture(apps, schema_editor):
-        ChainUp.objects.all().delete()
-
     dependencies = [
         ("segments", "0006_chainup_active_chainup_next_update"),
         ('organizations', '0007_auto_20260219_0100'),
@@ -26,5 +19,4 @@ class Migration(migrations.Migration):
             model_name="chainup",
             name="next_update",
         ),
-        migrations.RunPython(load_fixture, reverse_fixture),
     ]
