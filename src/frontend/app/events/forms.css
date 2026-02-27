@@ -538,6 +538,7 @@
       border-color: white;
       margin: 0.5rem 0 0 0;
       border-radius: 0;
+      gap: 0.5rem;
 
       button {
         background: black;

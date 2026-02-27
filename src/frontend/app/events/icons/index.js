@@ -400,6 +400,7 @@ const strokes = {
   minor: {
     active: MINOR,
     clearing: CLEARING,
+    pending: PENDING,
     inactive: INACTIVE,
   },
   roadConditions: {
@@ -807,6 +808,7 @@ export function getIconAndStroke(event, state='static', includePending=true) {
       tense = type === 'incident' ? 'present' : 'future';
       closure = event.is_closure ? 'closure' : 'open';
 
+// incident minor present closure pending static
       return [
         icons[type][severity][tense][closure][status][state],
         strokes[severity][status][state],

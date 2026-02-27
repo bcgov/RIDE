@@ -1,7 +1,7 @@
 import { Component } from 'react';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckDouble, faCircleCheck, faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { faCheckDouble, faCircleCheck, faCircleX, faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
 
 import Conditions from './Conditions.jsx';
 import Details from './Details.jsx';
@@ -389,12 +389,12 @@ export default class EventForm extends Component {
     };
   }
 
-  handleSubmit = (e, submitLabel) => {
+  handleSubmit = (e, submitLabel, overrides={}) => {
     e.preventDefault();
     const err = {};
     const { event, map, dispatch, cancel, setMessage } = this.props;
 
-    const form = structuredClone(event);
+    const form = {...structuredClone(event), ...overrides};
     const now = new Date();
     now.setMinutes(now.getMinutes() + 2);
     now.setSeconds(0);
@@ -542,6 +542,9 @@ export default class EventForm extends Component {
         break;
       case 'Clear':
         label = 'cleared';
+        break;
+      case 'Reject Clear':
+        label = 'clearing rejected'
         break;
       default:
         label = 'submitted';
@@ -694,6 +697,13 @@ export default class EventForm extends Component {
               {this.getLabel()}
             </button>
 
+            { this.context.authContext.is_approver && !event.approved && event.status === 'Inactive' && (
+              <button type="button" onClick={(e) => this.handleSubmit(e, 'Reject Clear', { status: 'Active' })}>
+                  <FontAwesomeIcon icon={faCircleX} />
+                Reject Clear
+              </button>
+            )}
+
             { event.id && event.type === 'ROAD_CONDITION' &&
               <button
                 type="button"
@@ -732,6 +742,7 @@ export default class EventForm extends Component {
               </button>
             }
 
+            <div style={{flex: 1}}></div>
             <button type="button" className="cancel" onClick={cancel}>
                 <FontAwesomeIcon icon={faXmark} />
               Cancel
