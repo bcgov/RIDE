@@ -65,6 +65,9 @@ export default function EditUserForm(props) {
 
   /* Rendering */
   // Main component
+  const userOrg = Array.isArray(user.organizations) && user.organizations.length ?
+    orgs.find(org => org.id === user.organizations[0]) : null;
+
   return (
     <div className="edit-user-form">
       <div className={'user-info'}>
@@ -91,7 +94,7 @@ export default function EditUserForm(props) {
           label={'Organization: '}
           extraClasses={`extra-margin-right user-form`}
           items={orgs}
-          value={user.organization}
+          value={userOrg}
           handler={setSelectedOrg} />
 
         <RIDEDropdown
