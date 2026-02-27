@@ -194,7 +194,7 @@ class ChainUps(Events):
         for chainup_pk in chainupPks:
             try:
                 chainup = ChainUp.objects.get(uuid=chainup_pk)
-                existing_event = Event.objects.filter(chainup=chainup, event_type=EventType.CHAIN_UP, latest=True).first()
+                existing_event = Event.objects.filter(chainup=chainup, event_type=EventType.CHAIN_UP, latest=True).order_by('-created').first()
 
                 next_status = 'Inactive' if existing_event and existing_event.status == 'Active' else 'Active'
 
@@ -206,7 +206,7 @@ class ChainUps(Events):
                     }
 
                 default_event_data = {
-                    'id': existing_event.id if existing_event else None,
+                    'id': existing_event.id if existing_event and next_status == 'Inactive' else None,
                     'type': EventType.CHAIN_UP.value,
                     'chainup': chainup_pk,
                     'geometry': geometry_geojson,
@@ -228,7 +228,7 @@ class ChainUps(Events):
                 merged_data = json.loads(json.dumps(merged_data, cls=DjangoJSONEncoder))
 
                 serializer = ChainUpEventSerializer(
-                    instance=existing_event,
+                    instance=existing_event if existing_event and next_status == 'Inactive' else None,
                     data=merged_data,
                     context={'request': request}
                 )
