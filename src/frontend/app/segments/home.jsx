@@ -389,7 +389,7 @@ export default function Home() {
 
           <RIDEDropdown
             label={''}
-            extraClasses={'extra-margin-right'}
+            extraClasses={'extra-margin-right fixed-width'}
             items={['All service areas', ...displayedAreas]}
             handler={(area) => setSelectedArea(area)}
             value={selectedArea} />

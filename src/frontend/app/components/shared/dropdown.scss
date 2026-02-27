@@ -22,6 +22,12 @@
     margin-right: 1rem;
   }
 
+  &.fixed-width {
+    button {
+      width: 180px;
+    }
+  }
+
   &-button {
     display: flex;
     align-items: center;
@@ -33,6 +39,7 @@
     color: #111827;
     border: 1px solid black;
     height: 31px;
+    justify-content: space-between;
 
     &:hover {
       background-color: #f9fafb;
