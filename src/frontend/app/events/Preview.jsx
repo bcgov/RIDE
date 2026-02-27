@@ -65,13 +65,20 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
 
   /* Rendering */
   // Sub-components
-  const EventHeader = () => {
+  const EventName = () => {
+    let headerText = '';
+
     if (isRoadCondition) {
-      return <p>{conditions[0]?.label || 'Road condition'}</p>;
+      headerText = conditions[0]?.label || 'Road condition';
+
     } else if (isChainup) {
-      return <p>Commercial chain-up</p>;
+      headerText = 'Commercial chain-up';
+
+    } else {
+      headerText = `${displayed.details.severity} ${displayed.type === 'Incident' ? 'incident' : 'delay'}`
     }
-    return <p>{ displayed.details.severity } {displayed.type === 'Incident' ? 'incident' : 'delay' }</p>
+
+    return <p className={'event-name'}>{headerText}</p>;
   }
 
   // Main component
@@ -112,9 +119,10 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
               <path strokeWidth="30" stroke="currentColor" d="M135.5 169C126.1 159.6 126.1 144.4 135.5 135.1C144.9 125.8 160.1 125.7 169.4 135.1L320.4 286.1L471.4 135.1C480.8 125.7 496 125.7 505.3 135.1C514.6 144.5 514.7 159.7 505.3 169L354.3 320L505.3 471C514.7 480.4 514.7 495.6 505.3 504.9C495.9 514.2 480.7 514.3 471.4 504.9L320.4 353.9L169.4 504.9C160 514.3 144.8 514.3 135.5 504.9C126.2 495.5 126.1 480.3 135.5 471L286.5 320L135.5 169z"/>
             </svg>
           </div>
+
           <h3>{ PHRASES_LOOKUP[displayed.details.situation] }</h3>
 
-          <EventHeader />
+          <EventName />
         </div>
       </div>
 
