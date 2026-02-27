@@ -25,6 +25,8 @@
     padding: 0;
     width: 268px;
     top: 2rem;
+    height: unset;
+    overflow: hidden;
 
     &:last-of-type {
       margin-left: 12px;
