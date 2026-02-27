@@ -21,7 +21,7 @@ function Condition({ id, item, change, update, current, }) {
   );
 }
 
-export default function Conditions({ errors, event, dispatch }) {
+export default function Conditions({ errors, event, dispatch, caption }) {
   const displayErrors = event.conditions.length === 0 && errors['Conditions'] ? errors : {};
   let conditions = event.conditions;
   if (typeof(conditions[0]) === 'number') {
@@ -39,6 +39,7 @@ export default function Conditions({ errors, event, dispatch }) {
       dispatch={dispatch}
       errors={displayErrors}
       section={'conditions'}
+      caption={caption}
     />
   );
 }

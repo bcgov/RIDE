@@ -78,7 +78,7 @@ function DraggableRow({ children, id, isDraggable, remove, noX }) {
  */
 export function DraggableRows({
   label, limit=5, itemsSource, Child, errors, childErrors=[], callback, dispatch,
-  section, appended, items=[], noX, noBlank }) {
+  section, appended, items=[], noX, noBlank, caption }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -115,6 +115,12 @@ export function DraggableRows({
           <span className="error-message">{errors[label]}</span>
         </p>
       </div>
+
+      {caption &&
+        <div className={'caption'}>
+          <p>{caption}</p>
+        </div>
+      }
 
       { (items || []).reduce((acc, item) => acc || item.closed, false) && (
         <div className="is-closure">

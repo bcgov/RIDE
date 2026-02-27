@@ -157,7 +157,7 @@ export default class RcsForm extends EventForm {
 
           <div className="form-body">
             <div className="section conditions">
-              <Conditions errors={errors} event={event} dispatch={dispatch} />
+              <Conditions errors={errors} event={event} dispatch={dispatch} caption={'Top condition is shown as the title of the condition to DriveBC users.'} />
             </div>
 
             <div className="section additional">
