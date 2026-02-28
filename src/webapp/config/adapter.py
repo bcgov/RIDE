@@ -1,9 +1,12 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.signals import user_logged_in
 from django.conf import settings
 import requests
 from django.http import HttpResponseRedirect
+
+from apps.users.models import RIDEUser
 
 
 class RideAdapter(DefaultAccountAdapter):
@@ -17,6 +20,31 @@ class RideAdapter(DefaultAccountAdapter):
 
 
 class RideSocialAdapter(DefaultSocialAccountAdapter):
+    def pre_social_login(self, request, sociallogin):
+        """
+        Overridden hook to lookup import DIT users by idir_username or bceid_username
+        """
+        social_data = sociallogin.account.extra_data
+        isIdir = social_data['identity_provider'] == 'azureidir'
+        username = 'idir__' + social_data['idir_username'] \
+            if isIdir else 'bceid__' + social_data['bceid_username']
+
+        ride_user = RIDEUser.objects.filter(username__iexact=username).first()
+
+        # No existing DIT user, do nothing
+        if not ride_user:
+            return
+
+        # User already linked, do nothing
+        if SocialAccount.objects.filter(
+            provider=sociallogin.account.provider,
+            uid=sociallogin.account.uid,
+        ).exclude(user=ride_user).exists():
+            return
+
+        # Link imported DIT user to social account
+        sociallogin.connect(request, ride_user)
+
     def populate_user(self, request, sociallogin, data):
         return super().populate_user(request, sociallogin, data)
 
