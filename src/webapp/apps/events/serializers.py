@@ -268,21 +268,31 @@ class EventSerializer(KeyMoveSerializer):
 
         Where the submission does not include the impacts or severity, the
         current values for the instance are used if an instance exists.
+
+        When an event had an impact with closure, and the update removes that
+        impact, approval is still required.
         '''
 
         impacts = data.get('impacts')
         severity = data.get('severity')
         currently_major = False
+        was_closure = False
 
         if self.instance is not None:
             if severity is None:
                 severity = self.instance.severity
+
+            prior_impacts = self.instance.impacts
+            # need to detect a change from closure to non closure due to
+            # removing an impact triggering closure
+            was_closure = len([el for el in (prior_impacts or []) if el.get('closed', False)]) > 0
+
             if impacts is None:
-                impacts = self.instance.impacts
+                impacts = prior_impacts
 
             currently_major = self.instance.severity == 'Major'
 
-        is_closure = len([el for el in (impacts or []) if el.get('closed', False)]) > 0
+        is_closure = was_closure or len([el for el in (impacts or []) if el.get('closed', False)]) > 0
 
         if severity == 'Minor' and not is_closure and not currently_major:
             return True
@@ -337,8 +347,9 @@ class PendingSerializer(EventSerializer):
         if obj.status == 'Active':
             return False
 
-        latest = Event.current.filter(id=obj.id).first()
-        if latest.status == 'Active':
+        # is there an earlier version, approved or not, that was active?
+        latest = Event.objects.filter(id=obj.id, status='Active').order_by('-version').first()
+        if latest:
             return True
 
         return False

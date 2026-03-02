@@ -57,6 +57,8 @@ export function addEvent(event, map, dispatch) {
     styles[state] = [new Style({ image: new Icon({ src: icon }), ...stroke, })];
   });
 
+  // capture initial value so that later changes are are handled correctly
+  event.was_closure = event.is_closure;
   const feature = new RideFeature({
     styles,
     type: 'event',
