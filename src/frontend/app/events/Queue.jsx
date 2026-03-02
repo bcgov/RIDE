@@ -1,10 +1,6 @@
-import { useState } from 'react';
-
-import PollingComponent from '../shared/PollingComponent';
 import { get } from '../shared/helpers';
-import { API_HOST } from '../env';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faDiamondExclamation } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronRight } from '@fortawesome/pro-solid-svg-icons';
 import { getPlainIcon } from './icons';
 
 import { PHRASES_LOOKUP } from './references';
@@ -74,23 +70,13 @@ function Pending({ event, dispatch, goToFunc, map }) {
   );
 }
 
-export default function Queue({ dispatch, goToFunc, map }) {
-  const [pending, setPending] = useState([]);
-
-  const pollEvents = async () => {
-    const pending = await get(`${API_HOST}/api/events/pending`);
-    setPending(pending);
-  }
+export default function Queue({ dispatch, goToFunc, map, pending }) {
 
   return (
-    <>
-      <PollingComponent runnable={pollEvents} interval={10000} runImmediately={true}/>
-
-      <div className='queue'>
-        {pending.map((event) => (
-          <Pending key={event.id} event={event} dispatch={dispatch} goToFunc={goToFunc} map={map} />
-        ))}
-      </div>
-    </>
+    <div className='queue'>
+      {pending.map((event) => (
+        <Pending key={event.id} event={event} dispatch={dispatch} goToFunc={goToFunc} map={map} />
+      ))}
+    </div>
   )
 }

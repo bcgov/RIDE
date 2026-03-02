@@ -7,8 +7,8 @@ function Tab({ children }) {
 }
 
 const getDefault = (children) => {
-  let def = children.find((child) => child.props.default);
-  return (def || children[0]).props.name;
+  let def = children.filter((child) => child).find((child) => child.props.default);
+  return (def || children[0])?.props.name;
 }
 
 
@@ -18,7 +18,7 @@ export default function Tabs({ children }) {
   return (
     <div className={`tabs-control`}>
       <div className='tabs-handles'>
-        {children.map((child) => {
+        {children.filter(child => child).map((child) => {
           const name = child.props.name;
           return (
             <button
@@ -38,7 +38,7 @@ export default function Tabs({ children }) {
         })}
       </div>
 
-      {children.map((child) => {
+      {children.filter((child) => child).map((child) => {
         const name = child.props.name;
         return (
           <div

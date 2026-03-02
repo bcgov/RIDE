@@ -15,12 +15,14 @@ import PinLayer from '../components/Map/PinLayer';
 import { AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
 import Tabs from '../shared/Tabs';
+import { API_HOST } from '../env';
+import { get } from '../shared/helpers';
+import PollingComponent from '../shared/PollingComponent';
 
 import EventForm, { eventReducer, getInitialEvent } from './forms';
 import Preview from './Preview';
 import Message from './Message';
 import Queue from './Queue';
-import History from './History/History.jsx';
 
 // Styling
 import './home.scss';
@@ -67,6 +69,12 @@ export default function Home() {
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
   const [ visibleLayers, toggle ] = useReducer(layersReducer, layersInitial());
   const [ message, setMessage ] = useState('');
+  const [ pending, setPending ] = useState([]);
+
+  const pollEvents = async () => {
+    const pending = await get(`${API_HOST}/api/events/pending`);
+    setPending(pending);
+  }
 
   // Effects
   useEffect(() => {
@@ -148,8 +156,10 @@ export default function Home() {
                 <Tabs.Tab name='active' label='Active'>
                   active
                 </Tabs.Tab>
-                <Tabs.Tab name='queue' label={<span>Awaiting Approval <span className='num'>3</span></span>}>
-                  <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
+                <Tabs.Tab name='queue' label={
+                  <span>Awaiting Approval {pending.length > 0 ? <span className='num'>{pending.length}</span> : ''}</span>
+                }>
+                  <Queue pending={pending} dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
                 </Tabs.Tab>
               </Tabs>
             </>
@@ -173,6 +183,7 @@ export default function Home() {
         />
       }
       <Message message={message} setMessage={setMessage} />
+      <PollingComponent runnable={pollEvents} interval={10000} runImmediately={true}/>
     </div>
   );
 }

@@ -580,7 +580,7 @@ export default class EventForm extends Component {
     if (authContext.is_approver) {
       if (!event.approved && event.status === 'Inactive') { return 'Clear'; }
       return 'Publish';
-    } else if (event.details.severity.startsWith('Minor') && !event.is_closure) {
+    } else if (event.details.severity.startsWith('Minor') && !event.is_closure && !event.was_closure) {
       return event.id ? 'Update' : 'Publish';
     }
     return 'Submit for Approval';
@@ -685,9 +685,10 @@ export default class EventForm extends Component {
             </div>
           </Tabs.Tab>
 
-          <Tabs.Tab name='history' label='Event history' default={event.showHistory}>
-            <History event={event} dispatch={dispatch} />
-          </Tabs.Tab>
+          { event.id ? <Tabs.Tab name='history' label='Event history' default={event.showHistory}>
+              <History event={event} dispatch={dispatch} />
+            </Tabs.Tab> : null
+          }
         </Tabs>
 
         { event.location.start.name &&
