@@ -12,7 +12,7 @@ const getDefault = (children) => {
 }
 
 
-export default function Tabs({ children }) {
+export default function Tabs({ children, onChange }) {
   const [currentTab, setCurrentTab] = useState(getDefault(children));
 
   return (
@@ -29,6 +29,7 @@ export default function Tabs({ children }) {
                 e.stopPropagation();
                 if (currentTab !== name) {
                   setCurrentTab(name);
+                  onChange?.(name);
                 }
               }}
             >

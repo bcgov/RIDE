@@ -54,7 +54,8 @@
 
   .form-body {
     flex: 1;
-    overflow: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
     scrollbar-color: #999 #f3f2f1;
   }
 

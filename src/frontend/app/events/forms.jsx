@@ -606,7 +606,11 @@ export default class EventForm extends Component {
           { event.id && <div className="subtitle">{event.id} v{event.version}</div> }
         </div>
 
-        <Tabs>
+        <Tabs
+          onChange={(tabName) => {
+            dispatch({ type: 'set', value: { showHistory: tabName === 'history' } });
+          }}>
+
           <Tabs.Tab name='edit' label='Edit event'>
             <div className="form-container">
               <div className="form-body">
@@ -692,7 +696,7 @@ export default class EventForm extends Component {
           }
         </Tabs>
 
-        { event.location.start.name &&
+        { event.location.start.name && !event.showHistory &&
           <div className="section buttons">
             <button type="button" onClick={(e) => this.handleSubmit(e, this.getLabel())}>
                 <FontAwesomeIcon icon={faCircleCheck} />
@@ -745,8 +749,9 @@ export default class EventForm extends Component {
             }
 
             <div style={{flex: 1}}></div>
+
             <button type="button" className="cancel" onClick={cancel}>
-                <FontAwesomeIcon icon={faXmark} />
+              <FontAwesomeIcon icon={faXmark} />
               Cancel
             </button>
           </div>
