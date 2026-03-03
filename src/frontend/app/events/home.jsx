@@ -10,7 +10,7 @@ import { boundingExtent, getCenter } from 'ol/extent';
 // Internal imports
 import Map from '../components/Map';
 import Layer from '../components/Map/Layer';
-import Layers, { allLayers } from './Layers';
+import Layers, { defaultLayers } from './Layers';
 import PinLayer from '../components/Map/PinLayer';
 import { AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
@@ -36,7 +36,7 @@ export function meta() {
 const layersInitial = () => {
   const stored = localStorage.getItem('visibleLayers');
   if (stored) { return JSON.parse(stored); }
-  return allLayers;
+  return defaultLayers;
 }
 
 export default function Home() {

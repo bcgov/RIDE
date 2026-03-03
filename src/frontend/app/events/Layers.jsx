@@ -43,7 +43,12 @@ const BUTTONS = {
   }
 }
 
-export const allLayers = Object.values(BUTTONS).flatMap((section) => Object.keys(section)).reduce((acc, curr) => { acc[curr] = true; return acc }, {});
+export const defaultLayers = Object.values(BUTTONS)
+  .flatMap((section) => Object.keys(section))
+  .reduce((acc, curr) => {
+    acc[curr] = !['cleared7', 'dms'].includes(curr);
+    return acc;
+  }, {});
 
 function Legend() {
   return (
