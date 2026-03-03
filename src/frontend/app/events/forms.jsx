@@ -583,7 +583,7 @@ export default class EventForm extends Component {
     } else if (event.details.severity.startsWith('Minor') && !event.is_closure && !event.was_closure) {
       return event.id ? 'Update' : 'Publish';
     }
-    return 'Submit for Approval';
+    return 'Request approval';
   }
 
   render() {
