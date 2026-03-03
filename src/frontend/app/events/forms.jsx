@@ -685,9 +685,10 @@ export default class EventForm extends Component {
             </div>
           </Tabs.Tab>
 
-          { event.id ? <Tabs.Tab name='history' label='Event history' default={event.showHistory}>
+          { event.id &&
+            <Tabs.Tab name='history' label='Event history' default={event.showHistory}>
               <History event={event} dispatch={dispatch} />
-            </Tabs.Tab> : null
+            </Tabs.Tab>
           }
         </Tabs>
 

@@ -29,6 +29,12 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 
 class ServiceAreaSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
     class Meta:
         model = ServiceArea
         fields = "__all__"
+
+    def get_name(self, obj):
+        prefix = '0' if obj.sortingOrder < 10 else ''
+        return prefix + str(obj.sortingOrder) + " - " + obj.name
