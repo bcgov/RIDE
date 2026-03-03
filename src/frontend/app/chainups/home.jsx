@@ -60,6 +60,10 @@ export default function Home() {
 
     if (!authContext.username) {
       navigate('/');
+
+    // Redirect to first page if not superuser
+    } else if (!authContext.is_superuser) {
+      navigate('/events/');
     }
   }, [authContext]);
 

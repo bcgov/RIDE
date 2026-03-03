@@ -75,6 +75,7 @@ export default function Home() {
   useEffect(() => {
     if (!authContext?.loginStateKnown) { return; }
 
+    // Redirect to homepage if not logged in
     if (!authContext.username) {
       navigate('/');
     }
