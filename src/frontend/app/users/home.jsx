@@ -295,8 +295,6 @@ export default function Home() {
         </div>
 
         <div className={'right'}>
-          <div className={'toolbar-btn'}><FontAwesomeIcon icon={faPlus} /> <span>Add user</span></div>
-
           <RIDEModal
             title={'Add RIDE organization'}
             confirmBtnText={'Add organization'}

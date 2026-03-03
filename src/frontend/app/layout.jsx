@@ -121,7 +121,7 @@ export default function Layout() {
           </>
         }
 
-        <div className='right'>
+        <div className='right debug-toggle'>
           <button
             className={debuggingIsOn ? 'debugging' : ''}
             onClick={() => { localStorage.setItem('debugging', !debuggingIsOn); setDebuggingIsOn(!debuggingIsOn)}}
