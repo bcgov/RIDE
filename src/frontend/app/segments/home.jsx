@@ -424,7 +424,7 @@ export default function Home() {
         </div>
       }
 
-      {displayedSegments &&
+      {checkedSegs && checkedSegs.length === 0 &&
         <div className={'select-bar no-select'}>
           No segments selected
         </div>
