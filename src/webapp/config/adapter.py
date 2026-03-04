@@ -46,8 +46,28 @@ class RideSocialAdapter(DefaultSocialAccountAdapter):
         sociallogin.connect(request, ride_user)
 
     def populate_user(self, request, sociallogin, data):
-        return super().populate_user(request, sociallogin, data)
+        user = super().populate_user(request, sociallogin, data)
 
+        social_data = sociallogin.account.extra_data or {}
+        identity_provider = social_data.get('identity_provider')
+        given_name = (social_data.get('given_name') or '').strip()
+        family_name = (social_data.get('family_name') or '').strip()
+        display_name = (social_data.get('display_name') or social_data.get('name') or '').strip()
+
+        # DBC22-5775
+        # BCeID can send the full name in given_name while family_name is blank.
+        # Normalize so UI displays "First Last" instead of "First Last Last".
+        if identity_provider == 'bceidboth' and not family_name:
+            source_name = given_name or display_name
+            name_parts = source_name.split()
+            if len(name_parts) > 1:
+                user.first_name = name_parts[0]
+                user.last_name = ' '.join(name_parts[1:])
+            elif source_name:
+                user.first_name = source_name
+                user.last_name = ''
+
+        return user
 
 def store_id_token(sender, **kwargs):
     user = kwargs.get('user')
