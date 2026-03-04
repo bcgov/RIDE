@@ -135,6 +135,10 @@ export default function Home() {
   mapRef.current = map;
   if (mapRef.current && !mapRef.current.get('visibleLayers')) { mapRef.current.set('visibleLayers', visibleLayers); }
 
+  const isClearedRoadCondition = (
+    (event.type === 'ROAD_CONDITION' || event.type === 'Road condition')
+    && event.status === 'Inactive'
+  );
   const showLayers = !(event.showPreview && event.location.start.name);
 
   return authContext.loginStateKnown && authContext.username && (
@@ -174,7 +178,7 @@ export default function Home() {
         </Map>
       </MapContext.Provider>
 
-      { event.location.start.name && event.showPreview &&
+      {event.location.start.name && event.showPreview && !isClearedRoadCondition &&
         <Preview
           event={event}
           dispatch={dispatch}
