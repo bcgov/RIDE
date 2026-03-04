@@ -70,7 +70,7 @@ export default function Home() {
 
   useEffect(() => {
     filterAndSortUsers();
-  }, [users, sortKey, selectedOrg, searchText]);
+  }, [users, orgs, sortKey, selectedOrg, searchText]);
 
   useEffect(() => {
     // Sync selectedOrg with orgs list if it changes
@@ -100,6 +100,16 @@ export default function Home() {
     return user.is_approver ? 'Approver' : 'Submitter';
   }
 
+  const getUserOrganizationName = (user) => {
+    const userOrgId = user.organizations?.[0];
+    if (!userOrgId) {
+      return '';
+    }
+
+    const organization = orgs.find(org => org.id === userOrgId);
+    return organization?.name || user.group || '';
+  }
+
   // Add this function in the Helpers section
   const sortUsers = (unsortedUsers, key, direction) => {
     if (!unsortedUsers || !key) return users;
@@ -122,8 +132,8 @@ export default function Home() {
           valueB = b.email?.toLowerCase();
           break;
         case 'Organization':
-          valueA = a.group?.toLowerCase();
-          valueB = b.group?.toLowerCase();
+          valueA = getUserOrganizationName(a).toLowerCase();
+          valueB = getUserOrganizationName(b).toLowerCase();
           break;
         case 'Role':
           valueA = getUserRole(a);
@@ -267,12 +277,6 @@ export default function Home() {
     'Last Login'
   ]
 
-  // Main Component
-  const orgMap = orgs.reduce((res, org) => {
-      res[org.id] = org;
-      return res;
-  }, {});
-
   return (
     <div className='users-home'>
       <div className={'toolbar'}>
@@ -357,7 +361,7 @@ export default function Home() {
                 <p>{`${user.first_name} ${user.last_name}`}</p>
                 <p>{user.social_username || user.username}</p>
                 <p>{user.email}</p>
-                <p>{user.organizations?.length ? orgMap[user.organizations[0]]?.name : ''}</p>
+                <p>{getUserOrganizationName(user)}</p>
                 <p>{getUserRole(user)}</p>
                 <p>{formatDate(user.date_joined)}</p>
                 <p>{formatDate(user.last_login)}</p>
