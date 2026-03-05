@@ -383,52 +383,51 @@ export default function Home() {
     )
   };
 
-  const ConditionsPanel = () => {
-    return (
-      <div className={'conditions-panel'}>
-        <div className={'header-bar'}>
-          <div className={'label'}>Update conditions</div>
-          <div className={'unselect-btn'} onClick={() => setCheckedConditions([])}>Unselect all</div>
+  const conditionsPanel = (
+    <div className={'conditions-panel'}>
+      <div className={'header-bar'}>
+        <div className={'label'}>Update conditions</div>
+        <div className={'unselect-btn'} onClick={() => setCheckedConditions([])}>Unselect all</div>
+      </div>
+
+      <RIDECheckBoxes
+        label={''}
+        itemsList={RoadConditions.map((condition) => { return { id: condition.id, name: condition.label }; })}
+        extraClasses={''}
+        itemsState={checkedConditions}
+        setItemsState={setCheckedConditions} />
+
+      <div className={'footer-bar'}>
+        <div
+          className={`apply-btn ${checkedConditions.length === 0 ? 'disabled' : ''}`}
+          onClick={() => {
+            if (checkedConditions.length > 0) {
+              // Initialize event with selected conditions
+              const initialEvent = getInitialRc();
+
+              // Convert selected condition IDs to condition objects with id and label
+              const conditions = checkedConditions.map(conditionId => {
+                const condition = RoadConditions.find(c => c.id === conditionId);
+                return condition ? { id: condition.id, label: condition.label } : null;
+              }).filter(Boolean);
+
+              initialEvent.conditions = conditions;
+
+              dispatch({ type: 'reset form', value: initialEvent, showPreview: true, showForm: true });
+              setShowEventPanel(true);
+            }
+          }}>
+          <FontAwesomeIcon icon={faCheckCircle} aria-hidden={'true'} />
+          Apply to {checkedSegs.length} {checkedSegs.length > 1 ? 'segments' : 'segment'}
         </div>
 
-        <RIDECheckBoxes
-          label={''}
-          itemsList={RoadConditions.map((condition) => { return { id: condition.id, name: condition.label }; })}
-          extraClasses={''}
-          itemsState={checkedConditions}
-          setItemsState={setCheckedConditions} />
-
-        <div className={'footer-bar'}>
-          <div 
-            className={`apply-btn ${checkedConditions.length === 0 ? 'disabled' : ''}`} 
-            onClick={() => {
-              if (checkedConditions.length > 0) {
-                // Initialize event with selected conditions
-                const initialEvent = getInitialRc();
-
-                // Convert selected condition IDs to condition objects with id and label
-                const conditions = checkedConditions.map(conditionId => {
-                  const condition = RoadConditions.find(c => c.id === conditionId);
-                  return condition ? { id: condition.id, label: condition.label } : null;
-                }).filter(Boolean);
-
-                initialEvent.conditions = conditions;
-                
-                dispatch({ type: 'reset form', value: initialEvent, showPreview: true, showForm: true });
-                setShowEventPanel(true);
-              }
-            }}>
-            <FontAwesomeIcon icon={faCheckCircle} aria-hidden={'true'} />
-            Apply to {checkedSegs.length} {checkedSegs.length > 1 ? 'segments' : 'segment'}
-          </div>
-          <div className={'cancel-btn'} onClick={() => setCheckedSegs([])}>
-            <FontAwesomeIcon icon={faXmark} aria-hidden={'true'} />
-            Cancel
-          </div>
+        <div className={'cancel-btn'} onClick={() => setCheckedSegs([])}>
+          <FontAwesomeIcon icon={faXmark} aria-hidden={'true'} />
+          Cancel
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
   // Main Component
   const columns = [
@@ -466,7 +465,7 @@ export default function Home() {
       </div>
 
       {checkedSegs.length > 0 &&
-        <ConditionsPanel />
+        conditionsPanel
       }
 
       {checkedSegs.length > 0 && displayedSegments &&
