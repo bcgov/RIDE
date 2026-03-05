@@ -1,15 +1,18 @@
-import { get } from '../shared/helpers';
+import { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/pro-solid-svg-icons';
 import { getPlainIcon } from './icons';
 
+import { AuthContext } from '../contexts';
 import { PHRASES_LOOKUP } from './references';
 import { selectFeature } from '../components/Map/helpers';
 import './Queue.scss';
 
 function Pending({ event, dispatch, goToFunc, map }) {
-  const nearby = event.location.start.nearby.filter((loc) => loc.include)
+  const { authContext } = useContext(AuthContext);
+  const canReview = authContext?.is_approver || authContext?.is_superuser;
 
+  const nearby = event.location.start.nearby.filter((loc) => loc.include)
   let location = 'Reference location not provided';
   if (nearby.length > 0)
     location = nearby[0].phrase;
@@ -53,19 +56,22 @@ function Pending({ event, dispatch, goToFunc, map }) {
       </section>
       <section className='location'>{location}</section>
       <section className='road'>{road}</section>
-      <section className='button'>
-        <button
-          type='button'
-          onClick={(e) => {
-            e.stopPropagation();
-            dispatch({ type: 'reset form', value: event, showPreview: true, showForm: true });
-            goToFunc(event.location.start.coords)
-          }}
-        >
-          Review
-          <FontAwesomeIcon icon={faChevronRight} />
-        </button>
-      </section>
+
+      {canReview && (
+        <section className='button'>
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch({ type: 'reset form', value: event, showPreview: true, showForm: true });
+              goToFunc(event.location.start.coords)
+            }}
+          >
+            Review
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </section>
+      )}
     </div>
   );
 }
