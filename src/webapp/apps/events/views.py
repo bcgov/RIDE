@@ -142,7 +142,7 @@ class RoadConditions(Events):
 
                 default_event_data = {
                     'id': existing_event.id if existing_event else None,
-                    'conditions': [c['id'] for c in event_data['conditions']],
+                    'conditions': event_data.get('conditions', []),
                     'segment': seg_pk,
                     'geometry': geometry_geojson,
                     'location': {

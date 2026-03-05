@@ -412,15 +412,36 @@ class RcSerializer(EventSerializer):
         }
 
     def to_representation(self, instance):
-        """Override to convert condition IDs to labels in output"""
+        """Override to normalize conditions to {id, label} objects."""
         obj = super().to_representation(instance)
 
-        # Convert condition IDs to labels for output in the same order
-        condition_ids = obj.get('conditions') or []
-        if condition_ids:
-            qs = Condition.objects.filter(id__in=condition_ids).values_list('id', 'label')
-            id_to_label = {cid: label for cid, label in qs}
-            obj['conditions'] = [id_to_label[cid] for cid in condition_ids if cid in id_to_label]
+        conditions = obj.get('conditions') or []
+        if conditions:
+            condition_ids = [
+                condition for condition in conditions
+                if isinstance(condition, int)
+            ]
+            condition_ids.extend([
+                condition.get('id') for condition in conditions
+                if isinstance(condition, dict) and isinstance(condition.get('id'), int)
+            ])
+            id_to_label = dict(
+                Condition.objects.filter(id__in=condition_ids).values_list('id', 'label')
+            )
+            normalized = []
+            for condition in conditions:
+                if isinstance(condition, int):
+                    label = id_to_label.get(condition)
+                    if label is not None:
+                        normalized.append({'id': condition, 'label': label})
+                elif isinstance(condition, dict):
+                    condition_id = condition.get('id')
+                    if isinstance(condition_id, int):
+                        normalized.append({
+                            'id': condition_id,
+                            'label': condition.get('label') or id_to_label.get(condition_id),
+                        })
+            obj['conditions'] = normalized
 
         return obj
 

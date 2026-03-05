@@ -483,7 +483,12 @@ export default function Home() {
               return (
                 <div key={seg.uuid} className='segment-row'>
                   <MainSegmentCell event={event} seg={seg} />
-                  <div className={'segment-cell'}>{event && event.status === 'Active' && event.conditions.map(c => <p key={c}>{c}</p>)}</div>
+                  <div className={'segment-cell'}>
+                    {event && event.status === 'Active' && event.conditions.map((condition, index) => {
+                      const key = `${condition.id}-${index}`;
+                      return <p key={key}>{condition.label}</p>;
+                    })}
+                  </div>
                   <div className={'segment-cell'}>{event && event.status === 'Active' && event.id}</div>
                   <div className={'segment-cell'}>{event && event.status === 'Active' && <FormattedDt date={event.first_reported.date} user={event.first_reported.user} />}</div>
                   <div className={'segment-cell'}>{event && <FormattedDt date={event.last_updated} user={event.user} />}</div>

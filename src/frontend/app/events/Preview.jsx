@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 // Internal imports
 import { desc } from './Schedule';
 import { getConditionIcon, getPlainIcon } from './icons';
-import { PHRASES_LOOKUP, TrafficImpacts, RoadConditionsLookup } from './references';
+import { PHRASES_LOOKUP, TrafficImpacts } from './references';
 import { selectFeature } from '../components/Map/helpers';
 
 // Styling
@@ -53,12 +53,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
   // States
   const [selectedSeg, setSelectedSeg] = useState(segments ? segments[0] : null);
 
-  const conditions = (displayed.conditions || []).map((c) => {
-    if (typeof(c) === 'number') {
-      return { id: c, label: RoadConditionsLookup[c] };
-    }
-    return c;
-  });
+  const conditions = displayed.conditions || [];
 
   const isRoadCondition = event.type === 'ROAD_CONDITION';
   const isChainup = event.type === 'CHAIN_UP';
@@ -281,18 +276,11 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
           <div className={'conditions'}>
             <h5>Conditions</h5>
             <ul>
-              {displayed.conditions.map((condition, ii) => {
-                let id, label;
-                if (typeof(condition) === 'number') {
-                  id = condition;
-                  label = RoadConditionsLookup[condition];
-                } else {
-                  id = condition.id;
-                  label = condition.label;
-                }
+              {conditions.map((condition, ii) => {
                 return (
                   <li key={'item ' + ii}>
-                    <FontAwesomeIcon icon={getConditionIcon(id)} className={'condition-icon'}/>{label}
+                    <FontAwesomeIcon icon={getConditionIcon(condition.id)} className={'condition-icon'}/>
+                    {condition.label}
                   </li>
                 );
               })}
