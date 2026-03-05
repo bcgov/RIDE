@@ -104,6 +104,7 @@ class RoadConditions(Events):
         existing_events = Event.current.filter(segment_id__in=segPks)
         for event in existing_events:
             event.next_update = get_default_next_update()
+            event.user = request.user
             event.save()
             confirmed_events.append(RcSerializer(event).data)
 
