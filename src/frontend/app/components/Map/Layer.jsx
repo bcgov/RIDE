@@ -9,7 +9,7 @@ import { linear } from 'ol/easing';
 import { Point, LineString, GeometryCollection, MultiPolygon, Polygon } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
 
-import { MapContext } from '../../contexts';
+import { AlertContext, MapContext } from '../../contexts';
 
 import { ll2g, selectFeature, pointerMove } from './helpers.js';
 import RideFeature, { PinFeature } from './feature.js';
@@ -173,6 +173,7 @@ function layerStyle(feature, resolution) {
 
 export default function Layer({ visibleLayers, event, dispatch }) {
 
+  const { setAlertContext } = useContext(AlertContext);
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
   const [ fetchInterval, setFetchInterval ] = useState();
@@ -324,6 +325,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
               ).then((updatedEvent) => {
                 feature.set('raw', updatedEvent);
                 dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
+                setAlertContext({ message: 'Event awaiting approval' });
               });
             }
           });
