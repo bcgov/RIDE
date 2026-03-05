@@ -67,6 +67,32 @@ export default function Home() {
   // Conditional states
   const [ showEventPanel, setShowEventPanel ] = useState(false);
 
+  const roadConditionLabelToId = RoadConditions.reduce((acc, condition) => {
+    acc[condition.label] = condition.id;
+    return acc;
+  }, {});
+
+  const normalizeConditionId = (condition) => {
+    if (typeof condition === 'number') {
+      return RoadConditions.some(rc => rc.id === condition) ? condition : null;
+    }
+
+    if (typeof condition === 'string') {
+      return roadConditionLabelToId[condition] ?? null;
+    }
+
+    if (condition && typeof condition === 'object') {
+      if (typeof condition.id === 'number' && RoadConditions.some(rc => rc.id === condition.id)) {
+        return condition.id;
+      }
+      if (typeof condition.label === 'string') {
+        return roadConditionLabelToId[condition.label] ?? null;
+      }
+    }
+
+    return null;
+  };
+
   const initialEvent = getInitialEvent();
   initialEvent.type = 'ROAD_CONDITION';
   const [ event, dispatch ] = useReducer(eventReducer, initialEvent);
@@ -160,6 +186,38 @@ export default function Home() {
       setDisplayedRoutes(routes);
     }
   }, [selectedRoute, selectedArea]);
+
+  useEffect(() => {
+    if (!checkedSegs.length) {
+      setCheckedConditions([]);
+      return;
+    }
+
+    const selectedConditionSets = checkedSegs.map(segUuid => {
+      const segmentRcs = rcsMap[segUuid];
+
+      if (!segmentRcs || segmentRcs.status !== 'Active' || !Array.isArray(segmentRcs.conditions)) {
+        return new Set();
+      }
+
+      const conditionIds = segmentRcs.conditions
+        .map(normalizeConditionId)
+        .filter(conditionId => conditionId !== null);
+
+      return new Set(conditionIds);
+    });
+
+    if (selectedConditionSets.length === 1) {
+      setCheckedConditions(Array.from(selectedConditionSets[0]));
+      return;
+    }
+
+    const commonConditionIds = Array.from(selectedConditionSets[0]).filter(conditionId =>
+      selectedConditionSets.every(conditionSet => conditionSet.has(conditionId))
+    );
+
+    setCheckedConditions(commonConditionIds);
+  }, [checkedSegs, rcsMap]);
 
   /* Handlers */
   const clearConditions = (segPks) => {
