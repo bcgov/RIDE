@@ -31,7 +31,9 @@ export default function EditUserForm(props) {
   /* Helpers */
   const submitForm = (undoing=false) => {
     updateUser(user.id, {
-      organizations: undoing ? (user.organization ? [user.organization.id] : []) : [selectedOrg.id],
+      organizations: undoing ?
+        (user.organization ? [user.organization.id] : []) :
+        (selectedOrg ? [selectedOrg.id] : []),
       is_approver: undoing ? user.is_approver : selectedRole,
       is_superuser: undoing? user.is_superuser : isSuperuser
 
