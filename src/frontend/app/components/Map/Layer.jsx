@@ -136,20 +136,32 @@ function getVisibility(event, visibleLayers) {
   const SEVEN_DAYS_AGO = now - 1000 * 60 * 60 * 24 * 7;
   const FIFTEEN_MINUTES_AGO = now - 1000 * 60 * 15;
 
+  const normalizedType = (event.type || '').toLowerCase().replaceAll(/\s|_|-/g, '');
+  const typeLayerMap = {
+    chainup: 'chainups',
+    roadcondition: 'roadConditions',
+  };
+  const typeLayer = typeLayerMap[normalizedType];
+  if (typeLayer) {
+    return visibleLayers[typeLayer];
+  }
+
   const last_inactivated = new Date(event.last_inactivated);
   if (event.status === 'Active' || last_inactivated > FIFTEEN_MINUTES_AGO) {
     if (event.is_closure) {
       return visibleLayers.closures;
-    } else if (new Date(event.timing.startTime) > now) {
+
+    } else if (event.timing?.startTime && new Date(event.timing.startTime) > now) {
       return visibleLayers.future;
-    } else if (event.type === 'ROAD_CONDITION') {
-      return visibleLayers.roadConditions;
+
     } else if (event.type === 'Incident' || event.type === 'Planned event') {
       return visibleLayers[event.details.severity.toLowerCase()];
     }
+
   } else if (event.status === 'Inactive') {
     return visibleLayers.cleared7 && new Date(event.last_inactivated) > SEVEN_DAYS_AGO;
   }
+
   return true;
 }
 
