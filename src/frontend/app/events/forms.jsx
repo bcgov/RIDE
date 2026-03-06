@@ -584,10 +584,12 @@ export default class EventForm extends Component {
 
     if (authContext.is_approver) {
       if (!event.approved && event.status === 'Inactive') { return 'Clear'; }
-      return 'Publish';
+      return event.id ? 'Update' : 'Publish';
+
     } else if (event.details.severity.startsWith('Minor') && !event.is_closure && !event.was_closure) {
       return event.id ? 'Update' : 'Publish';
     }
+
     return 'Request approval';
   }
 
