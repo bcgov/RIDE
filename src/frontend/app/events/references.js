@@ -411,5 +411,6 @@ export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
 // the list of phrases for each incident type needs to alphabetic (DBC22-5063)
 Object.keys(FORM_PHRASES).forEach((key) => FORM_PHRASES[key].sort((a, b) => a.phrase < b.phrase ? -1 : 1));
 
-globalThis.FORM_CATEGORY_PHRASE = FORM_CATEGORY_PHRASE
+globalThis.FORM_CATEGORY_PHRASE = FORM_CATEGORY_PHRASE;
+globalThis.PHRASES_LOOKUP = PHRASES_LOOKUP;
 

@@ -1,9 +1,123 @@
-.events-page {
-  header {
-    padding-left: 0.5rem;
-    input {
-      border: solid 1px black;
-      border-radius: 4px;
+@use "../styles/variables.scss" as *;
+
+.events-list {
+  .event {
+    margin: 0.5rem;
+    border-radius: 8px;
+    border: solid 2px $Type-Primary;
+    background: white;
+    overflow: hidden;
+
+    .title {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0.25rem 0.3rem 0.25rem;
+      background: $BC-Yellow-Alt;
+      align-items: baseline;
+      font-weight: 700;
+
+      .card-name {
+        padding-left: 0.5rem;
+      }
+
+      .lozenge {
+        background: $Type-Secondary;
+        height: 1.6rem;
+        color: $BC-Yellow-Alt;
+        border-radius: 0.8rem;
+        padding: 0.1rem 0.5rem 0 0.5rem;
+        font-size: 0.9rem;
+
+        svg {
+          margin-right: 0.25rem;
+        }
+      }
+
+      &.overdue {
+        color: white;
+        background: $Error;
+
+        .lozenge {
+          color: $Error;
+          background: #ffd4d2;
+        }
+      }
+
+      &.close {
+        .lozenge {
+          color: white;
+          background: $Error;
+        }
+      }
+
+      &.selected {
+        color: white;
+        background: $Focus;
+      }
+    }
+
+    .body {
+      padding: 0.5rem 0.75rem;
+
+      .icon-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+
+        .icon {
+          img {
+            height: 40px;
+          }
+        }
+
+        .name {
+          flex: 1;
+
+          .situation {
+            font-weight: 700;
+          }
+          .event-id {
+            font-size: 0.9rem;
+          }
+        }
+
+        .edit {
+          button {
+            color: $Type-Secondary;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: solid 1px white;
+            border-radius: 6px;
+            padding: 0 0.5rem;
+
+            &:hover {
+              border: solid 1px $Grey70;
+              background: $Grey10;
+            }
+
+            &:active {
+              border: solid 1px $Grey90;
+              background: $Grey20;
+            }
+
+            svg {
+              margin-right: 0.25rem;
+            }
+          }
+        }
+      }
+
+      .location {
+          margin-bottom: 0.5rem;
+
+      }
+
+      .service-area {
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
     }
   }
 }
