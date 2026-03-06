@@ -138,7 +138,7 @@ export default class RcsForm extends EventForm {
     const { errors } = this.state;
 
     return (
-      <div className="form">
+      <div className="form rcs-form-container">
         <form id='event-form' className={'rcs-form'}>
           <div className="section form-header">
             <div className="title">
