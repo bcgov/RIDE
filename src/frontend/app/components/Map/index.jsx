@@ -100,7 +100,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
           }}
           blurInputOnSelect={true}
           loadOptions={getLocations}
-          placeholder="type to search"
+          placeholder="Search location"
           openMenuOnFocus={false}
           noOptionsMessage={(e) => e.inputValue && e.inputValue.length > 2 ? 'No matches' : null }
           components={{ IndicatorSeparator: () => null, DropdownIndicator, }}
