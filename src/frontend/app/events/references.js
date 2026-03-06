@@ -74,7 +74,7 @@ export const RestrictionsList = [
   { id: 1, label: 'Axle Count', placeholder: '# of Axles (2-12)' },
   { id: 2, label: 'Height', placeholder: 'Meters (max 6)' },
   { id: 3, label: 'Length', placeholder: 'Meters (max 40)' },
-  { id: 4, label: 'Speed Limit', placeholder: 'Kilometers per hour (60-120)' },
+  { id: 4, label: 'Speed Limit', placeholder: 'Kilometers per hour (20-120)' },
   { id: 7, label: 'Weight axle', placeholder: 'Kilograms (10-64,000)' },
   { id: 8, label: 'Weight vehicle', placeholder: 'Kilograms (10-64,000)' },
   { id: 9, label: 'Width', placeholder: 'Meters (max 10)' },
