@@ -35,11 +35,14 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
   let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase) || [];
   if (end.other && end.useOther) { endNearbies.push(end.other); }
 
+  // Timing
+  const nextUpdate = displayed?.timing?.nextUpdate ? new Date(displayed.timing.nextUpdate) : null;
   const lastUpdated = displayed.last_updated ? new Date(displayed.last_updated) : new Date(Date.now());
+
   const cleared = displayed.status === 'Inactive' && (!displayed.approved || lastUpdated > Date.now() - 60000 * 15);  // TODO: time window move to env variable
 
   const icon = getPlainIcon(displayed);
-  const nextUpdate = new Date(displayed?.timing?.nextUpdate);
+
   let banner = [];
   if (displayed.version !== event.version) {
     banner.push(`Version ${displayed.version} at ${inEffectUntilFormat(displayed.last_updated)}`);
