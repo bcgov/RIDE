@@ -93,19 +93,20 @@ export function desc(schedule, short=false) {
   let final = names.join(', ');
 
   if (schedule.allDay) {
-    final = `All day ${final}`;
+    final = `All day${final ? ` ${final}` : ''}`;
   } else {
     const start = getDate(schedule.startTime);
     const end = getDate(schedule.endTime);
     if (start) {
       if (end) {
-        final = `${final}, ${printTime(start)} to ${printTime(end)}`;
-        if (end < start) { final += ' next day'}
+        let timeDescription = `${printTime(start)} to ${printTime(end)}`;
+        if (end < start) { timeDescription += ' next day'}
+        final = final ? `${final}, ${timeDescription}` : timeDescription;
       } else {
-        final = `${final}, from ${printTime(start)}`;
+        final = final ? `${final}, from ${printTime(start)}` : `from ${printTime(start)}`;
       }
     } else if (end) {
-      final = `${final}, until ${printTime(end)}`;
+      final = final ? `${final}, until ${printTime(end)}` : `until ${printTime(end)}`;
     }
   }
   return (final.length > 40 && !short) ? desc(schedule, true) : final ;
