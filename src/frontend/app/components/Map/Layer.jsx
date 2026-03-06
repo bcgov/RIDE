@@ -1,4 +1,6 @@
 import { useContext, useEffect, useState, useRef } from 'react';
+import { useSelector, useDispatch, useStore } from 'react-redux';
+import { add, refresh } from '../../slices/events';
 
 import * as turf from '@turf/turf';
 
@@ -24,6 +26,7 @@ import { patch } from '../../shared/helpers';
 
 
 export function addEvent(event, map, dispatch) {
+  event = structuredClone(event);
   const source = map.get('events').getSource();
   const existing = source.get(event.id);
 
@@ -62,7 +65,7 @@ export function addEvent(event, map, dispatch) {
   const feature = new RideFeature({
     styles,
     type: 'event',
-    raw: structuredClone(event),
+    raw: event,
     version: event.version,
     geometry: new GeometryCollection([new Point(mid || start)]),
   });
@@ -96,37 +99,7 @@ async function updateEvents(map, dispatch, layerStyle) {
     credentials: "include",
   }).then((response) => response.json())
     .then((data) => {
-      if (!map.get('events')) {
-        const layer = new VectorLayer({
-          classname: 'events',
-          visible: true,
-          source: new VectorSource({ format: new GeoJSON() }),
-          style: layerStyle,
-          renderBuffer: 30,
-        });
-        layer.listenForHover = true;
-        layer.listenForClicks = true;
-        map.addLayer(layer);
-        map.set('events', layer);
-      }
-
-      const source = map.get('events').getSource();
-
-      const eventIds = {};
-      data.forEach((event) => {
-        addEvent(event, map, dispatch);
-        eventIds[event.id] = true;
-      });
-
-      // remove events no longer in the list of events
-      source.getKeys().forEach((key) => {
-        if (!key.startsWith('DBC')) { return; }
-        if (!eventIds[key]) {
-          const existing = source.get(key);
-          source.unset(key, true);
-          source.removeFeature(existing);
-        }
-      });
+      dispatch(refresh(data));
     });
 }
 
@@ -171,6 +144,22 @@ function layerStyle(feature, resolution) {
   return feature.get('hovered') ? feature.hover : feature.normal;
 }
 
+function addEventsLayer(map) {
+  if (!map.get('events')) {
+    const layer = new VectorLayer({
+      classname: 'events',
+      visible: true,
+      source: new VectorSource({ format: new GeoJSON() }),
+      style: layerStyle,
+      renderBuffer: 30,
+    });
+    layer.listenForHover = true;
+    layer.listenForClicks = true;
+    map.addLayer(layer);
+    map.set('events', layer);
+  }
+}
+
 export default function Layer({ visibleLayers, event, dispatch }) {
 
   const { setAlertContext } = useContext(AlertContext);
@@ -180,6 +169,10 @@ export default function Layer({ visibleLayers, event, dispatch }) {
   const menuRef = useRef();
   const eventRef = useRef(); // necessary for early-bound handler to read current prop
   eventRef.current = event;
+
+  // const events = useSelector(state => state.events.all);
+  const storeDispatch = useDispatch()
+  const store = useStore();
 
   const contextHandler = (e) => {
     e.preventDefault();
@@ -370,6 +363,27 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     setContextMenu(items);
   };
 
+  const updateEventsOnMap = () => {
+    const state = store.getState()
+    const eventIds = {};
+
+    state.events.all.forEach((event) => {
+      addEvent(event, map, dispatch);
+      eventIds[event.id] = true;
+    })
+
+    // remove events no longer in the list of events
+    const source = map.get('events').getSource();
+    source.getKeys().forEach((key) => {
+      if (!key.startsWith('DBC')) { return; }
+      if (!eventIds[key]) {
+        const existing = source.get(key);
+        source.unset(key, true);
+        source.removeFeature(existing);
+      }
+    });
+  }
+
   useEffect(() => {
     if (!map) { return; }
     map.on('contextmenu', contextHandler);
@@ -381,9 +395,11 @@ export default function Layer({ visibleLayers, event, dispatch }) {
       });
     });
     map.on('pointermove', pointerMove);
-    updateEvents(map, dispatch, layerStyle);
+    addEventsLayer(map);
+    store.subscribe(updateEventsOnMap);
+    updateEvents(map, storeDispatch, layerStyle);
     if (!fetchInterval) {
-      setFetchInterval(setInterval(() => updateEvents(map, dispatch, layerStyle), EVENT_POLLING_REFRESH || 10000));
+      setFetchInterval(setInterval(() => updateEvents(map, storeDispatch, layerStyle), EVENT_POLLING_REFRESH || 10000));
     }
   }, [map]);
 

@@ -1,12 +1,17 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/pro-solid-svg-icons';
 import { getPlainIcon } from './icons';
 
 import { AuthContext } from '../contexts';
+import { API_HOST, EVENT_POLLING_REFRESH } from '../env';
+import { get } from '../shared/helpers';
 import { PHRASES_LOOKUP } from './references';
 import { selectFeature } from '../components/Map/helpers';
+import PollingComponent from '../shared/PollingComponent';
+
 import './Queue.scss';
+
 
 function Pending({ event, dispatch, goToFunc, map }) {
   const { authContext } = useContext(AuthContext);
@@ -76,13 +81,29 @@ function Pending({ event, dispatch, goToFunc, map }) {
   );
 }
 
-export default function Queue({ dispatch, goToFunc, map, pending }) {
+export default function Queue({ dispatch, goToFunc, map }) {
+  const [ pending, setPending ] = useState([]);
+
+  const pollEvents = async () => {
+    const pending = await get(`${API_HOST}/api/events/pending`);
+    setPending(pending);
+    const bubble = document.getElementById('num-pending');
+    if (pending.length > 0) {
+      bubble.innerText = pending.length;
+      bubble.style.visibility = 'visible';
+    } else {
+      bubble.innerText = '';
+      bubble.style.visibility = 'hidden';
+    }
+  }
+
 
   return (
     <div className='queue'>
       {pending.map((event) => (
         <Pending key={event.id} event={event} dispatch={dispatch} goToFunc={goToFunc} map={map} />
       ))}
+      <PollingComponent runnable={pollEvents} interval={EVENT_POLLING_REFRESH || 10000} runImmediately={true}/>
     </div>
   )
 }

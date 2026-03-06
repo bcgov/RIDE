@@ -1,5 +1,7 @@
 import uuid
 
+from dictdiffer import diff
+
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models.signals import pre_delete

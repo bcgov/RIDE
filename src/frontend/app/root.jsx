@@ -8,6 +8,9 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import store from './store';
+import { Provider } from 'react-redux';
+
 import { API_HOST } from './env.js';
 import { DataContext } from './contexts';
 
@@ -52,7 +55,6 @@ export function HydrateFallback() {
 let fetching = false;
 
 export default function App() {
-
   const [impacts, setImpacts] = useState(getImpacts);
 
   function getImpacts() {
@@ -72,9 +74,11 @@ export default function App() {
   }
 
   return (
-    <DataContext.Provider value={{ impacts }}>
-      <Outlet />
-    </DataContext.Provider>
+    <Provider store={store}>
+      <DataContext.Provider value={{ impacts }}>
+        <Outlet />
+      </DataContext.Provider>
+    </Provider>
   )
 }
 

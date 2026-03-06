@@ -5,11 +5,14 @@ import logging
 from datetime import datetime, timezone
 
 from django.contrib.auth import get_user_model
+from django.contrib.gis.geos import Point
+
 from rest_framework import fields, serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework_gis.fields import GeometryField
 
 from .models import Event, Note, TrafficImpact, Condition
+from apps.organizations.models import ServiceArea
 
 log = logging.getLogger('debug')
 
@@ -239,6 +242,16 @@ class EventSerializer(KeyMoveSerializer):
             }
             log.info(data['geometry'])
         data['approved'] = self.is_automatically_approved(data)
+
+        coords = data.get('start', {}).get('coords')
+        if coords is not None:
+            try:
+                point = Point(coords[0], coords[1])
+                sa = ServiceArea.objects.filter(geometry__contains=point)
+                data['service_area'] = sa.id
+            except Exception as e:
+                log.error(f'getting service area failed for coords {coords} for event {data.get('id')}')
+                log.exception(e)
 
         return super().to_internal_value(data)
 

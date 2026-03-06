@@ -7,17 +7,28 @@ from django.db.models import ForeignKey
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
+from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
 from apps.shared.models import BaseModel, LocationField, OrderedListField, VersionedModel
 
 
+class EverythingManager(models.Manager):
+
+    use_in_migrations = True
+
+
 class PendingManager(models.Manager):
+
+    use_in_migrations = True
 
     def get_queryset(self):
         return super().get_queryset().filter(latest=True, approved=False, deleted=False)
 
 
 class LatestApprovedManager(models.Manager):
+
+    use_in_migrations = True
+
     def get_queryset(self):
         return super().get_queryset().filter(latest_approved=True, deleted=False)
 
@@ -161,6 +172,7 @@ class Event(VersionedModel):
 
     segment = ForeignKey(Segment, on_delete=models.CASCADE, blank=True, null=True)
     chainup = ForeignKey(ChainUp, on_delete=models.CASCADE, blank=True, null=True)
+    service_area = ForeignKey(ServiceArea, on_delete=models.CASCADE, blank=True, null=True)
 
     delay_amount = models.PositiveIntegerField(default=0)
     delay_unit = models.CharField(default='minutes')
@@ -174,6 +186,7 @@ class Event(VersionedModel):
 
     # override VersionedModel's .current manager to use latest_approved
     # rather than latest (still available via the .last manager)
+    objects = EverythingManager()
     current = LatestApprovedManager()
     pending = PendingManager()
 
