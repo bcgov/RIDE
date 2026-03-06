@@ -36,6 +36,7 @@ import './forms.css';
 
 const ONE_HOUR = 1000 * 60 * 60;
 const ONE_WEEK = ONE_HOUR * 24 * 7
+const INVALID_ADDITIONAL_CHARACTERS = /[<>\[\]{}\\|~`!@#$%\^&*()_+=]/;
 
 function getLater(severity) {
   if (!severity) { return null; }
@@ -442,6 +443,10 @@ export default class EventForm extends Component {
       err['Conditions'] = 'Must include at least one';
     }
 
+    if (form.additional && INVALID_ADDITIONAL_CHARACTERS.test(form.additional)) {
+      err.additional = 'Contains unsupported special characters';
+    }
+
     if (form.type === 'Incident') {
       if (!form.timing.nextUpdate && !form.timing.endTime) {
         err['Manage Timing By'] = 'Must set one or both';
@@ -675,7 +680,7 @@ export default class EventForm extends Component {
 
                   { event.type &&
                     <div className="section additional">
-                      <AdditionalMessaging event={event} dispatch={dispatch} />
+                      <AdditionalMessaging event={event} dispatch={dispatch} errors={errors} />
                     </div>
                   }
 
