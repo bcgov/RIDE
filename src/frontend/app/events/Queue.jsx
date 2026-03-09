@@ -88,6 +88,7 @@ export default function Queue({ dispatch, goToFunc, map }) {
     const pending = await get(`${API_HOST}/api/events/pending`);
     setPending(pending);
     const bubble = document.getElementById('num-pending');
+    if (!bubble) { return; }
     if (pending.length > 0) {
       bubble.innerText = pending.length;
       bubble.style.visibility = 'visible';
