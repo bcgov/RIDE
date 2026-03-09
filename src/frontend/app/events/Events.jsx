@@ -1,4 +1,6 @@
 import { useSelector, useDispatch, useStore } from 'react-redux';
+import { useNavigate } from 'react-router';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencil } from '@fortawesome/pro-solid-svg-icons';
 import { faStopwatch } from '@fortawesome/pro-regular-svg-icons';
@@ -13,6 +15,8 @@ import { PHRASES_LOOKUP } from './references';
 import './Events.scss';
 
 function Event({ event, goToFunc, dispatch, map, selected }) {
+
+  const navigate = useNavigate();
 
   const isOverdue = event.delta < 0;
   const isClose = event.delta > 0 && event.delta < (1000 * 60 * 10);
@@ -79,8 +83,12 @@ function Event({ event, goToFunc, dispatch, map, selected }) {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                dispatch({ type: 'reset form', value: event, showPreview: true, showForm: true });
-                goToFunc(event.location.start.coords)
+                if (isChainUp) {
+                  navigate('/chainups/');
+                } else {
+                  dispatch({ type: 'reset form', value: event, showPreview: true, showForm: true });
+                  goToFunc(event.location.start.coords)
+                }
               }}
             >
               <FontAwesomeIcon icon={faPencil} />edit
