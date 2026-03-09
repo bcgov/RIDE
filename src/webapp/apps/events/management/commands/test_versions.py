@@ -12,5 +12,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        event = Event.last.get(id='DBC-100002')
+        event = Event.last.get(id='RIDE-100002')
         pprint(event.get_history())

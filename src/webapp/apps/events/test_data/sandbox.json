@@ -1,0 +1,105 @@
+{
+  "name": "Hwy 1A+99A",
+  "alias": "Kingsway",
+  "other": null,
+  "coords": [
+    -123.0237738377736,
+    49.232277755126375
+  ],
+  "nearby": [
+    {
+      "name": "Burnaby",
+      "type": "City",
+      "phrase": "5.1km W of Burnaby",
+      "source": "BCGNWS",
+      "include": true,
+      "distance": 5.118,
+      "priority": 6,
+      "direction": "W",
+      "coordinates": [
+        -122.9727777774,
+        49.2427777739
+      ]
+    },
+    {
+      "name": "Delta",
+      "type": "City",
+      "phrase": "22.5km N of Delta",
+      "source": "BCGNWS",
+      "distance": 22.508,
+      "priority": 6,
+      "direction": "N",
+      "coordinates": [
+        -123.0586111113,
+        49.084722218
+      ]
+    },
+    {
+      "name": "Coquitlam",
+      "type": "City",
+      "phrase": "25.8km W of Coquitlam",
+      "source": "BCGNWS",
+      "distance": 25.841,
+      "priority": 6,
+      "direction": "W",
+      "coordinates": [
+        -122.7936111117,
+        49.2841666625
+      ]
+    },
+    {
+      "name": "Abbotsford",
+      "type": "City",
+      "phrase": "61.5km W of Abbotsford",
+      "source": "BCGNWS",
+      "distance": 61.547,
+      "priority": 6,
+      "direction": "W",
+      "coordinates": [
+        -122.3291666669,
+        49.0522222178
+      ]
+    },
+    {
+      "name": "Duncan",
+      "type": "City",
+      "phrase": "143.7km NE of Duncan",
+      "source": "BCGNWS",
+      "distance": 143.681,
+      "priority": 6,
+      "direction": "NE",
+      "coordinates": [
+        -123.708055555,
+        48.7786111072
+      ]
+    }
+  ],
+  "aliases": [
+    "Kingsway",
+    "Hwy 1A",
+    "Hwy 99A"
+  ],
+  "pending": false,
+  "OBJECTID": 247894635,
+  "useAlias": true,
+  "useOther": false,
+  "ROAD_CLASS": "arterial",
+  "FEATURE_CODE": null,
+  "FEATURE_TYPE": "Road",
+  "ROAD_SURFACE": "paved",
+  "nearbyPending": false,
+  "ROAD_NAME_FULL": "Kingsway",
+  "NUMBER_OF_LANES": 4,
+  "FEATURE_LENGTH_M": 90.8026,
+  "ROAD_NAME_ALIAS1": "Hwy 1A",
+  "ROAD_NAME_ALIAS2": "Hwy 99A",
+  "ROAD_NAME_ALIAS3": null,
+  "ROAD_NAME_ALIAS4": null,
+  "SE_ANNO_CAD_DATA": null,
+  "DATA_CAPTURE_DATE": null,
+  "SEGMENT_LENGTH_2D": 90.803,
+  "SEGMENT_LENGTH_3D": null,
+  "HIGHWAY_EXIT_NUMBER": null,
+  "HIGHWAY_ROUTE_NUMBER": "1A+99A",
+  "DIGITAL_ROAD_ATLAS_LINE_ID": 100786
+}

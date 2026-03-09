@@ -8,12 +8,6 @@ from apps.organizations.models import ServiceArea
 
 
 class Migration(migrations.Migration):
-    def run_mgmt_cmd(apps, schema_editor):
-        call_command('update_area_routes')
-
-    def reverse_mgmt_cmd(apps, schema_editor):
-        ServiceArea.objects.update(routes=[])
-
     dependencies = [
         ('organizations', '0005_alter_organization_contact_id_and_more'),
     ]
@@ -24,5 +18,4 @@ class Migration(migrations.Migration):
             name='routes',
             field=apps.shared.models.OrderedListField(default=list),
         ),
-        migrations.RunPython(run_mgmt_cmd, reverse_mgmt_cmd),
     ]

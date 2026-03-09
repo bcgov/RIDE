@@ -9,7 +9,7 @@ from apps.users.models import RIDEUser
 
 
 NEW_EVENT = {
-    'id': 'DBC-100006',
+    'id': 'RIDE-100006',
     'event_type': 'Incident',
 }
 
@@ -19,7 +19,7 @@ class Command(BaseCommand):
         # user = RIDEUser.objects.get(username='approver')
 
 
-        Event.objects.filter(id='DBC-100006').delete()
+        Event.objects.filter(id='RIDE-100006').delete()
 
         # e = Event(**NEW_EVENT)
         # e.user = user
@@ -27,25 +27,25 @@ class Command(BaseCommand):
         # self.print_events()
         # self.print_managers()
 
-        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e = Event.last.get(id='RIDE-100006', latest=True)
         # e.delay_amount = 1
         # e.save()
         # self.print_events()
         # self.print_managers()
 
-        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e = Event.last.get(id='RIDE-100006', latest=True)
         # e.approved = True
         # e.save()
         # self.print_events()
         # self.print_managers()
 
-        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e = Event.last.get(id='RIDE-100006', latest=True)
         # e.approved = False
         # e.save()
         # self.print_events()
         # self.print_managers()
 
-        # e = Event.last.get(id='DBC-100006', latest=True)
+        # e = Event.last.get(id='RIDE-100006', latest=True)
         # e.approved = True
         # e.save()
         # self.print_events()
@@ -58,8 +58,8 @@ class Command(BaseCommand):
             print(e)
 
     def print_managers(self):
-        pending = Event.pending.filter(id='DBC-100006').first()
-        current = Event.current.filter(id='DBC-100006').first()
+        pending = Event.pending.filter(id='RIDE-100006').first()
+        current = Event.current.filter(id='RIDE-100006').first()
 
         print(getattr(pending, 'version', '-'), getattr(current, 'version', '-'))
 

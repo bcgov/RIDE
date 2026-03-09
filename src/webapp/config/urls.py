@@ -9,7 +9,6 @@ from allauth.account import views as account_views
 from allauth.urls import build_provider_urlpatterns
 
 
-from apps.ride.views import home, cameras
 from apps.events import urls as event_urls
 from apps.users import urls as user_urls
 from apps.organizations import urls as organization_urls
@@ -26,8 +25,6 @@ urlpatterns = [
     path('api/', include((user_urls, 'users'), namespace='users')),
     path('api/', include((organization_urls, 'organizations'), namespace='organizations')),
     path('api/', include((segment_urls, 'segments'), namespace='segments')),
-    path('cameras/', cameras),
-    path('', home),
 
     # Auth
     path('session', session.as_view()),
