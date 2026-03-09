@@ -1,406 +1,193 @@
+import json
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+from django.contrib.auth import get_user_model
+from django.contrib.gis.geos import GeometryCollection, LineString, Point
 from django.test import TestCase
 
-sample = '''{
-  "type": "Incident",
-  "start": {
-    "location": [
-      -120.69816026633748,
-      50.09734902191738
-    ],
-    "name": "Hwy 97C",
-    "alias": "Hwy 5A",
-    "aliases": [
-      "Hwy 5A",
-      "Merritt-Princeton Hwy 5A"
-    ],
-    "nearby": {
-      "options": [
-        {
-          "source": "BCGNWS",
-          "name": "Merritt",
-          "type": "City",
-          "coordinates": [
-            -120.788333334,
-            50.1124999965
-          ],
-          "distance": 15.431,
-          "direction": "E",
-          "priority": 6,
-          "phrase": "15.4km E of Merritt"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Kamloops",
-          "type": "City",
-          "coordinates": [
-            -120.3394444447,
-            50.6758333294
-          ],
-          "distance": 98.428,
-          "direction": "S",
-          "priority": 6,
-          "phrase": "98.4km S of Kamloops"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Logan Lake",
-          "type": "District Municipality (1)",
-          "coordinates": [
-            -120.8133333333,
-            50.4944444401
-          ],
-          "distance": 63.998,
-          "direction": "S",
-          "priority": 5,
-          "phrase": "64km S of Logan Lake"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Peachland",
-          "type": "District Municipality (1)",
-          "coordinates": [
-            -119.7363888889,
-            49.7738888844
-          ],
-          "distance": 108.016,
-          "direction": "NW",
-          "priority": 5,
-          "phrase": "108km NW of Peachland"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Princeton",
-          "type": "Town",
-          "coordinates": [
-            -120.5089678006,
-            49.4590345969
-          ],
-          "distance": 82.293,
-          "direction": "N",
-          "priority": 4,
-          "phrase": "82.3km N of Princeton"
-        }
-      ],
-      "picked": [
-        0,
-        2
-      ],
-      "other": ""
-    }
-  },
-  "end": {
-    "location": "",
-    "route": "",
-    "name": None,
-    "alias": "",
-    "aliases": None,
-    "nearby": {
-      "options": None,
-      "picked": [],
-      "other": ""
-    }
-  },
-  "route": [],
-  "impacts": [
-    "1",
-    "4",
-    "3"
-  ],
-  "restrictions": [],
-  "conditions": [],
-  "delay": {
-    "amount": "20",
-    "unit": "hours"
-  },
-  "timing": {
-    "nextUpdate": "2025-08-22T13:04",
-    "end": ""
-  },
-  "additional": "Additional Messaging",
-  "direction": "Both",
-  "severity": "Minor (30- minute delay)",
-  "situation": "92"
-}'''
+from apps.events.open511 import build_event_payload
+from apps.events.models import Event, TrafficImpact
+from apps.organizations.models import ServiceArea
 
-e = {
+class TestOpen511Sync(TestCase):
+    def setUp(self):
+        super().setUp()
+        base = Path(__file__).parent / "test_data"
 
+        self.patch_payload = json.loads((base / "patch_1_event.json").read_text())
+        self.post_payload = json.loads((base / "post_2_new_events.json").read_text())
 
-  "type": "Incident",
-  "start": {
-    "location": [
-      -120.69816026633748,
-      50.09734902191738
-    ],
-    "name": "Hwy 97C",
-    "alias": "Hwy 5A",
-    "aliases": [
-      "Hwy 5A",
-      "Merritt-Princeton Hwy 5A"
-    ],
-    "nearby": {
-      "options": [
-        {
-          "source": "BCGNWS",
-          "name": "Merritt",
-          "type": "City",
-          "coordinates": [
-            -120.788333334,
-            50.1124999965
-          ],
-          "distance": 15.431,
-          "direction": "E",
-          "priority": 6,
-          "phrase": "15.4km E of Merritt"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Kamloops",
-          "type": "City",
-          "coordinates": [
-            -120.3394444447,
-            50.6758333294
-          ],
-          "distance": 98.428,
-          "direction": "S",
-          "priority": 6,
-          "phrase": "98.4km S of Kamloops"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Logan Lake",
-          "type": "District Municipality (1)",
-          "coordinates": [
-            -120.8133333333,
-            50.4944444401
-          ],
-          "distance": 63.998,
-          "direction": "S",
-          "priority": 5,
-          "phrase": "64km S of Logan Lake"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Peachland",
-          "type": "District Municipality (1)",
-          "coordinates": [
-            -119.7363888889,
-            49.7738888844
-          ],
-          "distance": 108.016,
-          "direction": "NW",
-          "priority": 5,
-          "phrase": "108km NW of Peachland"
-        },
-        {
-          "source": "BCGNWS",
-          "name": "Princeton",
-          "type": "Town",
-          "coordinates": [
-            -120.5089678006,
-            49.4590345969
-          ],
-          "distance": 82.293,
-          "direction": "N",
-          "priority": 4,
-          "phrase": "82.3km N of Princeton"
-        }
-      ],
-      "picked": [
-        0,
-        2
-      ],
-      "other": ""
-    }
-  },
-  "end": {
-    "location": "",
-    "route": "",
-    "name": None,
-    "alias": "",
-    "aliases": None,
-    "nearby": {
-      "options": None,
-      "picked": [],
-      "other": ""
-    }
-  },
-  "route": [],
-  "impacts": [
-    "1",
-    "4",
-    "3"
-  ],
-  "restrictions": [],
-  "conditions": [],
-  "delay": {
-    "amount": "20",
-    "unit": "hours"
-  },
-  "timing": {
-    "nextUpdate": "2025-08-22T13:04",
-    "end": ""
-  },
-  "additional": "Additional Messaging",
-  "direction": "Both",
-  "severity": "Minor (30- minute delay)",
-  "situation": "92"
-}
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username="vcschuni",
+            email="v@x.com",
+            password="pw",
+        )
+        TrafficImpact.objects.create(id=999, label="Closed", order=1, closed=True)
 
-e2 = {
-    "id": 'DBC-100001',
-    "event_type": "Incident",
-    "waypoints": [],
-    "location": {
-        "start": {
-            "name": "Hwy 97C",
-            "alias": "Hwy 5A",
-            "aliases": [
-                "Hwy 5A",
-                "Merritt-Princeton Hwy 5A"
-            ],
-            "useAlias": True,
-            "other": None,
-            "useOther": False,
-            "nearby": [
-                {
-                    "source": "BCGNWS",
-                    "name": "Merritt",
-                    "type": "City",
-                    "coordinates": [
-                        -120.788333334,
-                        50.1124999965
-                    ],
-                    "distance": 12.093,
-                    "direction": "SE",
-                    "priority": 6,
-                    "phrase": "12.1km SE of Merritt",
-                    "include": True
-                },
-                {
-                    "source": "BCGNWS",
-                    "name": "Kamloops",
-                    "type": "City",
-                    "coordinates": [
-                        -120.3394444447,
-                        50.6758333294
-                    ],
-                    "distance": 95.091,
-                    "direction": "S",
-                    "priority": 6,
-                    "phrase": "95.1km S of Kamloops",
-                    "include": True
-                },
-                {
-                    "source": "BCGNWS",
-                    "name": "Logan Lake",
-                    "type": "District Municipality (1)",
-                    "coordinates": [
-                        -120.8133333333,
-                        50.4944444401
-                    ],
-                    "distance": 60.661,
-                    "direction": "S",
-                    "priority": 5,
-                    "phrase": "60.7km S of Logan Lake"
-                },
-                {
-                    "source": "BCGNWS",
-                    "name": "Peachland",
-                    "type": "District Municipality (1)",
-                    "coordinates": [
-                        -119.7363888889,
-                        49.7738888844
-                    ],
-                    "distance": 106.196,
-                    "direction": "NW",
-                    "priority": 5,
-                    "phrase": "106.2km NW of Peachland"
-                },
-                {
-                    "source": "BCGNWS",
-                    "name": "Summerland",
-                    "type": "District Municipality (1)",
-                    "coordinates": [
-                        -119.6819444441,
-                        49.6022222178
-                    ],
-                    "distance": 128.221,
-                    "direction": "NW",
-                    "priority": 5,
-                    "phrase": "128.2km NW of Summerland"
+    def _parse_dt(self, value):
+        dt = datetime.fromisoformat(value)
+        return dt if dt.tzinfo else dt.replace(tzinfo=ZoneInfo("America/Vancouver"))
+
+    def _make_event(self, payload, service_area):
+        geography = payload["geography"]
+        if geography["type"] == "Point":
+            shape = Point(*geography["coordinates"])
+        else:
+            shape = LineString(*geography["coordinates"])
+        geometry = GeometryCollection(shape)
+
+        road = payload["roads"][0]
+        schedule_interval = payload["schedule"]["intervals"][0]
+        start_s, end_s = schedule_interval.split("/")
+        start_time = self._parse_dt(start_s) if start_s else None
+        end_time = self._parse_dt(end_s) if end_s else None
+
+        event_type = {
+            "INCIDENT": "Incident",
+            "CONSTRUCTION": "Planned event",
+            "ROAD_CONDITION": "ROAD_CONDITION",
+        }[payload["event_type"]]
+        severity = {
+            "MAJOR": "Major",
+            "MINOR": "Minor",
+            "CLOSURE": "Closure",
+        }[payload["severity"]]
+        status = "Inactive" if payload["status"] == "INACTIVE" else "Active"
+
+        event = Event.objects.create(
+            id=payload["id"],
+            approved=True,
+            latest=True,
+            latest_approved=True,
+            user=self.user,
+            event_type=event_type,
+            status=status,
+            severity=severity,
+            category="Road Maintenance" if "ROAD_MAINTENANCE" in payload["event_subtypes"] else "Collision",
+            direction={
+                "E": "Eastbound",
+                "W": "Westbound",
+                "N": "Northbound",
+                "S": "Southbound",
+                "BOTH": "Both directions",
+            }[road["direction"]],
+            start={
+                "name": road["name"],
+                "other": road.get("from"),
+                "coords": geography["coordinates"] if geography["type"] == "Point" else geography["coordinates"][0],
+                "ROAD_NAME_ALIAS1": road["name"],
+                "ROAD_NAME_FULL": road.get("from"),
+            },
+            end={"name": road["name"], "other": road.get("to"), "coords": geography["coordinates"][-1]} if road.get("to") else None,
+            impacts=[{"id": 999}] if road.get("state") == "CLOSED" else [],
+            delay_amount=int((road.get("+delay", "0 minutes").split(" ")[0])) if road.get("+delay") else 0,
+            delay_unit="minutes",
+            additional=road.get("+detour"),
+            start_time=start_time,
+            end_time=end_time,
+            geometry=geometry,
+            service_area=service_area,
+            meta={
+                "source": {
+                    "headline": payload["headline"],
+                    "description": payload["description"],
                 }
-            ],
-            "pending": False,
-            "nearbyPending": False,
-            "coords": [
-                -13432996.733995885,
-                6459540.839290078
-            ],
-            "DIGITAL_ROAD_ATLAS_LINE_ID": 334901,
-            "FEATURE_TYPE": "Road",
-            "HIGHWAY_EXIT_NUMBER": None,
-            "HIGHWAY_ROUTE_NUMBER": "97C+5A",
-            "SEGMENT_LENGTH_2D": 881.595,
-            "SEGMENT_LENGTH_3D": None,
-            "ROAD_NAME_ALIAS1": "Hwy 5A",
-            "ROAD_NAME_ALIAS2": "Merritt-Princeton Hwy 5A",
-            "ROAD_NAME_ALIAS3": None,
-            "ROAD_NAME_ALIAS4": None,
-            "ROAD_NAME_FULL": "Hwy 97C",
-            "ROAD_SURFACE": "paved",
-            "ROAD_CLASS": "freeway",
-            "NUMBER_OF_LANES": 2,
-            "DATA_CAPTURE_DATE": "2007-05-01Z",
-            "FEATURE_CODE": None,
-            "OBJECTID": 234219703,
-            "SE_ANNO_CAD_DATA": None,
-            "FEATURE_LENGTH_M": 881.5946
-        },
-        "end": None,
-    },
-    "details": {
-        "direction": "Both directions",
-        "severity": "Minor",
-        "category": "Hazard",
-        "situation": 305
-    },
-    "impacts": [
-        {
-            "id": 2,
-            "label": "Assessment in progress"
-        },
-        {
-            "id": 7,
-            "label": "Closed"
-        },
-        {
-            "id": 20,
-            "label": "Expect delays"
-        }
-    ],
-    "delays": {
-        "amount": "20",
-        "unit": "minutes"
-    },
-    "restrictions": [
-        {
-            "id": 4,
-            "label": "Speed Limit",
-            "text": "20km/h"
-        }
-    ],
-    "conditions": [],
-    "timing": {
-        "nextUpdate": "2025-09-12T16:20:00.000Z",
-        "nextUpdateTZ": "PST",
-        "nextUpdateIsDefault": True,
-        "endTime": None,
-        "endTimeTZ": None
-    },
-    "additional": "lorem\n\nipsum",
-    "external": {
-        "url": ""
-    }
-}
+            },
+        )
+        Event.objects.filter(uuid=event.uuid).update(
+            created=self._parse_dt(payload["created"]),
+            last_updated=self._parse_dt(payload["updated"]),
+        )
+        event.refresh_from_db()
+        return event
 
+    def _normalize(self, payload):
+        normalized = json.loads(json.dumps(payload))
+        for evt in normalized.get("events", []):
+            evt.pop("midpoint_longitude", None)
+            evt.pop("midpoint_latitude", None)
+            evt.pop("service_area_number", None)
+            evt.pop("created", None)
+            evt.pop("updated", None)
+            evt.pop("event_subtypes", None)
+            evt.pop("event_type", None)
+            evt.pop("description", None)
+            evt.pop("+ivr_message", None)
+            evt.pop("headline", None)
+            evt.pop("last_update_userid", None)
+            evt.pop("last_publish_userid", None)
+            roads = evt.get("roads", [])
+            if roads:
+                roads[0].pop("to", None)
+        return normalized
 
+    def test_post_payload(self):
+        sa1 = ServiceArea.objects.create(id=1, name="Lower Mainland District", sortingOrder=1, parent=None)
+        sa2 = ServiceArea.objects.create(id=2, name="Thompson-Nicola District", sortingOrder=2, parent=None)
+
+        e1 = self._make_event(self.post_payload["events"][0], sa1)
+        e2 = self._make_event(self.post_payload["events"][1], sa2)
+
+        payload = {"events": [build_event_payload(e1), build_event_payload(e2)]}
+
+        assert payload["events"][0]["event_type"] == "INCIDENT"
+        assert payload["events"][1]["event_type"] == "CONSTRUCTION"
+        assert payload["events"][0]["event_subtypes"] == ["HAZARD"]
+        assert payload["events"][1]["event_subtypes"] == ["ROAD_MAINTENANCE", "PLANNED_EVENT"]
+        assert payload["events"][0]["headline"] == "Incident"
+        assert payload["events"][1]["headline"] == "Planned event"
+
+        assert payload["events"][0]["description"] == payload["events"][0]["+ivr_message"]
+        assert payload["events"][1]["description"] == payload["events"][1]["+ivr_message"]
+
+        assert self._normalize(payload) == self._normalize(self.post_payload)
+
+    def test_patch_payload(self):
+        sa = ServiceArea.objects.create(id=1, name="Lower Mainland District", sortingOrder=1, parent=None)
+        patch_event = self.patch_payload["events"][0]
+
+        event = Event.objects.create(
+            id=patch_event["id"],
+            approved=True,
+            latest=True,
+            latest_approved=True,
+            user=self.user,
+            event_type="Incident",
+            status="Active",
+            severity="Major",
+            category="Collision",
+            direction="Both directions",
+            start={
+                "name": patch_event["roads"][0]["name"],
+                "other": patch_event["roads"][0]["from"],
+                "coords": [-123.03, 49.27],
+                "ROAD_NAME_ALIAS1": patch_event["roads"][0]["name"],
+                "ROAD_NAME_FULL": patch_event["roads"][0]["from"],
+            },
+            impacts=[],
+            geometry=GeometryCollection(Point(-123.03, 49.27)),
+            service_area=sa,
+            meta={"source": {"headline": patch_event["headline"], "description": "x"}},
+        )
+        Event.objects.filter(uuid=event.uuid).update(
+            created=self._parse_dt(patch_event["created"]),
+            last_updated=self._parse_dt(patch_event["updated"]),
+        )
+        event.refresh_from_db()
+
+        built = build_event_payload(event, with_offset=True)
+        payload = {
+            "events": [{
+                "id": built["id"],
+                "headline": built["headline"],
+                "roads": built["roads"],
+            }]
+        }
+
+        # Current helper behavior: headline uses event_type text.
+        assert payload["events"][0]["id"] == patch_event["id"]
+        assert payload["events"][0]["headline"] == "Incident"
+        assert payload["events"][0]["roads"] == patch_event["roads"]
