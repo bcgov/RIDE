@@ -331,9 +331,9 @@ class EventSerializer(KeyMoveSerializer):
     def get_id(self):
         event = Event.objects.distinct('id').order_by('-id').first()
         if event is None:
-            return 'DBC-100000'
+            return 'RIDE-100000'
         else:
-            return f'DBC-{int(event.id.split('-')[-1]) + 1}'
+            return f'RIDE-{int(event.id.split('-')[-1]) + 1}'
 
 
 class EventHistorySerializer(EventSerializer, HistorySerializer):

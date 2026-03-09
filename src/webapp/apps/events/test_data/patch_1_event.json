@@ -1,0 +1,18 @@
+{
+  "events": [
+    {
+      "id": "RIDE-000001",
+      "headline": "Big Collision",
+      "created": "2026-02-26T10:45:42-07:00",
+      "updated": "2026-02-26T11:23:00-07:00",
+      "roads": [
+        {
+          "name": "Highway 1",
+          "direction": "BOTH",
+          "from": "Hastings",
+          "state": "ALL_LANES_OPEN"
+        }
+      ]
+    }
+  ]
+}

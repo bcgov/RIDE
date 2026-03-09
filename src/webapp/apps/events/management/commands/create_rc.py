@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         next_update = datetime.datetime.now() + datetime.timedelta(days=21, hours=6, minutes=30)
         Event.objects.create(
-            id='DBC-1',
+            id='RIDE-1',
             event_type=EventType.ROAD_CONDITION,
             approved=True,
             latest_approved=True,
@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         next_update_outdated = datetime.datetime.now() - datetime.timedelta(days=1, hours=2, minutes=20)
         Event.objects.create(
-            id='DBC-2',
+            id='RIDE-2',
             event_type=EventType.ROAD_CONDITION,
             approved=True,
             latest_approved=True,
@@ -48,7 +48,7 @@ class Command(BaseCommand):
             conditions=[3,4,5]
         )
         Event.objects.create(
-            id='DBC-3',
+            id='RIDE-3',
             event_type=EventType.ROAD_CONDITION,
             approved=True,
             latest_approved=True,
@@ -62,7 +62,7 @@ class Command(BaseCommand):
         )
 
         Event.objects.create(
-            id='DBC-4',
+            id='RIDE-4',
             event_type=EventType.ROAD_CONDITION,
             approved=True,
             latest_approved=True,
@@ -76,7 +76,7 @@ class Command(BaseCommand):
         )
 
         Event.objects.create(
-            id='DBC-5',
+            id='RIDE-5',
             event_type=EventType.ROAD_CONDITION,
             approved=True,
             latest_approved=True,
