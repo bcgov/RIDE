@@ -7,6 +7,7 @@ from django.db.models import ForeignKey
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
+from apps.events.open511 import sync_open511_data
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
 from apps.shared.models import BaseModel, LocationField, OrderedListField, VersionedModel
@@ -209,6 +210,8 @@ class Event(VersionedModel):
                     .filter(id=self.id, latest_approved=True)\
                     .update(latest_approved=False)
             super().save(*args, **kwargs)
+
+            sync_open511_data(self)
 
     def get_ignored_fields(self):
         ignored = super().get_ignored_fields().copy()

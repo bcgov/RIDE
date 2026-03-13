@@ -22,7 +22,7 @@ class EventSubtype(models.TextChoices):
     PARTLY_SNOW_PACKED =  'PARTLY_SNOW_PACKED', 'Partly snow packed'
     MUD =                 'MUD', 'Mud'
     PLANNED_EVENT =       'PLANNED_EVENT', 'Planned event'
-    POOR_VISIBILITY =     'POOR_VISIBILITY', 'Poor visiblity'
+    POOR_VISIBILITY =     'POOR_VISIBILITY', 'Poor visibility'
     PARTLY_SNOW_COVERED = 'PARTLY_SNOW_COVERED', 'Partly snow packed'
     DRIFTING_SNOW =       'DRIFTING_SNOW', 'Drifting snow',
     PASSABLE_WITH_CARE =  'PASSABLE_WITH_CARE', 'Passable with care'

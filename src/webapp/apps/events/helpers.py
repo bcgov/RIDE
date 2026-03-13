@@ -1,5 +1,8 @@
 import datetime
+import logging
 from zoneinfo import ZoneInfo
+
+logger = logging.getLogger(__name__)
 
 
 def get_default_next_update():

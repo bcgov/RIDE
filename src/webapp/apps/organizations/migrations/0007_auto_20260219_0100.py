@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('organizations', '0006_servicearea_routes'),
+        ('segments', '0004_auto_20260127_2329'),
     ]
 
     operations = [
