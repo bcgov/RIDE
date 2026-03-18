@@ -13,6 +13,12 @@ import { Provider } from 'react-redux';
 
 import { API_HOST } from './env.js';
 import { DataContext } from './contexts';
+import {
+  refreshConditions,
+  refreshServiceAreas,
+  refreshSituations,
+  refreshTrafficImpacts,
+} from './slices';
 
 import "./app.scss";
 
@@ -53,6 +59,11 @@ export function HydrateFallback() {
 }
 
 let fetching = false;
+
+store.dispatch(refreshConditions());
+store.dispatch(refreshServiceAreas());
+store.dispatch(refreshTrafficImpacts());
+// store.dispatch(refreshSituations());
 
 export default function App() {
   const [impacts, setImpacts] = useState(getImpacts);

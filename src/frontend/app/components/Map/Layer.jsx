@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch, useStore } from 'react-redux';
-import { add, refresh } from '../../slices/events';
 
 import * as turf from '@turf/turf';
 
@@ -23,6 +22,8 @@ import { getIconAndStroke } from '../../events/icons';
 import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers.js';
 import { endHandler } from './PinLayer';
 import { patch } from '../../shared/helpers';
+
+import { refreshEvents } from '../../slices/events';
 
 
 export function addEvent(event, map, dispatch) {
@@ -93,17 +94,6 @@ export function addEvent(event, map, dispatch) {
   }
 }
 
-async function updateEvents(map, dispatch, layerStyle) {
-  fetch(`${API_HOST}/api/events`, {
-    headers: { 'Accept': 'application/json' },
-    credentials: "include",
-  }).then((response) => response.json())
-    .then((data) => {
-      dispatch(refresh(data));
-    });
-}
-
-
 function getVisibility(event, visibleLayers) {
   const now = new Date()
   const SEVEN_DAYS_AGO = now - 1000 * 60 * 60 * 24 * 7;
@@ -170,7 +160,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
   const eventRef = useRef(); // necessary for early-bound handler to read current prop
   eventRef.current = event;
 
-  // const events = useSelector(state => state.events.all);
+  const status = useSelector(state => state.events.status);
   const storeDispatch = useDispatch()
   const store = useStore();
 
@@ -367,9 +357,10 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     const state = store.getState()
     const eventIds = {};
 
-    state.events.all.forEach((event) => {
+    state.events.ids.forEach((id) => {
+      const event = state.events.entities[id];
       addEvent(event, map, dispatch);
-      eventIds[event.id] = true;
+      eventIds[id] = true;
     })
 
     // remove events no longer in the list of events
@@ -397,9 +388,9 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     map.on('pointermove', pointerMove);
     addEventsLayer(map);
     store.subscribe(updateEventsOnMap);
-    updateEvents(map, storeDispatch, layerStyle);
+    storeDispatch(refreshEvents());
     if (!fetchInterval) {
-      setFetchInterval(setInterval(() => updateEvents(map, storeDispatch, layerStyle), EVENT_POLLING_REFRESH || 10000));
+      setFetchInterval(setInterval(() => storeDispatch(refreshEvents()), EVENT_POLLING_REFRESH || 10000));
     }
   }, [map]);
 

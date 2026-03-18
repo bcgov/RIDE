@@ -6,6 +6,8 @@ import { faPencil } from '@fortawesome/pro-solid-svg-icons';
 import { faStopwatch } from '@fortawesome/pro-regular-svg-icons';
 import { formatDistanceToNowStrict } from 'date-fns';
 
+import { selectAllEvents } from '../slices/events.js';
+import { selectServiceAreasIdLabel } from '../slices/serviceAreas.js';
 import { selectFeature } from '../components/Map/helpers.js';
 
 import { getConditionIcon, getPlainIcon } from './icons';
@@ -14,7 +16,7 @@ import { PHRASES_LOOKUP } from './references';
 
 import './Events.scss';
 
-function Event({ event, goToFunc, dispatch, map, selected }) {
+function Event({ event, goToFunc, dispatch, map, selected, areaLabel }) {
 
   const navigate = useNavigate();
 
@@ -117,7 +119,9 @@ function Event({ event, goToFunc, dispatch, map, selected }) {
           )}
         </div>
 
-        <div className='service-area'>Skeena ({event.service_area})</div>
+        { areaLabel &&
+          <div className='service-area'>{areaLabel.slice(4)} ({event.service_area})</div>
+        }
       </div>
     </div>
   )
@@ -126,15 +130,20 @@ function Event({ event, goToFunc, dispatch, map, selected }) {
 const ONE_HOUR = 1000 * 60 * 60;
 
 export default function Events({ goToFunc, dispatch, map, current }) {
-  const events = useSelector(state => state.events.all);
+  const events = useSelector(selectAllEvents);
+  const serviceAreas = useSelector(selectServiceAreasIdLabel);
 
   const now = new Date();
+  // displayed events are active, have a next update or end time, and a delta
+  // between that time and now of less than one hour.  They're annotated with
+  // the delta and whether the event is ending at the time.
   const displayed = events.filter((event) => (
     event.status === 'Active' && (
       event.timing.nextUpdate || event.timing.endTime
     )
   )).map((event) => {
     let delta, ending = false;
+
     if (event.timing.nextUpdate) {
       delta = new Date(event.timing.nextUpdate) - now;
     } else if (event.timing.endTime) {
@@ -142,14 +151,9 @@ export default function Events({ goToFunc, dispatch, map, current }) {
       ending = true;
     }
 
-    return {
-      ...event,
-      delta,
-      ending,
-    };
+    return { ...event, delta, ending, };
   }).filter((event) => event.delta < ONE_HOUR);
   displayed.sort((a, b) => a.delta < b.delta ? -1 : 1);
-
   return (
     <div className='events-list'>
       {displayed.map((event) => {
@@ -160,6 +164,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
           dispatch={dispatch}
           map={map}
           selected={event.id === current.id}
+          areaLabel={serviceAreas[event.service_area]?.name}
         />;
       })}
     </div>
