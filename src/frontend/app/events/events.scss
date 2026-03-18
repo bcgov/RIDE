@@ -1,6 +1,48 @@
 @use "../styles/variables.scss" as *;
 
 .events-list {
+
+  .filters, .search {
+    margin: 0.5rem;
+  }
+
+  .search {
+    display: flex;
+    gap: 0.5rem;
+
+    .search-input {
+      flex: 1;
+      position: relative;
+
+      input {
+        width: 100%;
+        background: white;
+        border: solid 1px black;
+        border-radius: 4px;
+        padding: 0.25rem 2rem 0.25rem 0.5rem;
+      }
+
+      .search-icon {
+        position: absolute;
+        right: 10px;
+        top: 0.3rem;
+        display: inline-block;
+
+        svg {
+          height: 16px;
+          width: 16px;
+        }
+      }
+    }
+
+    button {
+      padding: 0 0.5rem;
+      border: solid 1px $Grey60;
+      border-radius: 4px;
+      background: $Grey40;
+    }
+  }
+
   .event {
     margin: 0.5rem;
     border-radius: 8px;
@@ -119,5 +161,10 @@
         font-weight: 700;
       }
     }
+  }
+
+  .no-results {
+    margin: 2rem 0.5rem;
+    text-align: center;
   }
 }
