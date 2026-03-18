@@ -15,6 +15,7 @@ import PinLayer from '../components/Map/PinLayer';
 import { AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
 import Tabs from '../shared/Tabs';
+import Bubble from '../shared/Bubble';
 import { API_HOST, EVENT_POLLING_REFRESH } from '../env';
 import { get } from '../shared/helpers';
 
@@ -23,6 +24,8 @@ import Preview from './Preview';
 import Message from './Message';
 import Queue from './Queue';
 import Events from './Events';
+
+import { selectLength } from '../slices/pending';
 
 // Styling
 import './home.scss';
@@ -156,7 +159,10 @@ export default function Home() {
                 </Tabs.Tab>
 
                 <Tabs.Tab name='queue' label={
-                  <span>Awaiting Approval <span className='num' id='num-pending'></span></span>
+                  <span>
+                    Awaiting Approval
+                    <Bubble classes={'num'} selector={selectLength} />
+                  </span>
                 }>
                   <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
                 </Tabs.Tab>

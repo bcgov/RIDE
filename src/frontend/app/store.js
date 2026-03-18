@@ -1,10 +1,21 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import { eventsReducer, pendingReducer } from './slices';
+import {
+  conditions,
+  events,
+  pending,
+  serviceAreas,
+  situations,
+  trafficImpacts,
+} from './slices';
 
 export default configureStore({
   reducer: {
-    events: eventsReducer,
-    pending: pendingReducer,
-  }
+    conditions,
+    events,
+    pending,
+    serviceAreas,
+    situations,
+    trafficImpacts,
+  },
 });

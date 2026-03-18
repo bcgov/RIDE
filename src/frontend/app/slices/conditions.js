@@ -4,15 +4,14 @@ import { API_HOST } from '../env.js';
 
 import client from './client';
 
-const pendingAdapter = createEntityAdapter({
-  // ordered by last update time, ascending
-  sortComparer: (a, b) => { return b.last_updated < a.last_updated ? -1 : 1; }
+const adapter = createEntityAdapter({
+  sortComparer: (a, b) => { return b.name < a.name ? 1 : -1; }
 })
 
 const refreshThunk = createAsyncThunk(
-  'pending/refresh',
+  'conditions/refresh',
   async () => {
-    const response = await client.get(`${API_HOST}/api/events/pending`);
+    const response = await client.get(`${API_HOST}/api/conditions`);
     return response.data;
   },
   {
@@ -22,18 +21,15 @@ const refreshThunk = createAsyncThunk(
   }
 );
 
-const selectStatus = (state) => state.pending.status;
-const selectIdLabel = (state) => state.pending.entities;
-const selectLength = (state) => state.pending.ids.length;
+const selectStatus = (state) => state.conditions.status;
+const selectIdLabel = (state) => state.conditions.entities;
 
 export const slice = createSlice({
-  name: 'pending',
-
-  initialState: pendingAdapter.getInitialState({
+  name: 'conditions',
+  initialState: {
     status: 'idle',
-    error: null
-  }),
-
+    error: null,
+  },
   reducers: {},
 
   extraReducers: (builder) => {
@@ -43,7 +39,7 @@ export const slice = createSlice({
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
-        pendingAdapter.setAll(state, action.payload);
+        adapter.setAll(state, action.payload);
       })
       .addCase(refreshThunk.rejected, (state, action) => {
         state.status = 'failed';
@@ -53,15 +49,14 @@ export const slice = createSlice({
 });
 
 export const {
-  selectAll: selectAllPending,
-  selectById: selectPendingById,
-  selectIds: selectPendingIds,
-} = pendingAdapter.getSelectors((state) => state.pending)
+  selectAll: selectAllConditions,
+  selectById: selectConditionById,
+  selectIds: selectConditionIds,
+} = adapter.getSelectors((state) => state.conditions);
 export {
-  refreshThunk as refreshPending,
-  selectStatus as selectPendingStatus,
-  selectIdLabel as selectPendingIdLabel,
-  selectLength,
+  refreshThunk as refreshConditions,
+  selectStatus as selectConditionStatus,
+  selectIdLabel as selectConditionsIdLabel,
 };
 
 export default slice.reducer;

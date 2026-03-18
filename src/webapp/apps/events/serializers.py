@@ -247,8 +247,9 @@ class EventSerializer(KeyMoveSerializer):
         if coords is not None:
             try:
                 point = Point(coords[0], coords[1])
-                sa = ServiceArea.objects.filter(geometry__contains=point)
-                data['service_area'] = sa.id
+                sa = ServiceArea.objects.filter(geometry__contains=point).first()
+                if sa is not None:
+                   data['service_area'] = sa.id
             except Exception as e:
                 log.error(f'getting service area failed for coords {coords} for event {data.get('id')}')
                 log.exception(e)

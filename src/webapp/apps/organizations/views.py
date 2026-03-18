@@ -1,9 +1,10 @@
 from rest_framework import permissions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from apps.organizations.models import Organization, ServiceArea
-from apps.organizations.serializers import OrganizationSerializer, ServiceAreaSerializer
+from apps.organizations.serializers import OrganizationSerializer, ServiceAreaSerializer, ServiceAreaNoGeoSerializer
 
 
 class OrganizationAPIView(ModelViewSet):
@@ -68,3 +69,9 @@ class ServiceAreaAPIView(ModelViewSet):
             qs = ServiceArea.objects.filter(organizations__in=user_orgs)
 
         return qs.exclude(parent=None).distinct().order_by('sortingOrder')
+
+    @action(detail=False)
+    def nogeo(self, request):
+        queryset = self.get_queryset()
+        serializer = ServiceAreaNoGeoSerializer(queryset, many=True)
+        return Response(serializer.data)

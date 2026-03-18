@@ -38,3 +38,15 @@ class ServiceAreaSerializer(serializers.ModelSerializer):
     def get_name(self, obj):
         prefix = '0' if obj.sortingOrder < 10 else ''
         return prefix + str(obj.sortingOrder) + " - " + obj.name
+
+
+class ServiceAreaNoGeoSerializer(ServiceAreaSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceArea
+        exclude = ["geometry"]
+
+    def get_name(self, obj):
+        prefix = '0' if obj.sortingOrder < 10 else ''
+        return prefix + str(obj.sortingOrder) + " - " + obj.name
