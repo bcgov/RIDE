@@ -3,7 +3,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from apps.events.models import Event, Condition
@@ -22,7 +22,7 @@ class Events(viewsets.ModelViewSet):
     queryset = Event.last.all()
     serializer_class = EventSerializer
     lookup_field = 'id'
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @action(detail=True)
     def history(self, request, id):

@@ -266,6 +266,14 @@ def build_event_payload(target_event, with_offset=False):
 
         return get_username(first_approved or target_event)
 
+    def get_areas():
+        areas = []
+        if target_event.service_area:
+            sa = target_event.service_area
+            areas.append({"name": (sa.parent.name if sa.parent else sa.name) + ' ' + 'District'})
+
+        return areas
+
     geometry = get_primary_geometry()
     payload_event = {
         "jurisdiction": "drivebc.ca",
@@ -289,7 +297,7 @@ def build_event_payload(target_event, with_offset=False):
             "coordinates": get_coordinates(geometry),
         },
         "roads": [build_road()],
-        "areas": [{"name": target_event.service_area.name}] if target_event.service_area else [],
+        "areas": get_areas(),
     }
 
     if geometry is not None:
