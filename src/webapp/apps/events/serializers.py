@@ -265,6 +265,10 @@ class EventSerializer(KeyMoveSerializer):
         if 'meta' in obj:
             del obj['meta']
 
+        if instance.segment:
+            from apps.segments.serializers import SegmentSerializer
+            obj['segment'] = SegmentSerializer(instance.segment).data
+
         if obj.get('type') == 'ROAD_CONDITION':
             if instance.segment:
                 obj['location']['start']['name'] = instance.segment.name

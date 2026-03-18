@@ -7,6 +7,7 @@ from django.db.models import ForeignKey
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
+from apps.events.enums import EventType
 from apps.events.open511 import sync_open511_data
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
@@ -209,6 +210,15 @@ class Event(VersionedModel):
                 Event.objects\
                     .filter(id=self.id, latest_approved=True)\
                     .update(latest_approved=False)
+
+            # Update non-rc/chain-ups segments reference
+            if self.event_type not in [EventType.ROAD_CONDITION, EventType.CHAIN_UP] and self.geometry:
+                event_srid = self.geometry.srid or 4326
+                buffered_geometry = self.geometry.transform(3005, clone=True).buffer(150)
+                buffered_geometry.transform(event_srid)
+                segment = Segment.objects.filter(geometry__intersects=buffered_geometry).first()
+                self.segment = segment
+
             super().save(*args, **kwargs)
 
             sync_open511_data(self)
