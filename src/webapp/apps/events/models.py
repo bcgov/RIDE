@@ -221,6 +221,7 @@ class Event(VersionedModel):
                     .update(latest_approved=False)
 
             # Update non-rc/chain-ups segments reference
+            # TODO: check case for multiple segments, perhaps update reference through start location name match
             if self.event_type not in [EventType.ROAD_CONDITION, EventType.CHAIN_UP] and self.geometry:
                 event_srid = self.geometry.srid or 4326
                 buffered_geometry = self.geometry.transform(3005, clone=True).buffer(150)
