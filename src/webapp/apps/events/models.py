@@ -9,6 +9,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 from apps.events.enums import EventType
+from apps.events.helpers import get_route_projection
 from apps.events.open511 import sync_open511_data
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
@@ -191,6 +192,9 @@ class Event(VersionedModel):
     additional = models.TextField(blank=True, null=True)
     link = models.URLField(max_length=None, blank=True, null=True)
 
+    # for sorting along a highway
+    route_projection = models.FloatField(blank=True, default=0)
+
     # override VersionedModel's .current manager to use latest_approved
     # rather than latest (still available via the .last manager)
     objects = EverythingManager()
@@ -223,6 +227,9 @@ class Event(VersionedModel):
                 buffered_geometry.transform(event_srid)
                 segment = Segment.objects.filter(geometry__intersects=buffered_geometry).first()
                 self.segment = segment
+
+            # Update route projection for sorting
+            self.route_projection = get_route_projection(self)
 
             super().save(*args, **kwargs)
 
@@ -275,3 +282,12 @@ class Condition(Choice):
 
 # class Restriction(Choice):
 #     pass
+
+
+class RouteGeometry(models.Model):
+    id = models.CharField(max_length=128, primary_key=True)
+
+    routes = gis.MultiLineStringField()
+
+    def __str__(self):
+        return self.id
