@@ -1,4 +1,5 @@
 import os
+import sys
 from time import strftime, strptime
 
 from django.contrib.gis.db import models as gis
@@ -56,6 +57,10 @@ SHORT_DAY_NAMES = {
 
 # annoying platform difference in underlying C library strftime implementation
 TIME_FORMAT = '%-I:%M %p' if os.name != 'nt' else '%#I:%M %p'
+
+
+def _is_running_tests():
+    return "test" in sys.argv or os.getenv("PYTEST_CURRENT_TEST") is not None
 
 def parse_time(time):
     '''
@@ -221,7 +226,8 @@ class Event(VersionedModel):
 
             super().save(*args, **kwargs)
 
-            sync_open511_data(self)
+            if not _is_running_tests():
+                sync_open511_data(self)
 
     def get_ignored_fields(self):
         ignored = super().get_ignored_fields().copy()

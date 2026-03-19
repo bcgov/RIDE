@@ -241,10 +241,22 @@ def build_event_payload(target_event, with_offset=False):
         return {"intervals": [interval]}
 
     def build_road():
-        name = (target_event.start or {}).get("ROAD_NAME_ALIAS1")
-        corrected_name = name.replace("Hwy", "Highway") if name else ''
+        road_name_keys = (
+            "ROAD_NAME_ALIAS1",
+            "ROAD_NAME_ALIAS2",
+            "ROAD_NAME_ALIAS3",
+            "ROAD_NAME_ALIAS4",
+        )
+        corrected_name = "Other Roads"
+        for key in road_name_keys:
+            name = (target_event.start or {}).get(key)
+            candidate = name.replace("Hwy", "Highway") if name else ""
+            if candidate in accepted_roads:
+                corrected_name = candidate
+                break
+
         road = {
-            "name": corrected_name if corrected_name else 'Other Roads',
+            "name": corrected_name,
             "direction": normalize_direction(target_event.direction),
             "state": get_state(),
         }
