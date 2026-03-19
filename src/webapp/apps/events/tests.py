@@ -191,3 +191,75 @@ class TestOpen511Sync(TestCase):
         assert payload["events"][0]["id"] == patch_event["id"]
         assert payload["events"][0]["headline"] == "Incident"
         assert payload["events"][0]["roads"] == patch_event["roads"]
+
+    def test_build_road_uses_first_matching_alias(self):
+        sa, _ = ServiceArea.objects.get_or_create(
+            id=9001,
+            defaults={"name": "Sample District", "sortingOrder": 3, "parent": None},
+        )
+
+        event = Event.objects.create(
+            id="alias-priority-event",
+            approved=False,
+            latest=True,
+            latest_approved=True,
+            user=self.user,
+            event_type="Incident",
+            status="Active",
+            severity="Major",
+            category="Collision",
+            direction="Both directions",
+            start={
+                "name": "Unknown Road",
+                "other": "Some marker",
+                "coords": [-123.03, 49.27],
+                "ROAD_NAME_ALIAS1": "Unknown Road",
+                "ROAD_NAME_ALIAS2": "Hwy 1A",
+                "ROAD_NAME_ALIAS3": "Riverview Bridge",
+                "ROAD_NAME_ALIAS4": None,
+                "ROAD_NAME_FULL": "Some marker",
+            },
+            impacts=[],
+            geometry=GeometryCollection(Point(-123.03, 49.27)),
+            service_area=sa,
+            meta={"source": {"headline": "Incident", "description": "x"}},
+        )
+
+        payload = build_event_payload(event)
+        assert payload["roads"][0]["name"] == "Highway 1A"
+
+    def test_build_road_defaults_to_other_roads(self):
+        sa, _ = ServiceArea.objects.get_or_create(
+            id=9002,
+            defaults={"name": "Sample District 2", "sortingOrder": 4, "parent": None},
+        )
+
+        event = Event.objects.create(
+            id="alias-fallback-event",
+            approved=False,
+            latest=True,
+            latest_approved=True,
+            user=self.user,
+            event_type="Incident",
+            status="Active",
+            severity="Major",
+            category="Collision",
+            direction="Both directions",
+            start={
+                "name": "Unknown Road",
+                "other": "Some marker",
+                "coords": [-123.03, 49.27],
+                "ROAD_NAME_ALIAS1": "Unknown Road",
+                "ROAD_NAME_ALIAS2": "Another Unknown Road",
+                "ROAD_NAME_ALIAS3": "Third Unknown Road",
+                "ROAD_NAME_ALIAS4": None,
+                "ROAD_NAME_FULL": "Some marker",
+            },
+            impacts=[],
+            geometry=GeometryCollection(Point(-123.03, 49.27)),
+            service_area=sa,
+            meta={"source": {"headline": "Incident", "description": "x"}},
+        )
+
+        payload = build_event_payload(event)
+        assert payload["roads"][0]["name"] == "Other Roads"
