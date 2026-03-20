@@ -12,7 +12,7 @@ from apps.events.enums import EventType
 from apps.events.helpers import get_route_projection
 from apps.events.open511 import sync_open511_data
 from apps.organizations.models import ServiceArea
-from apps.segments.models import Segment, ChainUp
+from apps.segments.models import Segment, ChainUp, Route
 from apps.shared.models import BaseModel, LocationField, OrderedListField, VersionedModel
 
 
@@ -158,6 +158,7 @@ class Event(VersionedModel):
     '''
 
     meta = models.JSONField(default=dict)
+    from_bulk = models.BooleanField(default=False)
     event_type = models.CharField(blank=True, null=True)
     status = models.CharField(default='Active')
     approved = models.BooleanField(default=False)
@@ -221,13 +222,18 @@ class Event(VersionedModel):
                     .update(latest_approved=False)
 
             # Update non-rc/chain-ups segments reference
-            # TODO: check case for multiple segments, perhaps update reference through start location name match
             if self.event_type not in [EventType.ROAD_CONDITION, EventType.CHAIN_UP] and self.geometry:
-                event_srid = self.geometry.srid or 4326
-                buffered_geometry = self.geometry.transform(3005, clone=True).buffer(150)
-                buffered_geometry.transform(event_srid)
-                segment = Segment.objects.filter(geometry__intersects=buffered_geometry).first()
-                self.segment = segment
+                event_start = self.start if self.start else {}
+                event_start_location = event_start.get('name', '').replace('Highway ', '')
+
+                # Filter event_route by start location name first to avoid overlapping segments
+                event_route = Route.objects.filter(name=event_start_location).first()
+                if event_route:
+                    event_srid = self.geometry.srid or 4326
+                    buffered_geometry = self.geometry.transform(3005, clone=True).buffer(150)
+                    buffered_geometry.transform(event_srid)
+                    segment = Segment.objects.filter(geometry__intersects=buffered_geometry, route=event_route).first()
+                    self.segment = segment
 
             # Update route projection for sorting
             self.route_projection = get_route_projection(self)

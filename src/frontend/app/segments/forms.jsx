@@ -83,6 +83,7 @@ export function getInitialRc() {
   rc.type = 'ROAD_CONDITION'
   rc.showPreview = true;
   rc.showForm = true;
+  rc.from_bulk = true;
 
   return rc;
 }

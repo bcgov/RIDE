@@ -9,6 +9,7 @@ export function getChainUps() {
 export function getInitialChainUp() {
   const cu = getInitialEvent();
   cu.type = 'CHAIN_UP'
+  cu.from_bulk = true;
 
   return cu;
 }
