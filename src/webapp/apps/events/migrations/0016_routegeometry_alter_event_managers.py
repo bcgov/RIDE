@@ -5,15 +5,14 @@ import apps.events.models
 import django.contrib.gis.db.models.fields
 from django.db import migrations, models
 
-from apps.events.models import RouteGeometry
-
 
 class Migration(migrations.Migration):
     def build_hwy_geometries(apps, schema_editor):
         call_command('build_route_geometries')
 
     def reverse_hwy_geometries(apps, schema_editor):
-        RouteGeometry.objects.all().delete()
+        RouteGeometry = apps.get_model("events", "RouteGeometry")
+        RouteGeometry._default_manager.all().delete()
 
     dependencies = [
         ("events", "0015_populate_event_service_areas"),
