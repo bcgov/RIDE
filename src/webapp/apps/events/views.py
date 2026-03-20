@@ -64,7 +64,7 @@ def validate_allowed_segments(user, segPks):
 
 
 class RoadConditions(Events):
-    queryset = Event.current.filter(event_type=EventType.ROAD_CONDITION)
+    queryset = Event.current.filter(event_type=EventType.ROAD_CONDITION, from_bulk=True)
     serializer_class = RcSerializer
 
     @action(detail=False, methods=['post'], url_path='clear')
@@ -180,7 +180,7 @@ class RoadConditions(Events):
 
 
 class ChainUps(Events):
-    queryset = Event.current.filter(event_type=EventType.CHAIN_UP)
+    queryset = Event.current.filter(event_type=EventType.CHAIN_UP, from_bulk=True)
     serializer_class = ChainUpEventSerializer
     permission_classes = [Approver]
 
