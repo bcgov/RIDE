@@ -3,22 +3,20 @@
 from django.db import migrations, models
 from django.contrib.gis.geos import Point
 
-from apps.events.models import Event
-from apps.organizations.models import ServiceArea
-
 def update_service_areas(apps, schema_editor):
+    Event = apps.get_model("events", "Event")
+    ServiceArea = apps.get_model("organizations", "ServiceArea")
 
-    for event in Event.objects.filter(service_area=None):
+    for event in Event._default_manager.filter(service_area=None):
         try:
             cc = event.start.get('coords')
             if cc is None:
                 continue
             point = Point(cc[0], cc[1])
-            sa = ServiceArea.objects.filter(geometry__contains=point).first()
+            sa = ServiceArea._default_manager.filter(geometry__contains=point).first()
             if sa is not None:
-                event.service_area = sa
                 # does not create a new version
-                event.save(force_update=True)
+                Event._default_manager.filter(pk=event.pk).update(service_area=sa)
         except Exception as e:
             print(f'Exception getting service area for {event.id}')
 

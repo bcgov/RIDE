@@ -125,8 +125,8 @@ class TestOpen511Sync(TestCase):
         return normalized
 
     def test_post_payload(self):
-        sa1 = ServiceArea.objects.create(id=1, name="Lower Mainland District", sortingOrder=1, parent=None)
-        sa2 = ServiceArea.objects.create(id=2, name="Thompson-Nicola District", sortingOrder=2, parent=None)
+        sa1 = ServiceArea.objects.create(id=1, name="Lower Mainland", sortingOrder=1, parent=None)
+        sa2 = ServiceArea.objects.create(id=2, name="Thompson-Nicola", sortingOrder=2, parent=None)
 
         e1 = self._make_event(self.post_payload["events"][0], sa1)
         e2 = self._make_event(self.post_payload["events"][1], sa2)
