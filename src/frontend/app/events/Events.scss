@@ -2,14 +2,32 @@
 
 .events-list {
 
-  .filters, .search {
+  .filters, .search, .sort {
     margin: 0.5rem;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    align-content: stretch;
+    gap: 1rem;
+  }
+
+  .filters {
+    .filter {
+      min-width: max-content;
+      border: solid 1px $Divider;
+      padding: 0 0.5rem;
+      background-color: $Grey10;
+      border-radius: 4px;
+
+      svg {
+        height: 16px;
+        width: 16px;
+        vertical-align: middle;
+      }
+    }
   }
 
   .search {
-    display: flex;
-    gap: 0.5rem;
-
     .search-input {
       flex: 1;
       position: relative;
@@ -29,18 +47,23 @@
         display: inline-block;
 
         svg {
-          height: 16px;
-          width: 16px;
+          height: 14px;
+          width: 14px;
         }
       }
     }
 
     button {
-      padding: 0 0.5rem;
+      padding: 0 0.75rem;
       border: solid 1px $Grey60;
       border-radius: 4px;
       background: $Grey40;
+      height: stretch;
     }
+  }
+
+  .sort {
+    justify-content: space-between;
   }
 
   .event {

@@ -22,7 +22,6 @@ const refreshThunk = createAsyncThunk(
 );
 
 const selectStatus = (state) => state.situations.status;
-const selectIdLabel = (state) => state.situations.entities;
 
 export const slice = createSlice({
   name: 'situations',
@@ -56,7 +55,6 @@ export const {
 export {
   refreshThunk as refreshSituations,
   selectStatus as selectSituationStatus,
-  selectIdLabel as selectSituationsIdLabel,
 };
 
 export default slice.reducer;

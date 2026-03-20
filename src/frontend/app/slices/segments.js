@@ -2,17 +2,16 @@ import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/too
 
 import { API_HOST } from '../env.js';
 
-import client from './client';
+import client from './client.js';
 
-const pendingAdapter = createEntityAdapter({
-  // ordered by last update time, ascending
-  sortComparer: (a, b) => { return b.last_updated < a.last_updated ? -1 : 1; }
+const adapter = createEntityAdapter({
+  sortComparer: (a, b) => { return b.sorting_order < a.sorting_order ? 1 : -1; }
 })
 
 const refreshThunk = createAsyncThunk(
-  'pending/refresh',
+  'segments/refresh',
   async () => {
-    const response = await client.get(`${API_HOST}/api/events/pending`);
+    const response = await client.get(`${API_HOST}/api/segments`);
     return response.data;
   },
   {
@@ -22,17 +21,16 @@ const refreshThunk = createAsyncThunk(
   }
 );
 
-const selectStatus = (state) => state.pending.status;
-const selectLength = (state) => state.pending.ids.length;
+const selectStatus = (state) => state.segments.status;
 
 export const slice = createSlice({
-  name: 'pending',
-
-  initialState: pendingAdapter.getInitialState({
+  name: 'segments',
+  initialState: {
+    ids: [],
+    entities: {},
     status: 'idle',
-    error: null
-  }),
-
+    error: null,
+  },
   reducers: {},
 
   extraReducers: (builder) => {
@@ -42,24 +40,30 @@ export const slice = createSlice({
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
-        pendingAdapter.setAll(state, action.payload);
+        adapter.setAll(state, action.payload.map((item) => ({
+          name: item.name,
+          sort_key: item.sort_key,
+          id: item.id,
+          value: item.id,
+          label: item.name,
+        })));
       })
       .addCase(refreshThunk.rejected, (state, action) => {
         state.status = 'failed';
+        console.log(action);
         state.error = action.error.message ?? 'Unknown Error';
       });
   }
 });
 
 export const {
-  selectAll: selectAllPending,
-  selectById: selectPendingById,
-  selectIds: selectPendingIds,
-} = pendingAdapter.getSelectors((state) => state.pending)
+  selectAll: selectAllSegments,
+  selectById: selectSegmentById,
+  selectIds: selectSegmentIds,
+} = adapter.getSelectors((state) => state.routes);
 export {
-  refreshThunk as refreshPending,
-  selectStatus as selectPendingStatus,
-  selectLength,
+  refreshThunk as refreshSegments,
+  selectStatus as selectSegmentsStatus,
 };
 
 export default slice.reducer;

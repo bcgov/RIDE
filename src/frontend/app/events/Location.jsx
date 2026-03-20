@@ -26,7 +26,7 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
   const startChange = (e) => setStartOther(e.target.value.substring(0, 100));
   const endChange = (e) => setEndOther(e.target.value.substring(0, 100));
 
-  if (event.segment) {
+  if (event.segment && !event?.location?.start?.name) {
     return (
       <div>
         <p><strong>Segment</strong></p>

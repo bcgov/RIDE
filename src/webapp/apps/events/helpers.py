@@ -37,7 +37,7 @@ def get_chainup_next_update():
 def get_route_projection(event):
     from apps.events.models import RouteGeometry
 
-    key = event.start['name'].replace('Hwy ', '')
+    key = event.start.get('name', '').replace('Hwy ', '')
 
     # Only process if reference linestring exists
     route_geometry = RouteGeometry.objects.filter(id=key).first()

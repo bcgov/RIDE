@@ -534,6 +534,7 @@ export default class EventForm extends Component {
 
     // user is always taken from the request
     delete form.user;
+    delete form.segment;
 
     this.setState({ errors: err });
 

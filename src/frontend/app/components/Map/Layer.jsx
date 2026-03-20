@@ -366,7 +366,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     // remove events no longer in the list of events
     const source = map.get('events').getSource();
     source.getKeys().forEach((key) => {
-      if (!key.startsWith('DBC')) { return; }
+      if (!key.startsWith('RIDE') || !key.startsWith('DBC')) { return; }
       if (!eventIds[key]) {
         const existing = source.get(key);
         source.unset(key, true);

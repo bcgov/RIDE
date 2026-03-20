@@ -15,6 +15,8 @@ import { API_HOST } from './env.js';
 import { DataContext } from './contexts';
 import {
   refreshConditions,
+  refreshRoutes,
+  refreshSegments,
   refreshServiceAreas,
   refreshSituations,
   refreshTrafficImpacts,
@@ -60,7 +62,9 @@ export function HydrateFallback() {
 
 let fetching = false;
 
+store.dispatch(refreshRoutes());
 store.dispatch(refreshConditions());
+store.dispatch(refreshSegments());
 store.dispatch(refreshServiceAreas());
 store.dispatch(refreshTrafficImpacts());
 // store.dispatch(refreshSituations());
