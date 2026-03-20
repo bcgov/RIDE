@@ -19,5 +19,5 @@ export function deleteOrganization(orgId) {
 }
 
 export function getServiceAreas() {
-  return get(`${API_HOST}/api/service_areas`, {});
+  return get(`${API_HOST}/api/service_areas/nogeo`, {});
 }

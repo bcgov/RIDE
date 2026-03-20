@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 
 from apps.events.serializers import UserSerializer
@@ -38,6 +40,15 @@ class ChainUpSerializer(serializers.ModelSerializer):
 
 
 class RouteSerializer(serializers.ModelSerializer):
+    sort_key = serializers.SerializerMethodField()
+
     class Meta:
         model = Route
         fields = "__all__"
+
+    def get_sort_key(self, route):
+
+        if route.name.startswith('Highway '):
+            match = re.match(r'^Highway\s+(\d+)(.*)', route.name)
+            return f'0-{int(match.group(1)):03}-{match.group(2)}'
+        return f'1-0-{route.name}'

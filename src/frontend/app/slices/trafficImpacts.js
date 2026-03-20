@@ -22,7 +22,6 @@ const refreshThunk = createAsyncThunk(
 );
 
 const selectStatus = (state) => state.trafficImpacts.status;
-const selectIdLabel = (state) => state.trafficImpacts.entities;
 
 export const slice = createSlice({
   name: 'trafficImpacts',
@@ -56,7 +55,6 @@ export const {
 export {
   refreshThunk as refreshTrafficImpacts,
   selectStatus as selectTrafficImpactStatus,
-  selectIdLabel as selectTrafficImpactsIdLabel,
 };
 
 export default slice.reducer;

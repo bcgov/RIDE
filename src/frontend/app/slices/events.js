@@ -5,6 +5,7 @@ import { API_HOST } from '../env.js';
 import client from './client';
 
 const eventsAdapter = createEntityAdapter({
+  selectId: (event) => `${event.id}v${event.version}`,
   sortComparer: (a, b) => { return b.last_updated < a.last_updated ? 1 : -1; }
 })
 
@@ -22,7 +23,6 @@ export const refreshThunk = createAsyncThunk(
 );
 
 const selectStatus = (state) => state.conditions.status;
-const selectIdLabel = (state) => state.conditions.entities;
 
 export const slice = createSlice({
   name: 'events',
@@ -58,7 +58,6 @@ export const {
 export {
   refreshThunk as refreshEvents,
   selectStatus as selectEventsStatus,
-  selectIdLabel as selectEventsIdLabel,
 };
 
 export default slice.reducer;

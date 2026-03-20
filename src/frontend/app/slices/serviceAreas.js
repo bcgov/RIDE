@@ -5,7 +5,7 @@ import { API_HOST } from '../env.js';
 import client from './client';
 
 const adapter = createEntityAdapter({
-  sortComparer: (a, b) => { return b.name < a.name ? 1 : -1; }
+  sortComparer: (a, b) => { return b.sortingOrder < a.sortingOrder ? 1 : -1; }
 })
 
 const refreshThunk = createAsyncThunk(
@@ -22,7 +22,6 @@ const refreshThunk = createAsyncThunk(
 );
 
 const selectStatus = (state) => state.serviceAreas.status;
-const selectIdLabel = (state) => state.serviceAreas.entities;
 
 export const slice = createSlice({
   name: 'serviceAreas',
@@ -39,7 +38,14 @@ export const slice = createSlice({
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
-        adapter.setAll(state, action.payload);
+        adapter.setAll(state, action.payload.map((item) => ({
+          name: item.name,
+          id: item.id,
+          sortingOrder: item.sortingOrder,
+          value: item.id,
+          label: `${item.sortingOrder} - ${item.name}`,
+          routes: item.routes,
+        })));
       })
       .addCase(refreshThunk.rejected, (state, action) => {
         state.status = 'failed';
@@ -56,7 +62,6 @@ export const {
 export {
   refreshThunk as refreshServiceAreas,
   selectStatus as selectServiceAreaStatus,
-  selectIdLabel as selectServiceAreasIdLabel,
 };
 
 export default slice.reducer;
