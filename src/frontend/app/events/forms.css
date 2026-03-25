@@ -92,6 +92,7 @@
     .title, .subtitle {
       display: flex;
       justify-content: space-between;
+      align-items: baseline;
 
       &.error {
         p, strong {
@@ -105,6 +106,26 @@
           }
         }
       }
+
+      button.cancel {
+          background: none;
+          color: #666;
+        border-radius: 4px;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+        border: solid 1px transparent;
+
+          &:hover {
+            border-color: #666;
+          }
+
+          &:active {
+            border-color: black;
+            color: black;
+            background: #eee;
+          }
+        }
+
     }
 
     .subtitle {
@@ -270,6 +291,14 @@
 
           div {
             margin-bottom: 0.25rem;
+
+            &.nearby-error {
+              font-style: italic;
+              font-size: 0.9rem;
+              color: #888;
+              padding-left: 2rem;
+              margin-bottom: 0.5rem;
+            }
             &:last-child {
               margin-bottom: 0;
             }

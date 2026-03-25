@@ -49,7 +49,17 @@ layer.setZIndex(1000);
   */
 export const endHandler = async (e, point, dispatch) => {
   const snapped = getSnapped(e.coordinate, e.pixel, e.map);
-  dispatch({ type: point.action, value: { name: 'pending', pending: true, nearbyPending: false, coords: g2ll(snapped) }})
+  dispatch({
+    type: point.action,
+    value: {
+      name: 'pending',
+      pending: true,
+      nearbyPending: false,
+      nearbyError: '',
+      coords: g2ll(snapped)
+    }
+  });
+  updateRoute(e.map);
   point.getGeometry().setCoordinates(snapped);
   point.dra = await getDRA(snapped, point, e.map);
   const props = point.dra.properties;
@@ -85,7 +95,14 @@ export const endHandler = async (e, point, dispatch) => {
   }
 
   if (point.dra.properties) {
-    point.nearby = await getNearby(g2ll(point.getGeometry().getCoordinates()), point === e.map.end);
+    let error = '';
+    try {
+      point.nearby = await getNearby(g2ll(point.getGeometry().getCoordinates()), point === e.map.end);
+    } catch (err) {
+      console.log(err, `cause: ${err.cause})`);
+      error = 'Error retrieving reference locations';
+      point.nearby = [];
+    }
     if (point.nearby[0]) { point.nearby[0].include = true; }
     dispatch({
       type: point.action,
@@ -93,12 +110,12 @@ export const endHandler = async (e, point, dispatch) => {
         ... point.dra.properties,
         nearbyPending: false,
         pending: false,
-        nearby: point.nearby
+        nearby: point.nearby,
+        nearbyError: error,
       }
     });
   }
 
-  updateRoute(e.map);
 };
 
   /* Given an always present (possibly empty) route feature on the map: if
@@ -209,6 +226,8 @@ export default function PinLayer({ event, dispatch }) {
     if (!event.showForm) {
         map.route.getGeometry().setCoordinates([])
     }
+
+    updateRoute(map);
   }, [event]);
 
   /* Remove a pin from the map and update the event.  If the pin removed is the
