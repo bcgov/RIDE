@@ -256,6 +256,12 @@ export function eventReducer(event, action) {
       return { ...event };
     }
 
+    case 'swap locations': {
+      event.location.start = action.start;
+      event.location.end = action.end;
+      return { ...event };
+    }
+
     case 'reset form': {
       if (event.showForm && !action.cancel) {
         return event; // disallow resetting if form is open
@@ -312,6 +318,8 @@ const LOCATION_BLANK = {
   other: null,
   useOther: false,
   nearby: null,
+  nearbyPending: false,
+  nearbyError: '',
 };
 
 const SCHEDULE_BLANK = {

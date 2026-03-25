@@ -2,12 +2,15 @@ import { useCallback, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import "react-loading-skeleton/dist/skeleton.css";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRightArrowLeft } from '@fortawesome/pro-regular-svg-icons';
+
 import pinStart from '../../public/pin-start.svg';
 import pinEnd from '../../public/pin-end.svg';
 
 import Tooltip from './Tooltip';
 
-const REF_LOC_TEXT = `Sorted by population class, then by distance.
+const REF_LOC_TEXT = `Reference locations within 100km as the crow flies.  Sorted by population class, then by distance.
 
 1. City (> 5,000)
 2. District Municipality (> 800 hectares, < 5 people/hectare)
@@ -26,7 +29,7 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
   const startChange = (e) => setStartOther(e.target.value.substring(0, 100));
   const endChange = (e) => setEndOther(e.target.value.substring(0, 100));
 
-  if (event.segment && !event?.location?.start?.name) {
+  if (event.from_bulk) {
     return (
       <div>
         <p><strong>Segment</strong></p>
@@ -48,6 +51,18 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
           </svg>
         </Tooltip>
       </div>
+      {/* { end?.name &&
+        <div>
+          <button
+            type='button'
+            className='cancel'
+            onClick={(e) => dispatch({ type: 'swap locations', start: end, end: start })}
+          >
+            <FontAwesomeIcon icon={faArrowRightArrowLeft} />&nbsp;
+            Swap pins
+          </button>
+        </div>
+      } */}
     </div>
 
     <div className="toggleable">
@@ -84,60 +99,59 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
           </div>
         }
 
-        {event.type !== 'ROAD_CONDITION' && event.type !== 'CHAIN_UP' &&
+        <div>
           <div>
-            <div>
-              Reference Location
-              &nbsp;<Tooltip text={REF_LOC_TEXT} />
-            </div>
+            Reference Location
+            &nbsp;<Tooltip text={REF_LOC_TEXT} />
+          </div>
+          { !start?.nearby && start?.name && <Skeleton width={250} height={20} />}
 
-            { !start?.nearby && start?.name && <Skeleton width={250} height={20} />}
+          { start?.name && start?.nearbyError && <div className='nearby-error'>{start?.nearbyError}</div>}
 
-            { start?.nearby?.length > 0 && <>
-              { start.nearby.map((loc, ii) => (
-                <div key={loc.name}>&nbsp;&nbsp;
-                  <input
-                    type="checkbox"
-                    name="start nearby"
-                    value={ii}
-                    defaultChecked={loc.include}
-                    onChange={(e) => {
-                      dispatch({ type: 'toggle checked', key: 'start', value: ii, checked: loc.include})
-                    }}
-                  />&nbsp;
-
-                  {loc.phrase}
-                </div>
-              ))}
-
-              <div>&nbsp;&nbsp;
-                <input type="checkbox"
-                  name='include start other'
-                  defaultChecked={start.useOther}
+          { start?.nearby?.length > 0 && <>
+            { start.nearby.map((loc, ii) => (
+              <div key={loc.name}>&nbsp;&nbsp;
+                <input
+                  type="checkbox"
+                  name="start nearby"
+                  value={ii}
+                  defaultChecked={loc.include}
                   onChange={(e) => {
                     dispatch({ type: 'toggle other', key: 'start', checked: start.useOther})
                   }}
                 />&nbsp;
 
-                Other&nbsp;&nbsp;
-
-                <input
-                  type="text"
-                  name="start other"
-                  value={startOther || ''}
-                  onChange={startChange}
-                  onBlur={(e) => {
-                    dispatch({ type: 'set other', key: 'start', value: e.target.value})
-                  }}
-                />&nbsp;&nbsp;
-
-                <span className={startOther?.length === 100 ? 'bold' : ''}>{startOther?.length}/100</span>
+                {loc.phrase}
               </div>
+            ))}
+          </>}
 
-              </>
-            }
+          { start?.nearby?.length === 0 && !start?.nearbyError &&
+            <div className='nearby-error'>No reference locations found within 100km</div>
+          }
+
+          <div>&nbsp;&nbsp;
+            <input type="checkbox"
+              name='include start other'
+              defaultChecked={start.useOther}
+              onChange={(e) => {
+                dispatch({ type: 'toggle other', key: 'start', checked: start.useOther})
+              }}
+            />&nbsp;
+            Other&nbsp;&nbsp;
+            <input
+              type="text"
+              name="start other"
+              value={startOther || ''}
+              onChange={startChange}
+              onBlur={(e) => {
+                dispatch({ type: 'set other', key: 'start', value: e.target.value})
+              }}
+            />&nbsp;&nbsp;
+            <span className={startOther?.length === 100 ? 'bold' : ''}>{startOther?.length}/100</span>
           </div>
-        }
+        </div>
+
       </div>
     </div>
 
@@ -193,35 +207,19 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
             </div>
           }
 
-          {event.type !== 'ROAD_CONDITION' && event.type !== 'CHAIN_UP' &&
+          <div>
             <div>
-              <div>
-                Reference Location
-                &nbsp;<Tooltip text={REF_LOC_TEXT} />
-              </div>
+              Reference Location
+              &nbsp;<Tooltip text={REF_LOC_TEXT} />
+            </div>
 
-              { !end?.nearby && end?.name &&
-                <Skeleton width={250} height={20} />
-              }
+            { !end?.nearby && end?.name && <Skeleton width={250} height={20} />}
 
-              { end?.nearby?.length > 0 && <>
-                { end.nearby.map((loc, ii) => (
-                  <div key={loc.name}>&nbsp;&nbsp;
-                    <input
-                      type="checkbox"
-                      name='end nearby'
-                      value={ii}
-                      defaultChecked={loc.include}
-                      onChange={(e) => {
-                        dispatch({ type: 'toggle checked', key: 'end', value: ii, checked: loc.include})
-                      }}
-                    />&nbsp;
+            { end?.name && end?.nearbyError && <div className='nearby-error'>{end?.nearbyError}</div>}
 
-                    {loc.phrase}
-                  </div>
-                ))}
-
-                <div>&nbsp;&nbsp;
+            { end?.nearby?.length > 0 && <>
+              { end.nearby.map((loc, ii) => (
+                <div key={loc.name}>&nbsp;&nbsp;
                   <input
                     type="checkbox"
                     name='include end other'
@@ -231,25 +229,37 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
                     }}
                   />&nbsp;
 
-                  Other&nbsp;&nbsp;
-
-                  <input
-                    type="text"
-                    name="end other"
-                    value={endOther || ''}
-                    onChange={endChange}
-                    onBlur={(e) => {
-                      dispatch({ type: 'set other', key: 'end', value: e.target.value})
-                    }}
-                  />&nbsp;&nbsp;
-
-                  <span className={endOther.length === 100 ? 'bold' : ''}>{endOther.length}/100</span>
+                  {loc.phrase}
                 </div>
+              ))}
+            </>}
 
-                </>
-              }
+            { end?.nearby?.length === 0 && !end?.nearbyError &&
+              <div className='nearby-error'>No reference locations found within 100km</div>
+            }
+
+            <div>&nbsp;&nbsp;
+              <input
+                type="checkbox"
+                name='include end other'
+                defaultChecked={end.useOther}
+                onChange={(e) => {
+                  dispatch({ type: 'toggle other', key: 'end', checked: end.useOther})
+                }}
+              />&nbsp;
+              Other&nbsp;&nbsp;
+              <input
+                type="text"
+                name="end other"
+                value={endOther || ''}
+                onChange={endChange}
+                onBlur={(e) => {
+                  dispatch({ type: 'set other', key: 'end', value: e.target.value})
+                }}
+              />&nbsp;&nbsp;
+              <span className={endOther.length === 100 ? 'bold' : ''}>{endOther.length}/100</span>
             </div>
-          }
+          </div>
         </div>
       </div>
     }

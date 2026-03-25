@@ -496,23 +496,23 @@ export async function getNearby(coords, reverseRouteOrder) {
   url.search = new URLSearchParams(params).toString();
   const apiUrl = url.toString();
 
-  try {
-    const response = await fetch(apiUrl, {mode: 'cors'});
-    const data = await response.json();
-    const results = await filterByTypes(data.features, PopulationCenterTypes, coords, reverseRouteOrder);
-    if (results.length < 5) {
-      results.push(... await filterByTypes(data.features, ['', 'Community'], coords, reverseRouteOrder));
-    }
-    if (results.length < 5) {
-      results.push(... await filterByTypes(data.features, ['Locality'], coords, reverseRouteOrder));
-    }
-
-    results.sort((a, b) => b.priority - a.priority || a.distance - b.distance);
-    return results.slice(0, 5);
-  } catch (error) {
-    console.error("Error fetching BCGNWS data:", error);
+  const response = await fetch(apiUrl, {mode: 'cors'});
+  if (!response.ok) {
+    const text = await response.text();
+    const message = (text.match(/<p><b>Message<\/b>(.*?)<\/p>/imv) || ['', 'No detail provided'])[1];
+    throw Error(`BCGNWS request failed (status ${response.status})`, { cause: message.trim() });
   }
-  return [];
+  const data = await response.json();
+  const results = await filterByTypes(data.features, PopulationCenterTypes, coords, reverseRouteOrder);
+  if (results.length < 5) {
+    results.push(... await filterByTypes(data.features, ['', 'Community'], coords, reverseRouteOrder));
+  }
+  if (results.length < 5) {
+    results.push(... await filterByTypes(data.features, ['Locality'], coords, reverseRouteOrder));
+  }
+
+  results.sort((a, b) => b.priority - a.priority || a.distance - b.distance);
+  return results.slice(0, 5);
 }
 
 export async function fetchRoute(points) {
@@ -620,6 +620,7 @@ export function getSnapped(coordinate, pixel, map) {
   let closest;
   const name = 'snapped lines';
   map.get('debug').getSource().remove(name);
+
   map.getFeaturesAtPixel(pixel, { hitTolerance: 50 })
     .filter((f) => f.get('mvt:layer')?.startsWith('DRA Roads'))
     .map((f) => {
@@ -630,12 +631,13 @@ export function getSnapped(coordinate, pixel, map) {
       f.snapped = turf.nearestPointOnLine(line, point, { units: "meters" });
       f.closest = !closest || f.snapped.properties.dist < closest.dist;
       if (f.closest) {
-        if (closest) closest.closest = false;
+        if (closest) { closest.closest = false; }
         closest = f;
       }
       f.dist = f.snapped.properties.dist;
       return f;
     });
+
   if (closest) {
     map.pins.getSource().getFeatures().forEach((f) => {
       if (
@@ -660,7 +662,7 @@ function unflatten(l) {
 
 const fun = (a) => a;
 
-/* Takes a renderfeatures flat coordinates and returns a nest array of
+/* Takes a renderfeatures flat coordinates and returns a nested array of
  * coordinate pairs with func applied to the pair (e.g., for transforming the
  * pair from one projection to another).
  */
