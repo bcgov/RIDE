@@ -228,7 +228,7 @@ class Event(VersionedModel):
             # Update non-rc/chain-ups segments reference
             if self.event_type not in [EventType.ROAD_CONDITION, EventType.CHAIN_UP] and self.geometry:
                 event_start = self.start if self.start else {}
-                event_start_location = event_start.get('name', '').replace('Highway ', '')
+                event_start_location = event_start.get('name', '').replace('Hwy ', 'Highway ')
 
                 # Filter event_route by start location name first to avoid overlapping segments
                 event_route = Route.objects.filter(name=event_start_location).first()

@@ -149,7 +149,7 @@ def format_open511_datetime(value):
     if value is None:
         return None
     local = value.astimezone(ZoneInfo("America/Vancouver"))
-    return local.isoformat(timespec="seconds")
+    return local.replace(tzinfo=None).isoformat(timespec="seconds")
 
 
 def build_open511_schedule(target_event):
