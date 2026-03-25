@@ -143,15 +143,31 @@ def get_username(target_event):
 
     return prefix + suffix
 
-def build_event_payload(target_event, with_offset=False):
-    def format_dt(value):
-        if value is None:
-            return None
-        local = value.astimezone(ZoneInfo("America/Vancouver"))
-        if with_offset:
-            return local.isoformat(timespec="seconds")
-        return local.replace(tzinfo=None).isoformat(timespec="seconds")
 
+def format_open511_datetime(value):
+    """Format a datetime for Open511 JSON (America/Vancouver, ISO-8601 with seconds)."""
+    if value is None:
+        return None
+    local = value.astimezone(ZoneInfo("America/Vancouver"))
+    return local.isoformat(timespec="seconds")
+
+
+def build_open511_schedule(target_event):
+    """Build the Open511 ``schedule`` object for an :class:`~apps.events.models.Event`."""
+    start = format_open511_datetime(target_event.start_time)
+    end = format_open511_datetime(target_event.end_time)
+    if start and end:
+        interval = f"{start}/{end}"
+    elif start and not end:
+        interval = f"{start}/"
+    elif end and not start:
+        interval = f"/{end}"
+    else:
+        interval = f"{format_open511_datetime(target_event.created)}/"
+    return {"intervals": [interval]}
+
+
+def build_event_payload(target_event):
     def normalize_direction(direction):
         mapping = {
             "Eastbound": "E",
@@ -227,19 +243,6 @@ def build_event_payload(target_event, with_offset=False):
             matched.append("PLANNED_EVENT")
         return matched or ["HAZARD"]
 
-    def get_schedule():
-        start = format_dt(target_event.start_time)
-        end = format_dt(target_event.end_time)
-        if start and end:
-            interval = f"{start}/{end}"
-        elif start and not end:
-            interval = f"{start}/"
-        elif end and not start:
-            interval = f"/{end}"
-        else:
-            interval = f"{format_dt(target_event.created)}/"
-        return {"intervals": [interval]}
-
     def build_road():
         road_name_keys = (
             "ROAD_NAME_ALIAS1",
@@ -292,13 +295,13 @@ def build_event_payload(target_event, with_offset=False):
         "id": target_event.id,
         "headline": get_headline(),
         "status": normalize_status(target_event.status).value,
-        "created": format_dt(target_event.created),
-        "updated": format_dt(target_event.last_updated),
+        "created": format_open511_datetime(target_event.created),
+        "updated": format_open511_datetime(target_event.last_updated),
         "timezone": "America/Vancouver",
         "description": build_event_description(target_event),
         "+ivr_message": build_event_description(target_event),
         "+linear_reference_km": 0,
-        "schedule": get_schedule(),
+        "schedule": build_open511_schedule(target_event),
         "event_type": get_event_type(target_event.event_type),
         "event_subtypes": get_event_subtypes(),
         "severity": get_severity(target_event.severity),
@@ -326,8 +329,8 @@ def build_event_payload(target_event, with_offset=False):
 def generate_open511_payload(event, previous_approved=None):
     # Event removed or updated, generate difference from last approved version
     if previous_approved:
-        current_payload = build_event_payload(event, with_offset=True)
-        previous_payload = build_event_payload(previous_approved, with_offset=True)
+        current_payload = build_event_payload(event)
+        previous_payload = build_event_payload(previous_approved)
         patch_event = {"id": event.id}
 
         compare_keys = (
@@ -340,13 +343,14 @@ def generate_open511_payload(event, previous_approved=None):
             if previous_value != current_value:
                 patch_event[key] = current_value
 
-        if len(patch_event) == 1:
-            return None
-
-        return {"events": [patch_event]}
+        # Updated value found, fill user ids and patch
+        if len(patch_event) > 1:
+            patch_event['last_update_userid'] = current_payload.get('last_update_userid')
+            patch_event['last_publish_userid'] = current_payload.get('last_publish_userid')
+            return {"events": [patch_event]}
 
     # Event created, generate entire payload
-    return {"events": [build_event_payload(event, with_offset=False)]}
+    return {"events": [build_event_payload(event)]}
 
 
 # Sync approved minor, major, and road conditions to Open511

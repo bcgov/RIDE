@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import GeometryCollection, LineString, Point
 from django.test import TestCase
 
-from apps.events.open511 import build_event_payload
+from apps.events.open511 import build_event_payload, build_open511_schedule
 from apps.events.models import Event, TrafficImpact
 from apps.organizations.models import ServiceArea
 
@@ -143,7 +143,10 @@ class TestOpen511Sync(TestCase):
         assert payload["events"][0]["description"] == payload["events"][0]["+ivr_message"]
         assert payload["events"][1]["description"] == payload["events"][1]["+ivr_message"]
 
-        assert self._normalize(payload) == self._normalize(self.post_payload)
+        expected = self._normalize(self.post_payload)
+        for evt, event in zip(expected["events"], (e1, e2)):
+            evt["schedule"] = build_open511_schedule(event)
+        assert self._normalize(payload) == expected
 
     def test_patch_payload(self):
         sa = ServiceArea.objects.create(id=1, name="Lower Mainland District", sortingOrder=1, parent=None)
@@ -178,7 +181,7 @@ class TestOpen511Sync(TestCase):
         )
         event.refresh_from_db()
 
-        built = build_event_payload(event, with_offset=True)
+        built = build_event_payload(event)
         payload = {
             "events": [{
                 "id": built["id"],
