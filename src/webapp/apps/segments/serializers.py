@@ -2,7 +2,7 @@ import re
 
 from rest_framework import serializers
 
-from apps.events.serializers import UserSerializer
+from apps.shared.serializers import UserSerializer
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, Route, ChainUp
 

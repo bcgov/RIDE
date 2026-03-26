@@ -206,7 +206,7 @@ class Event(VersionedModel):
     current = LatestApprovedManager()
     pending = PendingManager()
 
-    ignored_fields = ['meta', 'latest_approved']
+    ignored_fields = ['meta', 'latest_approved', 'segment']
 
     def save(self, *args, **kwargs):
         '''

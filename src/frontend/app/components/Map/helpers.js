@@ -41,7 +41,7 @@ export function pointerMove(e) {
   const feature = e.map.getFeaturesAtPixel(e.pixel, {
     layerFilter: (layer) => layer.listenForHover,
   })[0];
-  if (feature?.noHover) { return; }
+  if (feature?.noHover || feature?.get('isPreview')) { return; }
   if (!feature?.styleState) {
     if (e.map.hoveredFeature) {
       e.map.hoveredFeature.set('hovered', false);
@@ -292,7 +292,7 @@ function handleDownEvent(evt) {
   })[0];
 
   if (feature) {
-    if (feature.noSelect) { return false; }
+    if (feature.noSelect || feature.get('isPreview')) { return false; }
     map.route?.clear();
     this.coordinate_ = evt.coordinate;
     feature.getGeometry().setCoordinates(evt.coordinate);
@@ -327,7 +327,7 @@ function handleMoveEvent(evt) {
     })[0];
     const element = evt.map.getTargetElement();
     if (feature) {
-      if (feature.noHover) { return; }
+      if (feature.noHover || feature.get('isPreview')) { return; }
       if (element.style.cursor != this.cursor_) {
         this.previousCursor_ = element.style.cursor;
         element.style.cursor = this.cursor_;

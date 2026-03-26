@@ -181,7 +181,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
     const items = [];
 
     if (!feature) {
-      if (!event.location.start?.name || !event.showForm) {
+      if (!event.location.start?.name || (!event.showForm && !event.showHistory)) {
         items.push({
           label: 'Create incident',
           action: (e) => {
@@ -271,7 +271,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
             action: (e) => {
               setContextMenu([]);
               selectFeature(map, feature);
-              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true, showHistory: true });
+              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false, showHistory: true });
             }
           }
         );
