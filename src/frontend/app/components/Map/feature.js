@@ -5,7 +5,6 @@ import Styles from './styles';
 import { getIconAndStroke } from '../../events/icons';
 
 
-
 export default class RideFeature extends Feature {
   styleState = true;
 
@@ -25,6 +24,7 @@ export default class RideFeature extends Feature {
     this.action = props.action;
     this.on('propertychange', this.propertyChanged)
     this.set('visible', props.isVisible);
+    this.set('isPreview', false)
   }
 
   // used to update available styles based on the underlying event changing
@@ -97,5 +97,18 @@ export class PinFeature extends RideFeature {
     }
 
     return [(baseX + offsetX) * xMult, (baseY + offsetY) * yMult];
+  }
+
+  propertyChanged(e) {
+    if (e.key === 'isPreview') {
+
+      if (this.normal?.getImage()) {
+        if (this.get('isPreview')) {
+          this.normal.getImage().setOpacity(0.4);
+        } else {
+          this.normal.getImage().setOpacity(0.7);
+        }
+      }
+    }
   }
 }

@@ -36,7 +36,7 @@ import './forms.css';
 
 const ONE_HOUR = 1000 * 60 * 60;
 const ONE_WEEK = ONE_HOUR * 24 * 7
-const INVALID_ADDITIONAL_CHARACTERS = /[<>\[\]{}\\|~`!@#$%\^&*()_+=]/;
+const INVALID_ADDITIONAL_CHARACTERS = /[<>[\]{}\\|~`!@#$%^&*()_+=]/;
 
 function getLater(severity) {
   if (!severity) { return null; }
@@ -270,6 +270,14 @@ export function eventReducer(event, action) {
         return { ...event, showPreview: false };
       } else {
         return getInitialEvent();
+      }
+    }
+
+    case 'show history': {
+      if (action.show) {
+        return { ...event, showForm: false, showHistory: true };
+      } else {
+        return { ...event, showForm: true, showHistory: false, preview: null };
       }
     }
 
@@ -623,7 +631,7 @@ export default class EventForm extends Component {
 
         <Tabs
           onChange={(tabName) => {
-            dispatch({ type: 'set', value: { showHistory: tabName === 'history' } });
+            dispatch({ type: 'show history', show: tabName === 'history' });
           }}>
 
           <Tabs.Tab name='edit' label='Edit event'>

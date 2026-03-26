@@ -143,8 +143,11 @@ export default function PinLayer({ event, dispatch }) {
       map.getInteractions().extend([
         new Drag({ endHandler, menuRef, resetContextMenu: () => setContextMenu([]), dispatch })
       ]);
+
       map.route = new PinFeature({ style: 'route', geometry: new LineString([]), isVisible: true})
       layer.getSource().addFeature(map.route);
+
+      // pin for search result
       map.location = new PinFeature({
         style: 'location',
         geometry: new Point([]),
@@ -158,27 +161,30 @@ export default function PinLayer({ event, dispatch }) {
 
   // co-ordinate visible pins with current event
   useEffect(() => {
-    if (!map) { return; }
+    if (!map || event?.from_bulk) { return; }
 
-    if (event.location.start?.name && event.showForm && !event.segment) { // start location but no pin
-      const coords = ll2g(event.location.start.coords);
+    const evt = event.preview || event;
+
+    if (evt.location.start?.name && (event.showForm || event.showHistory)) { // start location but no pin
+      const coords = ll2g(evt.location.start.coords);
       if (map.start) {
         map.start.getGeometry().setCoordinates(coords);
       } else {
         map.start = new PinFeature({
           style: 'start', geometry: new Point(coords), action: 'set start', isVisible: true
         });
-        map.start.dra = { properties: event.location.start }
+        map.start.dra = { properties: evt.location.start }
         map.pins.getSource().addFeature(map.start);
       }
+      map.start.set('isPreview', !!event.preview);
     } else if (map.start) { // no start location but start pin exists
       // map.pins.getSource().removeFeature(map.start);
       // console.log('removing');
       // map.start = null;
     }
 
-    if (event.location.end?.name && event.showForm && !event.segment) { // end location but no pin
-      const coords = ll2g(event.location.end.coords);
+    if (evt.location.end?.name && (event.showForm || event.showHistory)) { // end location but no pin
+      const coords = ll2g(evt.location.end.coords);
       if (map.end) {
         map.end.getGeometry().setCoordinates(coords);
       } else {
@@ -186,11 +192,11 @@ export default function PinLayer({ event, dispatch }) {
           style: 'end', geometry: new Point(coords), action: 'set end', isVisible: true,
 
         });
-        map.end.dra = { properties: event.location.end }
+        map.end.dra = { properties: evt.location.end }
         map.pins.getSource().addFeature(map.end);
       }
 
-      const route = event.geometry?.geometries[2]?.coordinates;
+      const route = evt.geometry?.geometries[2]?.coordinates;
       if (route && route.length > 0) {
         map.route.getGeometry().setCoordinates(route.map(cc => ll2g(cc)))
       }

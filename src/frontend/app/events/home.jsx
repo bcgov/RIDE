@@ -141,7 +141,7 @@ export default function Home() {
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
       <div className="panel">
-        { (event.showForm && event.location.start.name)
+        { ((event.showForm || event.showHistory) && event.location.start.name)
           ? <EventForm
               map={mapRef.current}
               preview={() => setPreview(!preview)}

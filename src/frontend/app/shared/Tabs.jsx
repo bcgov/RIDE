@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { createContext, useState } from 'react';
 
 import './Tabs.scss';
 
@@ -11,44 +11,47 @@ const getDefault = (children) => {
   return (def || children[0])?.props.name;
 }
 
+export const TabContext = createContext('');
 
 export default function Tabs({ children, onChange }) {
   const [currentTab, setCurrentTab] = useState(getDefault(children));
 
   return (
-    <div className={`tabs-control`}>
-      <div className='tabs-handles'>
-        {children.filter(child => child).map((child) => {
+    <TabContext.Provider value={currentTab}>
+      <div className={`tabs-control`}>
+        <div className='tabs-handles'>
+          {children.filter(child => child).map((child) => {
+            const name = child.props.name;
+            return (
+              <button
+                type="button"
+                key={`${name}-handle`}
+                className={`tab-handle ${currentTab === name ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentTab !== name) {
+                    setCurrentTab(name);
+                    onChange?.(name);
+                  }
+                }}
+              >
+                {child.props.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {children.filter((child) => child).map((child) => {
           const name = child.props.name;
           return (
-            <button
-              type="button"
+            <div
               key={`${name}-handle`}
-              className={`tab-handle ${currentTab === name ? 'active' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (currentTab !== name) {
-                  setCurrentTab(name);
-                  onChange?.(name);
-                }
-              }}
-            >
-              {child.props.label}
-            </button>
+              className={`tab-body ${currentTab === name ? 'open' : ''}`}
+            >{child}</div>
           );
         })}
       </div>
-
-      {children.filter((child) => child).map((child) => {
-        const name = child.props.name;
-        return (
-          <div
-            key={`${name}-handle`}
-            className={`tab-body ${currentTab === name ? 'open' : ''}`}
-          >{child}</div>
-        );
-      })}
-    </div>
+    </TabContext.Provider>
   );
 }
 
