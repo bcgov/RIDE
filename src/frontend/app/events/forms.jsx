@@ -610,6 +610,10 @@ export default class EventForm extends Component {
     return 'Request approval';
   }
 
+  componentDidUpdate() {
+    document.querySelector('.error')?.parentNode?.scrollIntoView(true);
+  }
+
   render() {
     const { event, dispatch, preview, cancel, goToFunc, bulkRc } = this.props;
     const { errors } = this.state;
