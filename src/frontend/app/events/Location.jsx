@@ -62,9 +62,9 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
       </div>
 
       <div className="toggled">
-        <div>{ start?.name || 'Greenfield'}</div>
+        <div>{ start?.name || 'Greenfield' }</div>
 
-        { start?.aliases.length > 0 &&
+        { start?.aliases?.length > 0 &&
           <div>
             <input
               type="checkbox"
@@ -73,7 +73,7 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
               onChange={(e) => dispatch({ type: 'toggle alias', key: 'start', value: e.target.checked })}
             /> Include alias&nbsp;
 
-            { start?.aliases.length > 1 ?
+            { start?.aliases?.length > 1 ?
               <select
                 name="start alias"
                 onChange={(e) => dispatch({ type: 'set alias', key: 'start', value: e.target.value })}
@@ -84,51 +84,60 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
           </div>
         }
 
+        {event.type !== 'ROAD_CONDITION' && event.type !== 'CHAIN_UP' &&
           <div>
             <div>
               Reference Location
               &nbsp;<Tooltip text={REF_LOC_TEXT} />
             </div>
-          { !start?.nearby && start?.name && <Skeleton width={250} height={20} />}
-          { start?.nearby?.length > 0 && <>
-            { start.nearby.map((loc, ii) => (
-              <div key={loc.name}>&nbsp;&nbsp;
-                <input
-                  type="checkbox"
-                  name="start nearby"
-                  value={ii}
-                  defaultChecked={loc.include}
+
+            { !start?.nearby && start?.name && <Skeleton width={250} height={20} />}
+
+            { start?.nearby?.length > 0 && <>
+              { start.nearby.map((loc, ii) => (
+                <div key={loc.name}>&nbsp;&nbsp;
+                  <input
+                    type="checkbox"
+                    name="start nearby"
+                    value={ii}
+                    defaultChecked={loc.include}
+                    onChange={(e) => {
+                      dispatch({ type: 'toggle checked', key: 'start', value: ii, checked: loc.include})
+                    }}
+                  />&nbsp;
+
+                  {loc.phrase}
+                </div>
+              ))}
+
+              <div>&nbsp;&nbsp;
+                <input type="checkbox"
+                  name='include start other'
+                  defaultChecked={start.useOther}
                   onChange={(e) => {
-                    dispatch({ type: 'toggle checked', key: 'start', value: ii, checked: loc.include})
+                    dispatch({ type: 'toggle other', key: 'start', checked: start.useOther})
                   }}
                 />&nbsp;
-                {loc.phrase}
-              </div>
-            ))}
-            <div>&nbsp;&nbsp;
-              <input type="checkbox"
-                name='include start other'
-                defaultChecked={start.useOther}
-                onChange={(e) => {
-                  dispatch({ type: 'toggle other', key: 'start', checked: start.useOther})
-                }}
-              />&nbsp;
-              Other&nbsp;&nbsp;
-              <input
-                type="text"
-                name="start other"
-                value={startOther || ''}
-                onChange={startChange}
-                onBlur={(e) => {
-                  dispatch({ type: 'set other', key: 'start', value: e.target.value})
-                }}
-              />&nbsp;&nbsp;
-              <span className={startOther?.length === 100 ? 'bold' : ''}>{startOther?.length}/100</span>
-            </div>
-          </>
-        }
-        </div>
 
+                Other&nbsp;&nbsp;
+
+                <input
+                  type="text"
+                  name="start other"
+                  value={startOther || ''}
+                  onChange={startChange}
+                  onBlur={(e) => {
+                    dispatch({ type: 'set other', key: 'start', value: e.target.value})
+                  }}
+                />&nbsp;&nbsp;
+
+                <span className={startOther?.length === 100 ? 'bold' : ''}>{startOther?.length}/100</span>
+              </div>
+
+              </>
+            }
+          </div>
+        }
       </div>
     </div>
 
@@ -165,7 +174,7 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
         <div className="toggled">
           <div>{end?.name}</div>
 
-          { end?.aliases.length > 0 &&
+          { end?.aliases?.length > 0 &&
             <div>
               <input
                 type="checkbox"
@@ -173,64 +182,76 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
                 defaultChecked={event.location.end.useAlias}
                 onChange={(e) => dispatch({ type: 'toggle alias', key: 'end', value: e.target.checked })}
               /> Include alias&nbsp;
-              { end?.aliases.length > 1 ?
+
+              { end?.aliases?.length > 1 ?
                 <select name="end alias">
                   {end?.aliases.map((a) => <option key={a}>{a}</option>)}
                 </select> :
+
                 <input type="text" defaultValue={end?.aliases[0]} name="end alias" readOnly={true} style={{ borderWidth: 0 }} />
               }
             </div>
           }
 
+          {event.type !== 'ROAD_CONDITION' && event.type !== 'CHAIN_UP' &&
             <div>
               <div>
                 Reference Location
                 &nbsp;<Tooltip text={REF_LOC_TEXT} />
               </div>
-          { !end?.nearby && end?.name && <Skeleton width={250} height={20} />}
-          { end?.nearby?.length > 0 && <>
-              { end.nearby.map((loc, ii) => (
-                <div key={loc.name}>&nbsp;&nbsp;
+
+              { !end?.nearby && end?.name &&
+                <Skeleton width={250} height={20} />
+              }
+
+              { end?.nearby?.length > 0 && <>
+                { end.nearby.map((loc, ii) => (
+                  <div key={loc.name}>&nbsp;&nbsp;
+                    <input
+                      type="checkbox"
+                      name='end nearby'
+                      value={ii}
+                      defaultChecked={loc.include}
+                      onChange={(e) => {
+                        dispatch({ type: 'toggle checked', key: 'end', value: ii, checked: loc.include})
+                      }}
+                    />&nbsp;
+
+                    {loc.phrase}
+                  </div>
+                ))}
+
+                <div>&nbsp;&nbsp;
                   <input
                     type="checkbox"
-                    name='end nearby'
-                    value={ii}
-                    defaultChecked={loc.include}
+                    name='include end other'
+                    defaultChecked={end.useOther}
                     onChange={(e) => {
-                      dispatch({ type: 'toggle checked', key: 'end', value: ii, checked: loc.include})
+                      dispatch({ type: 'toggle other', key: 'end', checked: end.useOther})
                     }}
                   />&nbsp;
-                  {loc.phrase}
-                </div>
-              ))}
-              <div>&nbsp;&nbsp;
-                <input
-                  type="checkbox"
-                  name='include end other'
-                  defaultChecked={end.useOther}
-                  onChange={(e) => {
-                    dispatch({ type: 'toggle other', key: 'end', checked: end.useOther})
-                  }}
-                />&nbsp;
-                Other&nbsp;&nbsp;
-                <input
-                  type="text"
-                  name="end other"
-                  value={endOther || ''}
-                  onChange={endChange}
-                  onBlur={(e) => {
-                    dispatch({ type: 'set other', key: 'end', value: e.target.value})
-                  }}
-                />&nbsp;&nbsp;
-                <span className={endOther.length === 100 ? 'bold' : ''}>{endOther.length}/100</span>
-              </div>
-            </>
-            }
-            </div>
 
+                  Other&nbsp;&nbsp;
+
+                  <input
+                    type="text"
+                    name="end other"
+                    value={endOther || ''}
+                    onChange={endChange}
+                    onBlur={(e) => {
+                      dispatch({ type: 'set other', key: 'end', value: e.target.value})
+                    }}
+                  />&nbsp;&nbsp;
+
+                  <span className={endOther.length === 100 ? 'bold' : ''}>{endOther.length}/100</span>
+                </div>
+
+                </>
+              }
+            </div>
+          }
         </div>
       </div>
     }
   </>;
 }
-
