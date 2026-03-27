@@ -79,11 +79,11 @@ function matchRoad(event, road) {
   } else {
     const route = road.label.toLowerCase().replaceAll(/[^a-z ]*/g, '');
     if (route === start?.name.toLowerCase() ||
-        (start?.useAlias && route === start?.alias.toLowerCase())) {
+        (start?.useAlias && route === start?.alias?.toLowerCase())) {
       return true;
     }
-    if (route === end?.name.toLowerCase() ||
-        (end?.useAlias && route === end?.alias.toLowerCase())) {
+    if (route === end?.name?.toLowerCase() ||
+        (end?.useAlias && route === end?.alias?.toLowerCase())) {
       return true;
     }
   }
