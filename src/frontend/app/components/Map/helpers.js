@@ -67,7 +67,7 @@ export function click(evt, dispatch) {
     layerFilter: (layer) => layer.listenForClicks,
   })[0];
 
-  if (feature?.noSelect) { return; }
+  if (feature?.noSelect || feature?.get('noSelect')) { return; }
 
   if (feature?.styleState) { // new selection
     selectFeature(evt.map, feature);
@@ -292,7 +292,7 @@ function handleDownEvent(evt) {
   })[0];
 
   if (feature) {
-    if (feature.noSelect || feature.get('isPreview')) { return false; }
+    if (feature.noSelect || feature.get('isPreview') || feature.get('noSelect')) { return false; }
     map.route?.clear();
     this.coordinate_ = evt.coordinate;
     feature.getGeometry().setCoordinates(evt.coordinate);

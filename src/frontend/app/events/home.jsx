@@ -116,7 +116,7 @@ export default function Home() {
       layerFilter: (layer) => layer.listenForClicks,
     })[0];
 
-    if (feature?.noSelect) { return; }
+    if (feature?.noSelect || feature?.get('noSelect')) { return; }
 
     if (feature?.styleState) { // new selection
       selectFeature(e.map, feature);

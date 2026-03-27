@@ -161,7 +161,7 @@ export default function PinLayer({ event, dispatch }) {
         new Drag({ endHandler, menuRef, resetContextMenu: () => setContextMenu([]), dispatch })
       ]);
 
-      map.route = new PinFeature({ style: 'route', geometry: new LineString([]), isVisible: true})
+      map.route = new PinFeature({ style: 'route', geometry: new LineString([]), isVisible: true, noSelect: true })
       layer.getSource().addFeature(map.route);
 
       // pin for search result
