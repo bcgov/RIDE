@@ -37,6 +37,7 @@ proj4.defs([
 
 export const MapContext = createContext();
 
+// handles toggling the hover state over OpenLayers features
 export function pointerMove(e) {
   const feature = e.map.getFeaturesAtPixel(e.pixel, {
     layerFilter: (layer) => layer.listenForHover,
@@ -306,14 +307,8 @@ function handleDownEvent(evt) {
  * @param {import('ol/MapBrowserEvent.js').default} evt Map browser event.
  */
 function handleDragEvent(evt) {
-  const deltaX = evt.coordinate[0] - this.coordinate_[0];
-  const deltaY = evt.coordinate[1] - this.coordinate_[1];
-
-  const geometry = this.feature_.getGeometry();
-  geometry.translate(deltaX, deltaY);
-
-  this.coordinate_[0] = evt.coordinate[0];
-  this.coordinate_[1] = evt.coordinate[1];
+  this.feature_.getGeometry().setCoordinates(evt.coordinate);
+  this.coordinate_ = evt.coordinate;
 }
 
 /**
@@ -371,6 +366,32 @@ function eq(a, b) {
   return a[0] === b[0] && a[1] === b[1];
 }
 
+// roads not considered for snapping
+const EXCLUDED_CLASSES = [
+  'alleyway',
+  'driveway',
+  'resource',
+  'restricted', // e.g., access roads on school properties
+  'skid',
+  'strata',
+  'service', // e.g., access roads on school properties
+  'trail',
+  'unclassified',
+];
+
+// current zoom level required for features with this road class to be used
+// for snapping
+const MIN_ZOOM = {
+  'highway': 0,
+  'arterial': 0,
+  'freeway': 0,
+  'collector': 10,
+  'ramp': 13,
+  'local': 14,
+  'lane': 15,
+  'yield': 15,
+};
+
 export function getDRA(coords, point, map) {
   /* Resolution is projection unit per pixel.  For EPSG:3857, the unit is
    * meter; if the resolution is 30, then one pixel represents 30m.
@@ -393,11 +414,25 @@ export function getDRA(coords, point, map) {
     cql_filter: `INTERSECTS(GEOMETRY, POLYGON((${actual.join(', ')})))`,
   });
   const point2 = turf.point(g2ll(coords));
+
+  const zoom = map.getView().getZoom();
+
+  const name = 'dra lines';
+  map.get('debug').getSource().remove(name);
+
   return fetch('https://openmaps.gov.bc.ca/geo/wfs?' + params, {'mode': 'cors'})
     .then((body) => body.json())
     .then((data) => {
       let closest, feature, line;
       (data.features || []).forEach((feat) => {
+        if (EXCLUDED_CLASSES.includes(feat?.properties?.ROAD_CLASS) ||
+            zoom < (MIN_ZOOM[feat?.properties?.ROAD_CLASS] || 0)) {
+          return;
+        }
+
+        feat.debugLine = getLine([feat.geometry.coordinates], name);
+        map.get('debug').getSource().addFeature(feat.debugLine);
+
         try {
           line = turf.lineString(feat.geometry.coordinates);
           let snapped;
@@ -627,7 +662,7 @@ export function getSnapped(coordinate, pixel, map) {
       const lines = multi(f.getFlatCoordinates(), f.getEnds().map(a => a), g2ll)
       const line = turf.multiLineString(lines);
       f.debugLine = getLine(lines, name);
-      map.get('debug').getSource().addFeature(f.debugLine);
+      // map.get('debug').getSource().addFeature(f.debugLine);
       f.snapped = turf.nearestPointOnLine(line, point, { units: "meters" });
       f.closest = !closest || f.snapped.properties.dist < closest.dist;
       if (f.closest) {
