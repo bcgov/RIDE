@@ -1,10 +1,7 @@
-import copy
-import json
 import logging
 
 from datetime import datetime, timezone
 
-from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import Point
 
 from rest_framework import fields, serializers
@@ -13,6 +10,7 @@ from rest_framework_gis.fields import GeometryField
 
 from .models import Event, Note, TrafficImpact, Condition
 from apps.organizations.models import ServiceArea
+from apps.segments.models import Segment
 from apps.segments.serializers import SegmentSerializer
 from apps.shared.serializers import HistorySerializer, KeyMoveSerializer, UserSerializer, VersionSerializer
 
@@ -299,6 +297,12 @@ class ChainUpEventSerializer(EventSerializer):
 
 
 class RcSerializer(EventSerializer):
+    segment = serializers.PrimaryKeyRelatedField(
+        queryset=Segment.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
     first_reported = serializers.SerializerMethodField()
 
     def get_first_reported(self, obj):
