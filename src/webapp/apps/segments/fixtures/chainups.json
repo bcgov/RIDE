@@ -3,7 +3,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "407",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Westbound,  1km west of Boston Bar",
       "description": "Highway 1, between Old Boston Bar Rd and Alder Rd (Jackass Mountain Summit)",
@@ -57,7 +57,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "405",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Alexandra Pit 10km south of Hells Gate",
       "description": "Highway 1, between Anderson River Mainline and Thomas Rd (Yale)",
@@ -75,7 +75,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "405",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Alexandra Pit 10km south of Hells Gate",
       "description": "Highway 1, between Anderson River Mainline and Thomas Rd (Yale)",
@@ -129,7 +129,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "405",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Alexandra Pit 10km south of Hells Gate",
       "description": "Highway 1, between Anderson River Mainline and Thomas Rd (Yale)",
@@ -165,7 +165,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "407",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Westbound,  1km west of Boston Bar",
       "description": "Highway 1, between Old Boston Bar Rd and Alder Rd (Jackass Mountain Summit)",
@@ -291,7 +291,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "401",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Lake of the Woods 4km east of Hope",
       "description": "Highway 1, between K St and Ross Rd (Hope)",
@@ -363,7 +363,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "401",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Lake of the Woods 4km east of Hope",
       "description": "Highway 1, between K St and Ross Rd (Hope)",
@@ -561,7 +561,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "398",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Landstrom 1km west of Hope",
       "description": "Highway 1, between Haig Station Rd and K St (Hope)",
@@ -669,7 +669,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "401",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Lake of the Woods 4km east of Hope",
       "description": "Highway 1, between K St and Ross Rd (Hope)",
@@ -705,7 +705,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "409",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Albert Canyon 29 km east of Revelstoke",
       "description": "Highway 1, between East Boundary of Mount Revelstoke National Park and Albert Canyon West Bridge (East Boundary of Mount Revelstoke National Park)",
@@ -723,7 +723,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "398",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Landstrom 1km west of Hope",
       "description": "Highway 1, between Haig Station Rd and K St (Hope)",
@@ -849,7 +849,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "409",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Albert Canyon 29 km east of Revelstoke",
       "description": "Highway 1, between East Boundary of Mount Revelstoke National Park and Albert Canyon West Bridge (East Boundary of Mount Revelstoke National Park)",
@@ -885,7 +885,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "398",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Landstrom 1km west of Hope",
       "description": "Highway 1, between Haig Station Rd and K St (Hope)",
@@ -903,7 +903,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "398",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Landstrom 1km west of Hope",
       "description": "Highway 1, between Haig Station Rd and K St (Hope)",
@@ -921,7 +921,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "405",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Alexandra Pit 10km south of Hells Gate",
       "description": "Highway 1, between Anderson River Mainline and Thomas Rd (Yale)",
@@ -993,7 +993,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "407",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Westbound,  1km west of Boston Bar",
       "description": "Highway 1, between Old Boston Bar Rd and Alder Rd (Jackass Mountain Summit)",
@@ -1047,7 +1047,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "407",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Westbound,  1km west of Boston Bar",
       "description": "Highway 1, between Old Boston Bar Rd and Alder Rd (Jackass Mountain Summit)",
@@ -1065,7 +1065,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "401",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Lake of the Woods 4km east of Hope",
       "description": "Highway 1, between K St and Ross Rd (Hope)",
@@ -1119,7 +1119,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "407",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Westbound,  1km west of Boston Bar",
       "description": "Highway 1, between Old Boston Bar Rd and Alder Rd (Jackass Mountain Summit)",
@@ -1137,7 +1137,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "409",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Albert Canyon 29 km east of Revelstoke",
       "description": "Highway 1, between East Boundary of Mount Revelstoke National Park and Albert Canyon West Bridge (East Boundary of Mount Revelstoke National Park)",
@@ -1155,7 +1155,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "409",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Albert Canyon 29 km east of Revelstoke",
       "description": "Highway 1, between East Boundary of Mount Revelstoke National Park and Albert Canyon West Bridge (East Boundary of Mount Revelstoke National Park)",
@@ -1173,7 +1173,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "401",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Lake of the Woods 4km east of Hope",
       "description": "Highway 1, between K St and Ross Rd (Hope)",
@@ -1191,7 +1191,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "409",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Albert Canyon 29 km east of Revelstoke",
       "description": "Highway 1, between East Boundary of Mount Revelstoke National Park and Albert Canyon West Bridge (East Boundary of Mount Revelstoke National Park)",
@@ -1335,7 +1335,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "405",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Alexandra Pit 10km south of Hells Gate",
       "description": "Highway 1, between Anderson River Mainline and Thomas Rd (Yale)",
@@ -1353,7 +1353,7 @@
     "model": "segments.chainup",
     "fields": {
       "id": "398",
-      "latest": false,
+      "latest": true,
       "route": 1,
       "name": "Hwy 1, Eastbound, Landstrom 1km west of Hope",
       "description": "Highway 1, between Haig Station Rd and K St (Hope)",
