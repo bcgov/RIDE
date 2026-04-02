@@ -186,7 +186,7 @@ def build_event_payload(target_event):
 
     def normalize_status(status):
         if status == "Inactive" or status == Status.INACTIVE:
-            return Status.INACTIVE
+            return Status.OPEN511_ARCHIVED
         return Status.ACTIVE
 
     def get_severity(severity_label):

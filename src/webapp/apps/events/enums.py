@@ -31,6 +31,7 @@ class EventSubtype(models.TextChoices):
 class Status(models.TextChoices):
     ACTIVE = 'ACTIVE'
     INACTIVE = 'INACTIVE'
+    OPEN511_ARCHIVED = 'ARCHIVED'
 
 
 class Severity(models.TextChoices):
