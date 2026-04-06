@@ -11,7 +11,7 @@ from rest_framework_gis.fields import GeometryField
 from .models import Event, Note, TrafficImpact, Condition
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment
-from apps.segments.serializers import SegmentSerializer
+from apps.segments.serializers import SegmentSerializer, ChainUpSerializer
 from apps.shared.serializers import HistorySerializer, KeyMoveSerializer, UserSerializer, VersionSerializer
 
 log = logging.getLogger('debug')
@@ -53,6 +53,7 @@ class EventSerializer(KeyMoveSerializer):
     ongoing = fields.SerializerMethodField()
     notes = NotesListSerializer(required=False)
     segment = SegmentSerializer(required=False)
+    chainup = ChainUpSerializer(required=False)
 
     class Meta:
         model = Event
