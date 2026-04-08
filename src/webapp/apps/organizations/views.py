@@ -3,9 +3,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from apps.organizations.models import Organization, ServiceArea
-from apps.organizations.serializers import OrganizationSerializer, ServiceAreaSerializer, ServiceAreaNoGeoSerializer
-
+from .models import Organization, ServiceArea
+from .serializers import (
+    OrganizationSerializer,
+    ServiceAreaSerializer,
+    ServiceAreaBoundariesSerializer,
+)
 
 class OrganizationAPIView(ModelViewSet):
     queryset = Organization.objects.all().order_by('name')
@@ -61,17 +64,33 @@ class ServiceAreaAPIView(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            qs = ServiceArea.objects.all()
+        return ServiceArea.objects.exclude(parent=None).order_by('sortingOrder')
 
-        else:
-            user_orgs = self.request.user.organizations.all()
-            qs = ServiceArea.objects.filter(organizations__in=user_orgs)
-
-        return qs.exclude(parent=None).distinct().order_by('sortingOrder')
+    @action(detail=True)
+    def boundary(self, request, pk):
+        serializer = ServiceAreaBoundariesSerializer(self.get_object())
+        return Response(serializer.data)
 
     @action(detail=False)
-    def nogeo(self, request):
+    def boundaries(self, request):
         queryset = self.get_queryset()
-        serializer = ServiceAreaNoGeoSerializer(queryset, many=True)
+        serializer = ServiceAreaBoundariesSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class DistrictAPIView(ModelViewSet):
+    serializer_class = ServiceAreaSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ServiceArea.objects.filter(parent=None).order_by('sortingOrder')
+
+    @action(detail=True)
+    def boundary(self, request, pk):
+        serializer = ServiceAreaBoundariesSerializer(self.get_object())
+        return Response(serializer.data)
+
+    @action(detail=False)
+    def boundaries(self, request):
+        queryset = self.get_queryset()
+        serializer = ServiceAreaBoundariesSerializer(queryset, many=True)
         return Response(serializer.data)

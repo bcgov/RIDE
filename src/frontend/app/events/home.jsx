@@ -12,6 +12,7 @@ import Map from '../components/Map';
 import Layer from '../components/Map/Layer';
 import Layers, { defaultLayers } from './Layers';
 import PinLayer from '../components/Map/PinLayer';
+import BoundariesLayer from '../components/Map/BoundariesLayer';
 import { AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
 import Tabs from '../shared/Tabs';
@@ -36,41 +37,14 @@ export function meta() {
   ];
 }
 
-const layersInitial = () => {
-  const stored = localStorage.getItem('visibleLayers');
-  if (stored) { return JSON.parse(stored); }
-  return defaultLayers;
-}
-
 export default function Home() {
-  /* Setup */
-  // Navigation
   const navigate = useNavigate();
-
-  /* Hooks */
-  // Context
   const { authContext } = useContext(AuthContext);
-
-  // Refs
   const mapRef = useRef();
 
-  const layersReducer = (visibleLayers, action) => {
-    if (action.layer !== visibleLayers.layer) {
-      const updated = { ...visibleLayers, [action.layer]: action.value };
-      localStorage.setItem("visibleLayers", JSON.stringify(updated));
-      if (mapRef.current) {
-        mapRef.current.set('visibleLayers', updated);
-      }
-      return updated;
-    }
-    return visibleLayers;
-  }
-
-  // States
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
-  const [ visibleLayers, toggle ] = useReducer(layersReducer, layersInitial());
   const [ message, setMessage ] = useState('');
 
   // Effects
@@ -129,9 +103,6 @@ export default function Home() {
     }
   }
 
-  mapRef.current = map;
-  if (mapRef.current && !mapRef.current.get('visibleLayers')) { mapRef.current.set('visibleLayers', visibleLayers); }
-
   const isClearedRoadCondition = (
     (event.type === 'ROAD_CONDITION' || event.type === 'Road condition')
     && event.status === 'Inactive'
@@ -174,8 +145,9 @@ export default function Home() {
       <MapContext.Provider value={{ map, setMap }}>
         <Map dispatch={dispatch} event={event} clickHandler={clickHandler}>
           <PinLayer event={event} dispatch={dispatch} />
-          <Layer visibleLayers={visibleLayers} event={event} dispatch={dispatch} />
-          { showLayers && <Layers visibleLayers={visibleLayers} dispatch={toggle} /> }
+          <BoundariesLayer />
+          <Layer event={event} dispatch={dispatch} />
+          { showLayers && <Layers /> }
         </Map>
       </MapContext.Provider>
 

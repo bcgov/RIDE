@@ -33,14 +33,13 @@ class ServiceAreaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceArea
-        fields = "__all__"
+        exclude = ["geometry"]  # geo field explodes payload size
 
     def get_sortingOrder(self, obj):
-        prefix = '0' if obj.sortingOrder < 10 else ''
         return f'{obj.sortingOrder:02}'
 
 
-class ServiceAreaNoGeoSerializer(ServiceAreaSerializer):
+class ServiceAreaBoundariesSerializer(ServiceAreaSerializer):
     class Meta:
         model = ServiceArea
-        exclude = ["geometry"]
+        fields = ["id", "name", "sortingOrder", "geometry", "parent"]

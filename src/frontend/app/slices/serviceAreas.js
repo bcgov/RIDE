@@ -11,7 +11,7 @@ const adapter = createEntityAdapter({
 const refreshThunk = createAsyncThunk(
   'serviceAreas/refresh',
   async () => {
-    const response = await client.get(`${API_HOST}/api/service_areas/nogeo`);
+    const response = await client.get(`${API_HOST}/api/service_areas`);
     return response.data;
   },
   {
