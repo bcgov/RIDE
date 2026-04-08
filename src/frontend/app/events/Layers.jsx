@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { useSelector, useDispatch, useStore } from 'react-redux';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faXmark, faLayerGroup, faDiamond, faTriangle, faLink,
-
+  faDiamond, faLayer, faLayerGroup, faLink, faTriangle, faXmark,
 } from '@fortawesome/pro-regular-svg-icons';
 import { faDoNotEnter, faCalendarDays, faClockRotateLeft,
   faGameBoardSimple, faSignPosts
@@ -24,6 +25,8 @@ import chainupActiveStatic from './icons/chainup-default-static.svg';
 import roadconditionActiveStatic from './icons/roadcondition-default-static.svg';
 import dmsStatic from './icons/dms-static.svg';
 
+import { set } from '../slices';
+
 import './Layers.scss';
 
 const BUTTONS = {
@@ -40,13 +43,17 @@ const BUTTONS = {
   },
   'Commercial vehicles': {
     chainups: {icon: faLink, classes: 'stroke', label: 'Chain-ups in effect'},
+  },
+  'Boundaries': {
+    serviceAreas: {icon: faLayer, classes: 'stroke', label: 'Service areas'},
+    districts: {icon: faLayerGroup, classes: 'stroke', label: 'Districts'},
   }
 }
 
 export const defaultLayers = Object.values(BUTTONS)
   .flatMap((section) => Object.keys(section))
   .reduce((acc, curr) => {
-    acc[curr] = !['cleared7', 'dms'].includes(curr);
+    acc[curr] = !['cleared7', 'dms', 'serviceAreas', 'districts'].includes(curr);
     return acc;
   }, {});
 
@@ -123,9 +130,11 @@ function Legend() {
   );
 }
 
-export default function Layers ({ visibleLayers, dispatch }) {
+export default function Layers ({ visibleLayers2, dispatch }) {
 
   const [tab, setTab] = useState(localStorage.getItem('tab open'));
+  const storeDispatch = useDispatch();
+  const visibleLayers = useSelector(state => state.visibleLayers);
 
   const changeTab = (tab) => {
     if (tab) {
@@ -189,7 +198,9 @@ export default function Layers ({ visibleLayers, dispatch }) {
                       <button
                         key={key}
                         className={`${option.classes} ${visibleLayers[key] ? 'enabled' : ''}`}
-                        onClick={() => dispatch({ layer: key, value: !visibleLayers[key]})}
+                        onClick={
+                          () => storeDispatch(set({[key]: !visibleLayers[key]}))
+                        }
                       >
                         <FontAwesomeIcon icon={option.icon}/>
                         {BUTTONS[group][key].label}

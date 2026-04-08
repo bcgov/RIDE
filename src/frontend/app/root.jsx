@@ -9,15 +9,19 @@ import {
 } from "react-router";
 
 import store from './store';
+globalThis.store = store;
 import { Provider } from 'react-redux';
 
 import { API_HOST } from './env.js';
 import { DataContext } from './contexts';
 import {
   refreshConditions,
+  refreshDistricts,
+  refreshDistrictBoundaries,
   refreshRoutes,
   refreshSegments,
   refreshServiceAreas,
+  refreshServiceAreaBoundaries,
   refreshSituations,
   refreshTrafficImpacts,
 } from './slices';
@@ -62,12 +66,15 @@ export function HydrateFallback() {
 
 let fetching = false;
 
-store.dispatch(refreshRoutes());
 store.dispatch(refreshConditions());
-store.dispatch(refreshSegments());
+store.dispatch(refreshDistricts());
+store.dispatch(refreshRoutes());
 store.dispatch(refreshServiceAreas());
+store.dispatch(refreshSegments());
 store.dispatch(refreshTrafficImpacts());
 // store.dispatch(refreshSituations());
+store.dispatch(refreshServiceAreaBoundaries());
+store.dispatch(refreshDistrictBoundaries());
 
 export default function App() {
   const [impacts, setImpacts] = useState(getImpacts);

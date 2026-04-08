@@ -26,7 +26,7 @@ import { patch } from '../../shared/helpers';
 import { refreshEvents } from '../../slices/events';
 
 
-export function addEvent(event, map, dispatch) {
+export function addEvent(event, map, dispatch, visibleLayers) {
   event = structuredClone(event);
   const source = map.get('events').getSource();
   const existing = source.get(event.id);
@@ -75,7 +75,7 @@ export function addEvent(event, map, dispatch) {
   if (feature.getGeometry().getGeometries()[0].getCoordinates()[0] > -1000) {
     feature.getGeometry().getGeometries()[0].transform('EPSG:4326', map.getView().getProjection().getCode());
   }
-  feature.set('visible', getVisibility(event, map.get('visibleLayers')));
+  feature.set('visible', getVisibility(event, visibleLayers));
 
   if (route) {
     const gg = feature.getGeometry().getGeometries();
@@ -150,7 +150,7 @@ function addEventsLayer(map) {
   }
 }
 
-export default function Layer({ visibleLayers, event, dispatch }) {
+export default function Layer({ event, dispatch }) {
 
   const { setAlertContext } = useContext(AlertContext);
   const { map } = useContext(MapContext);
@@ -163,6 +163,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
   const status = useSelector(state => state.events.status);
   const storeDispatch = useDispatch()
   const store = useStore();
+  const visibleLayers = useSelector(state => state.visibleLayers);
 
   const contextHandler = (e) => {
     e.preventDefault();
@@ -359,7 +360,7 @@ export default function Layer({ visibleLayers, event, dispatch }) {
 
     state.events.ids.forEach((id) => {
       const event = state.events.entities[id];
-      addEvent(event, map, dispatch);
+      addEvent(event, map, dispatch, visibleLayers);
       eventIds[id] = true;
     })
 
@@ -376,15 +377,14 @@ export default function Layer({ visibleLayers, event, dispatch }) {
   }
 
   useEffect(() => {
+    map?.get('events').getSource().getFeatures().forEach((feature) => {
+      feature.set('visible', getVisibility(feature.get('raw'), visibleLayers));
+    });
+  }, [visibleLayers]);
+
+  useEffect(() => {
     if (!map) { return; }
     map.on('contextmenu', contextHandler);
-    map.on('propertychange', (e) => {
-      if (e.key !== 'visibleLayers') { return; }
-      const visibility = map.get('visibleLayers');
-      map.get('events').getSource().getFeatures().forEach((feature) => {
-        feature.set('visible', getVisibility(feature.get('raw'), visibility));
-      });
-    });
     map.on('pointermove', pointerMove);
     addEventsLayer(map);
     store.subscribe(updateEventsOnMap);

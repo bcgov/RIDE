@@ -66,4 +66,11 @@
       border: solid 1px black;
     }
   }
+
+  .boundaries-status {
+    position: absolute;
+    bottom: 20px;
+    right: 200px;
+    z-index: 1;
+  }
 }

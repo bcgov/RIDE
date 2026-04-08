@@ -380,6 +380,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
             name='search'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            placeholder='ID, road, user, location, or details'
           />
 
           <span className='search-icon'><FontAwesomeIcon icon={faMagnifyingGlass} /></span>
