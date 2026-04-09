@@ -116,9 +116,9 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
                   name="start nearby"
                   value={ii}
                   defaultChecked={loc.include}
-                  onChange={(e) => {
-                    dispatch({ type: 'toggle other', key: 'start', checked: start.useOther})
-                  }}
+                  onChange={(e) =>
+                    dispatch({ type: 'toggle checked', key: 'start', value: ii, checked: loc.include})
+                  }
                 />&nbsp;
 
                 {loc.phrase}
@@ -224,9 +224,9 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
                     type="checkbox"
                     name='include end other'
                     defaultChecked={end.useOther}
-                    onChange={(e) => {
-                      dispatch({ type: 'toggle other', key: 'end', checked: end.useOther})
-                    }}
+                    onChange={(e) =>
+                      dispatch({ type: 'toggle checked', key: 'end', value: ii, checked: loc.include})
+                    }
                   />&nbsp;
 
                   {loc.phrase}
