@@ -153,8 +153,8 @@
     }
 
     .toggleable {
-      margin-top: 0.25rem;
-      margin-bottom: 0.5rem;
+      padding-top: 0.25rem;
+      padding-bottom: 0.5rem;
 
       .toggle {
         padding: 0 0.5rem 0 0.25rem;
@@ -261,10 +261,19 @@
       .go-to {
         cursor: pointer;
       }
+
+      .react-loading-skeleton {
+        margin-bottom: 1rem;
+      }
+
       .toggleable {
         display: flex;
-        margin-bottom: 0.5rem;
+        padding-top: 0rem;
+        padding-bottom: 0.5rem;
+        background: white;
+
         .toggle {
+          padding-top: 0.4rem;
           .unfold {
             display: none;
           }
@@ -290,7 +299,6 @@
           flex: 1;
 
           div {
-            margin-bottom: 0.25rem;
 
             &.nearby-error {
               font-style: italic;
@@ -299,9 +307,138 @@
               padding-left: 2rem;
               margin-bottom: 0.5rem;
             }
+
             &:last-child {
               margin-bottom: 0;
             }
+
+            .label {
+              margin: 0.75rem 0;
+            }
+
+            &.road-name {
+              font-size: 1.3rem;
+              display: flex;
+              align-items: flex-start;
+              margin-top: 0.5rem;
+              margin-bottom: 0.5rem;
+
+              .tooltip {
+                margin: 0.25rem 0 0 0.5rem;
+              }
+            }
+
+            &.landmarks {
+              .landmark {
+                display: flex;
+                justify-content: space-between;
+                align-items: first baseline;
+                cursor: grab;
+                background: white;
+
+                padding: 0.25rem 0.5rem;
+                border: solid 1px black;
+                border-radius: 4px;
+                margin-bottom: 0.5rem;
+
+                &.suggestion {
+                  border-color: transparent;
+                  margin-bottom: 0;
+                }
+
+                .phrase {
+                  flex: 1;
+                  text-align: left;
+
+                  display: flex;
+                  input { flex: 1; }
+                }
+
+                .icon {
+                  margin-right: 0.5rem;
+                }
+
+                .close {
+                  margin-left: 0.5rem;
+                  cursor: pointer;
+                  svg {
+                    width: 14px;
+                    height: 14px;
+                  }
+                }
+                &[aria-pressed="true"] {
+                  position: relative;
+                  box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.1);
+                  z-index: 10;
+                }
+              }
+
+              input {
+                outline: none;
+                border: solid 1px #ccc;
+                border-radius: 4px;
+
+              }
+
+              .search-box {
+                position: relative;
+                .search-icon {
+                  position: absolute;
+                  right: 10px;
+                  top: 0.2rem;
+                  display: inline-block;
+                  color: #ccc;
+
+                  svg {
+                    height: 14px;
+                    width: 14px;
+                  }
+                }
+              }
+              .landmark-search {
+                width: 100%;
+                padding: 0.25rem 0.5rem;
+                margin-bottom: 0.5rem;
+              }
+
+              .sublabel {
+                font-size: 13px;
+                font-weight: 700;
+                margin: 0.5rem 0 0.25rem 0;
+
+                button {
+                  margin-left: 0.5rem;
+                  cursor: pointer;
+
+                  svg {
+                    height: 12px;
+                    width: 12px;
+                  }
+                }
+              }
+
+              .filters {
+                display: flex;
+                align-items: flex-start;
+                font-size: 13px;
+                margin: 0.25rem 0;
+
+                button {
+                  border-radius: 16px;
+                  padding: 0.25rem 0.75rem;
+
+                  &.active {
+                    background: black;
+                    color: white;
+                    margin: 0 0.25rem;
+                  }
+                }
+              }
+            }
+              .tooltip {
+                /* margin: 0.25rem 0 0 0.5rem; */
+                min-width: max-content;
+              }
           }
         }
       }

@@ -10,6 +10,7 @@ from allauth.urls import build_provider_urlpatterns
 
 
 from apps.events import urls as event_urls
+from apps.lki import urls as lki_urls
 from apps.users import urls as user_urls
 from apps.organizations import urls as organization_urls
 from apps.segments import urls as segment_urls
@@ -22,6 +23,7 @@ urlpatterns = [
     path('admin/logout/', logout),
     path('admin/', admin.site.urls),
     path('api/', include((event_urls, 'events'), namespace='events')),
+    path('api/', include((lki_urls, 'lki'), namespace='lki')),
     path('api/', include((user_urls, 'users'), namespace='users')),
     path('api/', include((organization_urls, 'organizations'), namespace='organizations')),
     path('api/', include((segment_urls, 'segments'), namespace='segments')),
