@@ -94,6 +94,12 @@ export function selectFeature(map, feature) {
   }
 }
 
+function layerStyle(feature, resolution) {
+  if (!feature.get('visible')) { return null; }
+  if (feature.get('selected')) { return feature.active; }
+  return feature.get('hovered') ? feature.hover : feature.normal;
+}
+
 /* Creates and returns the base OpenLayers map with layers for the vector tiles
  * and a duplicate layer containing only the highway symbols and road names.
  */
@@ -197,39 +203,41 @@ export function createMap() {
     })
   });
 
+  // layer for debug elements on map
+  const debugLayer = new VectorLayer({
+    classname: 'debug',
+    visible: true,
+    source: new VectorSource({ format: new GeoJSON() }),
+    // style: null,
+    style: layerStyle,
+    renderBuffer: 30,
+    zIndex: 300,
+  });
+  debugLayer.listenForHover = true;
+  debugLayer.listenForClicks = false;
+  debugLayer.getSource().remove = (name) => {
+    debugLayer.getSource().forEachFeature((feature) => {
+      if (feature.get('name') === name) {
+        debugLayer.getSource().removeFeature(feature);
+      }
+    });
+  }
+
   // create map
   const map = new Map({
-    layers: [vectorLayer, aerialLayer, roadLayer, symbolLayer],
+    layers: [vectorLayer, aerialLayer, roadLayer, symbolLayer, debugLayer],
     view: view,
     moveTolerance: 7,
     controls: [new ScaleLine({ units: 'metric' })],
   });
 
-  // layer for debug elements on map
-  const layer = new VectorLayer({
-    classname: 'debug',
-    visible: true,
-    source: new VectorSource({ format: new GeoJSON() }),
-    style: null,
-    renderBuffer: 30,
-  });
-  layer.listenForHover = true;
-  layer.listenForClicks = false;
-  map.addLayer(layer);
-  map.set('debug', layer);
-  layer.getSource().remove = (name) => {
-    layer.getSource().forEachFeature((feature) => {
-      if (feature.get('name') === name) {
-        layer.getSource().removeFeature(feature);
-      }
-    });
-  }
 
   map.set('base', 'vector')
   map.set('vector', vectorLayer);
   map.set('roads', roadLayer);
   map.set('aerial', aerialLayer);
   map.set('symbols', symbolLayer);
+  map.set('debug', debugLayer);
   return map;
 }
 
@@ -431,7 +439,7 @@ export function getDRA(coords, point, map) {
         }
 
         feat.debugLine = getLine([feat.geometry.coordinates], name);
-        map.get('debug').getSource().addFeature(feat.debugLine);
+        // map.get('debug').getSource().addFeature(feat.debugLine);
 
         try {
           line = turf.lineString(feat.geometry.coordinates);
@@ -500,14 +508,14 @@ async function filterByTypes(features, types, coords, reverseRouteOrder) {
     const direction = getCardinalDirection(points, reverseRouteOrder);
 
     results.push({
+      id: `bcgnws-${feature.properties.feature.id}`,
       source: "BCGNWS",
       name: feature.properties.name,
       type: feature.properties.featureType,
       coordinates: feature.geometry.coordinates,
       distance: route.distance,
       direction,
-      priority: index,
-      phrase: `${Math.round(route.distance * 10) / 10}km ${direction} of ${feature.properties.name}`
+      phrase: `${Math.round(route.distance)}km ${direction} of ${feature.properties.name}`
     });
 
   }
@@ -539,15 +547,8 @@ export async function getNearby(coords, reverseRouteOrder) {
   }
   const data = await response.json();
   const results = await filterByTypes(data.features, PopulationCenterTypes, coords, reverseRouteOrder);
-  if (results.length < 5) {
-    results.push(... await filterByTypes(data.features, ['', 'Community'], coords, reverseRouteOrder));
-  }
-  if (results.length < 5) {
-    results.push(... await filterByTypes(data.features, ['Locality'], coords, reverseRouteOrder));
-  }
-
-  results.sort((a, b) => b.priority - a.priority || a.distance - b.distance);
-  return results.slice(0, 5);
+  results.sort((a, b) => a.distance - b.distance);
+  return results.map((result) => ({... result, displayDistance: Math.round(result.distance)})).slice(0, 6);
 }
 
 export async function fetchRoute(points) {

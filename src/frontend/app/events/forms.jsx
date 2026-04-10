@@ -121,6 +121,18 @@ export function eventReducer(event, action) {
       return {...event};
     }
 
+    case 'add nearby': {
+      if (event.location[action.key].nearby.filter((nearby) => nearby.id === action.candidate.id).length === 0) {
+        event.location[action.key].nearby.push(structuredClone(action.candidate));
+      }
+      return {...event};
+    }
+
+    case 'remove nearby': {
+      event.location[action.key].nearby = event.location[action.key].nearby.filter((nearby) => nearby.id !== action.id);
+      return {...event};
+    }
+
     case 'toggle days': {
       const schedule = structuredClone(event.timing.schedules[action.index]);
       delete schedule.error;
@@ -230,6 +242,11 @@ export function eventReducer(event, action) {
       const final = segments.pop();
       for (const segment of segments) { obj = obj[segment]; }
       obj[final] = action.value;
+      return {...event};
+    }
+
+    case 'change nearby order': {
+      event.location[action.subkey].nearby = action.value;
       return {...event};
     }
 
@@ -447,6 +464,13 @@ export default class EventForm extends Component {
       type: "GeometryCollection",
       geometries,
     };
+
+    if (form.location.start?.candidates) {
+      delete form.location.start.candidates;
+    }
+    if (form.location.end?.candidates) {
+      delete form.location.end.candidates;
+    }
 
     if (form.type !== 'Road condition' && form.type !== 'ROAD_CONDITION') {
       if (!form.details.direction) { err.direction = 'You must set a direction'; }

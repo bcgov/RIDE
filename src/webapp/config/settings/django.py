@@ -70,6 +70,7 @@ INSTALLED_APPS = [
 
     'apps.ride',
     'apps.events',
+    'apps.lki',
     'apps.users',
     'apps.organizations',
     'apps.segments',
