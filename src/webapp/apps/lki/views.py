@@ -21,7 +21,7 @@ class Landmarks(viewsets.ReadOnlyModelViewSet):
         Q(landmark_type__in=intersection_types,
           sourced_intersection__isnull=False)
         | Q(landmark_type__in=other_types)
-    )
+    ).prefetch_related('segment__highways')
     serializer_class = serializers.Landmark
     lookup_field = 'id'
     permission_classes = [AllowAny]

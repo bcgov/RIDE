@@ -1,6 +1,8 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import "react-loading-skeleton/dist/skeleton.css";
+import { Circle, Fill, Icon, Style, Stroke, Text } from 'ol/style';
+import { Point as olPoint, LineString, Polygon } from 'ol/geom';
 
 import {
   DndContext,
@@ -32,7 +34,8 @@ import { ROUTER_CLIENT_ID } from '../env.js';
 
 import Tabs from '../shared/Tabs';
 
-import { bc2g, bc2ll, g2bc, getNearby as getNearbyPopCenters, ll2bc } from '../components/Map/helpers';
+import { bc2g, bc2ll, g2bc, g2ll, getNearby as getNearbyPopCenters, ll2bc, ll2g } from '../components/Map/helpers';
+import RideFeature from '../components/Map/feature';
 
 import { API_HOST } from '../env';
 
@@ -57,6 +60,113 @@ const LAYERS = {
   municipalities: 'pub:WHSE_LEGAL_ADMIN_BOUNDARIES.ABMS_MUNICIPALITIES_SP',
 };
 
+const markerStyles = {
+  static: new Style({
+    image: new Circle({
+      stroke: new Stroke({
+        color: 'rgb(30, 83, 167)',
+        width: 2,
+      }),
+      fill: new Fill({ color: 'rgba(24, 148, 230, 0.75)' }),
+      radius: 10,
+    }),
+    text: new Text({
+      font: '11px BC Sans',
+      fill: new Fill({ color: [ 255, 255, 255, 1], }),
+      text: '',
+      textBaseline: 'bottom',
+      offsetY: 8,
+    }),
+  }),
+  hover: [
+    new Style({
+      image: new Circle({
+        stroke: new Stroke({
+          color: 'rgba(30, 83, 167, 1)',
+          width: 3,
+        }),
+        fill: new Fill({ color: 'rgba(30, 83, 167, 0.7)' }),
+        radius: 11,
+      }),
+      text: new Text({
+        font: 'bold 11px BC Sans',
+        fill: new Fill({ color: [ 255, 255, 255, 1], }),
+        text: '',
+        textBaseline: 'bottom',
+        offsetY: 8,
+      }),
+    }),
+    new Style({
+      text: new Text({
+        font: '13px BC Sans',
+        // fill: new Fill({ color: [ 0, 0, 0, 1], }),
+        fill: new Fill({ color: [ 255, 255, 255, 1], }),
+        backgroundFill: new Fill({ color: [ 0, 0, 0, 0.5], }),
+        padding: [3, 5, 1, 6],
+        // stroke: new Stroke({ color: [255, 255, 255,1], width: 2 }),
+        text: 'asdfasdf',
+        offsetY: -20,
+        textBaseline: 'bottom',
+      }),
+    }),
+  ],
+  active: new Style({
+    image: new Circle({
+      stroke: new Stroke({
+        color: 'rgba(30, 83, 167, 1)',
+        width: 2,
+      }),
+      fill: new Fill({ color: 'rgba(30, 83, 167, 0.7)' }),
+      radius: 8,
+    }),
+  }),
+}
+
+const intersectionStyles = {
+  static: new Style({
+    image: new Circle({
+      stroke: new Stroke({
+        color: 'rgba(88, 66, 21, 1)',
+        width: 2,
+      }),
+      fill: new Fill({ color: 'rgba(249, 196, 48, 0.4)' }),
+      radius: 8,
+    }),
+  }),
+  hover: new Style({
+    image: new Circle({
+      stroke: new Stroke({
+        color: 'rgba(88, 66, 21, 1)',
+        width: 3,
+      }),
+      fill: new Fill({ color: 'rgba(249, 196, 48, 0.7)' }),
+      radius: 10,
+    }),
+    text: new Text({
+      font: '13px BC Sans',
+      // fill: new Fill({ color: [ 0, 0, 0, 1], }),
+      fill: new Fill({ color: [ 255, 255, 255, 1], }),
+      backgroundFill: new Fill({ color: [ 0, 0, 0, 0.5], }),
+      padding: [3, 5, 1, 6],
+      // stroke: new Stroke({ color: [255, 255, 255,1], width: 2 }),
+      text: '',
+      offsetY: -20,
+      textBaseline: 'bottom',
+    }),
+  }),
+  active: new Style({
+    image: new Circle({
+      stroke: new Stroke({
+        color: 'rgba(88, 66, 21, 1)',
+        width: 2,
+      }),
+      fill: new Fill({ color: 'rgba(249, 196, 48, 0.7)' }),
+      radius: 8,
+    }),
+  }),
+}
+
+
 function getGeoserverParams(layer, cql='', numResults=100) {
   return new URLSearchParams({
     service: 'WFS',
@@ -76,7 +186,7 @@ export async function getRoute(points) {
   const pointString = `${points[0]},${points[1]},${points[2]},${points[3]}`;
   const baseUrl = "https://router.api.gov.bc.ca/directions.json";
   const apiKey = ROUTER_CLIENT_ID;
-  const apiUrl = `${baseUrl}?points=${encodeURIComponent(pointString)}&criteria=shortest&roundTrip=false&correctSide=false&apikey=${apiKey}&distanceUnit=km`;
+  const apiUrl = `${baseUrl}?points=${encodeURIComponent(pointString)}&criteria=shortest&apikey=${apiKey}&distanceUnit=km`;
 
   try {
     const response = await fetch(apiUrl, {mode: 'cors'});
@@ -101,108 +211,213 @@ function getCardinalDirection(points) {
   return directions[index];
 }
 
-async function getIntersections(coords) {
-  const params = new URLSearchParams({
-    point: coords[0] + "," + coords[1],
-    maxDistance: (10 * 1000), // convert to metres
-    outputSRS: 4326,
-    maxResults: 10,
-    locationDescriptor: "intersectionPoint",
-    setBack: 0,
-    brief: false,
-    minDegree: 3,
-    excludeUnits: false,
-    onlyCivic: false
-  });
 
-  const results = await fetch(`https://geocoder.api.gov.bc.ca/intersections/near.json?${params}`, {'mode': 'cors'}).then((body) => body.json());
-  for (const result of results.features) {
-    const intCoords = result.geometry.coordinates
-    const points = [coords[0], coords[1], intCoords[0], intCoords[1]];
-    const route = await getDistanceRoute(coords, result.geometry.coordinates)
-    result.source = 'intersections';
-    result.distance = route.distance;
-    result.direction = getCardinalDirection(points);
-    result.phrase = `${route.distance * 1000}m ${result.direction} of ${result.properties.intersectionName}`;
-    result.id = `geobc-intersection-${result.properties.intersectionID}`;
-    result.coords = result.geometry.coordinates;
+async function getIntersections(coords, dispatch, subkey) {
+  const retval = [];
+  try {
+    const params = new URLSearchParams({
+      point: coords[0] + "," + coords[1],
+      maxDistance: (10 * 1000), // convert to metres
+      outputSRS: 4326,
+      maxResults: 10,
+      locationDescriptor: "intersectionPoint",
+      setBack: 0,
+      brief: false,
+      minDegree: 3,
+      excludeUnits: false,
+      onlyCivic: false
+    });
+
+    const results = await fetch(`https://geocoder.api.gov.bc.ca/intersections/near.json?${params}`, {'mode': 'cors'}).then((body) => body.json());
+    for (const result of results.features) {
+      const intCoords = result.geometry.coordinates
+      const points = [coords[0], coords[1], intCoords[0], intCoords[1]];
+      const route = await getDistanceRoute(coords, result.geometry.coordinates)
+      result.source = 'intersections';
+      result.distance = route.distance;
+      result.direction = getCardinalDirection(points);
+      result.phrase = `${route.distance * 1000}m ${result.direction} of ${result.properties.intersectionName}`;
+      result.id = `geobc-intersection-${result.properties.intersectionID}`;
+      result.coords = result.geometry.coordinates;
+    }
+
+    retval.push(...results.features.filter((feature) => feature.distance >= 0));
+  } catch (err) {
+    console.error(err);
+    return [{ source: 'error', detail: 'Geocoder intersections not available at this time' }];
   }
-
-  return results.features.filter((feature) => feature.distance >= 0);
+  dispatch({
+    type: 'add candidates',
+    source: 'intersections',
+    subkey,
+    value: retval,
+  });
 }
 globalThis.getIntersections = getIntersections;
 
-async function getIntersections2(coords) {
-  const params = new URLSearchParams({
-    lat: coords[1],
-    lon: coords[0],
+
+async function getLandmarks(location, dispatch, subkey) {
+  if (!location.HIGHWAY_ROUTE_NUMBER) { return []; }
+  const retval = [];
+
+  try {
+    const coords = location.coords;
+    const params = new URLSearchParams({ lat: coords[1], lon: coords[0], });
+
+    const landmarks = await fetch(`${API_HOST}/api/landmarks?${params}`, {'mode': 'cors'}).then((body) => body.json());
+
+    for (const landmark of landmarks) {
+      let wrongHighway = true;
+      const pinHwys = location.HIGHWAY_ROUTE_NUMBER.split('+');
+      const hwys = landmark.segment.highways.map((hwy) => hwy.full_name);
+      // console.log(hwys, pinHwys);
+      for (const ph of pinHwys) {
+        if (hwys.includes(ph)) {
+          wrongHighway = false;
+          break;
+        }
+      }
+      if (wrongHighway) { continue; }
+
+      const landmarkCoords = landmark.geometry.coordinates
+      const route = await getDistanceRoute(coords, landmarkCoords);
+
+      // if the road linear distance is greater than twice the crow-flies distance,
+      // filter it out as it's probably on a parallel highway
+      if (route.distance > (landmark.distance * 0.002)) { continue; }
+
+      const displayDistance = Math.round(route.distance < 1 ? landmark.distance : route.distance);
+      const unit = route.distance < 1 ? 'm' : 'km';
+      const points = [coords[0], coords[1], landmarkCoords[0], landmarkCoords[1]];
+      const direction = getCardinalDirection(points);
+      let km_post;
+      if (landmark.landmark_type === 'S4') {
+        km_post = landmark.description.split(' ')[0];
+      }
+
+      retval.push({
+        source: 'landmarks',
+        class: landmark.landmark_type,
+        distance: route.distance,
+        direction,
+        phrase: `${displayDistance}${unit} ${direction} of ${landmark.description}`,
+        id: `intersection-${landmark.id}`,
+        coords: landmark.geometry.coordinates,
+        km_post,
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    return [{ source: 'error', detail: 'Landmarks not available at this time' }];
+  }
+  dispatch({
+    type: 'add candidates',
+    source: 'landmarks',
+    subkey,
+    value: retval.slice(0, 20),
   });
-
-  const results = await fetch(`${API_HOST}/api/landmarks?${params}`, {'mode': 'cors'}).then((body) => body.json());
-
-  // const intersections = results.filter((feat) => feat.landmark_type === 'A5').slice(0, 5);
-  const intersections = results.slice(0, 10);
-
-  return intersections.map((i) => {
-    const distance = i.distance / 1000;
-    const displayDistance = Math.round(distance < 1 ? i.distance : distance);
-    const unit = distance < 1 ? 'm' : 'km';
-    const intCoords = i.geometry.coordinates
-    const points = [coords[0], coords[1], intCoords[0], intCoords[1]];
-    const direction = getCardinalDirection(points);
-    let km_post;
-    if (i.landmark_type === 'S4') {
-      km_post = i.description.split(' ')[0];
-    }
-    return {
-      source: 'intersections',
-      class: i.landmark_type,
-      distance,
-      direction,
-      phrase: `${displayDistance}${unit} ${direction} of ${i.description}`,
-      id: `intersection-${i.id}`,
-      coords: i.geometry.coordinates,
-      km_post,
-    }
-  })
 }
-globalThis.getIntersections2 = getIntersections2;
+globalThis.getLandmarks = getLandmarks;
 
-async function getMunicipality(coords) {
-  coords = ll2bc(coords);
-  const cql = `INTERSECTS(SHAPE, POINT(${coords[0]} ${coords[1]}))`;
-  const params = getGeoserverParams(LAYERS.municipalities, cql);
-  const results = await fetch(`${HOST}?${params}`, {'mode': 'cors'}).then((body) => body.json());
-  return {
-    name: results.features[0]?.properties?.ADMIN_AREA_ABBREVIATION,
-    id: `municipality-${results.features[0]?.properties?.LGL_ADMIN_AREA_ID}`,
-  };
+
+async function getMunicipality(coords, dispatch, subkey) {
+  const retval = [];
+  try {
+    coords = ll2bc(coords);
+    const cql = `INTERSECTS(SHAPE, POINT(${coords[0]} ${coords[1]}))`;
+    const params = getGeoserverParams(LAYERS.municipalities, cql);
+    const results = await fetch(`${HOST}?${params}`, {'mode': 'cors'}).then((body) => body.json());
+    const name = results.features[0]?.properties?.ADMIN_AREA_ABBREVIATION;
+    if (name) {
+      retval.push({
+        name: results.features[0]?.properties?.ADMIN_AREA_ABBREVIATION,
+        id: `municipality-${results.features[0]?.properties?.LGL_ADMIN_AREA_ID}`,
+        source: 'municipalities',
+        distance: 0,
+        phrase: `In ${name}`
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    return [{ source: 'error', detail: 'Municipality not available at this time' }];
+  }
+  dispatch({
+    type: 'add candidates',
+    source: 'municipalities',
+    subkey,
+    value: retval,
+  });
 }
 globalThis.getMunicipality = getMunicipality;
 
-export async function getNearby(coords, useGeocoder=true) {
-  const nearby = [];
-  const { name, id } = await getMunicipality(coords);
-  if (name) {
-    nearby.push({ id, name, phrase: `in ${name}`, source: 'municipalities', distance: 0 });
-  }
-  let intersections;
-  if (useGeocoder){
-    intersections = await getIntersections(coords);
+
+export async function getNearby(action, location, dispatch) {
+  const subkey = action.split(' ')[1];
+  dispatch({ type: 'reset retrieved', subkey });
+
+  getMunicipality(location.coords, dispatch, subkey);
+  getLandmarks(location, dispatch, subkey);
+
+  if (location.HIGHWAY_ROUTE_NUMBER){
+    getLandmarks(location, dispatch, subkey);
   } else {
-    intersections = await getIntersections2(coords);
+    getIntersections(location.coords, dispatch, subkey);
   }
-  nearby.push(...intersections);
-  const popCenters = (await getNearbyPopCenters(coords)).filter((pop) => !pop.name.toLowerCase().includes(name?.toLowerCase()));
-  nearby.push(...popCenters);
-  nearby.sort((a, b) => a.distance - b.distance);
-  return nearby;
+
+  const populations = await getNearbyPopCenters(location.coords);
+  if (populations.length > 0 && populations[0].source !== 'error') {
+    dispatch({
+      type: 'add candidates',
+      source: 'bcgnws',
+      subkey,
+      value: populations,
+    });
+  }
 }
 globalThis.getNearby = getNearby;
 
+
+/* For the given point, reset all the candidate markers on the map with
+ * updated text describing their distance from the pin
+ */
+function updateMap(map, point) {
+  const source = map.get('pins').getSource();
+  source.remove('nearby intersections');
+
+  for (const candidate of point.candidates) {
+    if (!['intersections', 'landmarks'].includes(candidate.source)) { continue; }
+
+    // update feature styles's text
+    let styles = intersectionStyles;
+    if (candidate.class === 'S4') {
+      styles = markerStyles;
+      styles.static = styles.static.clone();
+      styles.static.getText().setText(candidate.km_post);
+      styles.hover = styles.hover.map((style) => style.clone());
+      styles.hover[0].getText().setText(candidate.km_post);
+      styles.hover[1].getText().setText(candidate.phrase);
+    } else {
+      styles.hover = styles.hover.clone();
+      styles.hover.getText().setText(candidate.phrase);
+    }
+
+    const feature = new RideFeature({
+      styles,
+      geometry: new olPoint(ll2g(candidate.coords)),
+      name: 'nearby intersections',
+      isVisible: true,
+      noSelect: true,
+    });
+    source.addFeature(feature);
+  }
+}
+
+
 async function getDistanceRoute(pointA, pointB) {
-  const route1 = await getRoute([pointA[0], pointA[1], pointB[0], pointB[1]]);
-  const route2 = await getRoute([pointB[0], pointB[1], pointA[0], pointA[1]]);
+  const [route1, route2] = await Promise.all([
+    getRoute([pointA[0], pointA[1], pointB[0], pointB[1]]),
+    getRoute([pointB[0], pointB[1], pointA[0], pointA[1]]),
+  ]);
   return route1.distance < route2.distance ? route1 : route2;
 }
 
@@ -232,7 +447,7 @@ function Sortable({id, children, classes}) {
 
 
 function getIcon(loc) {
-  if (loc.source === 'intersections') {
+  if (loc.source === 'intersections' || loc.source === 'landmarks') {
     return loc.class === 'S4' ? faSignHanging : faRoad;
   } else if (loc.type === 'other') {
     return faInputText;
@@ -240,7 +455,8 @@ function getIcon(loc) {
   return faCity;
 }
 
-function Point({ point, dispatch, goToFunc, subkey }) {
+
+function Point({ point, dispatch, goToFunc, subkey, map }) {
   const [other, setOther] = useState('');
   const [filter, setFilter] = useState('all');
   const otherRef = useRef();
@@ -255,13 +471,16 @@ function Point({ point, dispatch, goToFunc, subkey }) {
   const startChange = (e) => setOther(e.target.value.substring(0, 100));
   const nearby = point?.nearby || [];
   const nearbyIds = nearby.map((n) => n.id);
+  const municipality = nearby.filter((near) => near.source === 'municipalities')[0];
+
   const candidates = (point?.candidates || [])
-    .filter((loc) => !nearbyIds.includes(loc.id))
-    .filter((loc) => {
+    .filter((location) => !nearbyIds.includes(location.id))
+    .filter((location) => {
+      if (location.source === 'bcgnws' && location.name === municipality?.name) { return false; }
       if (filter === 'all') return true;
-      if (filter === 'intersections' && loc.source === 'intersections' && loc.class?.startsWith('A')) { return true; }
-      if (filter === 'landmarks' && loc.class === 'S4') { return true; }
-      if (filter === 'places' && (loc.source === 'municipalities' || loc.source === 'BCGNWS')) { return true; }
+      if (filter === 'intersections' && ['intersections', 'landmarks'].includes(location.source) && location.class?.startsWith('A')) { return true; }
+      if (filter === 'landmarks' && location.class === 'S4') { return true; }
+      if (filter === 'places' && (location.source === 'municipalities' || location.source === 'bcgnws')) { return true; }
 
       return false;
     });
@@ -275,6 +494,20 @@ function Point({ point, dispatch, goToFunc, subkey }) {
       dispatch({ type: 'change nearby order', subkey, value: arrayMove(nearby, oldIndex, newIndex) });
     }
   }
+
+  let nearbyPending = false;
+  ['municipalities', 'bcgnws'].forEach((term) => {
+    if (!point.retrieved.includes(term)) {
+      nearbyPending = true;
+    }
+  });
+  if (!nearbyPending &&
+      !(point.retrieved.includes('intersections') ||
+        point.retrieved.includes('landmarks'))) {
+    nearbyPending = false;
+  }
+
+  updateMap(map, point);
 
   return (
     <div className="toggleable">
@@ -303,8 +536,6 @@ function Point({ point, dispatch, goToFunc, subkey }) {
 
         <div className='landmarks fa-width-auto'>
           <div className='label'><strong>Reference landmarks</strong></div>
-
-          { point?.nearbyPending && point?.name && <Skeleton width={250} height={20} />}
 
           { point?.name && point?.nearbyError && <div className='nearby-error'>{point?.nearbyError}</div>}
 
@@ -370,10 +601,15 @@ function Point({ point, dispatch, goToFunc, subkey }) {
 
           <div className='sublabel'>
             suggested
-            <button
-              type="button"
-              onClick={() => null}
-            ><FontAwesomeIcon icon={faArrowRotateRight} /></button>
+            { candidates.length === 0 &&
+              <button
+                type="button"
+                onClick={() => {
+                  dispatch({ type: `set ${subkey}`, value: { ...point, nearbyPending: true } });
+                  getNearby(`set ${subkey}`, point, dispatch);
+                }}
+              ><FontAwesomeIcon className={point.nearbyPending ? 'fa-spin' : ''} icon={faArrowRotateRight} /></button>
+            }
           </div>
 
           { candidates.map((loc, ii) => (
@@ -387,6 +623,8 @@ function Point({ point, dispatch, goToFunc, subkey }) {
               ><FontAwesomeIcon icon={faPlus} /></button>
             </div>
           ))}
+
+          { nearbyPending && point?.name && <Skeleton width={250} height={20} />}
 
           { !nearbyIds.includes('other') &&
             <div className='landmark suggestion'>
@@ -403,14 +641,15 @@ function Point({ point, dispatch, goToFunc, subkey }) {
                 <span className={other?.length === 100 ? 'bold' : ''}>{other?.length}/100</span>
               </div>
               <button
-                  type='button'
-                  className='close'
-                  onClick={(e) => {
-                    dispatch({ type: 'add nearby', key: subkey, candidate: { ...otherBlank, phrase: otherRef.current.value } })
-                  }}
-                ><FontAwesomeIcon icon={faPlus} /></button>
+                type='button'
+                className='close'
+                onClick={(e) => {
+                  dispatch({ type: 'add nearby', key: subkey, candidate: { ...otherBlank, phrase: otherRef.current.value } })
+                }}
+              ><FontAwesomeIcon icon={faPlus} /></button>
             </div>
           }
+
         </div>
 
       </div>
@@ -425,7 +664,7 @@ const otherBlank = {
   distance: Infinity,
 }
 
-export default function Location({ errors, event, dispatch, goToFunc }) {
+export default function Location({ errors, event, dispatch, goToFunc, map }) {
   const start = event?.location?.start;
   const end = event?.location?.end;
 
@@ -467,12 +706,12 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
 
     <Tabs hideSingleTabHandle={true}>
       <Tabs.Tab name='start' label='Start location'>
-        <Point point={start} dispatch={dispatch} goToFunc={goToFunc} subkey='start' />
+        <Point point={start} dispatch={dispatch} goToFunc={goToFunc} subkey='start' map={map} />
       </Tabs.Tab>
 
       { end?.name &&
         <Tabs.Tab name='end' label='End location'>
-          <Point point={end} dispatch={dispatch} goToFunc={goToFunc} subkey='end' />
+          <Point point={end} dispatch={dispatch} goToFunc={goToFunc} subkey='end' map={map} />
         </Tabs.Tab>
       }
     </Tabs>
@@ -498,220 +737,3 @@ export default function Location({ errors, event, dispatch, goToFunc }) {
 
   </>;
 }
-
-const near = [
-    {
-        "id": "a1",
-        "phrase": "in Nanaimo",
-        "source": "municipalities",
-        "distance": 0,
-        "include": true
-    },
-    {
-        "id": "a2",
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "crs": {
-                "type": "EPSG",
-                "properties": {
-                    "code": 4326
-                }
-            },
-            "coordinates": [
-                -124.0140724,
-                49.1992367
-            ]
-        },
-        "properties": {
-            "fullAddress": "Labieux Rd and Pheasant Terr, Nanaimo, BC",
-            "intersectionName": "Labieux Rd and Pheasant Terr",
-            "localityName": "Nanaimo",
-            "localityType": "City",
-            "provinceCode": "BC",
-            "locationPositionalAccuracy": "high",
-            "locationDescriptor": "intersectionPoint",
-            "intersectionID": "318c2f8f-aa6e-441a-a911-d2d4da063257",
-            "degree": 3
-        },
-        "distance": 0.002,
-        "direction": "NW",
-        "phrase": "2m NW of Labieux Rd and Pheasant Terr"
-    },
-    {
-        "id": "a3",
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "crs": {
-                "type": "EPSG",
-                "properties": {
-                    "code": 4326
-                }
-            },
-            "coordinates": [
-                -124.013394,
-                49.1992287
-            ]
-        },
-        "properties": {
-            "fullAddress": "Conlin Way and Labieux Rd, Nanaimo, BC",
-            "intersectionName": "Conlin Way and Labieux Rd",
-            "localityName": "Nanaimo",
-            "localityType": "City",
-            "provinceCode": "BC",
-            "locationPositionalAccuracy": "high",
-            "locationDescriptor": "intersectionPoint",
-            "intersectionID": "187242f8-e625-4c4f-8150-15f95d3a9cb5",
-            "degree": 3
-        },
-        "distance": 0.051,
-        "direction": "W",
-        "phrase": "51m W of Conlin Way and Labieux Rd"
-    },
-    {
-        "id": "a4",
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "crs": {
-                "type": "EPSG",
-                "properties": {
-                    "code": 4326
-                }
-            },
-            "coordinates": [
-                -124.0151041,
-                49.1996429
-            ]
-        },
-        "properties": {
-            "fullAddress": "Labieux Rd and Meadow Lark Trail, Nanaimo, BC",
-            "intersectionName": "Labieux Rd and Meadow Lark Trail",
-            "localityName": "Nanaimo",
-            "localityType": "City",
-            "provinceCode": "BC",
-            "locationPositionalAccuracy": "high",
-            "locationDescriptor": "intersectionPoint",
-            "intersectionID": "cceff48a-1a9b-4b88-8fb4-a117d6a4613a",
-            "degree": 3
-        },
-        "distance": 0.086,
-        "direction": "SE",
-        "phrase": "86m SE of Labieux Rd and Meadow Lark Trail"
-    },
-    {
-        "id": "a5",
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "crs": {
-                "type": "EPSG",
-                "properties": {
-                    "code": 4326
-                }
-            },
-            "coordinates": [
-                -124.0140695,
-                49.1979265
-            ]
-        },
-        "properties": {
-            "fullAddress": "Pheasant Terr and Willow Grouse Cres, Nanaimo, BC",
-            "intersectionName": "Pheasant Terr and Willow Grouse Cres",
-            "localityName": "Nanaimo",
-            "localityType": "City",
-            "provinceCode": "BC",
-            "locationPositionalAccuracy": "high",
-            "locationDescriptor": "intersectionPoint",
-            "intersectionID": "0461041f-2c5d-439d-a0bf-453d7e4465fa",
-            "degree": 3
-        },
-        "distance": 0.148,
-        "direction": "N",
-        "phrase": "148m N of Pheasant Terr and Willow Grouse Cres"
-    },
-    {
-        "id": "a6",
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "crs": {
-                "type": "EPSG",
-                "properties": {
-                    "code": 4326
-                }
-            },
-            "coordinates": [
-                -124.015885,
-                49.1999814
-            ]
-        },
-        "properties": {
-            "fullAddress": "Black Franks Dr and Labieux Rd, Nanaimo, BC",
-            "intersectionName": "Black Franks Dr and Labieux Rd",
-            "localityName": "Nanaimo",
-            "localityType": "City",
-            "provinceCode": "BC",
-            "locationPositionalAccuracy": "high",
-            "locationDescriptor": "intersectionPoint",
-            "intersectionID": "91453062-ac8a-4c44-86b0-3f6e2d92023d",
-            "degree": 3
-        },
-        "distance": 0.154,
-        "direction": "SE",
-        "phrase": "154m SE of Black Franks Dr and Labieux Rd"
-    },
-    {
-        "id": "a7",
-        "source": "BCGNWS",
-        "name": "Lantzville",
-        "type": "District Municipality (1)",
-        "coordinates": [
-            -124.0744444438,
-            49.2505555511
-        ],
-        "distance": 9.254,
-        "direction": "SE",
-        "phrase": "9.3km SE of Lantzville"
-    },
-    {
-        "id": "a8",
-        "source": "BCGNWS",
-        "name": "Ladysmith",
-        "type": "Town",
-        "coordinates": [
-            -123.8155555555,
-            48.9933333289
-        ],
-        "distance": 30.96,
-        "direction": "NW",
-        "phrase": "31km NW of Ladysmith"
-    },
-    {
-        "id": "a9",
-        "source": "BCGNWS",
-        "name": "North Cowichan",
-        "type": "District Municipality (1)",
-        "coordinates": [
-            -123.7197222225,
-            48.8247222182
-        ],
-        "distance": 53.187,
-        "direction": "NW",
-        "phrase": "53.2km NW of North Cowichan"
-    },
-    {
-        "id": "a10",
-        "source": "BCGNWS",
-        "name": "Duncan",
-        "type": "City",
-        "coordinates": [
-            -123.708055555,
-            48.7786111072
-        ],
-        "distance": 58.636,
-        "direction": "NW",
-        "phrase": "58.6km NW of Duncan"
-    },
-];

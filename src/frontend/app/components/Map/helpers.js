@@ -523,32 +523,38 @@ async function filterByTypes(features, types, coords, reverseRouteOrder) {
 };
 
 export async function getNearby(coords, reverseRouteOrder) {
-  const baseUrl = "https://apps.gov.bc.ca/pub/bcgnws/names/near";
-  const params = {
-    featureClass: 1,
-    official: 1,
-    itemsPerPage: 5,
-    startIndex: 1,
-    featurePoint: coords[0] + "," + coords[1],
-    distance: 100, // km
-    outputFormat: "json",
-    outputStyle: "detail",
-    outputSRS: 4326
-  };
-  const url = new URL(baseUrl);
-  url.search = new URLSearchParams(params).toString();
-  const apiUrl = url.toString();
+  try {
+    const baseUrl = "https://apps.gov.bc.ca/pub/bcgnws/names/near";
+    const params = {
+      featureClass: 1,
+      official: 1,
+      itemsPerPage: 200,
+      startIndex: 1,
+      featurePoint: coords[0] + "," + coords[1],
+      distance: 100, // km
+      outputFormat: "json",
+      outputStyle: "detail",
+      outputSRS: 4326
+    };
+    const url = new URL(baseUrl);
+    url.search = new URLSearchParams(params).toString();
+    const apiUrl = url.toString();
 
-  const response = await fetch(apiUrl, {mode: 'cors'});
-  if (!response.ok) {
-    const text = await response.text();
-    const message = (text.match(/<p><b>Message<\/b>(.*?)<\/p>/imv) || ['', 'No detail provided'])[1];
-    throw Error(`BCGNWS request failed (status ${response.status})`, { cause: message.trim() });
+    const response = await fetch(apiUrl, {mode: 'cors'});
+    if (!response.ok) {
+      const text = await response.text();
+      const message = (text.match(/<p><b>Message<\/b>(.*?)<\/p>/imv) || ['', 'No detail provided'])[1];
+      throw Error(`BCGNWS request failed (status ${response.status})`, { cause: message.trim() });
+    }
+    const data = await response.json();
+    const results = await filterByTypes(data.features, PopulationCenterTypes, coords, reverseRouteOrder);
+    results.sort((a, b) => a.distance - b.distance);
+    return results.map((result) => ({... result, source: 'bcgnws', displayDistance: Math.round(result.distance)})).slice(0, 6);
+  } catch (err) {
+    console.error(err);
+    return [{ source: 'error', detail: 'Population centres not available at this time' }];
   }
-  const data = await response.json();
-  const results = await filterByTypes(data.features, PopulationCenterTypes, coords, reverseRouteOrder);
-  results.sort((a, b) => a.distance - b.distance);
-  return results.map((result) => ({... result, displayDistance: Math.round(result.distance)})).slice(0, 6);
+
 }
 
 export async function fetchRoute(points) {
