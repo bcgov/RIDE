@@ -52,8 +52,8 @@ class EventSerializer(KeyMoveSerializer):
     last_inactivated = fields.SerializerMethodField()
     ongoing = fields.SerializerMethodField()
     notes = NotesListSerializer(required=False)
-    segment = SegmentSerializer(required=False)
-    chainup = ChainUpSerializer(required=False)
+    segment = SegmentSerializer(required=False, allow_null=True)
+    chainup = ChainUpSerializer(required=False, allow_null=True)
 
     class Meta:
         model = Event
