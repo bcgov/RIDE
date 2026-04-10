@@ -133,6 +133,41 @@ export function eventReducer(event, action) {
       return {...event};
     }
 
+    case 'reset retrieved': {
+      event.location[action.subkey].retrieved = [];
+      return {...event}
+    }
+
+    case 'add candidates': {
+      const point = event.location[action.subkey];
+      let candidates = point.candidates.filter((c) => c.source !== action.source);
+      candidates.push(...action.value)
+      candidates.sort((a, b) => a.distance - b.distance);
+      point.candidates = candidates;
+
+      // update existing nearbies
+      if (action.value[0]?.source === 'municipalities') {
+        if (point.nearby[0]?.id !== action.value[0]?.id) {
+          point.nearby.unshift(action.value[0]);
+        }
+      } else {
+        for (const candidate of action.value) {
+          point.nearby.forEach((nearby) => {
+            if (nearby.id === candidate.id) {
+              Object.assign(nearby, candidate);
+            }
+          })
+        }
+      }
+
+      for (const candidate of action.value) {
+        if (!point.retrieved.includes(action.source)) {
+          point.retrieved.push(action.source);
+        }
+      }
+      return {...event};
+    }
+
     case 'toggle days': {
       const schedule = structuredClone(event.timing.schedules[action.index]);
       delete schedule.error;
@@ -334,9 +369,11 @@ const LOCATION_BLANK = {
   useAlias: true,
   other: null,
   useOther: false,
-  nearby: null,
+  nearby: [],
   nearbyPending: false,
   nearbyError: '',
+  candidates: [],
+  retrieved: [],
 };
 
 const SCHEDULE_BLANK = {
@@ -675,7 +712,7 @@ export default class EventForm extends Component {
               <div className="form-body">
                 { event.location.start.name && <>
                   <div className="section location">
-                    <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} />
+                    <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} map={this.props.map} />
                   </div>
 
                   { DETAILS_FORMS.includes(event.type) &&

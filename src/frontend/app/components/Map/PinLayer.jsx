@@ -87,111 +87,6 @@ function transform_prop_value(value) {
   return value;
 }
 
-const markerStyles = {
-  static: new Style({
-    image: new Circle({
-      stroke: new Stroke({
-        color: 'rgb(30, 83, 167)',
-        width: 2,
-      }),
-      fill: new Fill({ color: 'rgba(24, 148, 230, 0.75)' }),
-      radius: 10,
-    }),
-    text: new Text({
-      font: '11px BC Sans',
-      fill: new Fill({ color: [ 255, 255, 255, 1], }),
-      text: '',
-      textBaseline: 'bottom',
-      offsetY: 8,
-    }),
-  }),
-  hover: [
-    new Style({
-      image: new Circle({
-        stroke: new Stroke({
-          color: 'rgba(30, 83, 167, 1)',
-          width: 3,
-        }),
-        fill: new Fill({ color: 'rgba(30, 83, 167, 0.7)' }),
-        radius: 11,
-      }),
-      text: new Text({
-        font: 'bold 11px BC Sans',
-        fill: new Fill({ color: [ 255, 255, 255, 1], }),
-        text: '',
-        textBaseline: 'bottom',
-        offsetY: 8,
-      }),
-    }),
-    new Style({
-      text: new Text({
-        font: '13px BC Sans',
-        // fill: new Fill({ color: [ 0, 0, 0, 1], }),
-        fill: new Fill({ color: [ 255, 255, 255, 1], }),
-        backgroundFill: new Fill({ color: [ 0, 0, 0, 0.5], }),
-        padding: [3, 5, 1, 6],
-        // stroke: new Stroke({ color: [255, 255, 255,1], width: 2 }),
-        text: 'asdfasdf',
-        offsetY: -20,
-        textBaseline: 'bottom',
-      }),
-    }),
-  ],
-  active: new Style({
-    image: new Circle({
-      stroke: new Stroke({
-        color: 'rgba(30, 83, 167, 1)',
-        width: 2,
-      }),
-      fill: new Fill({ color: 'rgba(30, 83, 167, 0.7)' }),
-      radius: 8,
-    }),
-  }),
-}
-
-const intersectionStyles = {
-  static: new Style({
-    image: new Circle({
-      stroke: new Stroke({
-        color: 'rgba(88, 66, 21, 1)',
-        width: 2,
-      }),
-      fill: new Fill({ color: 'rgba(249, 196, 48, 0.4)' }),
-      radius: 8,
-    }),
-  }),
-  hover: new Style({
-    image: new Circle({
-      stroke: new Stroke({
-        color: 'rgba(88, 66, 21, 1)',
-        width: 3,
-      }),
-      fill: new Fill({ color: 'rgba(249, 196, 48, 0.7)' }),
-      radius: 10,
-    }),
-    text: new Text({
-      font: '13px BC Sans',
-      // fill: new Fill({ color: [ 0, 0, 0, 1], }),
-      fill: new Fill({ color: [ 255, 255, 255, 1], }),
-      backgroundFill: new Fill({ color: [ 0, 0, 0, 0.5], }),
-      padding: [3, 5, 1, 6],
-      // stroke: new Stroke({ color: [255, 255, 255,1], width: 2 }),
-      text: '',
-      offsetY: -20,
-      textBaseline: 'bottom',
-    }),
-  }),
-  active: new Style({
-    image: new Circle({
-      stroke: new Stroke({
-        color: 'rgba(88, 66, 21, 1)',
-        width: 2,
-      }),
-      fill: new Fill({ color: 'rgba(249, 196, 48, 0.7)' }),
-      radius: 8,
-    }),
-  }),
-}
 
 
 /* Handler for any event that triggers updating the point and related info
@@ -203,16 +98,17 @@ const intersectionStyles = {
   */
 export const endHandler = async (e, point, dispatch) => {
   const snapped = getSnapped(e.coordinate, e.pixel, e.map);
+  let location = {
+    name: 'pending',
+    pending: true,
+    nearbyPending: false,
+    nearbyError: '',
+    coords: g2ll(snapped),
+    candidates: [],
+  };
   dispatch({
     type: point.action,
-    value: {
-      name: 'pending',
-      pending: true,
-      nearbyPending: false,
-      nearbyError: '',
-      coords: g2ll(snapped),
-      candidates: [],
-    }
+    value: location,
   });
   updateRoute(e.map);
   point.getGeometry().setCoordinates(snapped);
@@ -224,30 +120,26 @@ export const endHandler = async (e, point, dispatch) => {
     props?.ROAD_NAME_ALIAS3,
     props?.ROAD_NAME_ALIAS4,
   ].filter(Boolean);
-  let name = props?.ROAD_NAME_FULL || 'Greenfield';
+  let name = props?.ROAD_NAME_FULL || 'no road found';
   if (props?.HIGHWAY_ROUTE_NUMBER) {
-    name = `Hwy ${props?.HIGHWAY_ROUTE_NUMBER}`;
+    name = `Highway ${props?.HIGHWAY_ROUTE_NUMBER}`;
     aliases.unshift(props?.ROAD_NAME_FULL);
     aliases = aliases.filter((alias) => alias !== name);
   }
 
-  const prop_values = {
+  Object.assign(location, {
     ... props,
     name,
     alias: aliases[0],
     aliases,
     pending: false,
     nearbyPending: true
-  };
-
-  const payload = {
-    type: point.action,
-    value: Object.fromEntries(
-      Object.entries(prop_values).map(([key, val]) => [key, transform_prop_value(val)])
+  });
+  location = Object.fromEntries(
+      Object.entries(location).map(([key, val]) => [key, transform_prop_value(val)])
     )
-  };
 
-  dispatch(payload);
+  dispatch({ type: point.action, value: location, });
 
   if (point.dra.closest) {
     const coords = ll2g(point.dra.closest.geometry.coordinates);
@@ -255,80 +147,8 @@ export const endHandler = async (e, point, dispatch) => {
   }
 
   if (point.dra.properties) {
-    let error = '';
-    const isHighway = point.dra.properties.HIGHWAY_ROUTE_NUMBER;
-    try {
-      point.candidates = await getNearby(g2ll(point.getGeometry().getCoordinates()), !isHighway);
-      const candidatesById = point.candidates.reduce((byId, candidate) => {
-        byId[candidate.id] = candidate;
-        return byId;
-      }, {});
-      const source = e.map.get('pins').getSource();
-      const name = 'nearby points';
-      source.remove(name);
-
-      for (const n of point.candidates) {
-        if (n.source !== 'intersections') { continue; }
-        let styles = intersectionStyles;
-        if (n.class == 'S4') {
-          styles = markerStyles;
-          styles.static = styles.static.clone();
-          styles.static.getText().setText(n.km_post);
-          styles.hover = styles.hover.map((style) => style.clone());
-          styles.hover[0].getText().setText(n.km_post);
-          styles.hover[1].getText().setText(n.phrase);
-        } else {
-          styles.hover = styles.hover.clone();
-          styles.hover.getText().setText(n.phrase);
-        }
-
-        const feature = new RideFeature({
-          styles,
-          type: 'intersection',
-          geometry: new Point(ll2g(n.coords)),
-          name,
-          isVisible: true,
-          noSelect: true,
-        });
-        source.addFeature(feature);
-      }
-      if (!point.nearby) { point.nearby = []; }
-      if (point.candidates.length > 0) {
-        if (point.nearby.length === 0 && point.candidates[0]?.source === 'municipalities') {
-          point.nearby.push(structuredClone(point.candidates[0]));
-        } else {
-          const current = point.nearby.filter((n) => n.source === 'municipalities')[0];
-          if (current && current.id !== point.candidates[0].id) {
-            Object.assign(current, point.candidates[0]);
-          }
-          point.nearby = point.nearby.filter((nearby) => {
-            if (candidatesById[nearby.id]) {
-              Object.assign(nearby, candidatesById[nearby.id]);
-              return true;
-            }
-            return false;
-          })
-        }
-      }
-    } catch (err) {
-      console.trace(err, `cause: ${err.cause})`);
-      error = 'Error retrieving reference locations';
-      point.candidates = [];
-    }
-
-    dispatch({
-      type: point.action,
-      value: {
-        ... point.dra.properties,
-        nearbyPending: false,
-        pending: false,
-        nearby: point.nearby,
-        nearbyError: error,
-        candidates: point.candidates,
-      }
-    });
+    getNearby(point.action, location, dispatch);
   }
-
 };
 
 /* Given an always present (possibly empty) route feature on the map: if
