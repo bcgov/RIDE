@@ -58,6 +58,12 @@ export default function Home() {
     }
   }, [authContext]);
 
+  useEffect(() => {
+    if (!map) { return; }
+
+    mapRef.current = map;
+  }, [map]);
+
   const centerMap = (coords) => {
     if (!map || !coords ) { return; }
     if (!Array.isArray(coords[0])) { coords = [coords]; }
