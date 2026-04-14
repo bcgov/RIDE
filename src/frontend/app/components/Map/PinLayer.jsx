@@ -39,6 +39,44 @@ layer.listenForHover = true;
 layer.canDragFeatures = true;
 layer.setZIndex(1000);
 
+// Replace all abbrevaitions in road names
+const transform_road_abbreviations = (input) => {
+  if (typeof input !== 'string') {
+    return input;
+  }
+
+  return input
+    .replace(/\bHwy\b/gi, 'Highway')
+    .replace(/\bAve\b/gi, 'Avenue')
+    .replace(/\bRd\b/gi, 'Road')
+    .replace(/\bPl\b/gi, 'Place')
+    .replace(/\bCrt\b/gi, 'Court')
+    .replace(/\bBlvd\b/gi, 'Boulevard')
+    .replace(/\bDr\b/gi, 'Drive')
+    .replace(/\bPky\b/gi, 'Parkway')
+    .replace(/\bCres\b/gi, 'Crescent')
+    .replace(/\bCir\b/gi, 'Circle')
+    .replace(/\bTerr\b/gi, 'Terrace')
+    .replace(/\bSt\b/gi, 'Street')
+    .replace(/\bLn\b/gi, 'Lane');
+};
+
+function transform_prop_value(value) {
+  // Transform all strings
+  if (typeof value === 'string') {
+    return transform_road_abbreviations(value);
+  }
+
+  // Transform strings in array
+  if (Array.isArray(value)) {
+    return value.map((item) => (
+      typeof item === 'string' ? transform_road_abbreviations(item) : item
+    ));
+  }
+
+  // Do nothing for other types
+  return value;
+}
 
 /* Handler for any event that triggers updating the point and related info
   * (such as dragging the pin to a new location):
@@ -76,18 +114,24 @@ export const endHandler = async (e, point, dispatch) => {
     aliases = aliases.filter((alias) => alias !== name);
   }
 
-  dispatch({
+  const prop_values = {
+    ... props,
+    name,
+    alias: aliases[0],
+    aliases,
+    nearby: null,
+    pending: false,
+    nearbyPending: true
+  };
+
+  const payload = {
     type: point.action,
-    value: {
-      ... props,
-      name,
-      alias: aliases[0],
-      aliases,
-      nearby: null,
-      pending: false,
-      nearbyPending: true
-    }
-  });
+    value: Object.fromEntries(
+      Object.entries(prop_values).map(([key, val]) => [key, transform_prop_value(val)])
+    )
+  };
+
+  dispatch(payload);
 
   if (point.dra.closest) {
     const coords = ll2g(point.dra.closest.geometry.coordinates);

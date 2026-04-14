@@ -208,8 +208,14 @@ def build_event_payload(target_event):
     def get_primary_geometry():
         if target_event.geometry is None:
             return None
-        if target_event.geometry.geom_type == "GeometryCollection" and len(target_event.geometry) > 0:
+
+        if target_event.geometry.geom_type == "GeometryCollection":
+            # Start point(0), end point(1), linestring(2) - return linestring
+            if len(target_event.geometry) > 1:
+                return target_event.geometry[2]
+
             return target_event.geometry[0]
+
         return target_event.geometry
 
     def get_coordinates(geometry):
@@ -263,12 +269,16 @@ def build_event_payload(target_event):
             "direction": normalize_direction(target_event.direction),
             "state": get_state(),
         }
+
         if (target_event.start or {}).get("ROAD_NAME_FULL"):
             road["from"] = target_event.start.get("ROAD_NAME_FULL")
+
         if target_event.delay_amount:
             road["+delay"] = f"{target_event.delay_amount} {target_event.delay_unit}"
+
         if target_event.additional:
             road["+detour"] = target_event.additional
+
         return road
 
     def get_last_publish_userid():

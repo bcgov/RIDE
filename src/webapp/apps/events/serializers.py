@@ -46,7 +46,6 @@ class NotesListSerializer(fields.ListField):
 
 
 class EventSerializer(KeyMoveSerializer):
-
     geometry = GeometryField()
     is_closure = fields.SerializerMethodField()
     last_inactivated = fields.SerializerMethodField()
@@ -143,14 +142,19 @@ class EventSerializer(KeyMoveSerializer):
         if 'meta' in obj:
             del obj['meta']
 
-        # if instance.segment:
-        #     from apps.segments.serializers import SegmentSerializer
-        #     obj['segment'] = SegmentSerializer(instance.segment).data
-
         if obj.get('type') == 'ROAD_CONDITION':
             if instance.segment:
                 obj['location']['start']['name'] = instance.segment.name
+
             obj['polygon'] = instance.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2).coords[0]
+
+        # Only serialize segment for road conditions
+        if obj.get('type') != 'ROAD_CONDITION' and 'segment' in obj:
+            del obj['segment']
+
+        # Only serialize chainup for chainups
+        if obj.get('type') != 'CHAIN_UP' and 'chainup' in obj:
+            del obj['chainup']
 
         return obj
 
