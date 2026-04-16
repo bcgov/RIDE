@@ -62,7 +62,7 @@ export default function Home() {
       navigate('/');
 
     // Redirect to first page if not superuser
-    } else if (!authContext.is_superuser) {
+    } else if (!authContext.is_approver) {
       navigate('/events/');
     }
   }, [authContext]);

@@ -44,7 +44,7 @@ class ChainUpAPIView(ModelViewSet):
     permission_classes = [Approver]
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
+        if self.request.user.is_approver:
             qs = ChainUp.current.all()
         else:
             user_orgs = self.request.user.organizations.all()
