@@ -77,6 +77,7 @@ class ServiceAreaAPIView(ModelViewSet):
         serializer = ServiceAreaBoundariesSerializer(queryset, many=True)
         return Response(serializer.data)
 
+
 class DistrictAPIView(ModelViewSet):
     serializer_class = ServiceAreaSerializer
     permission_classes = [permissions.IsAuthenticated]

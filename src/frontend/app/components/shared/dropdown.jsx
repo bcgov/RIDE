@@ -25,10 +25,23 @@ export default function RIDEDropdown(props) {
   }, [value]);
 
   /* Helpers */
-  const getDisplayText = () => {
-    if (!selected) return '';
-    if (selected.name) return selected.name;
-    return selected.toString();
+  const getDisplayText = (target) => {
+    if (!target) return '';
+
+    let res = '';
+    if (target.sortingOrder) {
+      res += target.sortingOrder;
+    }
+
+    if (target.name) {
+      if (res.length) {
+        res += " - ";
+      }
+
+      res += target.name
+    }
+
+    return res ? res : target.toString();
   }
 
   /* Rendering */
@@ -38,7 +51,7 @@ export default function RIDEDropdown(props) {
       <p className={'ride-dropdown-label'}>{label}</p>
 
       <MenuButton disabled={!items?.length} className="ride-dropdown-button">
-        <span className={'selected-text'}>{getDisplayText()}</span>
+        <span className={'selected-text'}>{getDisplayText(selected)}</span>
         <FontAwesomeIcon icon={faChevronDown} aria-hidden="true" className="ride-dropdown-icon" />
       </MenuButton>
 
@@ -53,7 +66,7 @@ export default function RIDEDropdown(props) {
                     handler(item);
                   }
                 }}>
-                  {item.name || item.toString()}
+                  {getDisplayText(item)}
                 </a>
               </MenuItem>
             ))}
