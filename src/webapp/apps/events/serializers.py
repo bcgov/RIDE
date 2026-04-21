@@ -10,7 +10,7 @@ from rest_framework_gis.fields import GeometryField
 
 from .models import Event, Note, TrafficImpact, Condition
 from apps.organizations.models import ServiceArea
-from apps.segments.models import Segment
+from apps.segments.models import Segment, ChainUp
 from apps.segments.serializers import SegmentSerializer, ChainUpSerializer
 from apps.shared.serializers import HistorySerializer, KeyMoveSerializer, UserSerializer, VersionSerializer
 
@@ -269,6 +269,7 @@ class ConditionSerializer(ModelSerializer):
 
 
 class ChainUpEventSerializer(EventSerializer):
+    chainup = serializers.PrimaryKeyRelatedField(queryset=ChainUp.objects.all(), required=False, allow_null=True)
     first_reported = serializers.SerializerMethodField()
 
     def get_first_reported(self, obj):
