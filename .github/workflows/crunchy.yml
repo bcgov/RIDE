@@ -32,6 +32,7 @@ jobs:
       uses: redhat-actions/openshift-tools-installer@v1
       with:
         oc: "4"
+        skip_cache: true
           
     - name: Authenticate and set context for Gold
       if: ${{ github.event.inputs.cluster == 'gold' }}
@@ -42,7 +43,8 @@ jobs:
         namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
         insecure_skip_tls_verify: true
 
-    - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
+    - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Gold Environment
+      if: ${{ github.event.inputs.cluster == 'gold' }}
       run: |
         helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
 
@@ -56,7 +58,8 @@ jobs:
         namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
         insecure_skip_tls_verify: true
 
-    - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} Environment
+    - name: Helm upgrade on OpenShift ${{ github.event.inputs.environment }} GoldDR Environment
+      if: ${{ github.event.inputs.cluster == 'golddr' }}
       run: |
         helm upgrade ${{ github.event.inputs.environment }}-ride-db -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}.yaml -f ./infrastructure/crunchy-postgres/values-${{ github.event.inputs.environment }}-dr.yaml ./infrastructure/crunchy-postgres  --set crunchy.pgBackRest.s3.bucket=${{ secrets.CRUNCHY_BUCKET }} --set crunchy.pgBackRest.s3.endpoint=${{ secrets.CRUNCHY_ENDPOINT }}
 
