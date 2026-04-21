@@ -12,7 +12,8 @@
       "secondary_mp": 142.36,
       "secondary_point": "SRID=4326;POINT (-120.806620393501 50.4449854808181)",
       "geometry": "SRID=4326;LINESTRING (-120.80674 50.44409, -120.8067 50.44434, -120.80662 50.44499)",
-      "area": 21
+      "area": 21,
+      "latest": true
     }
   },
   {
@@ -28,7 +29,8 @@
       "secondary_mp": 100.92,
       "secondary_point": "SRID=4326;POINT (-125.766759116111 52.5371216915278)",
       "geometry": "SRID=4326;LINESTRING (-125.76809 52.53673, -125.76676 52.53712)",
-      "area": 25
+      "area": 25,
+      "latest": true
     }
   },
   {
@@ -44,7 +46,8 @@
       "secondary_mp": 372.74,
       "secondary_point": "SRID=4326;POINT (-121.402496804727 49.5682757290545)",
       "geometry": "SRID=4326;LINESTRING (-121.40176 49.56752, -121.4025 49.56827)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   },
   {
@@ -60,7 +63,8 @@
       "secondary_mp": 196.14,
       "secondary_point": "SRID=4326;POINT (-121.258942183447 50.6775424659668)",
       "geometry": "SRID=4326;LINESTRING (-121.25769 50.67797, -121.25877 50.67763, -121.25894 50.67754)",
-      "area": 24
+      "area": 24,
+      "latest": true
     }
   },
   {
@@ -76,7 +80,8 @@
       "secondary_mp": 33.12,
       "secondary_point": "SRID=4326;POINT (-121.179464287083 49.5756580607518)",
       "geometry": "SRID=4326;LINESTRING (-121.18027 49.57493, -121.17951 49.57561, -121.17946 49.57566)",
-      "area": 21
+      "area": 21,
+      "latest": true
     }
   },
   {
@@ -92,7 +97,8 @@
       "secondary_mp": 435.15,
       "secondary_point": "SRID=4326;POINT (-118.000976974157 49.2442285878652)",
       "geometry": "SRID=4326;LINESTRING (-118.00235 49.24417, -118.00122 49.24422, -118.00098 49.24423)",
-      "area": 15
+      "area": 15,
+      "latest": true
     }
   },
   {
@@ -108,7 +114,8 @@
       "secondary_mp": 23.09,
       "secondary_point": "SRID=4326;POINT (-121.209708709179 49.2646933594203)",
       "geometry": "SRID=4326;LINESTRING (-121.21061 49.26537, -121.20971 49.26469)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   },
   {
@@ -124,7 +131,8 @@
       "secondary_mp": 43.36,
       "secondary_point": "SRID=4326;POINT (-120.995045020225 49.2048463897753)",
       "geometry": "SRID=4326;LINESTRING (-120.99628 49.20524, -120.99504 49.20485)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   },
   {
@@ -140,7 +148,8 @@
       "secondary_mp": 351.37,
       "secondary_point": "SRID=4326;POINT (-121.444603657409 49.4102568352225)",
       "geometry": "SRID=4326;LINESTRING (-121.44559 49.40961, -121.4452 49.40989, -121.4446 49.41026)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   },
   {
@@ -156,7 +165,8 @@
       "secondary_mp": 168.28,
       "secondary_point": "SRID=4326;POINT (-116.824571236364 49.6811194545455)",
       "geometry": "SRID=4326;LINESTRING (-116.82545 49.68176, -116.82518 49.6817, -116.82486 49.68151, -116.82465 49.68127, -116.82457 49.68112)",
-      "area": 16
+      "area": 16,
+      "latest": true
     }
   },
   {
@@ -172,7 +182,8 @@
       "secondary_mp": 1036.85,
       "secondary_point": "SRID=4326;POINT (-116.462216001732 51.4118444493507)",
       "geometry": "SRID=4326;LINESTRING (-116.46456 51.4108, -116.46222 51.41184)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -188,7 +199,8 @@
       "secondary_mp": 980.39,
       "secondary_point": "SRID=4326;POINT (-116.960495956522 51.3001849756522)",
       "geometry": "SRID=4326;LINESTRING (-116.9619 51.30035, -116.96148 51.30027, -116.96061 51.30019, -116.96049 51.30018)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -204,7 +216,8 @@
       "secondary_mp": 0.2,
       "secondary_point": "SRID=4326;POINT (-117.832269332653 49.0019641122449)",
       "geometry": "SRID=4326;LINESTRING (-117.83163 49.00117, -117.83168 49.00129, -117.83227 49.00196)",
-      "area": 15
+      "area": 15,
+      "latest": true
     }
   },
   {
@@ -220,7 +233,8 @@
       "secondary_mp": 163.48,
       "secondary_point": "SRID=4326;POINT (-116.871900704348 49.6761159256522)",
       "geometry": "SRID=4326;LINESTRING (-116.87279 49.67519, -116.87279 49.67519, -116.87274 49.67523, -116.87225 49.67563, -116.872 49.67593, -116.8719 49.67612)",
-      "area": 16
+      "area": 16,
+      "latest": true
     }
   },
   {
@@ -236,7 +250,8 @@
       "secondary_mp": 920.75,
       "secondary_point": "SRID=4326;POINT (-117.476885070588 51.4402132082353)",
       "geometry": "SRID=4326;LINESTRING (-117.47687 51.43931, -117.47688 51.4402, -117.47688 51.44021)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -252,7 +267,8 @@
       "secondary_mp": 20.05,
       "secondary_point": "SRID=4326;POINT (-117.717835023077 49.0972492773077)",
       "geometry": "SRID=4326;LINESTRING (-117.71908 49.09763, -117.71792 49.09728, -117.71783 49.09725)",
-      "area": 15
+      "area": 15,
+      "latest": true
     }
   },
   {
@@ -268,7 +284,8 @@
       "secondary_mp": 348.36,
       "secondary_point": "SRID=4326;POINT (-121.461154859035 49.3879667225578)",
       "geometry": "SRID=4326;LINESTRING (-121.4605 49.38718, -121.46074 49.38739, -121.46115 49.38795, -121.46115 49.38797)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   },
   {
@@ -284,7 +301,8 @@
       "secondary_mp": 34.52,
       "secondary_point": "SRID=4326;POINT (-128.558626744635 54.3380502037014)",
       "geometry": "SRID=4326;LINESTRING (-128.55842 54.33716, -128.55863 54.33805)",
-      "area": 39
+      "area": 39,
+      "latest": true
     }
   },
   {
@@ -300,7 +318,8 @@
       "secondary_mp": 340.35,
       "secondary_point": "SRID=4326;POINT (-129.978867808716 54.2068368869495)",
       "geometry": "SRID=4326;LINESTRING (-129.97991 54.20749, -129.97887 54.20684)",
-      "area": 40
+      "area": 40,
+      "latest": true
     }
   },
   {
@@ -316,7 +335,8 @@
       "secondary_mp": 996.3,
       "secondary_point": "SRID=4326;POINT (-116.759426516667 51.2731702266667)",
       "geometry": "SRID=4326;LINESTRING (-116.76078 51.27345, -116.75952 51.27319, -116.75943 51.27317)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -332,7 +352,8 @@
       "secondary_mp": 17.6,
       "secondary_point": "SRID=4326;POINT (-117.744362287059 49.0950631683529)",
       "geometry": "SRID=4326;LINESTRING (-117.7456 49.09531, -117.74553 49.09533, -117.74515 49.09533, -117.74481 49.09528, -117.74436 49.09506)",
-      "area": 15
+      "area": 15,
+      "latest": true
     }
   },
   {
@@ -348,7 +369,8 @@
       "secondary_mp": 26.83,
       "secondary_point": "SRID=4326;POINT (-121.207082271429 49.5227582828571)",
       "geometry": "SRID=4326;LINESTRING (-121.20715 49.52187, -121.20712 49.52232, -121.20711 49.52262, -121.20708 49.52276)",
-      "area": 21
+      "area": 21,
+      "latest": true
     }
   },
   {
@@ -364,7 +386,8 @@
       "secondary_mp": 17.28,
       "secondary_point": "SRID=4326;POINT (-121.254196900131 49.4639091279232)",
       "geometry": "SRID=4326;LINESTRING (-121.25445 49.46302, -121.25425 49.46372, -121.2542 49.46391)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   },
   {
@@ -380,7 +403,8 @@
       "secondary_mp": 118.55,
       "secondary_point": "SRID=4326;POINT (-120.713068267391 50.1593773961594)",
       "geometry": "SRID=4326;LINESTRING (-120.71353 50.15853, -120.71307 50.15938)",
-      "area": 21
+      "area": 21,
+      "latest": true
     }
   },
   {
@@ -396,7 +420,8 @@
       "secondary_mp": 547.07,
       "secondary_point": "SRID=4326;POINT (-116.99999340869 49.0958664385385)",
       "geometry": "SRID=4326;LINESTRING (-117.00133 49.09569, -117.0008 49.09576, -117.00009 49.09585, -116.99999 49.09587, -116.99999 49.09587)",
-      "area": 16
+      "area": 16,
+      "latest": true
     }
   },
   {
@@ -412,7 +437,8 @@
       "secondary_mp": 1120.32,
       "secondary_point": "SRID=4326;POINT (-120.318470767543 55.803611674095)",
       "geometry": "SRID=4326;LINESTRING (-120.31726 55.80302, -120.31755 55.80316, -120.31847 55.80361)",
-      "area": 28
+      "area": 28,
+      "latest": true
     }
   },
   {
@@ -428,7 +454,8 @@
       "secondary_mp": 1005.98,
       "secondary_point": "SRID=4326;POINT (-121.740937902798 55.6549050280012)",
       "geometry": "SRID=4326;LINESTRING (-121.74145 55.65406, -121.74114 55.65463, -121.74094 55.65491)",
-      "area": 28
+      "area": 28,
+      "latest": true
     }
   },
   {
@@ -444,7 +471,8 @@
       "secondary_mp": 532.92,
       "secondary_point": "SRID=4326;POINT (-117.14114120566 49.0386790612453)",
       "geometry": "SRID=4326;LINESTRING (-117.14137 49.03779, -117.14114 49.03868)",
-      "area": 16
+      "area": 16,
+      "latest": true
     }
   },
   {
@@ -460,7 +488,8 @@
       "secondary_mp": 52.43,
       "secondary_point": "SRID=4326;POINT (-128.5615556 54.4728485469231)",
       "geometry": "SRID=4326;LINESTRING (-128.56066 54.47212, -128.56155 54.47285)",
-      "area": 39
+      "area": 39,
+      "latest": true
     }
   },
   {
@@ -476,7 +505,8 @@
       "secondary_mp": 38.75,
       "secondary_point": "SRID=4326;POINT (-121.121848825714 49.595248258381)",
       "geometry": "SRID=4326;LINESTRING (-121.12321 49.59538, -121.12256 49.5953, -121.12185 49.59525)",
-      "area": 21
+      "area": 21,
+      "latest": true
     }
   },
   {
@@ -492,7 +522,8 @@
       "secondary_mp": 172.98,
       "secondary_point": "SRID=4326;POINT (-116.051594496409 50.6332576282489)",
       "geometry": "SRID=4326;LINESTRING (-116.053 50.63329, -116.05246 50.63326, -116.05159 50.63326)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -508,7 +539,8 @@
       "secondary_mp": 196.24,
       "secondary_point": "SRID=4326;POINT (-121.259848044654 50.6768598042936)",
       "geometry": "SRID=4326;LINESTRING (-121.25894 50.67754, -121.25912 50.67745, -121.25946 50.67722, -121.25966 50.67704, -121.25985 50.67686)",
-      "area": 24
+      "area": 24,
+      "latest": true
     }
   },
   {
@@ -524,7 +556,8 @@
       "secondary_mp": 47.33,
       "secondary_point": "SRID=4326;POINT (-117.372280969834 49.9885866386298)",
       "geometry": "SRID=4326;LINESTRING (-117.37223 49.98949, -117.37224 49.98925, -117.37225 49.98916, -117.37227 49.98887, -117.37227 49.98878, -117.37228 49.98859)",
-      "area": 16
+      "area": 16,
+      "latest": true
     }
   },
   {
@@ -540,7 +573,8 @@
       "secondary_mp": 893.32,
       "secondary_point": "SRID=4326;POINT (-117.550154127778 51.2621655148148)",
       "geometry": "SRID=4326;LINESTRING (-117.55157 51.26226, -117.55148 51.26226, -117.5511 51.26225, -117.55101 51.26225, -117.55017 51.26217, -117.55015 51.26217)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -556,7 +590,8 @@
       "secondary_mp": 46.96,
       "secondary_point": "SRID=4326;POINT (-128.532987316574 54.4386137628977)",
       "geometry": "SRID=4326;LINESTRING (-128.53297 54.43772, -128.53299 54.43861)",
-      "area": 39
+      "area": 39,
+      "latest": true
     }
   },
   {
@@ -572,7 +607,8 @@
       "secondary_mp": 50.44,
       "secondary_point": "SRID=4326;POINT (-128.537475072222 54.4625574244444)",
       "geometry": "SRID=4326;LINESTRING (-128.53603 54.46223, -128.53626 54.46229, -128.53747 54.46256)",
-      "area": 39
+      "area": 39,
+      "latest": true
     }
   },
   {
@@ -588,7 +624,8 @@
       "secondary_mp": 865.13,
       "secondary_point": "SRID=4326;POINT (-117.873152213531 51.1385886090771)",
       "geometry": "SRID=4326;LINESTRING (-117.87475 51.13836, -117.87315 51.13859)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -604,7 +641,8 @@
       "secondary_mp": 56.92,
       "secondary_point": "SRID=4326;POINT (-128.552421108571 54.5049716997143)",
       "geometry": "SRID=4326;LINESTRING (-128.55226 54.50409, -128.55228 54.50452, -128.55242 54.50497)",
-      "area": 39
+      "area": 39,
+      "latest": true
     }
   },
   {
@@ -620,7 +658,8 @@
       "secondary_mp": 31.66,
       "secondary_point": "SRID=4326;POINT (-128.545310492 54.3146108304)",
       "geometry": "SRID=4326;LINESTRING (-128.54427 54.31395, -128.54531 54.31461)",
-      "area": 39
+      "area": 39,
+      "latest": true
     }
   },
   {
@@ -636,7 +675,8 @@
       "secondary_mp": 910.75,
       "secondary_point": "SRID=4326;POINT (-117.438407643612 51.358782515859)",
       "geometry": "SRID=4326;LINESTRING (-117.43834 51.35789, -117.43841 51.35878)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -652,7 +692,8 @@
       "secondary_mp": 417.96,
       "secondary_point": "SRID=4326;POINT (-118.112143609251 49.1902656573568)",
       "geometry": "SRID=4326;LINESTRING (-118.11307 49.18961, -118.11214 49.19027)",
-      "area": 15
+      "area": 15,
+      "latest": true
     }
   },
   {
@@ -668,7 +709,8 @@
       "secondary_mp": 264.67,
       "secondary_point": "SRID=4326;POINT (-116.053173867726 51.2263416607588)",
       "geometry": "SRID=4326;LINESTRING (-116.05415 51.22569, -116.05381 51.22592, -116.05321 51.22632, -116.05317 51.22634)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -684,7 +726,8 @@
       "secondary_mp": 133.98,
       "secondary_point": "SRID=4326;POINT (-120.62949816288 50.2746509053171)",
       "geometry": "SRID=4326;LINESTRING (-120.62866 50.27393, -120.6295 50.27465)",
-      "area": 21
+      "area": 21,
+      "latest": true
     }
   },
   {
@@ -700,7 +743,8 @@
       "secondary_mp": 970.2,
       "secondary_point": "SRID=4326;POINT (-122.239874218145 55.6352037414798)",
       "geometry": "SRID=4326;LINESTRING (-122.24136 55.63488, -122.23987 55.6352)",
-      "area": 28
+      "area": 28,
+      "latest": true
     }
   },
   {
@@ -716,7 +760,8 @@
       "secondary_mp": 198.05,
       "secondary_point": "SRID=4326;POINT (-121.272015090934 50.6698070043986)",
       "geometry": "SRID=4326;LINESTRING (-121.2715 50.66897, -121.27159 50.66916, -121.27202 50.66981)",
-      "area": 24
+      "area": 24,
+      "latest": true
     }
   },
   {
@@ -732,7 +777,8 @@
       "secondary_mp": 219.96,
       "secondary_point": "SRID=4326;POINT (-121.219465829899 56.2884987806935)",
       "geometry": "SRID=4326;LINESTRING (-121.22108 56.28859, -121.21946 56.2885)",
-      "area": 29
+      "area": 29,
+      "latest": true
     }
   },
   {
@@ -748,7 +794,8 @@
       "secondary_mp": 957.35,
       "secondary_point": "SRID=4326;POINT (-117.132440641667 51.4702728222222)",
       "geometry": "SRID=4326;LINESTRING (-117.13362 51.47079, -117.13329 51.47063, -117.13302 51.47052, -117.13244 51.47027)",
-      "area": 13
+      "area": 13,
+      "latest": true
     }
   },
   {
@@ -764,7 +811,8 @@
       "secondary_mp": 390.62,
       "secondary_point": "SRID=4326;POINT (-121.413863714208 49.7090902966667)",
       "geometry": "SRID=4326;LINESTRING (-121.41291 49.70844, -121.41336 49.70874, -121.41386 49.70909)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   },
   {
@@ -780,7 +828,8 @@
       "secondary_mp": 386.99,
       "secondary_point": "SRID=4326;POINT (-118.272560670297 49.0070711623762)",
       "geometry": "SRID=4326;LINESTRING (-118.27392 49.00698, -118.27256 49.00707)",
-      "area": 15
+      "area": 15,
+      "latest": true
     }
   },
   {
@@ -796,7 +845,8 @@
       "secondary_mp": 407.03,
       "secondary_point": "SRID=4326;POINT (-118.180156263587 49.1356360222826)",
       "geometry": "SRID=4326;LINESTRING (-118.18132 49.13516, -118.18016 49.13564)",
-      "area": 15
+      "area": 15,
+      "latest": true
     }
   },
   {
@@ -812,7 +862,8 @@
       "secondary_mp": 410.94,
       "secondary_point": "SRID=4326;POINT (-121.44065883287 49.8621326407407)",
       "geometry": "SRID=4326;LINESTRING (-121.44013 49.8613, -121.44066 49.86213)",
-      "area": 6
+      "area": 6,
+      "latest": true
     }
   }
 ]
