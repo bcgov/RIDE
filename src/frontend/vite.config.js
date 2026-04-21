@@ -15,5 +15,8 @@ export default defineConfig({
   server: {
     allowedHosts: ['localhost', '.apps.gold.devops.gov.bc.ca', '.th.gov.bc.ca', 'dev-ride.th.gov.bc.ca'],
   },
-  optimizeDeps: { exclude: ['node_modules/.cache'] }
+  optimizeDeps: { exclude: ['node_modules/.cache'] },
+  build: {
+    sourcemap: process.env.DEBUG_BUILD === 'true',
+  },
 });
