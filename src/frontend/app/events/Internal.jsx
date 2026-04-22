@@ -6,6 +6,7 @@ import { API_HOST } from '../env.js';
 import Tooltip from './Tooltip.jsx';
 
 import { patch, deleteRequest } from '../shared/helpers.js';
+import { getCookie } from './shared.jsx';
 
 function Note({ note, dispatch }) {
 
@@ -110,7 +111,11 @@ export default function InternalNotes ({ event, dispatch }) {
       setAdding(true);
       const response = await fetch(`${API_HOST}/api/notes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        credentials: "include",
         body: JSON.stringify({
           event: event.id,
           text: textarea.current.value,
