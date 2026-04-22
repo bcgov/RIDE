@@ -20,7 +20,7 @@ export default function EditUserForm(props) {
   /* Hooks */
   // States
   const hasOrg = Array.isArray(user.organizations) && user.organizations.length > 0;
-  const [ selectedOrgId, setSelectedOrgId ] = useState(hasOrg ? user.organizations[0] : null);
+  const [ selectedOrg, setSelectedOrg ] = useState(hasOrg ? user.organizations[0] : null);
   const [ selectedRole, setSelectedRole ] = useState(user.is_approver);
   const [ isSuperuser, setIsSuperuser ] = useState(user.is_superuser);
 
@@ -34,7 +34,7 @@ export default function EditUserForm(props) {
     updateUser(user.id, {
       organizations: undoing ?
         (hasOrg ? [user.organizations[0]] : []) :
-        (selectedOrgId ? [selectedOrgId] : []),
+        (selectedOrg ? [selectedOrg.id] : []),
       is_approver: undoing ? user.is_approver : selectedRole,
       is_superuser: undoing? user.is_superuser : isSuperuser
 
@@ -98,7 +98,7 @@ export default function EditUserForm(props) {
           extraClasses={`extra-margin-right user-form`}
           items={orgs}
           value={userOrg}
-          handler={setSelectedOrgId} />
+          handler={setSelectedOrg} />
 
         <RIDEDropdown
           label={'Role: '}
