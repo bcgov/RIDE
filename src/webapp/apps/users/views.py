@@ -76,7 +76,21 @@ class RIDEUserAPIView(ModelViewSet):
                 user.user_permissions.remove(perm)
             user.save()
 
-        return super().update(request, *args, **kwargs)
+        response = super().update(request, *args, **kwargs)
+        user.refresh_from_db()
+
+        # User inactive, clear organizations
+        if not user.is_active:
+            user.organizations.clear()
+
+            prefetch_cache = getattr(user, '_prefetched_objects_cache', None)
+            if prefetch_cache is not None:
+                prefetch_cache.pop('organizations', None)
+
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=response.status_code)
+
+        return response
 
 
 class RIDEGroupAPIView(ModelViewSet):
