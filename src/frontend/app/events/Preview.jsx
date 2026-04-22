@@ -30,7 +30,9 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
   const start = displayed.location.start || {};
   const end = displayed.location.end || {};
   const isLinear = !!end.name;
-  let startNearbies = start.nearby?.filter((loc) => loc.include).map((loc) => loc.phrase) || [];
+  let startNearbies = (start.nearby || [])
+    .filter((loc) => loc.include)
+    .map((loc) => loc.phrase);
   if (start.other && start.useOther) { startNearbies.push(start.other); }
   let endNearbies = (end.nearby || []).filter((loc) => loc.include).map((loc) => loc.phrase) || [];
   if (end.other && end.useOther) { endNearbies.push(end.other); }

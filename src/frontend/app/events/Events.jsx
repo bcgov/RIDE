@@ -48,8 +48,14 @@ function matchEvent(event, term) {
   user += `;${event?.user?.email || ''}`;
   if (user.toLowerCase().includes(term)) { return true; }
 
-  let nearby = event?.location?.start?.nearby?.filter((nearby) => nearby.include).map((nearby) => nearby.name).join(';') || '';
-  nearby += (event?.location?.end?.nearby?.filter((nearby) => nearby.include).map((nearby) => nearby.name).join(';') || '');
+  let nearby = (event?.location?.start?.nearby || [])
+    .filter((nearby) => nearby.include)
+    .map((nearby) => nearby.name)
+    .join(';');
+  nearby += ((event?.location?.end?.nearby || [])
+    .filter((nearby) => nearby.include)
+    .map((nearby) => nearby.name)
+    .join(';') || '');
   if (event?.location?.start?.other && event?.location?.start?.useOther) {
     nearby += `;${event.location.start.other}`;
   }
