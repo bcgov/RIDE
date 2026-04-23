@@ -43,6 +43,10 @@ class NotesListSerializer(fields.ListField):
     child = NoteSerializer()
 
     def get_attribute(self, instance):
+        notes_map = self.context.get('notes_map')
+        if notes_map is not None:
+            return notes_map.get(instance.id, [])
+        
         return Note.current.filter(event=instance.id).order_by('-created')
 
 
@@ -85,8 +89,14 @@ class EventSerializer(KeyMoveSerializer):
         return notes
 
     def get_is_closure(self, obj):
-        ids = [impact['id'] for impact in obj.impacts]
-        return TrafficImpact.objects.filter(id__in=ids, closed=True).count() > 0
+        closed_ids = self.context.get('closed_impact_ids')
+        
+        if closed_ids is None:
+            ids = [impact['id'] for impact in (obj.impacts or []) if isinstance(impact, dict)]
+            return TrafficImpact.objects.filter(id__in=ids, closed=True).exists()
+
+        event_impact_ids = [impact['id'] for impact in (obj.impacts or []) if isinstance(impact, dict)]
+        return any(impact_id in closed_ids for impact_id in event_impact_ids)
 
     def get_last_inactivated(self, obj):
         return obj.meta.get('last_inactivated')
@@ -136,27 +146,22 @@ class EventSerializer(KeyMoveSerializer):
 
     def to_representation(self, instance):
         obj = super().to_representation(instance)
+        conditions = obj.get('conditions') or []
+        
+        id_to_label = self.context.get('condition_labels')
+        
+        if id_to_label is None:
+            condition_ids = [c if isinstance(c, int) else c.get('id') for c in conditions]
+            id_to_label = dict(Condition.objects.filter(id__in=condition_ids).values_list('id', 'label'))
 
-        # have to remove meta here to avoid sending it, rather than as an
-        # excluded field, because otherwise meta doesn't get populated on the
-        # way in through key movement and to_internal_value()
-        if 'meta' in obj:
-            del obj['meta']
-
-        if obj.get('type') == 'ROAD_CONDITION':
-            if instance.segment:
-                obj['location']['start']['name'] = instance.segment.name
-
-            obj['polygon'] = instance.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2).coords[0]
-
-        # Only serialize segment for road conditions
-        if obj.get('type') != 'ROAD_CONDITION' and 'segment' in obj:
-            del obj['segment']
-
-        # Only serialize chainup for chainups
-        if obj.get('type') != 'CHAIN_UP' and 'chainup' in obj:
-            del obj['chainup']
-
+        normalized = []
+        for condition in conditions:
+            cid = condition if isinstance(condition, int) else condition.get('id')
+            label = id_to_label.get(cid)
+            if label:
+                normalized.append({'id': cid, 'label': label})
+        
+        obj['conditions'] = normalized
         return obj
 
     def is_automatically_approved(self, data):
@@ -320,37 +325,27 @@ class RcSerializer(EventSerializer):
         }
 
     def to_representation(self, instance):
-        """Override to normalize conditions to {id, label} objects."""
         obj = super().to_representation(instance)
-
         conditions = obj.get('conditions') or []
-        if conditions:
-            condition_ids = [
-                condition for condition in conditions
-                if isinstance(condition, int)
-            ]
-            condition_ids.extend([
-                condition.get('id') for condition in conditions
-                if isinstance(condition, dict) and isinstance(condition.get('id'), int)
-            ])
-            id_to_label = dict(
-                Condition.objects.filter(id__in=condition_ids).values_list('id', 'label')
-            )
-            normalized = []
-            for condition in conditions:
-                if isinstance(condition, int):
-                    label = id_to_label.get(condition)
-                    if label is not None:
-                        normalized.append({'id': condition, 'label': label})
-                elif isinstance(condition, dict):
-                    condition_id = condition.get('id')
-                    if isinstance(condition_id, int):
-                        normalized.append({
-                            'id': condition_id,
-                            'label': condition.get('label') or id_to_label.get(condition_id),
-                        })
-            obj['conditions'] = normalized
+        
+        id_to_label = self.context.get('condition_labels', {})
 
+        normalized = []
+        for condition in conditions:
+            c_id = None
+            c_label = None
+            
+            if isinstance(condition, int):
+                c_id = condition
+                c_label = id_to_label.get(c_id)
+            elif isinstance(condition, dict):
+                c_id = condition.get('id')
+                c_label = condition.get('label') or id_to_label.get(c_id)
+
+            if c_id and c_label:
+                normalized.append({'id': c_id, 'label': c_label})
+        
+        obj['conditions'] = normalized
         return obj
 
     class Meta:
