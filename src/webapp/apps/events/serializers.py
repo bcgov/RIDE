@@ -8,6 +8,7 @@ from rest_framework import fields, serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework_gis.fields import GeometryField
 
+from config.settings import EVENT_PREFIX
 from .models import Event, Note, TrafficImpact, Condition
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
@@ -218,9 +219,9 @@ class EventSerializer(KeyMoveSerializer):
     def get_id(self):
         event = Event.objects.distinct('id').order_by('-id').first()
         if event is None:
-            return 'RIDE-100000'
+            return f'{EVENT_PREFIX}-100000'
         else:
-            return f'RIDE-{int(event.id.split('-')[-1]) + 1}'
+            return f'{EVENT_PREFIX}-{int(event.id.split('-')[-1]) + 1}'
 
 
 class EventHistorySerializer(EventSerializer, HistorySerializer):
