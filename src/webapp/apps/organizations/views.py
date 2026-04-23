@@ -11,7 +11,7 @@ from .serializers import (
 )
 
 class OrganizationAPIView(ModelViewSet):
-    queryset = Organization.objects.all().order_by('name')
+    queryset = Organization.objects.all().prefetch_related('users', 'service_areas').order_by('name')
     serializer_class = OrganizationSerializer
     permission_classes = [permissions.IsAdminUser]
 
@@ -64,7 +64,7 @@ class ServiceAreaAPIView(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return ServiceArea.objects.exclude(parent=None).order_by('sortingOrder')
+        return ServiceArea.objects.exclude(parent=None).select_related('parent').order_by('sortingOrder')
 
     @action(detail=True)
     def boundary(self, request, pk):
@@ -83,7 +83,7 @@ class DistrictAPIView(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return ServiceArea.objects.filter(parent=None).order_by('sortingOrder')
+        return ServiceArea.objects.filter(parent=None).prefetch_related('children').order_by('sortingOrder')
 
     @action(detail=True)
     def boundary(self, request, pk):
