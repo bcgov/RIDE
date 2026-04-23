@@ -51,7 +51,8 @@ class RIDEUserAPIView(ModelViewSet):
     queryset = RIDEUser.objects.prefetch_related(
         'socialaccount_set',
         'organizations',
-        'user_permissions',
+        'user_permissions__content_type', 
+        'groups__permissions__content_type',
     ).all()
     serializer_class = RIDEUserSerializer
     permission_classes = [permissions.IsAdminUser]

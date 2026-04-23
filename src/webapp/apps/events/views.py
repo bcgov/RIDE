@@ -49,7 +49,16 @@ class EventPreview:
 
 
 class Events(viewsets.ModelViewSet):
-    queryset = Event.last.all()
+    queryset = Event.last.all().select_related(
+        'user',
+        'segment__route',
+        'chainup__route',
+        'chainup__area',
+        'service_area', 
+    ).prefetch_related(
+        'service_area__parent', 
+        'chainup__area__parent',
+    )
     serializer_class = EventSerializer
     lookup_field = 'id'
     http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options']
@@ -107,19 +116,17 @@ class Events(viewsets.ModelViewSet):
     def history(self, request, id):
         event = self.get_object()
         queryset = Event.objects.filter(id=event.id)
-        serializer = EventHistorySerializer(queryset, many=True)
+        serializer = EventHistorySerializer(queryset, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
 
     @action(detail=True)
     def diffs(self, request, id):
         event = self.get_object()
         queryset = Event.objects.filter(id=event.id)
-        serializer = EventDiffSerializer(queryset, many=True)
+        serializer = EventDiffSerializer(queryset, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
-        # need to do this here, otherwise serializer doesn't pick up user via
-        # default field value
         return super().partial_update(request, *args, **kwargs)
 
 def validate_allowed_segments(user, segPks):
@@ -142,7 +149,13 @@ def validate_allowed_segments(user, segPks):
 
 
 class RoadConditions(Events):
-    queryset = Event.current.filter(event_type=EventType.ROAD_CONDITION, from_bulk=True)
+    queryset = Event.current.filter(event_type=EventType.ROAD_CONDITION, from_bulk=True).select_related(
+        'user',
+        'segment__route',
+        'service_area',
+    ).prefetch_related(
+        'service_area__parent',
+    )
     serializer_class = RcSerializer
 
     @action(detail=False, methods=['post'], url_path='clear')
@@ -162,7 +175,7 @@ class RoadConditions(Events):
         for event in existing_events:
             event.status = 'Inactive'
             event.save()
-            cleared_events.append(RcSerializer(event).data)
+            cleared_events.append(RcSerializer(event, context=self.get_serializer_context()).data)
 
         return Response({'status': status.HTTP_202_ACCEPTED, 'data': cleared_events}, status=status.HTTP_202_ACCEPTED)
 
@@ -263,7 +276,13 @@ class RoadConditions(Events):
 
 
 class ChainUps(Events):
-    queryset = Event.current.filter(event_type=EventType.CHAIN_UP, from_bulk=True)
+    queryset = Event.current.filter(event_type=EventType.CHAIN_UP, from_bulk=True).select_related(
+        'user',
+        'chainup__route',
+        'chainup__area',
+    ).prefetch_related(
+        'chainup__area__parent',
+    )
     serializer_class = ChainUpEventSerializer
     permission_classes = [IsApprover]
 
@@ -359,7 +378,16 @@ class ChainUps(Events):
 
 
 class Pending(viewsets.ModelViewSet):
-    queryset = Event.pending.all()
+    queryset = Event.pending.all().select_related(
+        'user',
+        'segment__route',
+        'chainup__route',
+        'chainup__area',
+    ).prefetch_related(
+        'service_area',
+        'service_area__parent',
+        'chainup__area__parent',
+    )
     serializer_class = PendingSerializer
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
