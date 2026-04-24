@@ -43,7 +43,7 @@
 }
 
 body, p, h1, h2, h3, h4, a, span {
-  font-family: 'BC Sans', 'Times New Roman', 'Noto Sans', Verdana, Arial, sans-serif;
+  font-family: 'BC Sans', 'Noto Sans', Verdana, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -54,7 +54,7 @@ body {
 }
 
 p {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.6;
   color: $Type-Primary;
@@ -83,6 +83,11 @@ h4 {
   color: $BC-Blue;
 }
 
+h5 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 a {
   color: $Type-Link;
   font-weight: 400;
@@ -94,6 +99,10 @@ a {
 
 ul {
   line-height: 1.6;
+
+  li {
+    font-size: 0.875rem;
+  }
 }
 
 .label {
