@@ -173,3 +173,6 @@ crunchy:
 # Temporary till operator fix. See DBC22-3706
 pgbackrestLogCleanup:
   enabled: false
+
+networkPolicy:
+  ingressMatchLabels: {}
