@@ -58,6 +58,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'EMAIL_AUTHENTICATION_AUTO_CONNECT': True,
         'EMAIL_AUTHENTICATION': True,
         'STORE_TOKENS': True,
+        'VERIFIED_EMAIL': True,
     },
 }
 
