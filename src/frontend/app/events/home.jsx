@@ -81,6 +81,7 @@ export default function Home() {
   const cancel = () => {
     map.pins.getSource().removeFeature(map.start);
     map.pins.getSource().removeFeature(map.end);
+    map.pins.getSource().remove('nearby points');
     map.route.getGeometry().setCoordinates([]);
     map.start = map.end = null;
     selectFeature(map, null);
