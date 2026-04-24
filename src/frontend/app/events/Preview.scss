@@ -5,6 +5,15 @@
   flex-direction: column;
   overflow: hidden;
   z-index: 2;
+  height: 100%;
+
+  .preview__group {
+    margin: 1rem 0;
+
+    &__shadow-box {
+      margin: 12px 0;
+    }
+  }
 
   .segments-tab {
     background: $Type-Primary;
@@ -31,15 +40,10 @@
     }
   }
 
-  .direction {
-    color: #584215;
-  }
-
   h3, h5 { font-weight: normal; }
 
   &.major {
     .header {
-      border-top: solid 5px #ce3e39;
       background: #f4e1e2;
       color: #ce3e39;
     }
@@ -57,7 +61,6 @@
 
   &.cleared {
     .header {
-      border-top: solid 5px #196323;
       background: #e9f7eb;
       color: #196323;
     }
@@ -67,9 +70,8 @@
   }
 
   .header {
-    border-top: solid 5px #fcba19;
-    background: #fde9c4;
-    color: #584215;
+    background: $Yellow-10;
+    color: $Type-Primary;
 
     .banner {
       color: #faf9f8;
@@ -177,15 +179,14 @@
     }
 
     .timing {
-      font-size: 0.85rem;
+      font-size: 0.875rem;
       display: flex;
       justify-content: space-between;
       gap: 1rem;
-
-      margin-top: 1rem;
+      padding-top: 1rem;
 
       strong {
-        font-size: 80%;
+        font-size: 0.75rem;
       }
 
       .time {
@@ -202,6 +203,8 @@
   }
 
   .footer {
+    font-size: 0.875rem;
+    color: $Type-Secondary;
     padding: 1rem;
   }
 }

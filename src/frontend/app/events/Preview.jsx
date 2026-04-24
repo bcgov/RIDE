@@ -131,23 +131,23 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
               {event.name}
             </h3>
 
-            <>
+            <div className="preview__group">
               <h5>Detailed location</h5>
-              <ul>
+              <ul className="preview__group__shadow-box">
                 <li>
                   {event.description}
                 </li>
               </ul>
-            </>
+            </div>
 
-            <>
+            <div className="preview__group">
               <h5>Who does this impact?</h5>
-              <ul>
+              <ul className="preview__group__shadow-box">
                 <li>
                   Chain-up requirements apply to a commercial vehicle with a weight of 11,794 kg or greater
                 </li>
               </ul>
-            </>
+            </div>
           </div>
         }
 

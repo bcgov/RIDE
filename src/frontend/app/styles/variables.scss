@@ -3,6 +3,7 @@ $Type-Primary: #2D2D2D;
 $Type-Secondary: #474543;
 $Type-Disabled: #9F9D9C;
 $Type-Link: #1A5A96;
+$Type-LinkHover: #2378C7;
 
 //Dividers & Border
 $Divider: #D8D8D8;
@@ -48,8 +49,8 @@ $Blue70: #5595D9;
 $Blue80: #3470B1;
 $Blue90: #1E5189;
 
-//Yellow
-$Gold10: #FFFEE0;
+//Gold
+$Gold10: #FEF8E8;
 $Gold20: #FEF0D8;
 $Gold30: #FDE9C4;
 $Gold40: #FCE2B0;
@@ -59,19 +60,22 @@ $Gold80: #F9C462;
 $Gold110: #584215;
 
 
+
 //custom colours for DriveBC
 $HwyCrest: #1E53A7;
 $HwyCrest-green: #00674E;
 $Chainups: #F6E24B;
 $Base-red: #D8292F;
-$Red-dark: #9C2024;
+$Red-dark: #B73433;
+
+$Yellow-10: #FFFEE0;
 
 $Surface-tinted: #FBFDFF;
 
 $Surface-camera: #F1F8FE; //same as $Blue10
 $Surface-major: #F4E1E2;
 $Surface-minor: #FEF0D8;
-$Surface-ferry: #FBFFFC;
+$Surface-green: #FCFFFC;
 $Surface-weather: #ECEAE8; //same as $Grey30
 $Surface-reststop: #E8EAF4;
 
@@ -115,5 +119,9 @@ $Advisory-Bg: #FFF6F2;
 $Advisory-Text: #C84507;
 $ViewDetailsText: #255A90;
 
-// Ferries
-$Ferry: #42814A;
+// Ferries, wildfire under control
+$Green: #3B7142;
+
+// Error notification
+$Error-Notification: #FDD47B;
+$Stale-Notification: #E0DEDC;
