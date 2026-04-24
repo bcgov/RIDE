@@ -32,7 +32,7 @@ webapp:
     resources:
       requests:
         cpu: 10m
-        memory: 75Mi
+        memory: 150Mi
       limits:
         memory: 300Mi
     env:
@@ -66,12 +66,13 @@ static:
     resources:
       requests:
         cpu: 10m
-        memory: 75Mi
+        memory: 50Mi
       limits:
         memory: 200Mi
     env:
       variables:
         ENVIRONMENT: 'dev' # Set to dev, test, uat, prod
+        SHOW_DEBUG_TOOLBAR: 'True' # Creates the route for the debug toolbar. Set to False for UAT and Prod
 
   route:
     host: dev-ride.apps.gold.devops.gov.bc.ca # The host name for the route

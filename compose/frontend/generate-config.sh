@@ -36,12 +36,12 @@ echo "Created gzipped version: env.js.gz"
 cp /etc/nginx/conf.d/default.conf "${SHARED_CONFIG}/default.conf"
 
 # --- Handle Debug Route ---
-if [ "$ENVIRONMENT" = "dev" ]; then
-    echo "Environment is 'dev'; Enabling __debug__ route."
+if [ "$SHOW_DEBUG_TOOLBAR" = "True" ]; then
+    echo "Debug toolbar is enabled; Enabling __debug__ route."
     # This changes the prefix match to a regex match including __debug__
     sed -i 's|location \^~ /admin {|location ~ ^/(admin\|__debug__) {|' "${SHARED_CONFIG}/default.conf"
 else
-    echo "Environment is not 'dev'; not adding the debug toolbar route."
+    echo "Debug toolbar is not enabled; not adding the debug toolbar route."
 fi
 
 # Update the environment placeholder in the copied config

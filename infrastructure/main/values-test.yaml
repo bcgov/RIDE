@@ -28,11 +28,11 @@ webapp:
     authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
 
   deployment:
-    strategy: Recreate # Can be Recreate or RollingUpdate
+    strategy: RollingUpdate # Can be Recreate or RollingUpdate
     resources:
       requests:
         cpu: 10m
-        memory: 75Mi
+        memory: 150Mi
       limits:
         memory: 300Mi
     env:
@@ -67,12 +67,13 @@ static:
     resources:
       requests:
         cpu: 10m
-        memory: 75Mi
+        memory: 50Mi
       limits:
         memory: 200Mi
     env:
       variables:
         ENVIRONMENT: 'test' # Set to dev, test, uat, prod
+        SHOW_DEBUG_TOOLBAR: 'True' # Creates the route for the debug toolbar. Set to False for UAT and Prod
 
   route:
     host: test-ride.apps.gold.devops.gov.bc.ca # The host name for the route
