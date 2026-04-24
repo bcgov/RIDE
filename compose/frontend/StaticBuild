@@ -11,7 +11,7 @@ COPY ./src/frontend/ /app/
 ARG DEBUG_BUILD=false
 ENV DEBUG_BUILD=$DEBUG_BUILD
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 RUN --mount=type=secret,id=FONTAWESOME_PACKAGE_TOKEN \
     test -s /run/secrets/FONTAWESOME_PACKAGE_TOKEN || { echo "FONTAWESOME_PACKAGE_TOKEN secret missing"; exit 1; }; \
     export FONTAWESOME_PACKAGE_TOKEN="$(cat /run/secrets/FONTAWESOME_PACKAGE_TOKEN)" && \
