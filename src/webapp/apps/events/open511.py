@@ -6,7 +6,7 @@ import requests
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 
-from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType
+from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType, PHRASES_LOOKUP
 from apps.events.roads import roads
 
 logger = logging.getLogger(__name__)
@@ -69,9 +69,9 @@ def build_event_description(target_event):
 
     parts = []
 
-    # 1) Category
-    if target_event.category:
-        parts.append(sentence(f"{target_event.category} work planned"))
+    # 1) Situation
+    if target_event.situation and target_event.situation in PHRASES_LOOKUP:
+        parts.append(sentence(f"{PHRASES_LOOKUP[target_event.situation]}"))
 
     # 2) Schedule
     if target_event.start_time or target_event.end_time:
