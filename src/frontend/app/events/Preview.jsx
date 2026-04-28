@@ -21,7 +21,7 @@ const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
 }, {});
 
 const formatDate = (date) => date ? format(new Date(date), 'MMM d, y') : '';
-const formatTimestamp = (date) => date ? format(new Date(date), 'M/d/yyyy h:mm a') : '';
+const formatTimestamp = (date) => date ? format(new Date(date), "MMM d, yyyy 'at' h:mmaaa") : '';
 const inEffectUntilFormat = (date) => date ? format(new Date(date), "h:mm a 'on' EEE, MMM d, yyyy") : '';
 
 export default function Preview({ event, dispatch, mapRef, segments }) {
