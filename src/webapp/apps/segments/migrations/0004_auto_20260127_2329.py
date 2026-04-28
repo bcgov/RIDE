@@ -3,17 +3,19 @@
 from django.core.management import call_command
 from django.db import migrations
 
-from apps.events.models import TrafficImpact, Condition, Event
-from apps.segments.models import Segment
-
-
-
 def load_fixture(apps, schema_editor):
-    call_command('purge_segments')
+    Route = apps.get_model('segments', 'Route')
+    Segment = apps.get_model('segments', 'Segment')
+
+    Route.objects.all().delete()
+    Segment.objects.all().delete()
     call_command('loaddata', 'segments.json', app_label='segments')
-    call_command('update_segments')
+    Segment.objects.all().update(latest=True)
 
 def reverse_fixture(apps, schema_editor):
+    Event = apps.get_model('events', 'Event')
+    Segment = apps.get_model('segments', 'Segment')
+
     Event.objects.all().delete()
     Segment.objects.all().delete()
 
