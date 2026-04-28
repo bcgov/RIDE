@@ -3,6 +3,7 @@ import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 // Navigation
 import { useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
 
 // OpenLayers
 import { boundingExtent, getCenter } from 'ol/extent';
@@ -46,6 +47,7 @@ export default function Home() {
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
   const [ message, setMessage ] = useState('');
+  const visibleLayers = useSelector(state => state.visibleLayers);
 
   // Effects
   useEffect(() => {
@@ -126,6 +128,7 @@ export default function Home() {
               cancel={cancel}
               event={event}
               dispatch={dispatch}
+              visibleLayers={visibleLayers}
               goToFunc={centerMap}
               setMessage={setMessage}
             />

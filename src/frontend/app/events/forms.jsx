@@ -426,7 +426,7 @@ export default class EventForm extends Component {
   handleSubmit = (e, submitLabel, overrides={}) => {
     e.preventDefault();
     const err = {};
-    const { event, map, dispatch, cancel, setMessage } = this.props;
+    const { event, map, dispatch, visibleLayers, cancel, setMessage } = this.props;
 
     const form = {...structuredClone(event), ...overrides};
     const now = new Date();
@@ -609,7 +609,7 @@ export default class EventForm extends Component {
         .then(data => {
           const event_type = event.type === 'ROAD_CONDITION' ? 'Road condition' : event.type;
           cancel();
-          addEvent(data, map);
+          addEvent(data, map, dispatch, visibleLayers);
           dispatch({ type: 'reset form' });
           setMessage(`${event_type} successfully ${label}`);
           setTimeout(() => setMessage(''), 5000);

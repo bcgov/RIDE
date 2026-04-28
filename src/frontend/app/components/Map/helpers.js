@@ -527,7 +527,7 @@ export async function getNearby(coords, reverseRouteOrder) {
   const params = {
     featureClass: 1,
     official: 1,
-    itemsPerPage: 200,
+    itemsPerPage: 5,
     startIndex: 1,
     featurePoint: coords[0] + "," + coords[1],
     distance: 100, // km
