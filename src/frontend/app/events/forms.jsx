@@ -36,7 +36,7 @@ import './forms.css';
 
 const ONE_HOUR = 1000 * 60 * 60;
 const ONE_WEEK = ONE_HOUR * 24 * 7
-const INVALID_ADDITIONAL_CHARACTERS = /[<>[\]{}\\|~`!@#$%^&*()_+=]/;
+export const INVALID_ADDITIONAL_CHARACTERS = /[<>[\]{}\\|~`!@#$%^&*()_+=]/;
 
 function getLater(severity) {
   if (!severity) { return null; }

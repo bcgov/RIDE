@@ -6,7 +6,7 @@ import { bulkUpdateRcs } from "../shared/data/roadConditions.js";
 import Conditions from "../events/Conditions.jsx";
 import EventTiming from "../events/Timing.jsx";
 import AdditionalMessaging from "../events/Additional.jsx";
-import EventForm, {getInitialEvent} from "../events/forms.jsx";
+import EventForm, { getInitialEvent, INVALID_ADDITIONAL_CHARACTERS } from "../events/forms.jsx";
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -105,6 +105,10 @@ export default class RcsForm extends EventForm {
       errors['Conditions'] = 'At least one condition must be selected';
     }
 
+    if (event.additional && INVALID_ADDITIONAL_CHARACTERS.test(event.additional)) {
+      errors['additional'] = 'Contains unsupported special characters';
+    }
+
     if (event.timing.nextUpdate) {
       const now = new Date();
       now.setMinutes(now.getMinutes() + 2); // 2 minutes buffer
@@ -162,7 +166,7 @@ export default class RcsForm extends EventForm {
             </div>
 
             <div className="section additional">
-              <AdditionalMessaging event={event} dispatch={dispatch} />
+              <AdditionalMessaging event={event} dispatch={dispatch} errors={errors} />
             </div>
 
             <div className="section timing">
