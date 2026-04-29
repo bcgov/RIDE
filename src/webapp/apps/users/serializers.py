@@ -11,7 +11,7 @@ class RIDEUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RIDEUser
-        fields = "__all__"
+        exclude = ["password", "user_permissions", "groups"]
 
     def _get_social_account(self, obj):
         # prefetch_related makes .all() use the cache, .first() does not
@@ -33,7 +33,16 @@ class RIDEUserSerializer(serializers.ModelSerializer):
         return social_account.provider
 
     def get_is_approver(self, obj):
-        return obj.is_approver
+        if obj.is_superuser:
+            return True
+        for perm in obj.user_permissions.all():
+            if perm.codename == 'approve_ride_events' and perm.content_type.app_label == 'users':
+                return True
+        for group in obj.groups.all():
+            for perm in group.permissions.all():
+                if perm.codename == 'approve_ride_events' and perm.content_type.app_label == 'users':
+                    return True
+        return False
 
 
 class RIDEGroupSerializer(serializers.ModelSerializer):

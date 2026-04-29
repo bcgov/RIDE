@@ -16,8 +16,16 @@ class SegmentSerializer(serializers.ModelSerializer):
         exclude = ["geometry"]
 
     def get_area(self, obj):
-        sa = ServiceArea.objects.filter(segments__contains=int(obj.id)).exclude(parent=None).first()
-        return sa.id if sa else None
+        if 'segment_to_area' not in self.context:
+            areas = ServiceArea.objects.exclude(parent=None).order_by('id').values_list('id', 'segments')
+            mapping = {}
+            for area_id, segment_ids in areas:
+                if segment_ids:
+                    for sid in segment_ids:
+                        mapping.setdefault(str(sid), area_id)
+            self.context['segment_to_area'] = mapping
+
+        return self.context['segment_to_area'].get(str(obj.id))
 
 
 class ChainUpSerializer(serializers.ModelSerializer):
