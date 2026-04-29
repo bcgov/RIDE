@@ -26,7 +26,7 @@ standby_status() {
         -H "Authorization: Bearer $l_serviceaccount_token" \
         -H 'Accept: application/json' \
         "${l_ocp_api_server}/apis/postgres-operator.crunchydata.com/v1beta1/namespaces/${l_namespace}/postgresclusters/${l_cluster_name}" \
-    | jq '.spec.standby.enabled')
+    | jq '.spec.standby.enabled // false')
 
     if [[ $? -eq 0 ]]; then
         echo $output
@@ -77,9 +77,10 @@ while true; do
 
         # standby spec is false - postgrescluster is in primary mode and we should shut down
         "false")
-            if [[ $shutdownspec -eq "true" ]]; then
+            if [[ $shutdownspec == "true" ]]; then
                 echodate "[CRITICAL]: ${l_namespace}: GOLDDR is in primary mode AND in a shutdown state. Staying up."
                 caddy_reload_config ${caddy_200_conf}
+                sleep ${sleep}
                 continue
             fi
             
