@@ -384,7 +384,7 @@ function updateMap(map, point) {
   const source = map.get('pins').getSource();
   source.remove('nearby intersections');
 
-  for (const candidate of point.candidates) {
+  for (const candidate of (point.candidates ? point.candidates : [])) {
     if (!['intersections', 'landmarks'].includes(candidate.source)) { continue; }
 
     // update feature styles's text
@@ -497,13 +497,13 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
 
   let nearbyPending = false;
   ['municipalities', 'bcgnws'].forEach((term) => {
-    if (!point.retrieved.includes(term)) {
+    if (!point.retrieved?.includes(term)) {
       nearbyPending = true;
     }
   });
   if (!nearbyPending &&
-      !(point.retrieved.includes('intersections') ||
-        point.retrieved.includes('landmarks'))) {
+      !(point.retrieved?.includes('intersections') ||
+        point.retrieved?.includes('landmarks'))) {
     nearbyPending = false;
   }
 
