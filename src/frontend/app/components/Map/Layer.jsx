@@ -168,6 +168,10 @@ export default function Layer({ event, dispatch }) {
   const contextHandler = (e) => {
     e.preventDefault();
     const event = eventRef.current; // updated event prop
+    if (event?.showHistory) {
+      setContextMenu([]);
+      return;
+    }
 
     const feature = e.map.getFeaturesAtPixel(e.pixel, {
       layerFilter: (layer) => layer.listenForClicks,
