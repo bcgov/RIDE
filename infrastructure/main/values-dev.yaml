@@ -73,6 +73,7 @@ static:
       variables:
         ENVIRONMENT: 'dev' # Set to dev, test, uat, prod
         SHOW_DEBUG_TOOLBAR: 'True' # Creates the route for the debug toolbar. Set to False for UAT and Prod
+        MAINTENANCE_MODE: 'False'
 
   route:
     host: dev-ride.apps.gold.devops.gov.bc.ca # The host name for the route

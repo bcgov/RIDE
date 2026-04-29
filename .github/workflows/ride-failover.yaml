@@ -1,0 +1,129 @@
+name: DR Failover - Scale RIDE
+run-name: ${{ github.event.inputs.environment }} DR Failover - Scale RIDE - ${{ github.event.inputs.step }}
+# This workflow is designed to work in conjunction with the Crunchy DR Failover actions. 
+# It is meant to help automate the process of scaling up and down various components of RIDE during a failover event.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+      step:
+        type: choice
+        description: Step of the DR failover process to run
+        options: 
+        - Scale down RIDE in Gold
+        - Scale down RIDE in Gold DR
+        - Scale up RIDE in Gold
+        - Scale up RIDE in Gold DR
+
+jobs:
+  scale-down-gold:
+    if: ${{ github.event.inputs.step == 'Scale down RIDE in Gold' }}
+    runs-on: ubuntu-latest
+    name: Scale down RIDE in Gold (${{ github.event.inputs.environment }})
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: OC Setup
+      uses: ./.github/actions/oc-setup
+      with:
+        server: ${{ vars.OPENSHIFT_GOLD_SERVER }}
+        token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+# Since we are scaling down the backend, we turn off the PDB if enabled and set maintenance mode to true so the frontend can display a maintenance page.
+    - name: Scale down RIDE in Gold 
+      run: |
+        helm upgrade ${{ github.event.inputs.environment }}-ride ./infrastructure/main \
+            --reuse-values \
+            --set webapp.replicaCount=0 \
+            --set webapp.podDisruptionBudget.enabled=false \
+            --set static.deployment.env.variables.MAINTENANCE_MODE='True'
+
+  scale-down-golddr:
+    if: ${{ github.event.inputs.step == 'Scale down RIDE in Gold DR' }}
+    runs-on: ubuntu-latest
+    name: Scale down RIDE in Gold DR (${{ github.event.inputs.environment }})
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: OC Setup
+      uses: ./.github/actions/oc-setup
+      with:
+        server: ${{ vars.OPENSHIFT_GOLDDR_SERVER }}
+        token: ${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+    - name: Scale down RIDE in Gold DR
+      run: |
+        helm upgrade ${{ github.event.inputs.environment }}-ride ./infrastructure/main \
+            --reuse-values \
+            --set webapp.replicaCount=0 \
+            --set webapp.podDisruptionBudget.enabled=false \
+            --set static.deployment.env.variables.MAINTENANCE_MODE='True'
+
+  scale-up-gold:
+    if: ${{ github.event.inputs.step == 'Scale up RIDE in Gold' }}
+    runs-on: ubuntu-latest
+    name: Scale up RIDE in Gold (${{ github.event.inputs.environment }})
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: OC Setup
+      uses: ./.github/actions/oc-setup
+      with:
+        server: ${{ vars.OPENSHIFT_GOLD_SERVER }}
+        token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+    - name: Scale up RIDE in Gold
+      run: |
+        HELM_VALUES=$(helm get values ${{ github.event.inputs.environment }}-ride -o json) \
+        CURRENT_TAG=$(echo $HELM_VALUES | jq -r '.global.image.tag // empty')
+        CURRENT_BRANCH=$(echo $HELM_VALUES | jq -r '.global.branch // empty')
+        CURRENT_RELEASE=$(echo $HELM_VALUES | jq -r '.global.release // empty')
+        helm upgrade ${{ github.event.inputs.environment }}-ride ./infrastructure/main \
+            -f ./infrastructure/main/values-${{ github.event.inputs.environment }}.yaml \
+            --set global.image.tag=$CURRENT_TAG \
+            --set global.branch=$CURRENT_BRANCH \
+            --set global.release=$CURRENT_RELEASE
+
+  scale-up-golddr:
+    if: ${{ github.event.inputs.step == 'Scale up RIDE in Gold DR' }}
+    runs-on: ubuntu-latest
+    name: Scale up RIDE in Gold DR (${{ github.event.inputs.environment }})
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: OC Setup
+      uses: ./.github/actions/oc-setup
+      with:
+        server: ${{ vars.OPENSHIFT_GOLDDR_SERVER }}
+        token: ${{ secrets.OPENSHIFT_GOLDDR_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+    - name: Scale up RIDE in Gold DR
+      run: |
+        HELM_VALUES=$(helm get values ${{ github.event.inputs.environment }}-ride -o json)
+        CURRENT_TAG=$(echo $HELM_VALUES | jq -r '.global.image.tag // empty')
+        CURRENT_BRANCH=$(echo $HELM_VALUES | jq -r '.global.branch // empty')
+        CURRENT_RELEASE=$(echo $HELM_VALUES | jq -r '.global.release // empty')
+        helm upgrade ${{ github.event.inputs.environment }}-ride ./infrastructure/main \
+            -f ./infrastructure/main/values-${{ github.event.inputs.environment }}.yaml \
+            -f ./infrastructure/main/values-${{ github.event.inputs.environment }}-dr.yaml \
+            --set global.image.tag=$CURRENT_TAG \
+            --set global.branch=$CURRENT_BRANCH \
+            --set global.release=$CURRENT_RELEASE
