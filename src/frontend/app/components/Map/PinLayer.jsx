@@ -10,10 +10,9 @@ import { Circle, Fill, Icon, Style, Stroke, Text } from 'ol/style';
 import * as ol from 'ol';
 
 import { MapContext } from '../../contexts';
+import { getRoute } from '../../shared';
 import { getNearby } from '../../events/Location';
-import {
-  getDRA, fetchRoute, ll2g, g2ll, getSnapped, Drag, pointerMove,
-} from './helpers.js';
+import { getDRA, ll2g, g2ll, getSnapped, Drag, pointerMove } from './helpers.js';
 import ContextMenu from '../../events/ContextMenu';
 
 globalThis.ol = ol;
@@ -161,11 +160,7 @@ export const updateRoute = async (map) => {
   if (map.start && map.end) {
     const startCoordinates = g2ll(map.start.getGeometry().getCoordinates());
     const endCoordinates = g2ll(map.end.getGeometry().getCoordinates());
-    const points = [
-      startCoordinates[0], startCoordinates[1],
-      endCoordinates[0], endCoordinates[1]
-    ];
-    const results = await fetchRoute(points);
+    const results = await getRoute(startCoordinates, endCoordinates);
     if (results.route) {
       route = results.route.map((pair) => ll2g(pair));
     }
@@ -287,6 +282,7 @@ export default function PinLayer({ event, dispatch }) {
       }
     } else if (feature === map.end) {
       map.pins.getSource().removeFeature(map.end);
+      map.pins.getSource().remove('end nearby intersections')
       map.end = null;
       dispatch({ type: 'remove location', key: 'end' });
     }

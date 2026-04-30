@@ -23,6 +23,7 @@ import { Feature } from 'ol';
 import overrides from './overrides.js';
 import { BASE_MAP_URL, MAP_STYLE_URL, ROUTER_CLIENT_ID } from '../../env.js';
 import { post } from '../../shared/helpers'
+import { getCardinalDirection, getNonDirectionalRoute } from '../../shared';
 
 import { dotStyle, lineStyle, lineStyle2 } from './styles.js';
 
@@ -488,24 +489,20 @@ const PopulationCenterTypes = [
   'City', // > 5,000
 ];
 
-async function filterByTypes(features, types, coords, reverseRouteOrder) {
+async function filterByTypes(features, types, fromCoords, reverseRouteOrder) {
   const results = [];
   for (const feature of features) {
     const index = types.indexOf(feature.properties.featureType);
     if (index < 0) { continue; }
 
-    const points = [
-      feature.geometry.coordinates[0], feature.geometry.coordinates[1],
-    ];
+    const toCoords = feature.geometry.coordinates;
+    let direction = getCardinalDirection(fromCoords, toCoords, true);
     if (reverseRouteOrder) {
-      points.push(coords[0], coords[1]);
-    } else {
-      points.unshift(coords[0], coords[1]);
+      direction = getCardinalDirection(toCoords, fromCoords, true);
     }
-    const route = await fetchRoute(points);
+    const route = await getNonDirectionalRoute(fromCoords, toCoords);
 
-    if (!route || (route && route.distance < 0)) { continue; }
-    const direction = getCardinalDirection(points, reverseRouteOrder);
+    if (!route || route.distance < 0) { continue; }
 
     results.push({
       id: `bcgnws-${feature.properties.feature.id}`,
@@ -517,7 +514,6 @@ async function filterByTypes(features, types, coords, reverseRouteOrder) {
       direction,
       phrase: `${Math.round(route.distance)}km ${direction} of ${feature.properties.name}`
     });
-
   }
   return results;
 };
@@ -555,38 +551,6 @@ export async function getNearby(coords, reverseRouteOrder) {
     return [{ source: 'error', detail: 'Population centres not available at this time' }];
   }
 
-}
-
-export async function fetchRoute(points) {
-  const pointString = `${points[0]},${points[1]},${points[2]},${points[3]}`;
-  const baseUrl = "https://router.api.gov.bc.ca/directions.json";
-  const apiKey = ROUTER_CLIENT_ID;
-  const apiUrl = `${baseUrl}?points=${encodeURIComponent(pointString)}&criteria=fastest&roundTrip=false&correctSide=false&apikey=${apiKey}`;
-
-  try {
-    const response = await fetch(apiUrl, {mode: 'cors'});
-    return response.json();
-  } catch (error) {
-    console.error("Failed to fetch route:", error);
-    return null;
-  }
-}
-
-/**
- * Get cardinal direction of route
- */
-function getCardinalDirection(points, reverseRouteOrder) {
-  const lat1 = points[1] * Math.PI / 180;
-  const lat2 = points[3] * Math.PI / 180;
-  const dLon = (points[2] - points[0]) * Math.PI / 180;
-  const y = Math.sin(dLon) * Math.cos(lat2);
-  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-  const bearing = Math.atan2(y, x) * 180 / Math.PI;
-  const normalized = (bearing + 360) % 360;
-  const directions = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"];
-  const addend = reverseRouteOrder ? 4 : 0;
-  const index = (Math.round(normalized / 45) + addend) % 8;
-  return directions[index];
 }
 
 export const convertToDateTimeLocalString = (date) => {

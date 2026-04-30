@@ -1,41 +1,33 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import "react-loading-skeleton/dist/skeleton.css";
 import { Circle, Fill, Icon, Style, Stroke, Text } from 'ol/style';
 import { Point as olPoint, LineString, Polygon } from 'ol/geom';
 
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
+  arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import {
-  restrictToVerticalAxis,
-  restrictToParentElement,
-} from '@dnd-kit/modifiers';
+import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRightArrowLeft,  faArrowRotateRight, faCity, faInputText, faMagnifyingGlass, faPlus, faRoad, faSignHanging, faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowRightArrowLeft,  faArrowRotateRight, faCity, faInputText, faMagnifyingGlass, faPlus, faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { faRoad, faSignHanging } from '@fortawesome/duotone-regular-svg-icons';
 
 import pinStart from '../../public/pin-start.svg';
 import pinEnd from '../../public/pin-end.svg';
-import { ROUTER_CLIENT_ID } from '../env.js';
+import kmMarker from '../../public/km-marker.svg';
 
+import { getCardinalDirection, getNonDirectionalRoute, titleCase } from '../shared';
 import Tabs from '../shared/Tabs';
 
 import { bc2g, bc2ll, g2bc, g2ll, getNearby as getNearbyPopCenters, ll2bc, ll2g } from '../components/Map/helpers';
 import RideFeature from '../components/Map/feature';
+
+import { TabContext } from '../shared/Tabs';
 
 import { API_HOST } from '../env';
 
@@ -46,15 +38,6 @@ const PINS = {
 
 import Tooltip from './Tooltip';
 
-const REF_LOC_TEXT = `Reference locations within 100km as the crow flies.  Sorted by population class, then by distance.
-
-1. City (> 5,000)
-2. District Municipality (> 800 hectares, < 5 people/hectare)
-3. Town (< 5,000, inc.)
-4. Village (< 2,500, inc.)
-5. Community (>50, uninc.)
-6. Locality (<50, uninc.)`;
-
 const LAYERS = {
   DRA: 'pub:WHSE_BASEMAPPING.DRA_DGTL_ROAD_ATLAS_MPAR_SP',
   municipalities: 'pub:WHSE_LEGAL_ADMIN_BOUNDARIES.ABMS_MUNICIPALITIES_SP',
@@ -62,48 +45,48 @@ const LAYERS = {
 
 const markerStyles = {
   static: new Style({
-    image: new Circle({
-      stroke: new Stroke({
-        color: 'rgb(30, 83, 167)',
-        width: 2,
-      }),
-      fill: new Fill({ color: 'rgba(24, 148, 230, 0.75)' }),
-      radius: 10,
+    // image: new Circle({
+    //   stroke: new Stroke({
+    //     color: '#1e53a7',
+    //     width: 2,
+    //   }),
+    //   fill: new Fill({ color: 'rgba(24, 148, 230, 0.75)' }),
+    //   radius: 10,
+    // }),
+    image: new Icon({
+      src: '/km-marker.svg',
+      height: 32,
+      opacity: 0.7,
+      // displacement: [0, 16],
     }),
     text: new Text({
-      font: '11px BC Sans',
+      font: '10px/1 BC Sans',
       fill: new Fill({ color: [ 255, 255, 255, 1], }),
       text: '',
-      textBaseline: 'bottom',
-      offsetY: 8,
+      textBaseline: 'middle',
+      offsetY: 2,
     }),
   }),
   hover: [
     new Style({
-      image: new Circle({
-        stroke: new Stroke({
-          color: 'rgba(30, 83, 167, 1)',
-          width: 3,
-        }),
-        fill: new Fill({ color: 'rgba(30, 83, 167, 0.7)' }),
-        radius: 11,
+      image: new Icon({
+        src: '/km-marker.svg',
+        height: 32,
       }),
       text: new Text({
-        font: 'bold 11px BC Sans',
+        font: '10px/1 BC Sans',
         fill: new Fill({ color: [ 255, 255, 255, 1], }),
         text: '',
-        textBaseline: 'bottom',
-        offsetY: 8,
+        textBaseline: 'middle',
+        offsetY: 2,
       }),
     }),
     new Style({
       text: new Text({
         font: '13px BC Sans',
-        // fill: new Fill({ color: [ 0, 0, 0, 1], }),
         fill: new Fill({ color: [ 255, 255, 255, 1], }),
         backgroundFill: new Fill({ color: [ 0, 0, 0, 0.5], }),
         padding: [3, 5, 1, 6],
-        // stroke: new Stroke({ color: [255, 255, 255,1], width: 2 }),
         text: 'asdfasdf',
         offsetY: -20,
         textBaseline: 'bottom',
@@ -180,39 +163,7 @@ function getGeoserverParams(layer, cql='', numResults=100) {
   });
 }
 
-const HOST = 'https://openmaps.gov.bc.ca/geo/wfs';
-
-export async function getRoute(points) {
-  const pointString = `${points[0]},${points[1]},${points[2]},${points[3]}`;
-  const baseUrl = "https://router.api.gov.bc.ca/directions.json";
-  const apiKey = ROUTER_CLIENT_ID;
-  const apiUrl = `${baseUrl}?points=${encodeURIComponent(pointString)}&criteria=shortest&apikey=${apiKey}&distanceUnit=km`;
-
-  try {
-    const response = await fetch(apiUrl, {mode: 'cors'});
-    return response.json();
-  } catch (error) {
-    console.error("Failed to fetch route:", error);
-    return null;
-  }
-}
-
-const directions = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"];
-
-function getCardinalDirection(points) {
-  const lat1 = points[1] * Math.PI / 180;
-  const lat2 = points[3] * Math.PI / 180;
-  const dLon = (points[2] - points[0]) * Math.PI / 180;
-  const y = Math.sin(dLon) * Math.cos(lat2);
-  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-  const bearing = Math.atan2(y, x) * 180 / Math.PI;
-  const normalized = (bearing + 360) % 360;
-  const index = Math.round(normalized / 45) % 8;
-  return directions[index];
-}
-
-
-async function getIntersections(coords, dispatch, subkey) {
+async function getIntersections(coords, subkey, dispatch) {
   const retval = [];
   try {
     const params = new URLSearchParams({
@@ -232,31 +183,32 @@ async function getIntersections(coords, dispatch, subkey) {
     for (const result of results.features) {
       const intCoords = result.geometry.coordinates
       const points = [coords[0], coords[1], intCoords[0], intCoords[1]];
-      const route = await getDistanceRoute(coords, result.geometry.coordinates)
+      const route = await getNonDirectionalRoute(coords, result.geometry.coordinates)
       result.source = 'intersections';
       result.distance = route.distance;
-      result.direction = getCardinalDirection(points);
+      result.direction = getCardinalDirection(coords, intCoords, true);
       result.phrase = `${route.distance * 1000}m ${result.direction} of ${result.properties.intersectionName}`;
-      result.id = `geobc-intersection-${result.properties.intersectionID}`;
+      result.id = `${subkey}-intersection-${result.properties.intersectionID}`;
       result.coords = result.geometry.coordinates;
     }
 
     retval.push(...results.features.filter((feature) => feature.distance >= 0));
   } catch (err) {
     console.error(err);
-    return [{ source: 'error', detail: 'Geocoder intersections not available at this time' }];
+    retval.push({
+      id: `${subkey}-intersection-error`,
+      distance: 1,
+      phrase: 'Error retrieving GeoBC intersections',
+      isError: true,
+      source: 'intersections',
+    })
   }
-  dispatch({
-    type: 'add candidates',
-    source: 'intersections',
-    subkey,
-    value: retval,
-  });
+  dispatch(retval);
 }
 globalThis.getIntersections = getIntersections;
 
 
-async function getLandmarks(location, dispatch, subkey) {
+async function getLandmarks(location, subkey, dispatch) {
   if (!location.HIGHWAY_ROUTE_NUMBER) { return []; }
   const retval = [];
 
@@ -280,7 +232,7 @@ async function getLandmarks(location, dispatch, subkey) {
       if (wrongHighway) { continue; }
 
       const landmarkCoords = landmark.geometry.coordinates
-      const route = await getDistanceRoute(coords, landmarkCoords);
+      const route = await getNonDirectionalRoute(coords, landmarkCoords);
 
       // if the road linear distance is greater than twice the crow-flies distance,
       // filter it out as it's probably on a parallel highway
@@ -289,7 +241,7 @@ async function getLandmarks(location, dispatch, subkey) {
       const displayDistance = Math.round(route.distance < 1 ? landmark.distance : route.distance);
       const unit = route.distance < 1 ? 'm' : 'km';
       const points = [coords[0], coords[1], landmarkCoords[0], landmarkCoords[1]];
-      const direction = getCardinalDirection(points);
+      const direction = getCardinalDirection(coords, landmarkCoords, true);
       let km_post;
       if (landmark.landmark_type === 'S4') {
         km_post = landmark.description.split(' ')[0];
@@ -300,27 +252,30 @@ async function getLandmarks(location, dispatch, subkey) {
         class: landmark.landmark_type,
         distance: route.distance,
         direction,
-        phrase: `${displayDistance}${unit} ${direction} of ${landmark.description}`,
-        id: `intersection-${landmark.id}`,
+        phrase: `${displayDistance}${unit} ${direction} of ${titleCase(landmark.description)}`,
+        id: `${subkey}-landmark-${landmark.id}`,
         coords: landmark.geometry.coordinates,
         km_post,
       });
     }
   } catch (err) {
     console.error(err);
-    return [{ source: 'error', detail: 'Landmarks not available at this time' }];
+    retval.push({
+      source: 'landmarks',
+      distance: 1,
+      phrase: 'Error retrieving landmarks',
+      id: `${subkey}-landmark-error`,
+      isError: true,
+    });
   }
-  dispatch({
-    type: 'add candidates',
-    source: 'landmarks',
-    subkey,
-    value: retval.slice(0, 20),
-  });
+  dispatch(retval.slice(0, 20));
 }
 globalThis.getLandmarks = getLandmarks;
 
 
-async function getMunicipality(coords, dispatch, subkey) {
+const HOST = 'https://openmaps.gov.bc.ca/geo/wfs';
+
+async function getMunicipality(coords, subkey, dispatch) {
   const retval = [];
   try {
     coords = ll2bc(coords);
@@ -331,39 +286,58 @@ async function getMunicipality(coords, dispatch, subkey) {
     if (name) {
       retval.push({
         name: results.features[0]?.properties?.ADMIN_AREA_ABBREVIATION,
-        id: `municipality-${results.features[0]?.properties?.LGL_ADMIN_AREA_ID}`,
+        id: `${subkey}-municipality-${results.features[0]?.properties?.LGL_ADMIN_AREA_ID}`,
         source: 'municipalities',
         distance: 0,
         phrase: `In ${name}`
       });
+    } else {
+      retval.push({
+        name: 'no municipality found',
+        id: `${subkey}-municipality-none`,
+        source: 'municipalities',
+        distance: 0,
+        phrase: `Outside a recognized municipality`
+      });
     }
   } catch (err) {
     console.error(err);
-    return [{ source: 'error', detail: 'Municipality not available at this time' }];
+    retval.push({
+      name: 'error',
+      id: `${subkey}-municipality-error`,
+      source: 'municipalities',
+      distance: 0,
+      phrase: 'Error retrieving municipality',
+      isError: true,
+    })
   }
-  dispatch({
-    type: 'add candidates',
-    source: 'municipalities',
-    subkey,
-    value: retval,
-  });
+  dispatch(retval);
 }
 globalThis.getMunicipality = getMunicipality;
 
 
 export async function getNearby(action, location, dispatch) {
   const subkey = action.split(' ')[1];
-  dispatch({ type: 'reset retrieved', subkey });
 
-  getMunicipality(location.coords, dispatch, subkey);
-  getLandmarks(location, dispatch, subkey);
+  const type = 'add candidates';
+  dispatch({ type: 'add to pending', subkey, value: 'municipalities' });
+  getMunicipality(location.coords, subkey, (value) => {
+    dispatch({ type, subkey, value, source: 'municipalities' });
+  });
 
   if (location.HIGHWAY_ROUTE_NUMBER){
-    getLandmarks(location, dispatch, subkey);
+    dispatch({ type: 'add to pending', subkey, value: 'landmarks' });
+    getLandmarks(location, subkey, (value) => {
+      dispatch({ type, subkey, value, source: 'landmarks' });
+    });
   } else {
-    getIntersections(location.coords, dispatch, subkey);
+    dispatch({ type: 'add to pending', subkey, value: 'intersections' });
+    getIntersections(location.coords, subkey, (value) => {
+      dispatch({ type, subkey, value, source: 'intersections' });
+  });
   }
 
+  dispatch({ type: 'add to pending', subkey, value: 'bcgnws' });
   const populations = await getNearbyPopCenters(location.coords);
   if (populations.length > 0 && populations[0].source !== 'error') {
     dispatch({
@@ -380,21 +354,28 @@ globalThis.getNearby = getNearby;
 /* For the given point, reset all the candidate markers on the map with
  * updated text describing their distance from the pin
  */
-function updateMap(map, point) {
+function updateMap(map, point, subkey, visible=true) {
   const source = map.get('pins').getSource();
-  source.remove('nearby intersections');
+  source.remove(`${subkey} nearby intersections`);
+  if (!point.candidates) { return; }
 
-  for (const candidate of (point.candidates ? point.candidates : [])) {
-    if (!['intersections', 'landmarks'].includes(candidate.source)) { continue; }
+  for (const candidate of point.candidates) {
+    if (!['intersections', 'landmarks'].includes(candidate.source) || candidate.isError) { continue; }
 
     // update feature styles's text
     let styles = intersectionStyles;
     if (candidate.class === 'S4') {
-      styles = markerStyles;
+      styles = Object.assign({}, markerStyles);
       styles.static = styles.static.clone();
-      styles.static.getText().setText(candidate.km_post);
       styles.hover = styles.hover.map((style) => style.clone());
-      styles.hover[0].getText().setText(candidate.km_post);
+      let km = String(candidate.km_post);
+      if (km.length > 2) {
+        styles.static.getText().setFont('8px/1 BC Sans')
+        styles.hover[0].getText().setFont('8px/1 BC Sans');
+      }
+      km = km.split('').join('\n');
+      styles.static.getText().setText(km);
+      styles.hover[0].getText().setText(km);
       styles.hover[1].getText().setText(candidate.phrase);
     } else {
       styles.hover = styles.hover.clone();
@@ -404,22 +385,14 @@ function updateMap(map, point) {
     const feature = new RideFeature({
       styles,
       geometry: new olPoint(ll2g(candidate.coords)),
-      name: 'nearby intersections',
-      isVisible: true,
+      name: `${subkey} nearby intersections`,
+      isVisible: visible,
       noSelect: true,
     });
     source.addFeature(feature);
   }
 }
 
-
-async function getDistanceRoute(pointA, pointB) {
-  const [route1, route2] = await Promise.all([
-    getRoute([pointA[0], pointA[1], pointB[0], pointB[1]]),
-    getRoute([pointB[0], pointB[1], pointA[0], pointA[1]]),
-  ]);
-  return route1.distance < route2.distance ? route1 : route2;
-}
 
 function Sortable({id, children, classes}) {
   const {
@@ -460,6 +433,7 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
   const [other, setOther] = useState('');
   const [filter, setFilter] = useState('all');
   const otherRef = useRef();
+  const tab = useContext(TabContext);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5, }}),
@@ -478,8 +452,14 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
     .filter((location) => {
       if (location.source === 'bcgnws' && location.name === municipality?.name) { return false; }
       if (filter === 'all') return true;
-      if (filter === 'intersections' && ['intersections', 'landmarks'].includes(location.source) && location.class?.startsWith('A')) { return true; }
-      if (filter === 'landmarks' && location.class === 'S4') { return true; }
+      if (filter === 'intersections') {
+        if (location.source === 'intersections' ||
+            location.isError ||
+            location.class?.startsWith('A')) {
+            return true;
+        }
+      }
+      if (filter === 'landmarks' && (location.class === 'S4' || (location.source === 'landmarks' && location.isError))) { return true; }
       if (filter === 'places' && (location.source === 'municipalities' || location.source === 'bcgnws')) { return true; }
 
       return false;
@@ -495,19 +475,9 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
     }
   }
 
-  let nearbyPending = false;
-  ['municipalities', 'bcgnws'].forEach((term) => {
-    if (!point.retrieved?.includes(term)) {
-      nearbyPending = true;
-    }
-  });
-  if (!nearbyPending &&
-      !(point.retrieved?.includes('intersections') ||
-        point.retrieved?.includes('landmarks'))) {
-    nearbyPending = false;
-  }
+  let nearbyPending = point.pending ? point.pending.size > 0 : false;
 
-  updateMap(map, point);
+  updateMap(map, point, subkey, subkey === tab);
 
   return (
     <div className="toggleable">
@@ -608,12 +578,12 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
                   dispatch({ type: `set ${subkey}`, value: { ...point, nearbyPending: true } });
                   getNearby(`set ${subkey}`, point, dispatch);
                 }}
-              ><FontAwesomeIcon className={point.nearbyPending ? 'fa-spin' : ''} icon={faArrowRotateRight} /></button>
+              ><FontAwesomeIcon className={nearbyPending ? 'fa-spin' : ''} icon={faArrowRotateRight} /></button>
             }
           </div>
 
           { candidates.map((loc, ii) => (
-            <div className='landmark suggestion' key={loc.id}>
+            <div className={`landmark suggestion ${loc.isError ? 'error' : ''}`} key={loc.id}>
               <div className='icon'><FontAwesomeIcon icon={getIcon(loc)} /></div>
               <div className='phrase'>{loc.phrase}</div>
               <button

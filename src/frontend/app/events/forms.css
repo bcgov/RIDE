@@ -346,6 +346,19 @@
                   margin-bottom: 0;
                 }
 
+                &.error {
+                  .icon {
+                    .fa-road, .fa-sign-hanging {
+                      --fa-primary-color: #CE3E39;
+                      --fa-secondary-color: #CE3E39;
+                      --fa-secondary-opacity: 0.3;
+                    }
+                  }
+                  .phrase {
+                    font-style: italic;
+                  }
+                }
+
                 .phrase {
                   flex: 1;
                   text-align: left;
@@ -371,6 +384,18 @@
                   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.1);
                   z-index: 10;
                 }
+              }
+
+              .fa-road {
+                color: rgba(88, 66, 21, 1);
+                --fa-secondary-color: rgba(249, 196, 48, 0.7);
+                --fa-secondary-opacity: 0.7;
+              }
+
+              .fa-sign-hanging {
+                color: rgb(30, 83, 167);
+                --fa-secondary-color: rgba(24, 148, 230, 0.75);
+                --fa-secondary-opacity: 0.75;
               }
 
               input {
