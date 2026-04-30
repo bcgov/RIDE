@@ -133,22 +133,35 @@ export function eventReducer(event, action) {
       return {...event};
     }
 
-    case 'reset retrieved': {
-      event.location[action.subkey].retrieved = [];
+    case 'add to pending': {
+      const point = event.location[action.subkey];
+      if (!point.pending) { point.pending = new Set(); }
+      point.pending.add(action.value);
       return {...event}
     }
 
     case 'add candidates': {
       const point = event.location[action.subkey];
-      let candidates = point.candidates.filter((c) => c.source !== action.source);
+
+      let candidates = (point.candidates || []).filter((c) => c.source !== action.source);
       candidates.push(...action.value)
       candidates.sort((a, b) => a.distance - b.distance);
       point.candidates = candidates;
 
       // update existing nearbies
       if (action.value[0]?.source === 'municipalities') {
+        if (action.value[0].id === 'municipality-none' || action.value[0].id === 'municipality-error') {
+          if (point.nearby[0]?.source === 'municipalities') {
+            point.nearby.shift(); // municipality wasn't returned, so remove it.
+          }
+        }
         if (point.nearby[0]?.id !== action.value[0]?.id) {
-          point.nearby.unshift(action.value[0]);
+          if (point.nearby[0]?.source === 'municipalities') {
+            // municipality in nearby is outdated, so update it.
+            Object.assign(point.nearby[0], action.value[0]);
+          } else if (action.value[0].id !== 'municipality-error') { // nearby has no municipality, so add it.
+            point.nearby.unshift(action.value[0]);
+          }
         }
       } else {
         for (const candidate of action.value) {
@@ -160,11 +173,10 @@ export function eventReducer(event, action) {
         }
       }
 
-      for (const candidate of action.value) {
-        if (!point.retrieved.includes(action.source)) {
-          point.retrieved.push(action.source);
-        }
-      }
+      // remove pending flag
+      if (!point.pending) { point.pending = new Set(); }
+      point.pending.delete(action.value[0]?.source);
+
       return {...event};
     }
 
