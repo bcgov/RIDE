@@ -74,7 +74,7 @@ def build_event_description(target_event, ivr=False):
         parts.append(sentence(f"{PHRASES_LOOKUP[target_event.situation]}"))
 
     # DBC22-6236: Added conditions for road conditions
-    if target_event.event_type == EventType.ROAD_CONDITION and target_event.segment:
+    if target_event.event_type == EventType.ROAD_CONDITION:
         conditions_prefix = ''
         for index, condition in enumerate(target_event.conditions):
             if index > 0:
@@ -88,7 +88,7 @@ def build_event_description(target_event, ivr=False):
 
         # Omit location description for non-ivr call
         segment_description = ''
-        if ivr:
+        if ivr and target_event.segment:
             segment_description = target_event.segment.description.split(',')[1]
 
         parts.append(sentence(conditions_prefix + segment_description))
