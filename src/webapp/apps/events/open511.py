@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 accepted_roads = {road["NAME"]: road["ID"] for road in roads}
 
-def build_event_description(target_event):
+def build_event_description(target_event, ivr=False):
     day_labels = {
         "mon": "Monday",
         "tue": "Tuesday",
@@ -72,6 +72,26 @@ def build_event_description(target_event):
     # 1) Situation
     if target_event.situation and target_event.situation in PHRASES_LOOKUP:
         parts.append(sentence(f"{PHRASES_LOOKUP[target_event.situation]}"))
+
+    # DBC22-6236: Added conditions for road conditions
+    if target_event.event_type == EventType.ROAD_CONDITION and target_event.segment:
+        conditions_prefix = ''
+        for index, condition in enumerate(target_event.conditions):
+            if index > 0:
+                if index == len(target_event.conditions) - 1:
+                    conditions_prefix += " and "
+
+                else:
+                    conditions_prefix += ", "
+
+            conditions_prefix += f"{condition['label']}"
+
+        # Omit location description for non-ivr call
+        segment_description = ''
+        if ivr:
+            segment_description = target_event.segment.description.split(',')[1]
+
+        parts.append(sentence(conditions_prefix + segment_description))
 
     # 2) Schedule
     if target_event.start_time or target_event.end_time:
@@ -232,6 +252,7 @@ def build_event_payload(target_event):
         impact_ids = [impact.get("id") for impact in (target_event.impacts or []) if impact.get("id")]
         if not impact_ids:
             return "ALL_LANES_OPEN"
+
         is_closed = TrafficImpact.objects.filter(id__in=impact_ids, closed=True).exists()
         return "CLOSED" if is_closed else "ALL_LANES_OPEN"
 
@@ -249,6 +270,15 @@ def build_event_payload(target_event):
             matched.append("PLANNED_EVENT")
         return matched or ["HAZARD"]
 
+    def get_default_road_name():
+        road_name = "Other Roads"
+
+        # DBC22-6236: Use segment name for bulk road conditions
+        if target_event.event_type == EventType.ROAD_CONDITION and target_event.segment:
+            road_name = target_event.segment.route.name
+
+        return road_name
+
     def build_road():
         road_name_keys = (
             "ROAD_NAME_ALIAS1",
@@ -256,7 +286,7 @@ def build_event_payload(target_event):
             "ROAD_NAME_ALIAS3",
             "ROAD_NAME_ALIAS4",
         )
-        corrected_name = "Other Roads"
+        corrected_name = get_default_road_name()
         for key in road_name_keys:
             name = (target_event.start or {}).get(key)
             candidate = name.replace("Hwy", "Highway") if name else ""
@@ -272,6 +302,9 @@ def build_event_payload(target_event):
 
         if (target_event.start or {}).get("ROAD_NAME_FULL"):
             road["from"] = target_event.start.get("ROAD_NAME_FULL")
+
+        else:
+            road["from"] = get_default_road_name()
 
         if target_event.delay_amount:
             road["+delay"] = f"{target_event.delay_amount} {target_event.delay_unit}"
@@ -309,7 +342,7 @@ def build_event_payload(target_event):
         "updated": format_open511_datetime(target_event.last_updated),
         "timezone": "America/Vancouver",
         "description": build_event_description(target_event),
-        "+ivr_message": build_event_description(target_event),
+        "+ivr_message": build_event_description(target_event, ivr=True),
         "+linear_reference_km": 0,
         "schedule": build_open511_schedule(target_event),
         "event_type": get_event_type(target_event.event_type),
