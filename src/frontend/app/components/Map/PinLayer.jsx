@@ -21,6 +21,7 @@ globalThis.Polygon = Polygon;
 globalThis.circular = circular;
 
 import RideFeature, { PinFeature } from './feature.js';
+import { transform_road_abbreviations } from "../shared/helper.js";
 
 function layerStyle(feature, resolution) {
   if (!feature.get('visible')) { return null; }
@@ -46,28 +47,6 @@ layer.getSource().remove = (name) => {
     }
   });
 }
-
-// Replace all abbrevaitions in road names
-const transform_road_abbreviations = (input) => {
-  if (typeof input !== 'string') {
-    return input;
-  }
-
-  return input
-    .replace(/\bHwy\b/gi, 'Highway')
-    .replace(/\bAve\b/gi, 'Avenue')
-    .replace(/\bRd\b/gi, 'Road')
-    .replace(/\bPl\b/gi, 'Place')
-    .replace(/\bCrt\b/gi, 'Court')
-    .replace(/\bBlvd\b/gi, 'Boulevard')
-    .replace(/\bDr\b/gi, 'Drive')
-    .replace(/\bPky\b/gi, 'Parkway')
-    .replace(/\bCres\b/gi, 'Crescent')
-    .replace(/\bCir\b/gi, 'Circle')
-    .replace(/\bTerr\b/gi, 'Terrace')
-    .replace(/\bSt\b/gi, 'Street')
-    .replace(/\bLn\b/gi, 'Lane');
-};
 
 function transform_prop_value(value) {
   // Transform all strings
