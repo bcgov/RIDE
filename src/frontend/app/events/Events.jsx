@@ -76,6 +76,11 @@ function matchRoad(event, road) {
   const start = event?.location?.start;
   const end = event?.location?.end;
 
+  // DBC22-6323 filter bulk rcs with segment name
+  if (event.segment) {
+    if (event.segment.name.includes(road.label)) { return true; }
+  }
+
   if (road.label.startsWith('Highway ')) {
     const route = road.label.split(' ').pop();
     if (route) {
