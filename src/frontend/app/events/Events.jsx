@@ -75,20 +75,23 @@ function matchEvent(event, term) {
 function matchRoad(event, road) {
   const start = event?.location?.start;
   const end = event?.location?.end;
+  const roadLabel = road?.label || '';
 
   // DBC22-6323 filter bulk rcs with segment name
-  if (event.segment) {
-    if (event.segment.name.includes(road.label)) { return true; }
+  if (event.segment?.name && roadLabel) {
+    const escapedRoadLabel = roadLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const roadNamePattern = new RegExp(`(^|[^A-Za-z0-9])${escapedRoadLabel}($|[^A-Za-z0-9])`);
+    if (roadNamePattern.test(event.segment.name)) { return true; }
   }
 
-  if (road.label.startsWith('Highway ')) {
-    const route = road.label.split(' ').pop();
+  if (roadLabel.startsWith('Highway ')) {
+    const route = roadLabel.split(' ').pop();
     if (route) {
       if (start?.HIGHWAY_ROUTE_NUMBER === route) { return true; }
       if (end?.HIGHWAY_ROUTE_NUMBER === route) { return true; }
     }
   } else {
-    const route = road.label.toLowerCase().replaceAll(/[^a-z ]*/g, '');
+    const route = roadLabel.toLowerCase().replaceAll(/[^a-z ]*/g, '');
     if (route === start?.name.toLowerCase() ||
         (start?.useAlias && route === start?.alias?.toLowerCase())) {
       return true;
