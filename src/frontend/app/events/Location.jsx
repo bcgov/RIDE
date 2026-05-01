@@ -497,6 +497,7 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
           Alias:&nbsp;
           <select
             name="start alias"
+            value={point?.alias ?? ''}
             onChange={(e) => dispatch({ type: 'set alias', key: subkey, value: e.target.value })}
           >
             {point?.aliases.map((a) => <option key={a}>{a}</option>)}

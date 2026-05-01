@@ -93,17 +93,14 @@ export const endHandler = async (e, point, dispatch) => {
   point.dra = await getDRA(snapped, point, e.map);
   const props = point.dra.properties;
   let aliases = [
+    props?.ROAD_NAME_FULL,
     props?.ROAD_NAME_ALIAS1,
     props?.ROAD_NAME_ALIAS2,
     props?.ROAD_NAME_ALIAS3,
     props?.ROAD_NAME_ALIAS4,
   ].filter(Boolean);
-  let name = props?.ROAD_NAME_FULL || 'no road found';
-  if (props?.HIGHWAY_ROUTE_NUMBER) {
-    name = `Highway ${props?.HIGHWAY_ROUTE_NUMBER}`;
-    aliases.unshift(props?.ROAD_NAME_FULL);
-    aliases = aliases.filter((alias) => alias !== name);
-  }
+  let name = props?.ROAD_NAME_ALIAS1 || props?.ROAD_NAME_FULL || `Highway ${props?.HIGHWAY_ROUTE_NUMBER}`;
+  aliases = aliases.filter((alias) => alias !== name);
 
   Object.assign(location, {
     ... props,
