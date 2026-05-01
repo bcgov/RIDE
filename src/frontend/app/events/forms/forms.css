@@ -1,3 +1,5 @@
+@import "../styles/variables.scss";
+
 .form {
 
   display: flex;
@@ -133,7 +135,7 @@
     }
 
     .is-closure {
-      background: red;
+      background: $Red-dark;
       color: white;
       padding: 0.25rem 0.5rem;
       border-radius: 8px;
@@ -514,6 +516,7 @@
         border: solid 2px black;
         border-radius: 10px;
         padding: 0 0.5rem;
+        cursor: pointer;
 
         &.checked {
           color: white;

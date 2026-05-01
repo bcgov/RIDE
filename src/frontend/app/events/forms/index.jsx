@@ -198,16 +198,16 @@ export function eventReducer(event, action) {
       for (const day of days) {
         schedule[day] = action.value;
       }
-      if (numDaysOn(schedule) > 0) {
-        event.timing.schedules[action.index] = schedule;
-      } else {
-        event.timing.schedules[action.index].error = 'Must have at least one day selected';
+      if (numDaysOn(schedule) === 0) {
+        schedule.error = 'Must have at least one day selected';
       }
+      event.timing.schedules[action.index] = schedule;
       return {...event};
     }
 
     case 'set days': {
       const schedule = event.timing.schedules[action.index];
+      delete schedule.error;
       for (const day of days_of_the_week) { schedule[day] = false; }
       const days = Array.isArray(action.days) ? action.days : [action.days];
       for (const day of days) { schedule[day] = true; }
