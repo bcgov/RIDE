@@ -144,18 +144,19 @@ export function eventReducer(event, action) {
       const point = event.location[action.subkey];
 
       let candidates = (point.candidates || []).filter((c) => c.source !== action.source);
-      candidates.push(...action.value)
+      if (!action.value[0].id.endsWith('municipality-none')) {
+        candidates.push(...action.value)
+      }
       candidates.sort((a, b) => a.distance - b.distance);
       point.candidates = candidates;
 
       // update existing nearbies
       if (action.value[0]?.source === 'municipalities') {
-        if (action.value[0].id === 'municipality-none' || action.value[0].id === 'municipality-error') {
+        if (action.value[0].id.endsWith('municipality-none') || action.value[0].id === 'municipality-error') {
           if (point.nearby[0]?.source === 'municipalities') {
             point.nearby.shift(); // municipality wasn't returned, so remove it.
           }
-        }
-        if (point.nearby[0]?.id !== action.value[0]?.id) {
+        } else if (point.nearby[0]?.id !== action.value[0]?.id) {
           if (point.nearby[0]?.source === 'municipalities') {
             // municipality in nearby is outdated, so update it.
             Object.assign(point.nearby[0], action.value[0]);
