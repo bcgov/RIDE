@@ -106,6 +106,11 @@ function getVisibility(event, visibleLayers) {
   };
   const typeLayer = typeLayerMap[normalizedType];
   if (typeLayer) {
+    // DBC22-6330: Inactive rcs should not show in map
+    if (typeLayer === 'roadConditions' && event.status === 'Inactive') {
+      return false;
+    }
+
     return visibleLayers[typeLayer];
   }
 

@@ -113,10 +113,6 @@ export default function Home() {
     }
   }
 
-  const isClearedRoadCondition = (
-    (event.type === 'ROAD_CONDITION' || event.type === 'Road condition')
-    && event.status === 'Inactive'
-  );
   const showLayers = !(event.showPreview && (event.location.start.name || event.type === 'CHAIN_UP'));
 
   return authContext.loginStateKnown && authContext.username && (
@@ -162,7 +158,7 @@ export default function Home() {
         </Map>
       </MapContext.Provider>
 
-      {(event.location.start.name || event.type === 'CHAIN_UP') && event.showPreview && !isClearedRoadCondition &&
+      {(event.location.start.name || event.type === 'CHAIN_UP') && event.showPreview &&
         <Preview
           event={event}
           dispatch={dispatch}
