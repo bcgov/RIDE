@@ -92,7 +92,7 @@ function matchRoad(event, road) {
     }
   } else {
     const route = roadLabel.toLowerCase().replaceAll(/[^a-z ]*/g, '');
-    if (route === start?.name.toLowerCase() ||
+    if (route === start?.name?.toLowerCase() ||
         (start?.useAlias && route === start?.alias?.toLowerCase())) {
       return true;
     }
