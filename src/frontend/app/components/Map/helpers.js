@@ -506,7 +506,7 @@ async function filterByTypes(features, types, fromCoords, reverseRouteOrder) {
 
     results.push({
       id: `bcgnws-${feature.properties.feature.id}`,
-      source: "BCGNWS",
+      source: "bcgnws",
       name: feature.properties.name,
       type: feature.properties.featureType,
       coordinates: feature.geometry.coordinates,
@@ -548,7 +548,7 @@ export async function getNearby(coords, reverseRouteOrder) {
     return results.map((result) => ({... result, source: 'bcgnws', displayDistance: Math.round(result.distance)})).slice(0, 6);
   } catch (err) {
     console.error(err);
-    return [{ source: 'error', detail: 'Population centres not available at this time' }];
+    return [{ source: 'bcgnws', name: 'error', phrase: 'Problem retrieving population centres data. Refresh to try again.' }];
   }
 
 }

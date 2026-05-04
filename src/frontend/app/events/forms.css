@@ -329,6 +329,14 @@
             }
 
             &.landmarks {
+              .control {
+                flex: 1;
+                display: flex;
+                padding: 0.25rem 0.5rem;
+                border: solid 1px black;
+                border-radius: 4px;
+              }
+
               .landmark {
                 display: flex;
                 justify-content: space-between;
@@ -336,14 +344,17 @@
                 cursor: grab;
                 background: white;
 
-                padding: 0.25rem 0.5rem;
-                border: solid 1px black;
-                border-radius: 4px;
                 margin-bottom: 0.5rem;
 
                 &.suggestion {
+                  padding: 0.25rem 0.5rem;
                   border-color: transparent;
                   margin-bottom: 0;
+                  cursor: default;
+
+                  .icon {
+                    cursor: pointer;
+                  }
                 }
 
                 &.error {
@@ -386,13 +397,13 @@
                 }
               }
 
-              .fa-road {
-                color: rgba(88, 66, 21, 1);
-                --fa-secondary-color: rgba(249, 196, 48, 0.7);
+              .fa-road, .fa-tree {
+                color: #584215;
+                --fa-secondary-color: #f9c430;
                 --fa-secondary-opacity: 0.7;
               }
 
-              .fa-sign-hanging {
+              .fa-archway, .fa-map-location, .fa-sign-hanging {
                 color: rgb(30, 83, 167);
                 --fa-secondary-color: rgba(24, 148, 230, 0.75);
                 --fa-secondary-opacity: 0.75;
