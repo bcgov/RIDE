@@ -41,7 +41,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
 
   const cleared = displayed.status === 'Inactive' && (!displayed.approved || lastUpdated > Date.now() - 60000 * 15);  // TODO: time window move to env variable
 
-  const icon = getPlainIcon(displayed);
+  const icon = getPlainIcon(displayed, 'active');
 
   let banner = [];
   if (displayed.version !== event.version) {

@@ -794,7 +794,7 @@ export function getIconAndStroke(event, state='static', includePending=true) {
     status = event.status.toLowerCase() || 'active';
     if (event.approved === false && includePending) { status = 'pending'; }
     severity = event.details.severity.toLowerCase() || 'minor';
-    if (type === 'roadcondition') { severity = 'roadConditions'; state = 'hover'; }
+    if (type === 'roadcondition') { severity = 'roadConditions'; }
 
     if (['incident', 'planned'].includes(type)) {
 

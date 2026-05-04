@@ -152,7 +152,7 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
 
       <div className='body'>
         <div className='icon-row'>
-          <div className='icon'><img src={getPlainIcon(event)} /></div>
+          <div className='icon'><img src={getPlainIcon(event, 'active')} /></div>
 
           <div className='name'>
             <div className='situation'>
