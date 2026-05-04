@@ -144,39 +144,41 @@ export function eventReducer(event, action) {
       const point = event.location[action.subkey];
 
       let candidates = (point.candidates || []).filter((c) => c.source !== action.source);
-      if (!action.value[0].id.endsWith('municipality-none')) {
-        candidates.push(...action.value)
-      }
+      candidates.push(...action.value)
       candidates.sort((a, b) => a.distance - b.distance);
       point.candidates = candidates;
 
-      // update existing nearbies
-      if (action.value[0]?.source === 'municipalities') {
-        if (action.value[0].id.endsWith('municipality-none') || action.value[0].id === 'municipality-error') {
-          if (point.nearby[0]?.source === 'municipalities') {
-            point.nearby.shift(); // municipality wasn't returned, so remove it.
-          }
-        } else if (point.nearby[0]?.id !== action.value[0]?.id) {
-          if (point.nearby[0]?.source === 'municipalities') {
-            // municipality in nearby is outdated, so update it.
-            Object.assign(point.nearby[0], action.value[0]);
-          } else if (action.value[0].id !== 'municipality-error') { // nearby has no municipality, so add it.
-            point.nearby.unshift(action.value[0]);
-          }
-        }
+      if (action.value.length === 0) {
+        point.nearby = point.nearby.filter((nearby) => nearby.source !== action.source);
       } else {
-        for (const candidate of action.value) {
-          point.nearby.forEach((nearby) => {
-            if (nearby.id === candidate.id) {
-              Object.assign(nearby, candidate);
+        // update existing nearbies
+        if (action.source === 'municipalities') {
+          if (action.value[0].id === 'municipality-error') {
+            if (point.nearby[0]?.source === 'municipalities') {
+              point.nearby.shift(); // municipality wasn't returned, so remove it.
             }
-          })
+          } else if (point.nearby[0]?.id !== action.value[0]?.id) {
+            if (point.nearby[0]?.source === 'municipalities') {
+              // municipality in nearby is outdated, so update it.
+              Object.assign(point.nearby[0], action.value[0]);
+            } else if (action.value[0].id !== 'municipality-error') {
+              point.nearby.unshift(action.value[0]);
+            }
+          }
+        } else {
+          for (const candidate of action.value) {
+            point.nearby.forEach((nearby) => {
+              if (nearby.id === candidate.id) {
+                Object.assign(nearby, candidate);
+              }
+            })
+          }
         }
       }
 
       // remove pending flag
       if (!point.pending) { point.pending = new Set(); }
-      point.pending.delete(action.value[0]?.source);
+      point.pending.delete(action.source);
 
       return {...event};
     }

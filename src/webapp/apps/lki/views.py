@@ -10,9 +10,12 @@ from . import models, serializers
 intersection_types = ['A1', 'A2', 'A3', 'A5', 'A8', ]
 
 other_types = [
-    # 'D1',  # major structures
+    'B3', # 'B4',  gore points
+    'D1',  # major structures
+    'G6',  # forestry service roads
+    'R1', 'R2',  # park access
     'S4',  # signage
-    # 'Y1', 'Y3', 'Y4', # rest areas and POI
+    'Y1', 'Y3', 'Y4', # rest areas and POI
 ]
 
 class Landmarks(viewsets.ReadOnlyModelViewSet):

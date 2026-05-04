@@ -27,11 +27,10 @@ export function titleCase(text) {
   }
   return text;
 }
-globalThis.titleCase = titleCase;
 
 
 const DIRECTIONS = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"];
-const LONG_DIRECTIONS = ["South", "Southwest", "West", "Northwest", "North", "Northeast", "East", "Souteast"];
+const LONG_DIRECTIONS = ["South", "Southwest", "West", "Northwest", "North", "Northeast", "East", "Southeast"];
 
 /* Returns the cardinal direction based on the angle of the vector from `pointA`
  * to `pointB`. `pointA` and `pointB` are two element arrays of lon/lat.

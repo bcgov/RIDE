@@ -16,9 +16,6 @@ import { getDRA, ll2g, g2ll, getSnapped, Drag, pointerMove } from './helpers.js'
 import ContextMenu from '../../events/ContextMenu';
 
 globalThis.ol = ol;
-globalThis.Circle = Circle;
-globalThis.Polygon = Polygon;
-globalThis.circular = circular;
 
 import RideFeature, { PinFeature } from './feature.js';
 import { transform_road_abbreviations } from "../shared/helper.js";
@@ -127,10 +124,10 @@ export const endHandler = async (e, point, dispatch) => {
 };
 
 /* Given an always present (possibly empty) route feature on the map: if
-* there's a start and end point, ask for a route, and if a route is received,
-* update the feature's geometry.  Otherwise, blank the geometry to hide the
-* route
-*/
+ * there's a start and end point, ask for a route, and if a route is received,
+ * update the feature's geometry.  Otherwise, blank the geometry to hide the
+ * route
+ */
 export const updateRoute = async (map) => {
   let route = [];
   if (map.start && map.end) {
@@ -238,8 +235,10 @@ export default function PinLayer({ event, dispatch }) {
    * start pin and there's an end pin, make the end pin the new start pin.
    */
   const removePin = (feature, map) => {
+    const source = map.pins.getSource();
     if (feature === map.start) {
-      map.pins.getSource().removeFeature(map.start);
+      source.removeFeature(map.start);
+      source.remove('start nearby intersections')
       map.start = null;
 
       if (map.end) {
@@ -247,6 +246,11 @@ export default function PinLayer({ event, dispatch }) {
         map.end.action = 'set start';
         map.start = map.end;
         map.end = null;
+        source.forEachFeature((feature) => {
+          if (feature.get('name') === 'end nearby intersections') {
+            feature.set('name', 'start nearby intersections');
+          }
+        });
         dispatch({
           type: 'swap location',
           source: 'end',
@@ -257,8 +261,8 @@ export default function PinLayer({ event, dispatch }) {
         dispatch({ type: 'remove location', key: 'start' });
       }
     } else if (feature === map.end) {
-      map.pins.getSource().removeFeature(map.end);
-      map.pins.getSource().remove('end nearby intersections')
+      source.removeFeature(map.end);
+      source.remove('end nearby intersections')
       map.end = null;
       dispatch({ type: 'remove location', key: 'end' });
     }
@@ -288,6 +292,45 @@ export default function PinLayer({ event, dispatch }) {
               removePin(feature, map);
               setContextMenu([]);
             }
+          },
+          {
+            label: 'Dump point to console',
+            action: (e) => {
+              e.stopPropagation();
+              console.log(feature.getProperties());
+              setContextMenu([]);
+            },
+            debugging: true,
+          },
+        ]);
+      } else if (feature.get('type') === 'reference location') {
+        e.stopPropagation();
+        setContextMenu([
+          {
+            label: 'Add to reference landmarks',
+            action: (e) => {
+              e.stopPropagation();
+              dispatch({ type: 'add nearby', key: feature.get('subkey'), candidate: feature.get('raw')});
+              setContextMenu([]);
+            },
+          },
+          {
+            label: 'Dump feature to console',
+            action: (e) => {
+              e.stopPropagation();
+              console.log(feature);
+              setContextMenu([]);
+            },
+            debugging: true,
+          },
+          {
+            label: 'Dump point to console',
+            action: (e) => {
+              e.stopPropagation();
+              console.log(feature.getProperties());
+              setContextMenu([]);
+            },
+            debugging: true,
           },
         ]);
       }
