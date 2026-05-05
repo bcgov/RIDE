@@ -3,6 +3,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
@@ -277,6 +278,30 @@ class Notes(viewsets.ModelViewSet):
     serializer_class = NoteSerializer
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
+
+    def _check_note_event_permission(self, user, creator_user_id):
+        if user.is_superuser or user.is_approver:
+            return
+
+        if creator_user_id != user.pk:
+            raise PermissionDenied()
+
+    def perform_create(self, serializer):
+        event_id = serializer.validated_data['event']
+
+        creator_user_id = Event.objects.filter(
+            id=str(event_id), version=0
+        ).values_list('user_id', flat=True).first()
+
+        if creator_user_id is None:
+            raise NotFound('Event not found.')
+
+        self._check_note_event_permission(self.request.user, creator_user_id)
+        super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        self._check_note_event_permission(self.request.user, serializer.instance.user_id)
+        super().perform_update(serializer)
 
 
 class TrafficImpacts(viewsets.ModelViewSet):
