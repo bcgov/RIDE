@@ -196,14 +196,14 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
           </div>
 
           { event.location.start.name && (
-            <div>starts {(event.location.start?.nearby || []).reduce((first, near) => {
+            <div>starts {(event.location.start.nearby || []).reduce((first, near) => {
               if (!first && near.include) { first = near.phrase; }
               return first;
             }, null)}</div>
           )}
 
           { event.location.end?.name && (
-            <div>ends {event.location.end.nearby.reduce((first, near) => {
+            <div>ends {(event.location.end.nearby || []).reduce((first, near) => {
               if (!first && near.include) { first = near.phrase; }
               return first;
             }, null)}</div>
