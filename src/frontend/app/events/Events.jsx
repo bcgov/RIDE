@@ -377,7 +377,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
             value={road}
             options={[
               { value: null, label: 'All roads'},
-              ...roads.filter((road) => !area || serviceAreasByRoad[road.value].has(area.value)),
+              ...roads.filter((road) => !area || serviceAreasByRoad[road.value]?.has(area.value)),
             ]}
             onChange={(road) => setRoad(road.value ? road : null)}
             styles={sortSelectStyle}
