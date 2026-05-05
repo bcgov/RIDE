@@ -81,7 +81,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
 
   // Main component
   return (
-    <div className={`preview ${displayed.details.severity.startsWith("Major") ? 'major' : 'minor'} ${displayed.status.toLowerCase()} ${cleared ? 'cleared' : ''}`}>
+    <div className={`preview ${displayed.details.severity.startsWith("Major") ? 'major' : 'minor'} ${displayed.status.toLowerCase()} ${displayed.is_closure ? 'closure' : ''} ${isChainup ? 'chainup' : ''} ${cleared ? 'cleared' : ''}`}>
       {segments &&
         <div className={'segments-tab'}>
           <RIDEDropdown

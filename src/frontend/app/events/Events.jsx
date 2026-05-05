@@ -130,7 +130,7 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
 
   return (
     <div
-      className='event'
+      className={`event ${selected ? 'selected' : ''}`}
       onClick={() => {
         goToFunc(event.location.start.coords)
         dispatch({ type: 'reset form', value: event, showPreview: true, showForm: false });
@@ -141,7 +141,6 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
         className={`title
           ${isOverdue ? 'overdue' : ''}
           ${isClose ? 'close' : ''}
-          ${selected ? 'selected' : ''}
         `}
       >
         <div className='card-name'>{label}</div>
