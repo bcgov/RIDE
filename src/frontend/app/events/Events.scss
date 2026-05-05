@@ -74,9 +74,13 @@
   .event {
     margin: 0.5rem;
     border-radius: 8px;
-    border: solid 2px $Type-Primary;
+    box-shadow: 0 .6px 1.8px 0 rgba(0, 0, 0, .1), 0 3.2px 7.2px 0 rgba(0, 0, 0, .13);
     background: white;
     overflow: hidden;
+
+    &.selected {
+      outline: solid 2px $Focus;
+    }
 
     .title {
       display: flex;
@@ -118,11 +122,6 @@
           color: white;
           background: $Error;
         }
-      }
-
-      &.selected {
-        color: white;
-        background: $Focus;
       }
     }
 

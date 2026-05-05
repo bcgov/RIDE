@@ -27,11 +27,17 @@
 }
 
 .checkbox-container[data-checked] {
-  .checkbox:after {
-    content: '✓';
-    position: relative;
-    bottom: 8px;
-    right: 2px;
+  .checkbox {
+    background-color: $Type-LinkHover;
+    border-color: $Type-Link;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 10px;
+      height: 10px;
+      color: $White;
+    }
   }
 }
 

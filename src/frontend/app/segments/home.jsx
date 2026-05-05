@@ -318,7 +318,11 @@ export default function Home() {
                 newChecked.some(segUuid => rcsMap[segUuid] && rcsMap[segUuid].status === 'Active');
               setShowBulkBtns(hasCheckedRcs);
             }}>
-            <div className={'checkbox'}></div>
+            <div className={'checkbox'}>
+              {checkedSegs.includes(seg.uuid) && (
+                <FontAwesomeIcon icon={faCheck} aria-hidden="true" />
+              )}
+            </div>
             <div className={'checkbox-label'}>{seg.name}</div>
           </Checkbox>
         </div>

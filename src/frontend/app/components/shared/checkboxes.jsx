@@ -3,6 +3,8 @@ import React from 'react';
 
 // External imports
 import { Checkbox } from '@headlessui/react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck } from '@fortawesome/pro-solid-svg-icons';
 
 // Styling
 import './checkboxes.scss'
@@ -23,11 +25,13 @@ export default function RIDECheckBoxes(props) {
       }
 
       <div className={'ride-checkboxes-items'}>
-        {itemsList.map((item, index) => (
-          <div key={item.id} className={`ride-checkboxes-items-row ${itemsState.includes(item.id) ? 'checked' : ''}`}>
+        {itemsList.map((item, index) => {
+          const isChecked = itemsState.includes(item.id);
+          return (
+          <div key={item.id} className={`ride-checkboxes-items-row ${isChecked ? 'checked' : ''}`}>
             <Checkbox
               className="checkbox-container"
-              checked={itemsState.includes(item.id)}
+              checked={isChecked}
               onChange={(checked) => setItemsState(() => {
                 if (checked) {
                   return [...itemsState, item.id];
@@ -36,11 +40,16 @@ export default function RIDECheckBoxes(props) {
                   return itemsState.filter((id) => id !== item.id);
                 }
               })}>
-              <div className={'checkbox'}></div>
+              <div className={'checkbox'}>
+                {isChecked && (
+                  <FontAwesomeIcon icon={faCheck} aria-hidden="true" />
+                )}
+              </div>
               <div className={'checkbox-label'}>{item.name}</div>
             </Checkbox>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

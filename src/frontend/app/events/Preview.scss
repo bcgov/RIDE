@@ -41,37 +41,49 @@
   }
 
   h3, h5 { font-weight: normal; }
-
-  &.major {
+  
+  &.minor {
     .header {
-      background: #f4e1e2;
-      color: #ce3e39;
+      background: $Gold30;
+      color: $Gold110;
+    }
+  }
+
+  &.major, &.closure {
+    .header {
+      background: $Surface-major;
+      color: $Red-dark;
     }
 
     .direction {
-      color: #ce3e39;
+      color: $Red-dark;
+    }
+  }
+
+  &.chainup {
+    .header {
+      background: $Yellow-10;
+      color: $Type-Primary;
     }
   }
 
   &.inactive {
     .header {
-      background: #edebe9;
+      background: $Grey-invert;
     }
   }
 
   &.cleared {
     .header {
-      background: #e9f7eb;
-      color: #196323;
+      background: $Surface-green;
+      color: $Success;
     }
     .direction {
-      color: #196323;
+      color: $Success;
     }
   }
 
   .header {
-    background: $Yellow-10;
-    color: $Type-Primary;
 
     .banner {
       color: #faf9f8;
@@ -165,10 +177,10 @@
     .more-info {
       text-align: center;
       padding: 0.5rem;
-      color: #255a90;
+      color: $ViewDetailsText;
       a { font-weight: bold; }
 
-      background: #faf9f8;
+      background: $ViewDetailsText;
       svg {
         margin-left: 1rem;
       }
