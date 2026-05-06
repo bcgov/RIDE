@@ -52,6 +52,12 @@ function getLater(severity) {
 // not used for security purposes (id is used for React keys)
 const id = () => Math.random().toString(36).substr(2, 9); // NOSONAR
 
+function ensurePendingSet(point) {
+  if (!(point.pending instanceof Set)) {
+    point.pending = new Set();
+  }
+}
+
 const numDaysOn = (schedule) => (
   days_of_the_week.reduce((numOn, day) => numOn + (schedule[day] ? 1 : 0), 0)
 )
@@ -135,7 +141,7 @@ export function eventReducer(event, action) {
 
     case 'add to pending': {
       const point = event.location[action.subkey];
-      if (!point.pending) { point.pending = new Set(); }
+      ensurePendingSet(point);
       point.pending.add(action.value);
       return {...event}
     }
@@ -177,7 +183,7 @@ export function eventReducer(event, action) {
       }
 
       // remove pending flag
-      if (!point.pending) { point.pending = new Set(); }
+      ensurePendingSet(point);
       point.pending.delete(action.source);
 
       return {...event};
