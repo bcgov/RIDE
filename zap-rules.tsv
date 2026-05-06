@@ -1,0 +1,8 @@
+10109	IGNORE	(Modern Web Application)
+10049	IGNORE	(Non-Storable Content)
+10015	IGNORE	(Re-examine Cache-control Directives)
+10049	IGNORE	(Storable and Cacheable Content)
+10055	IGNORE	(CSP: unsafe-inline)
+10054	IGNORE	(Cookie with SameSite Attribute None)
+90003	IGNORE	(Sub Resource Integrity Attribute Missing - See DBC22-6389)
+10112	IGNORE	(Session Management Response Identified)
