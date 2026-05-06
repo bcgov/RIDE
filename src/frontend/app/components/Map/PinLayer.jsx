@@ -6,6 +6,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Point, LineString, Polygon } from 'ol/geom';
 import { circular } from 'ol/geom/Polygon';
+import { linear } from 'ol/easing';
 import { Circle, Fill, Icon, Style, Stroke, Text } from 'ol/style';
 import * as ol from 'ol';
 
@@ -279,8 +280,13 @@ export default function PinLayer({ event, dispatch }) {
     menuRef.current.style.left = (e.pixel[0] - 2) + 'px';
     menuRef.current.style.top = (e.pixel[1] - 2)+ 'px';
     menuRef.current.style.visibility = undefined;
+
     if (feature) {
       const map = e.map; // necessary to bind map for callback below
+
+      const coordinate = e.coordinate;
+      const pixel = e.pixel;
+
       if (feature === e.map.route) { return; }
       if (feature === e.map.start || feature === e.map.end) {
         e.stopPropagation();
@@ -294,7 +300,7 @@ export default function PinLayer({ event, dispatch }) {
             }
           },
           {
-            label: 'Dump point to console',
+            label: 'Dump pin to console',
             action: (e) => {
               e.stopPropagation();
               console.log(feature.getProperties());
@@ -302,19 +308,63 @@ export default function PinLayer({ event, dispatch }) {
             },
             debugging: true,
           },
+          {
+            label: 'Dump point to console',
+            action: (e) => {
+              e.stopPropagation();
+              console.log(eventRef.current?.location[feature.get('style')]);
+              setContextMenu([]);
+            },
+            debugging: true,
+          },
         ]);
       } else if (feature.get('type') === 'reference location') {
         e.stopPropagation();
-        setContextMenu([
-          {
-            label: 'Add to reference landmarks',
+        const items = [];
+        const point = eventRef.current?.location[feature.get('subkey')];
+        const id = feature.get('raw').id;
+
+        if (!eventRef.current.location.end?.name && eventRef.current.showForm) {
+          items.push({
+            label: 'Add end point',
             action: (e) => {
-              e.stopPropagation();
-              dispatch({ type: 'add nearby', key: feature.get('subkey'), candidate: feature.get('raw')});
               setContextMenu([]);
-            },
-          },
-          {
+              map.end = new PinFeature({
+                style: 'end',
+                geometry: new Point(coordinate),
+                action: 'set end',
+                isVisible: true,
+              });
+              map.pins.getSource().addFeature(map.end);
+              map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+              endHandler({ coordinate, pixel, map, }, map.end, dispatch);
+            }
+          });
+      }
+
+      if (point) {
+          if (point.nearby.filter((nearby) => nearby.id === id).length === 0) {
+            items.push({
+              label: 'Add to reference locations',
+              action: (e) => {
+                e.stopPropagation();
+                dispatch({ type: 'add nearby', key: feature.get('subkey'), candidate: feature.get('raw')});
+                setContextMenu([]);
+              },
+            });
+          } else {
+            items.push({
+              label: 'Remove from reference locations',
+              action: (e) => {
+                e.stopPropagation();
+                dispatch({ type: 'remove nearby', key: feature.get('subkey'), id});
+                setContextMenu([]);
+              },
+            });
+          }
+        }
+
+        items.push({
             label: 'Dump feature to console',
             action: (e) => {
               e.stopPropagation();
@@ -332,7 +382,8 @@ export default function PinLayer({ event, dispatch }) {
             },
             debugging: true,
           },
-        ]);
+        );
+        setContextMenu(items);
       }
     }
   };

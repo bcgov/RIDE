@@ -67,7 +67,7 @@ export default function Details({ errors, event, dispatch }) {
       />
     </div>
 
-    <div className={`input ${errors.situation ? 'error' : ''}`}>
+    <div className={`input ${errors.situation ? 'error' : ''}`} style={{marginBottom: '0.5rem'}}>
       <label>
         Situation
         <span className="error-message">{errors?.situation}</span>

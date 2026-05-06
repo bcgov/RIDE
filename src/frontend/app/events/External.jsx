@@ -11,6 +11,7 @@ export default function External({ event, dispatch }) {
             defaultValue={event.external.url}
             onBlur={(e) => dispatch({ type: 'set', value: { url: e.target.value, section: 'external' }})}
             placeholder="https://example.com/"
+            style={{marginBottom: '0.5rem'}}
           />
         </div>
       </div>

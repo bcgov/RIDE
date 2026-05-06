@@ -53,14 +53,14 @@ function getGeoserverParams(layer, cql='', numResults=100) {
   });
 }
 
-async function getIntersections(coords, subkey, dispatch) {
+async function getIntersections(coords, subkey, roadName, dispatch) {
   const intersections = [];
   try {
     const params = new URLSearchParams({
       point: coords[0] + "," + coords[1],
-      maxDistance: (10 * 1000), // convert to metres
+      maxDistance: 1000, // in metres
       outputSRS: 4326,
-      maxResults: 10,
+      maxResults: 50,
       locationDescriptor: "intersectionPoint",
       setBack: 0,
       brief: false,
@@ -70,7 +70,10 @@ async function getIntersections(coords, subkey, dispatch) {
     });
 
     const results = await fetch(`https://geocoder.api.gov.bc.ca/intersections/near.json?${params}`, {'mode': 'cors'}).then((body) => body.json());
+
     for (const result of results.features) {
+      // skip intersections not on the current road
+      if (!result.properties.intersectionName.includes(roadName)) { continue; }
       const intCoords = result.geometry.coordinates
       const route = await getNonDirectionalRoute(coords, result.geometry.coordinates)
       result.source = 'intersections';
@@ -167,6 +170,7 @@ async function getLandmarks(location, subkey, dispatch) {
       }
 
       const candidate = {
+        id: `${subkey}-landmark-${landmark.id}`,
         source: 'landmarks',
         type: LANDMARK_TYPES[landmark.landmark_type] || landmark.landmark_types,
         class: landmark.landmark_type,
@@ -174,8 +178,8 @@ async function getLandmarks(location, subkey, dispatch) {
         direction,
         description: landmark.description,
         phrase,
-        id: `${subkey}-landmark-${landmark.id}`,
         coords: landmarkCoords,
+        raw: landmark,
         km_post,
       }
 
@@ -187,8 +191,14 @@ async function getLandmarks(location, subkey, dispatch) {
         byDescription[candidate.description] = candidate;
       }
       landmarks.push(candidate);
-    }
 
+      // stop at 20 since they're coming from the backend sorted by crow-flies
+      // distance, and already filtered for landmarks on the current highway, so
+      // it's unlikely that a short linear distance might have a long road
+      // distance; this saves us a lot of calls to the router that are adding a
+      // noticeable lag.
+      if (landmarks.length > 20) { break; }
+    }
     // filter out landmarks that are not the nearest to the pin
     landmarks = landmarks.filter(
       (candidate) => byDescription[candidate.description].id === candidate.id
@@ -253,6 +263,7 @@ async function getMunicipality(coords, subkey, dispatch) {
  * handled later.
  */
 export async function getNearby(action, location, dispatch) {
+  const roadName = location.name.split(' ').slice(0, -1).join(' ');
   const subkey = action.split(' ')[1];
 
   const type = 'add candidates';
@@ -268,9 +279,9 @@ export async function getNearby(action, location, dispatch) {
     });
   } else {
     dispatch({ type: 'add to pending', subkey, value: 'intersections' });
-    getIntersections(location.coords, subkey, (value) => {
+    getIntersections(location.coords, subkey, roadName, (value) => {
       dispatch({ type, subkey, value, source: 'intersections' });
-  });
+    });
   }
 
   dispatch({ type: 'add to pending', subkey, value: 'bcgnws' });
@@ -490,7 +501,7 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
         </div>
 
         <div className='landmarks fa-width-auto'>
-          <div className='label'><strong>Reference landmarks</strong></div>
+          <div className='label'><strong>Reference locations</strong></div>
 
           { point?.name && point?.nearbyError && <div className='nearby-error'>{point?.nearbyError}</div>}
 
@@ -516,7 +527,7 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
             </SortableContext>
           </DndContext>
 
-          <div className='label'><strong>Add nearby landmark</strong></div>
+          <div className='label'><strong>Add nearby location</strong></div>
 
           <div className='search-box'>
             <input
