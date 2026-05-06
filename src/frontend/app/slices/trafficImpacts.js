@@ -25,10 +25,10 @@ const selectStatus = (state) => state.trafficImpacts.status;
 
 export const slice = createSlice({
   name: 'trafficImpacts',
-  initialState: {
+  initialState: adapter.getInitialState({
     status: 'idle',
     error: null,
-  },
+  }),
   reducers: {},
 
   extraReducers: (builder) => {

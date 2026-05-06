@@ -55,12 +55,10 @@ const selectStatus = (state) => state.districtBoundaries.status;
 
 export const slice = createSlice({
   name: 'districtBoundaries',
-  initialState: {
+  initialState: adapter.getInitialState({
     status: 'idle',
     error: null,
-    ids: [],
-    entities: {},
-  },
+  }),
   reducers: {},
 
   extraReducers: (builder) => {

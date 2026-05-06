@@ -25,12 +25,10 @@ const selectStatus = (state) => state.routes.status;
 
 export const slice = createSlice({
   name: 'routes',
-  initialState: {
-    ids: [],
-    entities: {},
+  initialState: adapter.getInitialState({
     status: 'idle',
     error: null,
-  },
+  }),
   reducers: {},
 
   extraReducers: (builder) => {

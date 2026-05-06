@@ -25,10 +25,10 @@ const selectStatus = (state) => state.serviceAreas.status;
 
 export const slice = createSlice({
   name: 'serviceAreas',
-  initialState: {
+  initialState: adapter.getInitialState({
     status: 'idle',
     error: null,
-  },
+  }),
   reducers: {},
 
   extraReducers: (builder) => {
