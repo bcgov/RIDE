@@ -22,8 +22,21 @@ const refreshThunk = createAsyncThunk(
   }
 );
 
-const selectStatus = (state) => state.pending.status;
-const selectLength = (state) => state.pending.ids.length;
+const selectStatus = (state) => state.pending?.status ?? 'idle';
+
+/** Entity state can lose `ids` if setAll ever receives a non-array payload; keep selectors safe. */
+function selectPendingRoot(state) {
+  const s = state.pending;
+  if (s && Array.isArray(s.ids) && typeof s.entities === 'object') {
+    return s;
+  }
+  return pendingAdapter.getInitialState({
+    status: s?.status ?? 'idle',
+    error: s?.error ?? null,
+  });
+}
+
+const selectLength = (state) => selectPendingRoot(state).ids.length;
 
 export const slice = createSlice({
   name: 'pending',
@@ -42,7 +55,8 @@ export const slice = createSlice({
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
-        pendingAdapter.setAll(state, action.payload);
+        const list = Array.isArray(action.payload) ? action.payload : [];
+        pendingAdapter.setAll(state, list);
       })
       .addCase(refreshThunk.rejected, (state, action) => {
         state.status = 'failed';
@@ -55,7 +69,7 @@ export const {
   selectAll: selectAllPending,
   selectById: selectPendingById,
   selectIds: selectPendingIds,
-} = pendingAdapter.getSelectors((state) => state.pending)
+} = pendingAdapter.getSelectors(selectPendingRoot)
 export {
   refreshThunk as refreshPending,
   selectStatus as selectPendingStatus,

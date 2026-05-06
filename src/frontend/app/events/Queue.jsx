@@ -1,6 +1,5 @@
 import { useContext, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { createSelector } from '@reduxjs/toolkit'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/pro-solid-svg-icons';
@@ -13,7 +12,7 @@ import { PHRASES_LOOKUP } from './references';
 import { selectFeature } from '../components/Map/helpers';
 import PollingComponent from '../shared/PollingComponent';
 
-import { refreshPending } from '../slices/pending';
+import { refreshPending, selectAllPending } from '../slices/pending';
 
 import './Queue.scss';
 
@@ -86,15 +85,9 @@ function Pending({ event, dispatch, goToFunc, map }) {
   );
 }
 
-const selectPending = (state) => state.pending;
-const selectMemoizedPending = createSelector(
-  [selectPending],
-  (pending) => pending.ids.map((id) => pending.entities[id]),
-);
-
 export default function Queue({ dispatch, goToFunc, map }) {
   const storeDispatch = useDispatch()
-  const pending = useSelector(selectMemoizedPending);
+  const pending = useSelector(selectAllPending);
 
   return (
     <div className='queue'>
