@@ -204,6 +204,6 @@ export default function BoundariesLayer() {
   setVisibility();
 
   return (
-    <div className='boundaries-status'>{serviceAreaStatus}</div>
+    <div className='boundaries-status'></div>
   );
 }

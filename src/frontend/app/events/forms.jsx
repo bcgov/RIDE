@@ -450,9 +450,7 @@ export function getInitialEvent(eventType = 'Incident') {
       endTimeTZ: null,
       ongoing: true,
       startTime: null,
-      schedules: [
-        addId(structuredClone(SCHEDULE_BLANK)),
-      ],
+      schedules: [],
     },
     additional: '',
     external: { url: '' },
