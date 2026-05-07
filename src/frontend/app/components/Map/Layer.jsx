@@ -267,15 +267,20 @@ export default function Layer({ event, dispatch }) {
 
       if (!event.showForm) {
         // TODO: add permission based checks on these items
+        if (raw.status === 'Active') {
+          items.push(
+            {
+              label: 'Edit event',
+              action: (e) => {
+                setContextMenu([]);
+                selectFeature(map, feature);
+                dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true });
+              }
+            },
+          );
+        }
+
         items.push(
-          {
-            label: 'Edit event',
-            action: (e) => {
-              setContextMenu([]);
-              selectFeature(map, feature);
-              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true });
-            }
-          },
           {
             label: 'View history',
             action: (e) => {
