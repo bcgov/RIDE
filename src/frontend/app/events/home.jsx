@@ -28,6 +28,7 @@ import Queue from './Queue';
 import Events from './Events';
 
 import { selectLength } from '../slices/pending';
+import { selectAllServiceAreaBoundaries } from '../slices/serviceAreaBoundaries';
 
 // Styling
 import './home.scss';
@@ -48,6 +49,7 @@ export default function Home() {
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
   const [ message, setMessage ] = useState('');
   const visibleLayers = useSelector(state => state.visibleLayers);
+  const serviceAreaBoundaries = useSelector(selectAllServiceAreaBoundaries);
 
   // Effects
   useEffect(() => {
@@ -126,6 +128,7 @@ export default function Home() {
               event={event}
               dispatch={dispatch}
               visibleLayers={visibleLayers}
+              serviceAreaBoundaries={serviceAreaBoundaries}
               goToFunc={centerMap}
               setMessage={setMessage}
             />

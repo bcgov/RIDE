@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.organizations.models import ServiceArea
 from apps.users.models import RIDEUser
 from django.contrib.auth.models import Group
 
@@ -8,6 +9,7 @@ class RIDEUserSerializer(serializers.ModelSerializer):
     social_username = serializers.SerializerMethodField()
     social_provider = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
+    service_areas = serializers.SerializerMethodField()
 
     class Meta:
         model = RIDEUser
@@ -34,6 +36,16 @@ class RIDEUserSerializer(serializers.ModelSerializer):
 
     def get_is_approver(self, obj):
         return obj.is_approver
+
+    def get_service_areas(self, obj):
+        user_orgs = obj.organizations.all()
+        user_areas = (
+            ServiceArea.objects.filter(organizations__in=user_orgs)
+            .exclude(parent=None)
+            .distinct()
+        )
+
+        return list(user_areas.values_list('id', flat=True))
 
 
 class RIDEGroupSerializer(serializers.ModelSerializer):

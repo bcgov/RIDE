@@ -81,12 +81,15 @@ export default function Layout() {
             ret.email = data.email;
             ret.is_superuser = data.is_superuser;
             ret.is_approver = data.is_approver;
+            ret.service_areas = Array.isArray(data.service_areas) ? data.service_areas : [];
           }
           setAuthContext((prior) => {
             if (ret.loginStateKnown != prior.loginStateKnown) { return ret; }
             if (ret.username != prior.username) { return ret; }
             if (ret.email != prior.email) { return ret; }
+            if (ret.is_superuser != prior.is_superuser) { return ret; }
             if (ret.is_approver != prior.is_approver) { return ret; }
+            if ((ret.service_areas || []).join(',') != (prior.service_areas || []).join(',')) { return ret; }
             return prior;
           });
         })

@@ -2,6 +2,8 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch, useStore } from 'react-redux';
 
 import * as turf from '@turf/turf';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleInfo } from '@fortawesome/pro-regular-svg-icons';
 
 import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
@@ -10,9 +12,9 @@ import { linear } from 'ol/easing';
 import { Point, LineString, GeometryCollection, MultiPolygon, Polygon } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
 
-import { AlertContext, MapContext } from '../../contexts';
+import { AlertContext, AuthContext, MapContext } from '../../contexts';
 
-import { ll2g, selectFeature, pointerMove } from './helpers.js';
+import { g2ll, ll2g, selectFeature, pointerMove } from './helpers.js';
 import RideFeature, { PinFeature } from './feature.js';
 import ContextMenu from '../../events/ContextMenu';
 import { getInitialEvent } from '../../events/forms';
@@ -24,6 +26,7 @@ import { endHandler } from './PinLayer';
 import { patch } from '../../shared/helpers';
 
 import { refreshEvents } from '../../slices/events';
+import { selectAllServiceAreaBoundaries } from '../../slices/serviceAreaBoundaries';
 
 
 export function addEvent(event, map, dispatch, visibleLayers) {
@@ -158,6 +161,7 @@ function addEventsLayer(map) {
 export default function Layer({ event, dispatch }) {
 
   const { setAlertContext } = useContext(AlertContext);
+  const { authContext } = useContext(AuthContext);
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
   const [ fetchInterval, setFetchInterval ] = useState();
@@ -169,6 +173,7 @@ export default function Layer({ event, dispatch }) {
   const storeDispatch = useDispatch()
   const store = useStore();
   const visibleLayers = useSelector(state => state.visibleLayers);
+  const serviceAreaBoundaries = useSelector(selectAllServiceAreaBoundaries);
 
   const contextHandler = (e) => {
     e.preventDefault();
@@ -189,11 +194,32 @@ export default function Layer({ event, dispatch }) {
     const coordinate = e.coordinate;
     const pixel = e.pixel;
     const items = [];
+    const userAreaIds = new Set(
+      (authContext?.service_areas || []).map((id) => String(id))
+    );
+
+    const authorizedBoundaries = Object.values(serviceAreaBoundaries || {}).filter((boundary) => (
+      boundary?.geometry && userAreaIds.has(String(boundary.id))
+    ));
+    const clickPoint = new Point(g2ll(coordinate));
+    const canCreateAtCoordinate = (!!authContext?.is_approver || (
+      authorizedBoundaries.length > 0 &&
+      authorizedBoundaries.some((boundary) => turf.booleanPointInPolygon(clickPoint.getCoordinates(), boundary.geometry))
+    ));
 
     if (!feature) {
       if (!event.location.start?.name || (!event.showForm && !event.showHistory)) {
+        if (!canCreateAtCoordinate) {
+          items.push({
+            label: <><FontAwesomeIcon icon={faCircleInfo} /> You do not have write access to this area.</>,
+            disabled: true,
+            action: () => null,
+          });
+        }
+
         items.push({
           label: 'Create incident',
+          disabled: !canCreateAtCoordinate,
           action: (e) => {
             setContextMenu([]);
             dispatch({ type: 'reset form', value: () => getInitialEvent('Incident'), showPreview: true, showForm: true });
@@ -210,6 +236,7 @@ export default function Layer({ event, dispatch }) {
         });
         items.push({
           label: 'Create planned event',
+          disabled: !canCreateAtCoordinate,
           action: (e) => {
             setContextMenu([]);
             dispatch({ type: 'reset form', value: () => getInitialEvent('Planned event'), showPreview: true, showForm: true });
@@ -226,6 +253,7 @@ export default function Layer({ event, dispatch }) {
         });
         items.push({
           label: 'Create road condition',
+          disabled: !canCreateAtCoordinate,
           action: (e) => {
             setContextMenu([]);
             dispatch({ type: 'reset form', value: () => getInitialEvent('ROAD_CONDITION'), showPreview: true, showForm: true });
@@ -266,30 +294,34 @@ export default function Layer({ event, dispatch }) {
       const raw = feature.get('raw');
 
       if (!event.showForm) {
-        // TODO: add permission based checks on these items
-        if (raw.status === 'Active') {
-          items.push(
-            {
-              label: 'Edit event',
-              action: (e) => {
-                setContextMenu([]);
-                selectFeature(map, feature);
-                dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true });
-              }
-            },
-          );
+        if (raw.status === 'Active' && !canCreateAtCoordinate) {
+          items.push({
+            label: <><FontAwesomeIcon icon={faCircleInfo} /> You do not have write access to this area.</>,
+            disabled: true,
+            action: () => null,
+          });
         }
 
-        items.push(
-          {
-            label: 'View history',
+        if (raw.status === 'Active') {
+          items.push({
+            label: 'Edit event',
+            disabled: !canCreateAtCoordinate,
             action: (e) => {
               setContextMenu([]);
               selectFeature(map, feature);
-              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false, showHistory: true });
+              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true });
             }
+          });
+        }
+
+        items.push({
+          label: 'View history',
+          action: (e) => {
+            setContextMenu([]);
+            selectFeature(map, feature);
+            dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false, showHistory: true });
           }
-        );
+        });
 
         if (feature.get('raw').status === 'Active') {
           if (feature.get('raw').type === 'ROAD_CONDITION') {
@@ -315,6 +347,7 @@ export default function Layer({ event, dispatch }) {
 
           items.push({
             label: 'Clear event',
+            disabled: !canCreateAtCoordinate,
             action: (e) => {
               setContextMenu([]);
               patch(

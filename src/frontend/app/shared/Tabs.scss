@@ -13,8 +13,77 @@
     flex: 0;
 
     .tab-handle {
+      position: relative;
       cursor: pointer;
       margin-right: 2rem;
+
+      &.disabled {
+        cursor: not-allowed;
+        opacity: 0.75;
+      }
+
+      .tab-tooltip {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: calc(50% + 40px);
+        transform: translateX(-50%);
+        z-index: 2;
+        background: #1f1f1f;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        padding: 0.35rem 0 0.35rem 6px;
+        width: 18rem;
+        max-height: calc(1.2em * 2);
+        white-space: normal;
+        overflow: hidden;
+        pointer-events: none;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .tab-tooltip::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: calc(50% - 2px);
+        transform: translateX(-50%);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 5px solid #1f1f1f;
+      }
+
+      &.disabled:hover .tab-tooltip {
+        display: inline-flex;
+      }
+
+      &:first-child.disabled:hover {
+        .tab-tooltip {
+          left: 12px;
+          transform: none;
+        }
+
+        .tab-tooltip::before {
+          left: 10px;
+          transform: none;
+        }
+      }
+
+      &:last-child.disabled:hover {
+        .tab-tooltip {
+          left: auto;
+          right: -12px;
+          transform: none;
+        }
+
+        .tab-tooltip::before {
+          left: auto;
+          right: 0;
+          transform: none;
+        }
+      }
 
       &.active {
         font-weight: bold;

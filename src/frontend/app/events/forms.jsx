@@ -1,7 +1,9 @@
 import { Component } from 'react';
 
+import * as turf from '@turf/turf';
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckDouble, faCircleCheck, faCircleX, faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { faCheckDouble, faCircleCheck, faCircleInfo, faCircleX, faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
 
 import Conditions from './Conditions.jsx';
 import Details from './Details.jsx';
@@ -693,8 +695,26 @@ export default class EventForm extends Component {
   }
 
   render() {
-    const { event, dispatch, preview, cancel, goToFunc, bulkRc } = this.props;
+    const { event, dispatch, preview, cancel, goToFunc, bulkRc, serviceAreaBoundaries } = this.props;
     const { errors } = this.state;
+
+    const { authContext } = this.context;
+
+    // User can only edit events within the service area that contains the event start point.
+    let canEditStartPoint = !!authContext?.is_approver;
+    if (!canEditStartPoint && event?.location?.start?.coords && serviceAreaBoundaries) {
+      const userAreaIds = new Set((authContext?.service_areas || []).map((id) => String(id)));
+      const authorizedBoundaries = Object.values(serviceAreaBoundaries || {}).filter((boundary) => (
+        boundary?.geometry && userAreaIds.has(String(boundary.id))
+      ));
+
+      let startCoords = event.location.start.coords;
+      if (Array.isArray(startCoords?.[0])) { startCoords = startCoords[0]; }
+
+      canEditStartPoint = authorizedBoundaries.length > 0 && authorizedBoundaries.some((boundary) =>
+        turf.booleanPointInPolygon(startCoords, boundary.geometry)
+      );
+    }
 
     const pendingNextUpdate = getPendingNextUpdate(event);
 
@@ -718,7 +738,12 @@ export default class EventForm extends Component {
             dispatch({ type: 'show history', show: tabName === 'history' });
           }}>
 
-          <Tabs.Tab name='edit' label='Edit event'>
+          <Tabs.Tab
+            name='edit'
+            label='Edit event'
+            disabled={event.id && !canEditStartPoint}
+            disabledHint={<><FontAwesomeIcon icon={faCircleInfo} /> You do not have write access to this area.</>}>
+
             <div className="form-container">
               <div className="form-body">
                 { event.location.start.name && <>

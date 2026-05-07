@@ -1,25 +1,21 @@
-/* eslint-disable no-unused-vars */
 import { useContext, useEffect, useRef, useState } from 'react';
 
+import { Point, LineString } from 'ol/geom';
+import { linear } from 'ol/easing';
+import * as ol from 'ol';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import { Point, LineString, Polygon } from 'ol/geom';
-import { circular } from 'ol/geom/Polygon';
-import { linear } from 'ol/easing';
-import { Circle, Fill, Icon, Style, Stroke, Text } from 'ol/style';
-import * as ol from 'ol';
 
-import { MapContext } from '../../contexts';
+import { AlertContext, AuthContext, MapContext } from '../../contexts';
 import { getRoute } from '../../shared';
 import { getNearby } from '../../events/Location';
 import { getDRA, ll2g, g2ll, getSnapped, Drag, pointerMove } from './helpers.js';
+import { PinFeature } from './feature.js';
+import { transform_road_abbreviations } from "../shared/helper.js";
 import ContextMenu from '../../events/ContextMenu';
 
 globalThis.ol = ol;
-
-import RideFeature, { PinFeature } from './feature.js';
-import { transform_road_abbreviations } from "../shared/helper.js";
 
 function layerStyle(feature, resolution) {
   if (!feature.get('visible')) { return null; }
@@ -33,6 +29,7 @@ const layer = new VectorLayer({
   source: new VectorSource({ format: new GeoJSON() }),
   style: layerStyle,
 });
+
 layer.listenForClicks = true;
 layer.listenForContext = true;
 layer.listenForHover = true;
@@ -63,33 +60,36 @@ function transform_prop_value(value) {
   return value;
 }
 
-
-
 /* Handler for any event that triggers updating the point and related info
   * (such as dragging the pin to a new location):
   *   1. reset the form data for the point
   *   2. get the DRA info and update the form data
   *   3. move the pin to the closest geometric feature
   *   4. get the nearby references and add them to the form data
+  *
+  * `snapped` optional: pass when caller already computed it (e.g. guarded drag).
   */
-export const endHandler = async (e, point, dispatch) => {
-  const snapped = getSnapped(e.coordinate, e.pixel, e.map);
+async function applyPinLocationUpdate(e, point, dispatch, snapped) {
+  const snappedCoord = snapped ?? getSnapped(e.coordinate, e.pixel, e.map);
   let location = {
     name: 'pending',
     pending: true,
     nearbyPending: false,
     nearbyError: '',
-    coords: g2ll(snapped),
+    coords: g2ll(snappedCoord),
     candidates: [],
   };
+
   dispatch({
     type: point.action,
     value: location,
   });
+
   updateRoute(e.map);
-  point.getGeometry().setCoordinates(snapped);
-  point.dra = await getDRA(snapped, point, e.map);
+  point.getGeometry().setCoordinates(snappedCoord);
+  point.dra = await getDRA(snappedCoord, point, e.map);
   const props = point.dra.properties;
+
   let aliases = [
     props?.ROAD_NAME_FULL,
     props?.ROAD_NAME_ALIAS1,
@@ -109,8 +109,8 @@ export const endHandler = async (e, point, dispatch) => {
     nearbyPending: true
   });
   location = Object.fromEntries(
-      Object.entries(location).map(([key, val]) => [key, transform_prop_value(val)])
-    )
+    Object.entries(location).map(([key, val]) => [key, transform_prop_value(val)])
+  );
 
   dispatch({ type: point.action, value: location, });
 
@@ -122,6 +122,46 @@ export const endHandler = async (e, point, dispatch) => {
   if (point.dra.properties) {
     getNearby(point.action, location, dispatch);
   }
+}
+
+export const endHandler = async (e, point, dispatch) => {
+  await applyPinLocationUpdate(e, point, dispatch);
+};
+
+function canSetStartAtCoordinate(map, coordinate, authContext) {
+  if (authContext?.is_approver) { return true; }
+
+  const areaIds = new Set((authContext?.service_areas || []).map((id) => String(id)));
+  if (!areaIds.size) { return false; }
+
+  const boundaryLayer = map?.get('boundaries');
+  if (!boundaryLayer) { return false; }
+
+  const features = boundaryLayer.getSource().getFeatures();
+  return features.some((feature) => (
+    feature.get('type') === 'serviceAreas' &&
+    areaIds.has(String(feature.get('id'))) &&
+    feature.getGeometry()?.intersectsCoordinate(coordinate)
+  ));
+}
+
+export const guardedEndHandler = async (e, point, dispatch, authContext, setAlertContext) => {
+  const snapped = getSnapped(e.coordinate, e.pixel, e.map);
+  const dragStartCoordinate = point.get('dragStartCoordinate');
+
+  if (point.action === 'set start' &&
+      dragStartCoordinate &&
+      !canSetStartAtCoordinate(e.map, snapped, authContext)) {
+
+    point.getGeometry().setCoordinates(dragStartCoordinate);
+    point.unset('dragStartCoordinate', true);
+    updateRoute(e.map);
+    setAlertContext?.({ message: 'You do not have write access to this area.' });
+    return;
+  }
+
+  point.unset('dragStartCoordinate', true);
+  await applyPinLocationUpdate(e, point, dispatch, snapped);
 };
 
 /* Given an always present (possibly empty) route feature on the map: if
@@ -142,13 +182,16 @@ export const updateRoute = async (map) => {
   map.route.getGeometry().setCoordinates(route);
 }
 
-
 export default function PinLayer({ event, dispatch }) {
+  const { authContext } = useContext(AuthContext);
+  const { setAlertContext } = useContext(AlertContext);
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
   const menuRef = useRef();
   const eventRef = useRef();
+  const authContextRef = useRef(authContext);
   eventRef.current = event;
+  authContextRef.current = authContext;
 
   useEffect(() => {
     if (!map) { return; }
@@ -160,7 +203,18 @@ export default function PinLayer({ event, dispatch }) {
       map.on('contextmenu', contextHandler);
       map.on('pointermove', pointerMove);
       map.getInteractions().extend([
-        new Drag({ endHandler, menuRef, resetContextMenu: () => setContextMenu([]), dispatch })
+        new Drag({
+          endHandler: (e, point, dispatch) => guardedEndHandler(
+            e,
+            point,
+            dispatch,
+            authContextRef.current,
+            setAlertContext,
+          ),
+          menuRef,
+          resetContextMenu: () => setContextMenu([]),
+          dispatch
+        })
       ]);
 
       map.route = new PinFeature({ style: 'route', geometry: new LineString([]), isVisible: true, noSelect: true })

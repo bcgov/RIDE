@@ -8,10 +8,11 @@ function Tab({ children }) {
 
 const getDefault = (children) => {
   if (!Array.isArray(children)) {
-    return children?.props?.name;
+    return children?.props?.disabled ? undefined : children?.props?.name;
   }
-  let def = children.filter((child) => child).find((child) => child.props.default);
-  return (def || children[0])?.props.name;
+  const available = children.filter((child) => child && !child.props.disabled);
+  let def = available.find((child) => child.props.default);
+  return (def || available[0])?.props.name;
 }
 
 export const TabContext = createContext('');
@@ -32,20 +33,25 @@ export default function Tabs({ children, onChange, hideSingleTabHandle }) {
           <div className='tabs-handles'>
             {tabs.filter(child => child).map((child) => {
               const name = child.props.name;
+              const disabled = !!child.props.disabled;
               return (
                 <button
                   type="button"
                   key={`${name}-handle`}
-                  className={`tab-handle ${currentTab === name ? 'active' : ''}`}
+                  className={`tab-handle ${currentTab === name ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
+                  aria-disabled={disabled}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (currentTab !== name) {
+                    if (!disabled && currentTab !== name) {
                       setCurrentTab(name);
                       onChange?.(name);
                     }
                   }}
                 >
                   {child.props.label}
+                  {disabled && child.props.disabledHint &&
+                    <span className="tab-tooltip">{child.props.disabledHint}</span>
+                  }
                 </button>
               );
             })}
