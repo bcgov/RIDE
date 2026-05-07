@@ -305,6 +305,7 @@ function handleDownEvent(evt) {
     if (feature.noSelect || feature.get('isPreview') || feature.get('noSelect')) { return false; }
     map.route?.clear();
     this.coordinate_ = evt.coordinate;
+    feature.set('dragStartCoordinate', [...feature.getGeometry().getCoordinates()]);
     feature.getGeometry().setCoordinates(evt.coordinate);
     this.feature_ = feature;
   }

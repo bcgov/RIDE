@@ -4,14 +4,15 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.events.models import Event, Condition
+from apps.events.permissions import EventServiceAreaPermission
 from apps.events.serializers import EventSerializer, EventHistorySerializer, EventDiffSerializer, ConditionSerializer
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
-from apps.users.permissions import Approver
+from apps.users.permissions import IsApprover
 from .enums import EventType
 from .helpers import get_default_next_update, get_chainup_next_update
 from .models import Note, TrafficImpact
@@ -23,7 +24,11 @@ class Events(viewsets.ModelViewSet):
     queryset = Event.last.all()
     serializer_class = EventSerializer
     lookup_field = 'id'
-    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return [(IsApprover | EventServiceAreaPermission)()]
+        return [AllowAny()]
 
     @action(detail=True)
     def history(self, request, id):
@@ -43,7 +48,6 @@ class Events(viewsets.ModelViewSet):
         # need to do this here, otherwise serializer doesn't pick up user via
         # default field value
         return super().partial_update(request, *args, **kwargs)
-
 
 def validate_allowed_segments(user, segPks):
     if user.is_superuser:
@@ -183,7 +187,7 @@ class RoadConditions(Events):
 class ChainUps(Events):
     queryset = Event.current.filter(event_type=EventType.CHAIN_UP, from_bulk=True)
     serializer_class = ChainUpEventSerializer
-    permission_classes = [Approver]
+    permission_classes = [IsApprover]
 
     @action(detail=False, methods=['post'], url_path='toggle')
     def toggle_chainups(self, request):

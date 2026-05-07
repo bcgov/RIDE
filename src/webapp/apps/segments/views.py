@@ -11,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, Route, ChainUp
 from apps.segments.serializers import SegmentSerializer, RouteSerializer, ChainUpSerializer
-from apps.users.permissions import Approver
+from apps.users.permissions import IsApprover
 
 
 def get_user_segments(user):
@@ -41,7 +41,7 @@ class SegmentAPIView(ModelViewSet):
 class ChainUpAPIView(ModelViewSet):
     queryset = ChainUp.current.all()
     serializer_class = ChainUpSerializer
-    permission_classes = [Approver]
+    permission_classes = [IsApprover]
 
     def get_queryset(self):
         if self.request.user.is_approver:
