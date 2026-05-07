@@ -533,8 +533,6 @@ export default class EventForm extends Component {
       if (!form.details.severity) { err.severity = 'You must set a severity'; }
       if (!form.details.category) { err.category = 'You must set a category'; }
       if (!form.details.situation) { err.situation = 'You must set a situation'; }
-
-      if (form.impacts.length === 0) { err['Traffic Impacts'] = 'Must include at least one'; }
     } else if (form.conditions.length === 0) {
       err['Conditions'] = 'Must include at least one';
     }
