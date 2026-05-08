@@ -738,88 +738,88 @@ export default class EventForm extends Component {
             dispatch({ type: 'show history', show: tabName === 'history' });
           }}>
 
-          <Tabs.Tab
-            name='edit'
-            label='Edit event'
-            disabled={event.id && !canEditStartPoint}
-            disabledHint={<><FontAwesomeIcon icon={faCircleInfo} /> You do not have write access to this area.</>}>
+          {canEditStartPoint &&
+            <Tabs.Tab
+              name='edit'
+              label='Edit event'>
 
-            <div className="form-container">
-              <div className="form-body">
-                { event.location.start.name && <>
-                  <div className="section location">
-                    <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} map={this.props.map} />
-                  </div>
-
-                  { DETAILS_FORMS.includes(event.type) &&
-                    <div className="section details">
-                      <Details errors={errors} event={event} dispatch={dispatch} />
+              <div className="form-container">
+                <div className="form-body">
+                  { event.location.start.name && <>
+                    <div className="section location">
+                      <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} map={this.props.map} />
                     </div>
-                  }
 
-                  { IMPACTS_FORMS.includes(event.type) &&
-                    <div className="section impacts">
-                      <Impacts errors={errors} event={event} dispatch={dispatch} />
-                    </div>
-                  }
+                    { DETAILS_FORMS.includes(event.type) &&
+                      <div className="section details">
+                        <Details errors={errors} event={event} dispatch={dispatch} />
+                      </div>
+                    }
 
-                  { DELAYS_FORMS.includes(event.type) &&
-                    <div className="section delays">
-                      <Delays errors={errors} event={event} dispatch={dispatch} />
-                    </div>
-                  }
+                    { IMPACTS_FORMS.includes(event.type) &&
+                      <div className="section impacts">
+                        <Impacts errors={errors} event={event} dispatch={dispatch} />
+                      </div>
+                    }
 
-                  { RESTRICTIONS_FORMS.includes(event.type) &&
-                    <div className="section restrictions">
-                      <Restrictions errors={errors} event={event} dispatch={dispatch} />
-                    </div>
-                  }
+                    { DELAYS_FORMS.includes(event.type) &&
+                      <div className="section delays">
+                        <Delays errors={errors} event={event} dispatch={dispatch} />
+                      </div>
+                    }
 
-                  { CONDITIONS_FORMS.includes(event.type) &&
-                    <div className="section conditions">
-                      <Conditions errors={errors} event={event} dispatch={dispatch} />
-                    </div>
-                  }
+                    { RESTRICTIONS_FORMS.includes(event.type) &&
+                      <div className="section restrictions">
+                        <Restrictions errors={errors} event={event} dispatch={dispatch} />
+                      </div>
+                    }
 
-                  { TIMING_FORMS.includes(event.type) &&
-                    <div className="section timing">
-                      <EventTiming
-                        errors={errors}
-                        event={event}
-                        dispatch={dispatch}
-                        isRoadCondition={CONDITIONS_FORMS.includes(event.type)}
-                      />
-                    </div>
-                  }
+                    { CONDITIONS_FORMS.includes(event.type) &&
+                      <div className="section conditions">
+                        <Conditions errors={errors} event={event} dispatch={dispatch} />
+                      </div>
+                    }
 
-                  { event?.type === 'Planned event' &&
-                    <div className="section scheduled">
-                      <Scheduled errors={errors} event={event} dispatch={dispatch} />
-                    </div>
-                  }
+                    { TIMING_FORMS.includes(event.type) &&
+                      <div className="section timing">
+                        <EventTiming
+                          errors={errors}
+                          event={event}
+                          dispatch={dispatch}
+                          isRoadCondition={CONDITIONS_FORMS.includes(event.type)}
+                        />
+                      </div>
+                    }
 
-                  { event.type &&
-                    <div className="section additional">
-                      <AdditionalMessaging event={event} dispatch={dispatch} errors={errors} />
-                    </div>
-                  }
+                    { event?.type === 'Planned event' &&
+                      <div className="section scheduled">
+                        <Scheduled errors={errors} event={event} dispatch={dispatch} />
+                      </div>
+                    }
 
-                  { EXTERNAL_FORMS.includes(event.type) &&
-                    <div className="section external">
-                      <External event={event} dispatch={dispatch} />
-                    </div>
-                  }
+                    { event.type &&
+                      <div className="section additional">
+                        <AdditionalMessaging event={event} dispatch={dispatch} errors={errors} />
+                      </div>
+                    }
 
-                  { INTERNAL_FORMS.includes(event.type) &&
-                    <div className="section internal">
-                      <InternalNotes event={event} dispatch={dispatch} />
-                    </div>
-                  }
-                </>}
+                    { EXTERNAL_FORMS.includes(event.type) &&
+                      <div className="section external">
+                        <External event={event} dispatch={dispatch} />
+                      </div>
+                    }
+
+                    { INTERNAL_FORMS.includes(event.type) &&
+                      <div className="section internal">
+                        <InternalNotes event={event} dispatch={dispatch} />
+                      </div>
+                    }
+                  </>}
+                </div>
+
               </div>
-
-            </div>
-          </Tabs.Tab>
+            </Tabs.Tab>
+          }
 
           { event.id &&
             <Tabs.Tab name='history' label='Event history' default={event.showHistory}>
