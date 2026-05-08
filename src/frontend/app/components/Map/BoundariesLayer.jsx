@@ -21,8 +21,6 @@ import { getInitialEvent } from '../../events/forms.jsx';
 import { API_HOST, EVENT_POLLING_REFRESH } from '../../env.js';
 import { getIconAndStroke } from '../../events/icons/index.js';
 import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers.js';
-import { endHandler } from './PinLayer.jsx';
-
 import {
   selectAllServiceAreaBoundaries, selectServiceAreaBoundariesStatus,
 } from '../../slices/serviceAreaBoundaries';

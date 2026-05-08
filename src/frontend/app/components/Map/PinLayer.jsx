@@ -69,7 +69,7 @@ function transform_prop_value(value) {
   *
   * `snapped` optional: pass when caller already computed it (e.g. guarded drag).
   */
-async function applyPinLocationUpdate(e, point, dispatch, snapped) {
+export async function applyPinLocationUpdate(e, point, dispatch, snapped) {
   const snappedCoord = snapped ?? getSnapped(e.coordinate, e.pixel, e.map);
   let location = {
     name: 'pending',
@@ -124,10 +124,6 @@ async function applyPinLocationUpdate(e, point, dispatch, snapped) {
   }
 }
 
-export const endHandler = async (e, point, dispatch) => {
-  await applyPinLocationUpdate(e, point, dispatch);
-};
-
 function canSetStartAtCoordinate(map, coordinate, authContext) {
   if (authContext?.is_approver) { return true; }
 
@@ -161,7 +157,7 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
   }
 
   point.unset('dragStartCoordinate', true);
-  await applyPinLocationUpdate(e, point, dispatch, snapped);
+  applyPinLocationUpdate(e, point, dispatch, snapped);
 };
 
 /* Given an always present (possibly empty) route feature on the map: if
@@ -391,7 +387,7 @@ export default function PinLayer({ event, dispatch }) {
               });
               map.pins.getSource().addFeature(map.end);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-              endHandler({ coordinate, pixel, map, }, map.end, dispatch);
+              applyPinLocationUpdate({ coordinate, pixel, map, }, map.end, dispatch);
             }
           });
       }

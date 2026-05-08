@@ -22,7 +22,7 @@ import { getInitialEvent } from '../../events/forms';
 import { API_HOST, EVENT_POLLING_REFRESH } from '../../env.js';
 import { getIconAndStroke } from '../../events/icons';
 import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers.js';
-import { endHandler } from './PinLayer';
+import { applyPinLocationUpdate } from './PinLayer';
 import { patch } from '../../shared/helpers';
 
 import { refreshEvents } from '../../slices/events';
@@ -231,7 +231,7 @@ export default function Layer({ event, dispatch }) {
             });
             map.pins.getSource().addFeature(map.start);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-            endHandler({ coordinate, pixel, map, }, map.start, dispatch);
+            applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
           }
         });
         items.push({
@@ -248,7 +248,7 @@ export default function Layer({ event, dispatch }) {
             });
             map.pins.getSource().addFeature(map.start);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-            endHandler({ coordinate, pixel, map, }, map.start, dispatch);
+            applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
           }
         });
         items.push({
@@ -265,7 +265,7 @@ export default function Layer({ event, dispatch }) {
             });
             map.pins.getSource().addFeature(map.start);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-            endHandler({ coordinate, pixel, map, }, map.start, dispatch);
+            applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
           }
         });
       } else if (!event.location.end?.name && event.showForm) {
@@ -281,7 +281,7 @@ export default function Layer({ event, dispatch }) {
             });
             map.pins.getSource().addFeature(map.end);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-            endHandler({ coordinate, pixel, map, }, map.end, dispatch);
+            applyPinLocationUpdate({ coordinate, pixel, map, }, map.end, dispatch);
           }
         });
       }
