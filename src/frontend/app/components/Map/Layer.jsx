@@ -209,65 +209,57 @@ export default function Layer({ event, dispatch }) {
 
     if (!feature) {
       if (!event.location.start?.name || (!event.showForm && !event.showHistory)) {
-        if (!canCreateAtCoordinate) {
+        if (canCreateAtCoordinate){
           items.push({
-            label: <><FontAwesomeIcon icon={faCircleInfo} /> You do not have write access to this area.</>,
-            disabled: true,
-            action: () => null,
+            label: 'Create incident',
+            action: (e) => {
+              setContextMenu([]);
+              dispatch({ type: 'reset form', value: () => getInitialEvent('Incident'), showPreview: true, showForm: true });
+              map.start = new PinFeature({
+                style: 'start',
+                geometry: new Point(coordinate),
+                action: 'set start',
+                isVisible: true,
+              });
+              map.pins.getSource().addFeature(map.start);
+              map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+              applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
+            }
+
+          }, {
+            label: 'Create planned event',
+            action: (e) => {
+              setContextMenu([]);
+              dispatch({ type: 'reset form', value: () => getInitialEvent('Planned event'), showPreview: true, showForm: true });
+              map.start = new PinFeature({
+                style: 'start',
+                geometry: new Point(coordinate),
+                action: 'set start',
+                isVisible: true,
+              });
+              map.pins.getSource().addFeature(map.start);
+              map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+              applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
+            }
+
+          }, {
+            label: 'Create road condition',
+            action: (e) => {
+              setContextMenu([]);
+              dispatch({ type: 'reset form', value: () => getInitialEvent('ROAD_CONDITION'), showPreview: true, showForm: true });
+              map.start = new PinFeature({
+                style: 'start',
+                geometry: new Point(coordinate),
+                action: 'set start',
+                isVisible: true,
+              });
+              map.pins.getSource().addFeature(map.start);
+              map.getView().animate({ center: coordinate, duration: 250, easing: linear });
+              applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
+            }
           });
         }
 
-        items.push({
-          label: 'Create incident',
-          disabled: !canCreateAtCoordinate,
-          action: (e) => {
-            setContextMenu([]);
-            dispatch({ type: 'reset form', value: () => getInitialEvent('Incident'), showPreview: true, showForm: true });
-            map.start = new PinFeature({
-              style: 'start',
-              geometry: new Point(coordinate),
-              action: 'set start',
-              isVisible: true,
-            });
-            map.pins.getSource().addFeature(map.start);
-            map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-            applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
-          }
-        });
-        items.push({
-          label: 'Create planned event',
-          disabled: !canCreateAtCoordinate,
-          action: (e) => {
-            setContextMenu([]);
-            dispatch({ type: 'reset form', value: () => getInitialEvent('Planned event'), showPreview: true, showForm: true });
-            map.start = new PinFeature({
-              style: 'start',
-              geometry: new Point(coordinate),
-              action: 'set start',
-              isVisible: true,
-            });
-            map.pins.getSource().addFeature(map.start);
-            map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-            applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
-          }
-        });
-        items.push({
-          label: 'Create road condition',
-          disabled: !canCreateAtCoordinate,
-          action: (e) => {
-            setContextMenu([]);
-            dispatch({ type: 'reset form', value: () => getInitialEvent('ROAD_CONDITION'), showPreview: true, showForm: true });
-            map.start = new PinFeature({
-              style: 'start',
-              geometry: new Point(coordinate),
-              action: 'set start',
-              isVisible: true,
-            });
-            map.pins.getSource().addFeature(map.start);
-            map.getView().animate({ center: coordinate, duration: 250, easing: linear });
-            applyPinLocationUpdate({ coordinate, pixel, map, }, map.start, dispatch);
-          }
-        });
       } else if (!event.location.end?.name && event.showForm) {
         items.push({
           label: 'Add end point',
@@ -294,18 +286,9 @@ export default function Layer({ event, dispatch }) {
       const raw = feature.get('raw');
 
       if (!event.showForm) {
-        if (raw.status === 'Active' && !canCreateAtCoordinate) {
-          items.push({
-            label: <><FontAwesomeIcon icon={faCircleInfo} /> You do not have write access to this area.</>,
-            disabled: true,
-            action: () => null,
-          });
-        }
-
-        if (raw.status === 'Active') {
+        if (raw.status === 'Active' && canCreateAtCoordinate) {
           items.push({
             label: 'Edit event',
-            disabled: !canCreateAtCoordinate,
             action: (e) => {
               setContextMenu([]);
               selectFeature(map, feature);
@@ -345,21 +328,23 @@ export default function Layer({ event, dispatch }) {
             });
           }
 
-          items.push({
-            label: 'Clear event',
-            disabled: !canCreateAtCoordinate,
-            action: (e) => {
-              setContextMenu([]);
-              patch(
-                `${API_HOST}/api/events/${raw.id}`,
-                { status: 'Inactive' },
-              ).then((updatedEvent) => {
-                feature.set('raw', updatedEvent);
-                dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
-                setAlertContext({ message: 'Event awaiting approval' });
-              });
-            }
-          });
+          if (canCreateAtCoordinate) {
+            items.push({
+              label: 'Clear event',
+              action: (e) => {
+                setContextMenu([]);
+                patch(
+                  `${API_HOST}/api/events/${raw.id}`,
+                  { status: 'Inactive' },
+                ).then((updatedEvent) => {
+                  feature.set('raw', updatedEvent);
+                  dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
+                  setAlertContext({ message: 'Event awaiting approval' });
+                });
+              }
+            });
+          }
+
         } else if (raw.approved) {
           items.push({
             label: 'Reactivate event',
