@@ -319,6 +319,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
   // between that time and now of less than one hour.  They're annotated with
   // the delta and whether the event is ending at the time.
   const displayed = events.filter((event) => (
+    event.editable &&
     event.status === 'Active' && (
       event.timing.nextUpdate || event.timing.endTime
     )

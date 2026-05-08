@@ -9,6 +9,7 @@ from rest_framework.serializers import ModelSerializer
 
 from config.settings import EVENT_PREFIX
 from .models import Event, Note, TrafficImpact, Condition
+from .permissions import coords_from_start, user_may_use_point
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
 from apps.segments.serializers import SegmentSerializer, ChainUpSerializer
@@ -52,6 +53,7 @@ class EventSerializer(KeyMoveSerializer):
     notes = NotesListSerializer(required=False)
     segment = SegmentSerializer(required=False, allow_null=True)
     chainup = ChainUpSerializer(required=False, allow_null=True)
+    editable = fields.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -94,6 +96,17 @@ class EventSerializer(KeyMoveSerializer):
             return True
 
         return False
+
+    def get_editable(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        if not user or not user.is_authenticated:
+            return False
+
+        if user.is_approver:
+            return True
+
+        return user_may_use_point(user, coords_from_start(obj.start))
 
     def to_internal_value(self, data):
         request = self.context.get("request")

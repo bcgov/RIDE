@@ -23,7 +23,8 @@ const refreshThunk = createAsyncThunk(
 );
 
 const selectStatus = (state) => state.pending.status;
-const selectLength = (state) => state.pending.ids.length;
+const selectLength = (state) =>
+  state.pending.ids.filter((id) => state.pending.entities[id]?.editable).length;
 
 export const slice = createSlice({
   name: 'pending',
