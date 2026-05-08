@@ -94,7 +94,7 @@ const selectMemoizedPending = createSelector(
 
 export default function Queue({ dispatch, goToFunc, map }) {
   const storeDispatch = useDispatch()
-  const pending = useSelector(selectMemoizedPending);
+  const pending = useSelector(selectMemoizedPending).filter((event) => event.editable);
 
   return (
     <div className='queue'>

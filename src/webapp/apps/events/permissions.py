@@ -13,7 +13,7 @@ def get_user_service_areas(user):
     ).distinct()
 
 
-def _coords_from_start(start):
+def coords_from_start(start):
     if not isinstance(start, dict):
         return None
     coords = start.get('coords')
@@ -41,14 +41,21 @@ def extract_event_start_coords(request_data, instance=None):
             location = request_data.get('location')
             if isinstance(location, dict):
                 start = location.get('start')
-        coords = _coords_from_start(start)
+        coords = coords_from_start(start)
         if coords is not None:
             return coords
 
     if instance is None:
         return None
     start_saved = getattr(instance, 'start', None)
-    return _coords_from_start(start_saved)
+    return coords_from_start(start_saved)
+
+
+def user_may_use_point(user, coords):
+    if coords is None:
+        return False
+    point = Point(coords[0], coords[1])
+    return get_user_service_areas(user).filter(geometry__contains=point).exists()
 
 
 class EventServiceAreaPermission(permissions.BasePermission):
@@ -72,15 +79,10 @@ class EventServiceAreaPermission(permissions.BasePermission):
             )
             return False
 
-        if self._user_may_use_point(user, coords):
+        if user_may_use_point(user, coords):
             return True
 
         self.message = (
             'You do not have permission to create or update an event at this location.'
         )
         return False
-
-    def _user_may_use_point(self, user, coords):
-        user_areas = get_user_service_areas(user)
-        point = Point(coords[0], coords[1])
-        return user_areas.filter(geometry__contains=point).exists()
