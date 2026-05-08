@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from dictdiffer import diff
@@ -27,8 +28,14 @@ class LocationField(models.JSONField):
         return models.JSONField().db_type(connection)
 
     def diff(self, a, b):
-
         result = {}
+
+        if a is None and b is not None:
+            result['location'] = { 'add': b.get('name') }
+            return result  # further diffing not possible
+        elif a is not None and b is None:
+            result['location'] = { 'remove': a.get('name') }
+            return result  # further diffing not possible
 
         coords_a = a.get('coords')
         coords_b = b.get('coords')
@@ -223,15 +230,16 @@ class VersionedModel(models.Model):
             for field in self._meta.get_fields():
                 if field.name in self.get_ignored_fields():
                     continue
-
                 current = getattr(self, field.name)
                 previous = getattr(prior, field.name)
 
                 if current != previous:
-                    if field.get_internal_type() in ['LocationField', 'OrderedListField']:
+                    if hasattr(field, 'diff'):
                         changes[field.name] = field.diff(previous, current)
                     elif field.get_internal_type() == 'JSONField':
                         changes[field.name] = diff(previous, current)
+                    elif field.get_internal_type() == 'GeometryCollectionField':
+                        changes[field.name] = json.loads(previous.geojson)
                     else:
                         changes[field.name] = previous
 
