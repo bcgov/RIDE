@@ -6,7 +6,6 @@ from django.contrib.gis.geos import Point
 
 from rest_framework import fields, serializers
 from rest_framework.serializers import ModelSerializer
-from rest_framework_gis.fields import GeometryField
 
 from config.settings import EVENT_PREFIX
 from .models import Event, Note, TrafficImpact, Condition
@@ -47,7 +46,6 @@ class NotesListSerializer(fields.ListField):
 
 
 class EventSerializer(KeyMoveSerializer):
-    geometry = GeometryField()
     is_closure = fields.SerializerMethodField()
     last_inactivated = fields.SerializerMethodField()
     ongoing = fields.SerializerMethodField()

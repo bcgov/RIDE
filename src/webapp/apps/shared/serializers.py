@@ -11,6 +11,7 @@ class UserSerializer(ModelSerializer):
         model = get_user_model()
         fields = ['id', 'first_name', 'last_name', 'email', 'username']
 
+
 class VersionSerializer(ModelSerializer):
 
     user = UserSerializer(default=serializers.CurrentUserDefault())
