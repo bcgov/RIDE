@@ -128,6 +128,27 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
 
   const time = formatDistanceToNowStrict(new Date() - event.delta);
 
+  let startNearby = event.location.start?.nearby?.[0];
+  let endNearby = event.location.end?.nearby?.[0];
+
+  if (startNearby) {
+    if (startNearby.source !== 'municipalities') {
+      startNearby = `starts ${startNearby.phrase}`;
+    } else {
+      startNearby = startNearby.phrase;
+    }
+  }
+  if (endNearby) {
+    if (endNearby.phrase.toLowerCase() === startNearby.toLowerCase()) {
+      endNearby = null;
+    } else {
+      endNearby = `ends ${endNearby.phrase}`;
+    }
+    if (endNearby && !startNearby.startsWith('starts')) {
+      startNearby = `starts ${startNearby}`;
+    }
+  }
+
   return (
     <div
       className={`event ${selected ? 'selected' : ''}`}
@@ -194,19 +215,10 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
             {event.location.start?.useAlias && <>&nbsp;({event.location.start.alias})</>}
           </div>
 
-          { event.location.start.name && (
-            <div>starts {(event.location.start.nearby || []).reduce((first, near) => {
-              if (!first && near.include) { first = near.phrase; }
-              return first;
-            }, null)}</div>
-          )}
+          { startNearby && <div>{startNearby}</div> }
 
-          { event.location.end?.name && (
-            <div>ends {(event.location.end.nearby || []).reduce((first, near) => {
-              if (!first && near.include) { first = near.phrase; }
-              return first;
-            }, null)}</div>
-          )}
+          { endNearby && <div>{endNearby}</div> }
+
         </div>
 
         { area &&
