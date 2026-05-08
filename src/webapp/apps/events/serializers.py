@@ -105,7 +105,7 @@ class EventSerializer(KeyMoveSerializer):
         if not user or not user.is_authenticated:
             return False
 
-        if user.is_approver:
+        if user.is_superuser:
             return True
 
         return user_may_use_point(user, coords_from_start(obj.start))
