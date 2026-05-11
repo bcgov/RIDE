@@ -650,7 +650,8 @@ export function getSnapped(coordinate, pixel, map) {
       if (
         f.ol_uid === map.start?.ol_uid ||
         f.ol_uid === map.end?.ol_uid ||
-        f.ol_uid === map.route?.ol_uid
+        f.ol_uid === map.route?.ol_uid ||
+        f.ol_uid === map.location?.ol_uid
       ) { return; }
       map.pins.getSource().removeFeature(f);
     })
