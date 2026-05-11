@@ -1,13 +1,13 @@
 import { useContext, useRef, useState } from 'react';
 import TimeAgo from 'react-timeago';
 
-import { AuthContext } from '../contexts';
-import { API_HOST } from '../env.js';
+import { AuthContext } from '../../contexts.js';
+import { API_HOST } from '../../env.js';
 
-import Tooltip from './Tooltip.jsx';
+import Tooltip from '../Tooltip.jsx';
 
-import { patch, deleteRequest } from '../shared/helpers.js';
-import { getCookie } from './shared.jsx';
+import { patch, deleteRequest } from '../../shared/helpers.js';
+import { getCookie } from '../shared.jsx';
 
 function Note({ note, dispatch }) {
   const { authContext } = useContext(AuthContext);

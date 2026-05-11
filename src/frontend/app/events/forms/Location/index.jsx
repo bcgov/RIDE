@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
-import "react-loading-skeleton/dist/skeleton.css";
+
 import { Circle, Fill, Icon, Style, Stroke, Text } from 'ol/style';
 import { Point as olPoint, LineString, Polygon } from 'ol/geom';
 
@@ -14,25 +14,47 @@ import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRightArrowLeft,  faArrowRotateRight, faCity, faInputText, faMagnifyingGlass, faPlus, faXmark } from '@fortawesome/pro-regular-svg-icons';
-import { faArchway, faRoad, faMapLocation, faSignHanging, faTree } from '@fortawesome/duotone-regular-svg-icons';
+import {
+  faArrowRightArrowLeft,
+  faArrowRotateRight,
+  faCity,
+  faInputText,
+  faMagnifyingGlass,
+  faPlus,
+  faXmark
+} from '@fortawesome/pro-regular-svg-icons';
+import {
+  faArchway,
+  faRoad,
+  faMapLocation,
+  faSignHanging,
+  faTree
+} from '@fortawesome/duotone-regular-svg-icons';
 
-import pinStart from '../../public/pin-start.svg';
-import pinEnd from '../../public/pin-end.svg';
-import kmMarker from '../../public/km-marker.svg';
+import pinStart from '../../icons/pin-start.svg';
+import pinEnd from '../../icons/pin-end.svg';
+import kmMarker from '../../icons/km-marker.svg';
 
-import { getCardinalDirection, getNonDirectionalRoute, titleCase } from '../shared';
-import Tabs from '../shared/Tabs';
+import { getCardinalDirection, getNonDirectionalRoute, titleCase } from '../../../shared';
+import Tabs from '../../../shared/Tabs';
 
-import { bc2g, bc2ll, g2bc, g2ll, getNearby as getNearbyPopCenters, ll2bc, ll2g } from '../components/Map/helpers';
-import RideFeature from '../components/Map/feature';
-import { iconStyles, intersectionStyles, markerStyles } from '../components/Map/styles';
+import {
+  bc2g,
+  bc2ll,
+  g2bc,
+  g2ll,
+  getNearby as getNearbyPopCenters,
+  ll2bc,
+  ll2g
+} from '../../../components/Map/helpers';
+import RideFeature from '../../../components/Map/feature';
+import { iconStyles, intersectionStyles, markerStyles } from '../../../components/Map/styles';
 
-import { TabContext } from '../shared/Tabs';
+import { TabContext } from '../../../shared/Tabs';
 
-import { API_HOST } from '../env';
+import { API_HOST } from '../../../env';
 
-import Tooltip from './Tooltip';
+import Tooltip from '../../Tooltip';
 
 const PINS = {
   start: pinStart,

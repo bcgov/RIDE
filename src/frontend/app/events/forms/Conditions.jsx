@@ -1,8 +1,8 @@
 import Select from 'react-select';
 
-import { RoadConditions } from './references';
-import { DraggableRows } from './shared';
-import { selectStyle } from '../components/Map/helpers';
+import { RoadConditions } from '../references';
+import { DraggableRows } from '../shared';
+import { selectStyle } from '../../components/Map/helpers';
 
 function Condition({ id, item, change, update, current, }) {
   return (

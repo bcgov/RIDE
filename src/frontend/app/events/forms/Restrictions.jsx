@@ -2,9 +2,9 @@ import { useCallback, useState } from 'react';
 
 import Select from 'react-select';
 
-import { RestrictionsList } from './references';
-import { DraggableRows } from './shared';
-import { selectStyle } from '../components/Map/helpers';
+import { RestrictionsList } from '../references';
+import { DraggableRows } from '../shared';
+import { selectStyle } from '../../components/Map/helpers';
 
 
 function Restriction({ id, item, change, update, current, }) {

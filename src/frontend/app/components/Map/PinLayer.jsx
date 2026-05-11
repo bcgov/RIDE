@@ -3,16 +3,16 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Point, LineString } from 'ol/geom';
 import { linear } from 'ol/easing';
 import * as ol from 'ol';
-import GeoJSON from 'ol/format/GeoJSON.js';
+import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
 import { AlertContext, AuthContext, MapContext } from '../../contexts';
 import { getRoute } from '../../shared';
-import { getNearby } from '../../events/Location';
-import { getDRA, ll2g, g2ll, getSnapped, Drag, pointerMove } from './helpers.js';
-import { PinFeature } from './feature.js';
-import { transform_road_abbreviations } from "../shared/helper.js";
+import { getNearby } from '../../events/forms/Location';
+import { getDRA, ll2g, g2ll, getSnapped, Drag, pointerMove } from './helpers';
+import { PinFeature } from './feature';
+import { transform_road_abbreviations } from "../shared/helper";
 import ContextMenu from '../../events/ContextMenu';
 
 globalThis.ol = ol;

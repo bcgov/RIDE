@@ -3,10 +3,10 @@ import React from 'react';
 
 // Internal imports
 import { bulkUpdateRcs } from "../shared/data/roadConditions.js";
-import Conditions from "../events/Conditions.jsx";
-import EventTiming from "../events/Timing.jsx";
-import AdditionalMessaging from "../events/Additional.jsx";
-import EventForm, { getInitialEvent, INVALID_ADDITIONAL_CHARACTERS } from "../events/forms.jsx";
+import Conditions from "../events/forms/Conditions.jsx";
+import EventTiming from "../events/forms/Timing.jsx";
+import AdditionalMessaging from "../events/forms/Additional.jsx";
+import EventForm, { getInitialEvent, INVALID_ADDITIONAL_CHARACTERS } from "../events/forms";
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

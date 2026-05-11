@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 
-import Tooltip from './Tooltip';
-import { DraggableRows } from './shared';
+import Tooltip from '../Tooltip';
+import { DraggableRows } from '../shared';
 
 let idc = 0;
 

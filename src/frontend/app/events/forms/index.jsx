@@ -5,33 +5,33 @@ import * as turf from '@turf/turf';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckDouble, faCircleCheck, faCircleInfo, faCircleX, faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
 
-import Conditions from './Conditions.jsx';
-import Details from './Details.jsx';
-import Delays from './Delays.jsx';
-import Scheduled from './Schedule.jsx';
-import EventTiming from './Timing.jsx';
-import Impacts from './Impacts.jsx';
-import InternalNotes from './Internal.jsx';
-import Location from './Location.jsx';
-import Restrictions from './Restrictions.jsx';
-import AdditionalMessaging from './Additional.jsx';
-import External from './External.jsx';
+import Conditions from './Conditions';
+import Details from './Details';
+import Delays from './Delays';
+import Scheduled from './Schedule';
+import EventTiming from './Timing';
+import Impacts from './Impacts';
+import InternalNotes from './Internal';
+import Location from './Location';
+import Restrictions from './Restrictions';
+import AdditionalMessaging from './Additional';
+import External from './External';
 import {
   CONDITIONS_FORMS, DELAYS_FORMS, DETAILS_FORMS, EXTERNAL_FORMS,
   FORM_PHRASE_CATEGORY, FORMS, IMPACTS_FORMS, INTERNAL_FORMS,
   RESTRICTIONS_FORMS, TIMING_FORMS,
-} from './references.js';
+} from '../references';
 import {
   convertToDateTimeLocalString as convert,
   g2ll,
-} from "../components/Map/helpers";
-import { addEvent } from '../components/Map/Layer.jsx';
-import { getCookie } from './shared.jsx';
-import { API_HOST } from '../env';
-import { AuthContext } from '../contexts';
-import { patch, getNextUpdate, getPendingNextUpdate } from '../shared/helpers.js';
-import Tabs from '../shared/Tabs';
-import History from './History/History.jsx';
+} from "../../components/Map/helpers";
+import { addEvent } from '../../components/Map/Layer';
+import { getCookie } from '../shared';
+import { API_HOST } from '../../env';
+import { AuthContext } from '../../contexts';
+import { patch, getNextUpdate, getPendingNextUpdate } from '../../shared/helpers';
+import Tabs from '../../shared/Tabs';
+import History from '../History/History';
 
 
 import './forms.css';

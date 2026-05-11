@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 
-import Tooltip from './Tooltip';
+import Tooltip from '../Tooltip';
 
 
 let idc = 0;
