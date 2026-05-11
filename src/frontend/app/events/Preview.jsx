@@ -6,14 +6,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { format } from 'date-fns';
 
 // Internal imports
-import { desc } from './Schedule';
+import { desc } from './forms/Schedule';
 import { getConditionIcon, getPlainIcon } from './icons';
 import { PHRASES_LOOKUP, TrafficImpacts } from './references';
 import { selectFeature } from '../components/Map/helpers';
 
 // Styling
 import './Preview.scss';
-import RIDEDropdown from "../components/shared/dropdown.jsx";
+import RIDEDropdown from "../components/shared/dropdown";
 
 const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
   acc[curr.id] = curr;

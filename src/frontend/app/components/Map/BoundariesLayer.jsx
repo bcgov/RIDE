@@ -16,11 +16,11 @@ import { AlertContext, MapContext } from '../../contexts.js';
 import { ll2g, selectFeature, pointerMove } from './helpers.js';
 import RideFeature, { PinFeature } from './feature.js';
 import ContextMenu from '../../events/ContextMenu.jsx';
-import { getInitialEvent } from '../../events/forms.jsx';
+import { getInitialEvent } from '../../events/forms';
 
-import { API_HOST, EVENT_POLLING_REFRESH } from '../../env.js';
-import { getIconAndStroke } from '../../events/icons/index.js';
-import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers.js';
+import { API_HOST, EVENT_POLLING_REFRESH } from '../../env';
+import { getIconAndStroke } from '../../events/icons/index';
+import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers';
 import {
   selectAllServiceAreaBoundaries, selectServiceAreaBoundariesStatus,
 } from '../../slices/serviceAreaBoundaries';

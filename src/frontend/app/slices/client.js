@@ -17,7 +17,7 @@ export default async function client( endpoint, { body, ...customConfig } = {}) 
 
   let data;
   try {
-    const response = await window.fetch(endpoint, config);
+    const response = await globalThis.fetch(endpoint, config);
     data = await response.json();
     if (response.ok) {
       // Return a result object similar to Axios

@@ -11,7 +11,7 @@ import { boundingExtent, getCenter } from 'ol/extent';
 // Internal imports
 import Map from '../components/Map';
 import Layer from '../components/Map/Layer';
-import Layers, { defaultLayers } from './Layers';
+import Layers from './Layers';
 import PinLayer from '../components/Map/PinLayer';
 import BoundariesLayer from '../components/Map/BoundariesLayer';
 import { AuthContext, MapContext } from '../contexts';

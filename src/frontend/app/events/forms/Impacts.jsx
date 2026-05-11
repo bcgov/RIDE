@@ -2,11 +2,11 @@ import { useCallback, useState, useContext } from 'react';
 
 import Select from 'react-select';
 
-import { TrafficImpacts } from './references';
-import { DraggableRows } from './shared';
-import { selectStyle } from '../components/Map/helpers';
+import { TrafficImpacts } from '../references';
+import { DraggableRows } from '../shared';
+import { selectStyle } from '../../components/Map/helpers';
 
-import { DataContext } from '../contexts';
+import { DataContext } from '../../contexts';
 
 function Impact({ id, item, change, update, current, }) {
   return (
