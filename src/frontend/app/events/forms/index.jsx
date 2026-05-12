@@ -487,6 +487,10 @@ export default class EventForm extends Component {
     const { event, map, dispatch, visibleLayers, cancel, setMessage } = this.props;
 
     const form = {...structuredClone(event), ...overrides};
+
+    // DBC22-6428: Default delays to 0 if null
+    if (form.delays && (form.delays.amount == null || form.delays.amount === '')) form.delays.amount = 0;
+
     const now = new Date();
     now.setMinutes(now.getMinutes() + 2);
     now.setSeconds(0);
