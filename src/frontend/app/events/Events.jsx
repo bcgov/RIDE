@@ -11,14 +11,15 @@ import {
 import { formatDistanceToNowStrict } from 'date-fns';
 
 import { selectAllEvents } from '../slices/events';
-import { selectServiceAreaById, selectAllServiceAreas } from '../slices/serviceAreas';
+import { selectAllServiceAreas } from '../slices/serviceAreas';
 import { selectAllRoutes } from '../slices/routes';
 import { selectFeature } from '../components/Map/helpers.js';
 import { ONE_MINUTE_MS, ONE_HOUR_MS } from '../shared';
 
-import { getConditionIcon, getPlainIcon } from './icons';
+import { getPlainIcon } from './icons';
 
 import { PHRASES_LOOKUP } from './references';
+import { EventCardLocation } from './EventCardLocation.jsx';
 
 import './Events.scss';
 
@@ -105,9 +106,8 @@ function matchRoad(event, road) {
   return false;
 }
 
-function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
+function Event({ event, goToFunc, dispatch, map, selected }) {
 
-  const area = useSelector((state) => selectServiceAreaById(state, serviceArea))
   const navigate = useNavigate();
 
   const isOverdue = event.delta < 0;
@@ -127,27 +127,6 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
   const isChainUp = ['CHAIN_UP'].includes(event.type);
 
   const time = formatDistanceToNowStrict(new Date() - event.delta);
-
-  let startNearby = event.location.start?.nearby?.[0];
-  let endNearby = event.location.end?.nearby?.[0];
-
-  if (startNearby) {
-    if (startNearby.source !== 'municipalities') {
-      startNearby = `starts ${startNearby.phrase}`;
-    } else {
-      startNearby = startNearby.phrase;
-    }
-  }
-  if (endNearby) {
-    if (endNearby.phrase.toLowerCase() === startNearby.toLowerCase()) {
-      endNearby = null;
-    } else {
-      endNearby = `ends ${endNearby.phrase}`;
-    }
-    if (endNearby && !startNearby.startsWith('starts')) {
-      startNearby = `starts ${startNearby}`;
-    }
-  }
 
   return (
     <div
@@ -209,21 +188,7 @@ function Event({ event, goToFunc, dispatch, map, selected, serviceArea }) {
           </div>
         </div>
 
-        <div className='location'>
-          <div className='location-name'>
-            {event.location.start?.name}
-            {event.location.start?.useAlias && <>&nbsp;({event.location.start.alias})</>}
-          </div>
-
-          { startNearby && <div>{startNearby}</div> }
-
-          { endNearby && <div>{endNearby}</div> }
-
-        </div>
-
-        { area &&
-          <div className='service-area'>{area.name} ({area.sortingOrder})</div>
-        }
+        <EventCardLocation event={event} />
       </div>
     </div>
   )
@@ -442,8 +407,6 @@ export default function Events({ goToFunc, dispatch, map, current }) {
           dispatch={dispatch}
           map={map}
           selected={event.id === current.id}
-          areaLabel={serviceAreas[event.service_area]?.name}
-          serviceArea={event.service_area}
         />;
       })}
 

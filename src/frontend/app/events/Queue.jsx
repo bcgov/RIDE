@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit'
 
@@ -7,9 +7,9 @@ import { faChevronRight } from '@fortawesome/pro-solid-svg-icons';
 import { getPlainIcon } from './icons';
 
 import { AuthContext } from '../contexts';
-import { API_HOST, EVENT_POLLING_REFRESH } from '../env';
-import { get } from '../shared/helpers';
+import { EVENT_POLLING_REFRESH } from '../env';
 import { PHRASES_LOOKUP } from './references';
+import { EventCardLocation } from './EventCardLocation.jsx';
 import { selectFeature } from '../components/Map/helpers';
 import PollingComponent from '../shared/PollingComponent';
 
@@ -21,19 +21,6 @@ import './Queue.scss';
 function Pending({ event, dispatch, goToFunc, map }) {
   const { authContext } = useContext(AuthContext);
   const canReview = authContext?.is_approver || authContext?.is_superuser;
-
-  const nearby = event.location.start.nearby.filter((loc) => loc.include)
-  let location = 'Reference location not provided';
-  if (nearby.length > 0)
-    location = nearby[0].phrase;
-  else if (event.location.start.useOther && event.location.start.other) {
-    location = event.location.start.other;
-  }
-
-  let road = event.location.start.name;
-  if (event.location.start.useAlias) {
-    road = `${road} (${event.location.start.alias})`
-  }
 
   let request = 'New event';
   if (event.clearing) {
@@ -64,8 +51,7 @@ function Pending({ event, dispatch, goToFunc, map }) {
           <div className='id'>{event.id}</div>
         </div>
       </section>
-      <section className='location'>{location}</section>
-      <section className='road'>{road}</section>
+      <EventCardLocation event={event} />
 
       {canReview && (
         <section className='button'>
