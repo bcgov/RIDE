@@ -1,6 +1,6 @@
 import { API_HOST } from '../../env.js';
 import { get, post } from "../helpers.js";
-import { getInitialEvent } from "../../events/forms.jsx";
+import { getInitialEvent } from "../../events/forms";
 
 export function getChainUps() {
   return get(`${API_HOST}/api/chainups`, {});

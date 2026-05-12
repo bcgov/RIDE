@@ -1,26 +1,8 @@
-import { useContext, useEffect, useState, useRef } from 'react';
-import { useSelector, useDispatch, useStore } from 'react-redux';
+// React
+import { useContext, useEffect } from 'react';
 
-import * as turf from '@turf/turf';
-
-import GeoJSON from 'ol/format/GeoJSON.js';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import { linear } from 'ol/easing';
-import { Point, LineString, GeometryCollection, MultiPolygon, Polygon } from 'ol/geom';
-import { Icon, Style, Stroke, Fill, Text } from 'ol/style';
-import { Feature } from 'ol';
-
-import { AlertContext, MapContext } from '../../contexts.js';
-
-import { ll2g, selectFeature, pointerMove } from './helpers.js';
-import RideFeature, { PinFeature } from './feature.js';
-import ContextMenu from '../../events/ContextMenu.jsx';
-import { getInitialEvent } from '../../events/forms';
-
-import { API_HOST, EVENT_POLLING_REFRESH } from '../../env';
-import { getIconAndStroke } from '../../events/icons/index';
-import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers';
+// Redux
+import { useSelector } from 'react-redux';
 import {
   selectAllServiceAreaBoundaries, selectServiceAreaBoundariesStatus,
 } from '../../slices/serviceAreaBoundaries';
@@ -28,6 +10,16 @@ import {
   selectAllDistrictBoundaries, selectDistrictBoundariesStatus,
 } from '../../slices/districtBoundaries';
 
+// Openlayers
+import { Polygon } from 'ol/geom';
+import { Style, Stroke, Fill, Text } from 'ol/style';
+import { Feature } from 'ol';
+import GeoJSON from 'ol/format/GeoJSON.js';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+
+// Internal imports
+import { MapContext } from '../../contexts.js';
 
 function layerStyle(feature, visibleLayers) {
   return feature.get('visible') ? feature.get('style') : null ;
