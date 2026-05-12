@@ -1,10 +1,10 @@
 import { ROUTER_CLIENT_ID } from '../env.js';
+import { get } from "./helpers";
 
 export const ONE_SECOND_MS = 1000;
 export const ONE_MINUTE_MS = ONE_SECOND_MS * 60;
 export const ONE_HOUR_MS = ONE_MINUTE_MS * 60;
 export const ONE_DAY_MS = ONE_HOUR_MS * 24;
-
 
 const SKIP_WORDS = [
   'a', 'an', 'the',
@@ -48,20 +48,20 @@ export function getCardinalDirection(pointA, pointB, longform=false) {
   return longform ? LONG_DIRECTIONS[index] : DIRECTIONS[index];
 }
 
-
 export async function getRoute(pointA, pointB) {
   const pointString = `${pointA[0]},${pointA[1]},${pointB[0]},${pointB[1]}`;
   const baseUrl = "https://router.api.gov.bc.ca/directions.json";
-  const apiKey = ROUTER_CLIENT_ID;
-  const apiUrl = `${baseUrl}?points=${encodeURIComponent(pointString)}&criteria=shortest&apikey=${apiKey}&distanceUnit=km`;
 
-  try {
-    const response = await fetch(apiUrl, {mode: 'cors'});
-    return response.json();
-  } catch (error) {
-    console.error("Failed to fetch route:", error);
-    return null;
+  const payload = {
+    points: pointString,
+    criteria: 'fastest',
+    distanceUnit: 'km',
+    gdf: 'resource:2.0,',
   }
+
+  return get(baseUrl, payload, {
+    'apiKey': ROUTER_CLIENT_ID
+  }).then((data) => data);
 }
 
 /* Get the shortest road distance by getting routes in each direction and
