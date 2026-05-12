@@ -166,20 +166,25 @@ export function createMap() {
     // DBC22-2153
     glStyle.metadata['ol:webfonts'] = '/fonts/{font-family}/{fontweight}{-fontstyle}.css';
     globalThis.glstyle = glStyle;
+
     // Overrides
     for (const layer of glStyle.layers) {
       overrides.merge(layer, overrides[layer.id] || {});
     }
 
     // clone the basemap style so we can override the style layers,
-    // filtering out everything that isn't a highway symbol.
+    // filtering out everything that isn't a highway symbol
+    // (or population placename, see DBC22-5551).
     const symbolsStyle = {
       ...glStyle,
       layers: glStyle.layers.filter((layer) => (
         layer.id.startsWith('TRANSPORTATION/DRA/Hwy Symbols') ||
+        layer.id.startsWith('POLITICAL/Populated Places') ||
         layer.id.startsWith('TRANSPORTATION/DRA/Road Names')
       )),
     };
+
+    // for displaying roads when the aerial imagery is used instead of basemap
     const roadsStyle = {
       ...glStyle,
       layers: glStyle.layers.filter((layer) => (
