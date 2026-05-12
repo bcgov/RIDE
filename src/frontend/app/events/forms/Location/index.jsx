@@ -448,6 +448,7 @@ function isIntersection(location) {
 
 function Point({ point, dispatch, goToFunc, subkey, map }) {
   const [other, setOther] = useState('');
+  const [suggestionSearch, setSuggestionSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const otherRef = useRef();
   const tab = useContext(TabContext);
@@ -480,7 +481,14 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
       }
 
       return false;
-    }).slice(0, 5);
+    })
+    .filter((location) => {
+      const q = suggestionSearch.trim().toLowerCase();
+      if (!q) { return true; }
+      const hay = `${location.phrase || ''} ${location.description || ''} ${location.name || ''}`.toLowerCase();
+      return hay.includes(q);
+    })
+    .slice(0, 5);
 
   const otherInNearby = nearbyIds.includes('other');
 
@@ -556,12 +564,9 @@ function Point({ point, dispatch, goToFunc, subkey, map }) {
               className='landmark-search'
               type="text"
               name="search"
-              value=''
-              onChange={startChange}
-              onBlur={(e) => {
-                dispatch({ type: 'set other', key: subkey, value: e.target.value})
-              }}
-            />
+              value={suggestionSearch}
+              onChange={(e) => setSuggestionSearch(e.target.value.substring(0, 100))} />
+
             <span className='search-icon'><FontAwesomeIcon icon={faMagnifyingGlass} /></span>
           </div>
 
