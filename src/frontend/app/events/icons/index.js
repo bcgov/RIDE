@@ -805,10 +805,11 @@ export function getIconAndStroke(event, state='static', includePending=true) {
         }
       }
 
-      tense = type === 'incident' ? 'present' : 'future';
+      const start = new Date(event.timing.startTime);
+      tense = (type === 'incident' || Date.now() >= start) ? 'present' : 'future';
       closure = event.is_closure ? 'closure' : 'open';
 
-// incident minor present closure pending static
+      // incident minor present closure pending static
       return [
         icons[type][severity][tense][closure][status][state],
         strokes[severity][status][state],

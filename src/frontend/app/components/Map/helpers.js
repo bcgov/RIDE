@@ -214,7 +214,6 @@ export function createMap() {
     classname: 'debug',
     visible: true,
     source: new VectorSource({ format: new GeoJSON() }),
-    // style: null,
     style: layerStyle,
     renderBuffer: 30,
     zIndex: 300,
@@ -236,7 +235,6 @@ export function createMap() {
     moveTolerance: 7,
     controls: [new ScaleLine({ units: 'metric' })],
   });
-
 
   map.set('base', 'vector')
   map.set('vector', vectorLayer);
@@ -377,10 +375,6 @@ export const ll2bc = (coords) => proj4('EPSG:4326', 'EPSG:3005', coords);
 export const bc2g = (coords) => proj4('EPSG:3005', 'EPSG:3857', coords);
 export const g2bc = (coords) => proj4('EPSG:3857', 'EPSG:3005', coords);
 
-function eq(a, b) {
-  return a[0] === b[0] && a[1] === b[1];
-}
-
 // roads not considered for snapping
 const EXCLUDED_CLASSES = [
   'alleyway',
@@ -460,7 +454,9 @@ export function getDRA(coords, point, map) {
              */
             if (ex.message === 'coordinates must contain numbers') {
               line = turf.lineString(
-                feat.geometry.coordinates.filter((cc, i, list) => i < 1 || !eq(cc, list[i - 1]))
+                feat.geometry.coordinates.filter(
+                  (cc, i, list) => i < 1 || !coordsMatch(cc, list[i - 1])
+                )
               );
               snapped = turf.nearestPointOnLine(line, point2, { units: "meters" });
             }
@@ -554,9 +550,8 @@ export async function getNearby(coords, reverseRouteOrder) {
     return results.map((result) => ({... result, source: 'bcgnws', displayDistance: Math.round(result.distance)})).slice(0, 6);
   } catch (err) {
     console.error(err);
-    return [{ source: 'bcgnws', name: 'error', phrase: 'Problem retrieving population centres data. Refresh to try again.' }];
+    return [{ source: 'bcgnws', name: 'error', phrase: 'Problem retrieving population centres data.' }];
   }
-
 }
 
 export const convertToDateTimeLocalString = (date) => {
@@ -623,6 +618,7 @@ function getLine(coords, name) {
   return f;
 }
 
+
 /* Finds the nearest road segment on the underlying vector tile to the
  * coordinate, then finds the nearest point on that segment and returns that
  * point.
@@ -634,20 +630,24 @@ export function getSnapped(coordinate, pixel, map) {
   map.get('debug').getSource().remove(name);
 
   map.getFeaturesAtPixel(pixel, { hitTolerance: 50 })
-    .filter((f) => f.get('mvt:layer')?.startsWith('DRA Roads'))
-    .map((f) => {
-      const lines = multi(f.getFlatCoordinates(), f.getEnds().map(a => a), g2ll)
+    .filter((feature) => feature.get('mvt:layer')?.startsWith('DRA Roads'))
+    .map((feature) => {
+      const lines = multi(
+        feature.getFlatCoordinates(),
+        feature.getEnds().map(a => a),
+        g2ll
+      );
       const line = turf.multiLineString(lines);
-      f.debugLine = getLine(lines, name);
+      feature.debugLine = getLine(lines, name);
       // map.get('debug').getSource().addFeature(f.debugLine);
-      f.snapped = turf.nearestPointOnLine(line, point, { units: "meters" });
-      f.closest = !closest || f.snapped.properties.dist < closest.dist;
-      if (f.closest) {
+      feature.snapped = turf.nearestPointOnLine(line, point, { units: "meters" });
+      feature.closest = !closest || feature.snapped.properties.dist < closest.dist;
+      if (feature.closest) {
         if (closest) { closest.closest = false; }
-        closest = f;
+        closest = feature;
       }
-      f.dist = f.snapped.properties.dist;
-      return f;
+      feature.dist = feature.snapped.properties.dist;
+      return feature;
     });
 
   if (closest) {
