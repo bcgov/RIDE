@@ -125,7 +125,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
       </div>
 
       <div className="body">
-        {isChainup &&
+        {isChainup && event.chainup &&
           <div>
             <h3 className="direction">
               {event.name}
@@ -135,7 +135,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
               <h5>Detailed location</h5>
               <ul className="preview__group__shadow-box">
                 <li>
-                  {event.description}
+                  {event.chainup.description}
                 </li>
               </ul>
             </div>
