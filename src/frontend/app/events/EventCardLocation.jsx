@@ -44,8 +44,6 @@ export function EventCardLocation({ event }) {
   );
   const { startNearby, endNearby } = eventCardNearbyStrings(event);
 
-  console.log(event);
-
   return (
     <div className='event-card-place'>
       <div className='location'>
