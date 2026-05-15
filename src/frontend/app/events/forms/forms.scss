@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss" as *;
 
 .form {
 
@@ -416,6 +416,10 @@
                 color: rgb(30, 83, 167);
                 --fa-secondary-color: rgba(24, 148, 230, 0.75);
                 --fa-secondary-opacity: 0.75;
+              }
+
+              .fa-house-building, .fa-building {
+                width: 1.1em;
               }
 
               input {

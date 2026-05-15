@@ -34,7 +34,7 @@ import Tabs from '../../shared/Tabs';
 import History from '../History/History';
 
 
-import './forms.css';
+import './forms.scss';
 
 const ONE_HOUR = 1000 * 60 * 60;
 const ONE_WEEK = ONE_HOUR * 24 * 7

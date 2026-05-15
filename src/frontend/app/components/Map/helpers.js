@@ -123,6 +123,7 @@ export function createMap() {
     declutter: true,
     source: tileSource,
     style: function() { return null; }, // avoids displaying blueline default style before style loads
+    displayCategory: 'roadmap',
   });
 
   // highway symbol layer
@@ -130,6 +131,7 @@ export function createMap() {
     declutter: true,
     source: tileSource,
     style: function() { return null; }, // avoids displaying blueline default style before style loads
+    displayCategory: 'symbols',
   });
   // should be highest z-index so that highway symbols are always visible
   symbolLayer.setZIndex(200);
@@ -479,7 +481,7 @@ export function getDRA(coords, point, map) {
     });
 }
 
-const PopulationCenterTypes = [
+const MajorPopulationCenterTypes = [
   // 'Locality', // < 50
   // 'Community', // > 50, unincorporated
   'Village', // < 2,500
@@ -489,6 +491,11 @@ const PopulationCenterTypes = [
   'Town', // < 5,000
   'District Municipality (1)', // > 800 hectares, < 5 people/hectare
   'City', // > 5,000
+];
+
+const MinorPopulationCenterTypes = [
+  // 'Locality', // < 50
+  'Community', // > 50, unincorporated
 ];
 
 async function filterByTypes(features, types, fromCoords, reverseRouteOrder) {
@@ -512,15 +519,17 @@ async function filterByTypes(features, types, fromCoords, reverseRouteOrder) {
       name: feature.properties.name,
       type: feature.properties.featureType,
       coordinates: feature.geometry.coordinates,
+      coords: feature.geometry.coordinates,
       distance: route.distance,
       direction,
-      phrase: `${Math.round(route.distance)}km ${direction} of ${feature.properties.name}`
+      phrase: `${Math.round(route.distance)}km ${direction} of ${feature.properties.name}`,
+      size: types === MajorPopulationCenterTypes ? 'major' : 'minor',
     });
   }
   return results;
 };
 
-export async function getNearby(coords, reverseRouteOrder) {
+export async function getNearbyFromBCGNWS(coords, reverseRouteOrder) {
   try {
     const baseUrl = "https://apps.gov.bc.ca/pub/bcgnws/names/near";
     const params = {
@@ -545,7 +554,10 @@ export async function getNearby(coords, reverseRouteOrder) {
       throw Error(`BCGNWS request failed (status ${response.status})`, { cause: message.trim() });
     }
     const data = await response.json();
-    const results = await filterByTypes(data.features, PopulationCenterTypes, coords, reverseRouteOrder);
+    let results = await filterByTypes(data.features, MajorPopulationCenterTypes, coords, reverseRouteOrder);
+    if (results.length === 0) {
+      results.push(...await filterByTypes(data.features, MinorPopulationCenterTypes, coords, reverseRouteOrder));
+    }
     results.sort((a, b) => a.distance - b.distance);
     return results.map((result) => ({... result, source: 'bcgnws', displayDistance: Math.round(result.distance)})).slice(0, 6);
   } catch (err) {
