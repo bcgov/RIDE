@@ -15,9 +15,13 @@ import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifi
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faApartment,
   faArrowRightArrowLeft,
   faArrowRotateRight,
+  faBuilding,
+  faBuildings,
   faCity,
+  faHouseBuilding,
   faInputText,
   faMagnifyingGlass,
   faPlus,
@@ -43,7 +47,7 @@ import {
   bc2ll,
   g2bc,
   g2ll,
-  getNearby as getNearbyPopCenters,
+  getNearbyFromBCGNWS as getNearbyPopCenters,
   ll2bc,
   ll2g
 } from '../../../components/Map/helpers';
@@ -435,6 +439,8 @@ function getIcon(loc) {
     icon = ICONS[loc?.class] || faRoad;
   } else if (loc.type === 'other') {
     icon = faInputText;
+  } else if (loc.size === 'minor') {
+    icon = faBuilding;
   }
   return <FontAwesomeIcon icon={icon} />
 }
