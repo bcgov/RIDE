@@ -9,6 +9,7 @@ from rest_framework.serializers import ModelSerializer
 
 from config.settings import EVENT_PREFIX
 from .models import Event, Note, TrafficImpact, Condition
+from .open511 import build_event_description
 from .permissions import coords_from_start, user_may_use_point
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
@@ -54,6 +55,8 @@ class EventSerializer(KeyMoveSerializer):
     segment = SegmentSerializer(required=False, allow_null=True)
     chainup = ChainUpSerializer(required=False, allow_null=True)
     editable = fields.SerializerMethodField()
+    description = fields.SerializerMethodField()
+    ivr = fields.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -107,6 +110,12 @@ class EventSerializer(KeyMoveSerializer):
             return True
 
         return user_may_use_point(user, coords_from_start(obj.start))
+
+    def get_description(self, obj):
+        return build_event_description(obj)
+
+    def get_ivr(self, obj):
+        return build_event_description(obj, ivr=True)
 
     def to_internal_value(self, data):
         request = self.context.get("request")

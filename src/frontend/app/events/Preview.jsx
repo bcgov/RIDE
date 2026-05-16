@@ -1,15 +1,19 @@
 // React
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // External imports
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { format } from 'date-fns';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 // Internal imports
 import { desc } from './forms/Schedule';
 import { getConditionIcon, getPlainIcon } from './icons';
 import { PHRASES_LOOKUP, TrafficImpacts } from './references';
 import { selectFeature } from '../components/Map/helpers';
+import { post } from '../shared/helpers';
+import { API_HOST } from '../env';
 
 // Styling
 import './Preview.scss';
@@ -55,6 +59,22 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
 
   // States
   const [selectedSeg, setSelectedSeg] = useState(segments ? segments[0] : null);
+  const [computed, setComputed] = useState(null);
+
+  // Description / IVR with EventPreview (build_event_description)
+  useEffect(() => {
+    if (event.preview) return;
+    setComputed(null);
+    const handle = setTimeout(() => {
+      post(`${API_HOST}/api/events/description`, displayed)
+        .then((data) => setComputed({ description: data.description || '', ivr: data.ivr || '' }))
+        .catch(() => setComputed({ description: '', ivr: '' }));
+    }, 250);
+    return () => clearTimeout(handle);
+  }, [displayed, event.preview]);
+
+  const description = event.preview ? (displayed.description || '') : computed?.description;
+  const ivr = event.preview ? (displayed.ivr || '') : computed?.ivr;
 
   const conditions = displayed.conditions || [];
 
@@ -125,32 +145,6 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
       </div>
 
       <div className="body">
-        {isChainup && event.chainup &&
-          <div>
-            <h3 className="direction">
-              {event.name}
-            </h3>
-
-            <div className="preview__group">
-              <h5>Detailed location</h5>
-              <ul className="preview__group__shadow-box">
-                <li>
-                  {event.chainup.description}
-                </li>
-              </ul>
-            </div>
-
-            <div className="preview__group">
-              <h5>Who does this impact?</h5>
-              <ul className="preview__group__shadow-box">
-                <li>
-                  Chain-up requirements apply to a commercial vehicle with a weight of 11,794 kg or greater
-                </li>
-              </ul>
-            </div>
-          </div>
-        }
-
         {!segments && !isChainup &&
           <h3 className="direction">
             {!isRoadCondition && `${displayed.details?.direction} on `}
@@ -207,6 +201,60 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
             { startNearbies?.map((loc, ii) => <p key={`loc ${ii}`}>{loc}</p>) }
           </>
         }
+
+        {isChainup && event.chainup &&
+          <div>
+            <h3 className="direction">
+              {event.name}
+            </h3>
+
+            <div className="preview__group">
+              <h5>Detailed location</h5>
+              <ul className="preview__group__shadow-box">
+                <li>
+                  {event.chainup.description}
+                </li>
+              </ul>
+            </div>
+
+            <div className="preview__group">
+              <h5>Who does this impact?</h5>
+              <ul className="preview__group__shadow-box">
+                <li>
+                  Chain-up requirements apply to a commercial vehicle with a weight of 11,794 kg or greater
+                </li>
+              </ul>
+            </div>
+          </div>
+        }
+
+        {!isChainup &&
+          <div className="preview__group">
+            <h5>Description</h5>
+            <ul className="preview__group__shadow-box">
+              <li>
+                {description == null ?
+                  <Skeleton width="100%" height={16} count={2} /> :
+                  description
+                }
+              </li>
+            </ul>
+          </div>
+        }
+
+        {/*/!**/}
+          <div className="preview__group">
+            <h5>IVR</h5>
+            <ul className="preview__group__shadow-box">
+              <li>
+                {ivr == null ?
+                  <Skeleton width="100%" height={16} count={4} /> :
+                  ivr
+                }
+              </li>
+            </ul>
+          </div>
+        {/**!/*/}
 
         { displayed.impacts.length > 0 &&
           <>

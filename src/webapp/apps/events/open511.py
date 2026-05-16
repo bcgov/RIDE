@@ -67,33 +67,86 @@ def build_event_description(target_event, ivr=False):
         match = TrafficImpact.objects.filter(id=impact_id).first()
         return match.label if match else None
 
+    def get_location_description():
+        start_locations = target_event.start[
+            'nearby'] if 'nearby' in target_event.start else []  # target_event.start is mandatory
+        has_start_locations = start_locations and len(start_locations) > 0
+        start_point_name = target_event.start['ROAD_NAME_ALIAS1']
+
+        end_locations = target_event.end['nearby'] if target_event.end and 'nearby' in target_event.end else []
+
+        # Start descriptions
+        res = ' from ' if target_event.end else ' at '
+        res += start_point_name
+
+        # Add phrase from first start ref location
+        if has_start_locations:
+            res += ', ' + start_locations[0]['phrase']
+
+        # End descriptions
+        if target_event.end:  # end point is optional
+            end_point_name = target_event.end['ROAD_NAME_ALIAS1']
+            has_different_name = start_point_name != end_point_name
+            has_ref_locs = len(end_locations) > 0
+
+            if has_different_name or has_ref_locs:
+                res += ' to '
+
+                # Skip road name if identical between start and end
+                if has_different_name:
+                    res += target_event.end['ROAD_NAME_ALIAS1'] + ', '
+
+                # Add phrase from first end ref location
+                if has_ref_locs:
+                    res += end_locations[0]['phrase']
+
+        return res
+
     parts = []
 
-    # 1) Situation
+    # Situation
     if target_event.situation and target_event.situation in PHRASES_LOOKUP:
-        parts.append(sentence(f"{PHRASES_LOOKUP[target_event.situation]}"))
+        # Non-rc location for IVR
+        sitn_loc_description = get_location_description() if ivr else ''
+        parts.append(sentence(PHRASES_LOOKUP[target_event.situation] + sitn_loc_description))
 
-    # DBC22-6236: Added conditions for road conditions
-    if target_event.event_type == EventType.ROAD_CONDITION:
+    # Rcs and chainups
+    if target_event.event_type == EventType.ROAD_CONDITION or target_event.event_type == EventType.CHAIN_UP:
         conditions_prefix = ''
-        for index, condition in enumerate(target_event.conditions):
-            if index > 0:
-                if index == len(target_event.conditions) - 1:
-                    conditions_prefix += " and "
 
-                else:
-                    conditions_prefix += ", "
+        # Conditions for rcs
+        if target_event.event_type == EventType.ROAD_CONDITION:
+            for index, condition in enumerate(target_event.conditions):
+                if index > 0:
+                    if index == len(target_event.conditions) - 1:
+                        conditions_prefix += " and "
 
-            conditions_prefix += f"{condition['label']}"
+                    else:
+                        conditions_prefix += ", "
 
-        # Omit location description for non-ivr call
-        segment_description = ''
-        if ivr and target_event.segment:
-            segment_description = target_event.segment.description.split(',')[1]
+                conditions_prefix += f"{condition['label']}"
 
-        parts.append(sentence(conditions_prefix + segment_description))
+        # Static text for chainups
+        else:
+            conditions_prefix = 'Commercial chain up in effect on '
 
-    # 2) Schedule
+        # Location for IVR
+        loc_description = ''
+        if ivr:
+            # Bulk rcs
+            if target_event.segment:
+                loc_description = target_event.segment.description.split(',')[1]
+
+            # Non-segment rcs
+            elif target_event.chainup:
+                loc_description = target_event.chainup.name
+
+            else:
+                loc_description = get_location_description()
+
+        parts.append(sentence(conditions_prefix + loc_description))
+
+    # Schedule
     if target_event.start_time or target_event.end_time:
         start_s = format_short_date(target_event.start_time)
         end_s = format_short_date(target_event.end_time)
@@ -124,18 +177,18 @@ def build_event_description(target_event, ivr=False):
         elif end_time:
             parts.append(sentence(f"Until {end_time} PST on {day_text}"))
 
-    # 3) Estimated delay amount/unit
+    # Estimated delay amount/unit
     if target_event.delay_amount:
         unit = target_event.delay_unit or "minutes"
         parts.append(sentence(f"Expect {target_event.delay_amount} {unit} delay"))
 
-    # 4) Impacts
+    # Impacts
     for impact in target_event.impacts or []:
         label = get_impact_label(impact)
         if label:
             parts.append(sentence(label))
 
-    # 5) Restrictions
+    # Restrictions
     for restriction in target_event.restrictions or []:
         label = restriction.get("label")
         text = restriction.get("text")
@@ -146,7 +199,7 @@ def build_event_description(target_event, ivr=False):
         elif text:
             parts.append(sentence(text))
 
-    # 6) Additional
+    # Additional
     if target_event.additional:
         parts.append(sentence(target_event.additional))
 
