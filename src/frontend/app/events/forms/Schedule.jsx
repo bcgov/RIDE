@@ -3,8 +3,6 @@ import { format } from 'date-fns';
 import Tooltip from '../Tooltip';
 import { DraggableRows } from '../shared';
 
-let idc = 0;
-
 function getTz(datetime) {
   if (!datetime) { return undefined; }
   datetime = new Date(datetime);
@@ -204,11 +202,9 @@ function Schedule({ id, item, change, update, current, dispatch, index, errors }
 
 export default function Scheduled({ errors, event, dispatch }) {
 
-  const id = ++idc;
-
   const hasErrors = errors.inEffect || errors.startTime || errors.endTime;
 
-  return <div key={'a' + id}>
+  return <div>
     <div className={`subtitle ${hasErrors && 'error'}`}>
       <p>
         <strong>In Effect</strong>
