@@ -1,4 +1,8 @@
+import copy
+import datetime
 import json
+from dataclasses import dataclass, field
+
 from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import status
 from rest_framework import viewsets
@@ -8,6 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.events.models import Event, Condition
+from apps.events.open511 import build_event_description
 from apps.events.permissions import EventServiceAreaPermission
 from apps.events.serializers import EventSerializer, EventHistorySerializer, EventDiffSerializer, ConditionSerializer
 from apps.organizations.models import ServiceArea
@@ -20,6 +25,26 @@ from .serializers import NoteSerializer, PendingSerializer, RcSerializer, ChainU
 from .serializers import TrafficImpactSerializer
 
 
+@dataclass
+class EventPreview:
+    """Subset of Event fields for build_event_description (unsaved API payloads)."""
+    situation: int = 0
+    event_type: str | None = None
+    conditions: list = field(default_factory=list)
+    start_time: datetime.datetime | None = None
+    end_time: datetime.datetime | None = None
+    schedules: list = field(default_factory=list)
+    delay_amount: int = 0
+    delay_unit: str = 'minutes'
+    impacts: list = field(default_factory=list)
+    restrictions: list = field(default_factory=list)
+    additional: str = ''
+    segment: Segment | None = None
+    start: dict = field(default_factory=dict)
+    end: dict | None = None
+    chainup: dict | None = None
+
+
 class Events(viewsets.ModelViewSet):
     queryset = Event.last.all()
     serializer_class = EventSerializer
@@ -29,6 +54,47 @@ class Events(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update'):
             return [(IsApprover | EventServiceAreaPermission)()]
         return [AllowAny()]
+
+    @action(detail=False, methods=['post'], url_path='description')
+    def preview_description(self, request):
+        # Builds preview description / IVR from an unsaved form payload
+        data = copy.deepcopy(request.data) if isinstance(request.data, dict) else json.loads(json.dumps(request.data))
+        EventSerializer(data=data, partial=True, context={'request': request})  # mutates data via move_keys
+
+        def parse_dt(value):
+            try:
+                return datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+            except (TypeError, ValueError, AttributeError):
+                return None
+
+        segment_data = data.get('segment')
+        segment = Segment.objects.filter(uuid=segment_data['uuid']).first() if segment_data else None
+
+        chainup_data = data.get('chainup')
+        chainup = ChainUp.objects.filter(uuid=chainup_data['uuid']).first() if chainup_data else None
+
+        preview_data = EventPreview(
+            situation=data.get('situation') or 0,
+            event_type=data.get('event_type'),
+            conditions=data.get('conditions') or [],
+            start_time=parse_dt(data.get('start_time')),
+            end_time=parse_dt(data.get('end_time')),
+            schedules=data.get('schedules') or [],
+            delay_amount=data.get('delay_amount') or 0,
+            delay_unit=data.get('delay_unit') or 'minutes',
+            impacts=data.get('impacts') or [],
+            restrictions=data.get('restrictions') or [],
+            additional=data.get('additional') or '',
+            segment=segment,
+            start=data.get('start') or {},
+            end=data.get('end'),
+            chainup=chainup,
+        )
+
+        return Response({
+            'description': build_event_description(preview_data),
+            'ivr': build_event_description(preview_data, ivr=True),
+        })
 
     @action(detail=True)
     def history(self, request, id):
