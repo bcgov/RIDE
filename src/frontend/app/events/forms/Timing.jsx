@@ -3,8 +3,6 @@ import { format } from 'date-fns';
 import Tooltip from '../Tooltip';
 
 
-let idc = 0;
-
 function getTz(datetime) {
   if (!datetime) { return undefined; }
   datetime = new Date(datetime);
@@ -20,13 +18,10 @@ function normalized(datestring) {
 }
 
 export default function EventTiming({ errors, event, dispatch, isRoadCondition }) {
-
-  const id = ++idc;
-
   const hasErrors = errors['nextUpdate'] || errors.endTime || errors['Manage Timing By']
   const timingError = isRoadCondition ? errors['nextUpdate'] : errors['Manage Timing By'];
 
-  return <div key={'a' + id}>
+  return <div>
     <div className={`title ${hasErrors ? 'error' : ''}`}>
       <p>
         <strong>{isRoadCondition ? 'Next update' : 'Event Timing'}</strong>
