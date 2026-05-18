@@ -92,7 +92,7 @@ export default class RcsForm extends EventForm {
   /* Handlers */
   handleSubmit = (e) => {
     e.preventDefault();
-    const { segPks, event, callback } = this.props;
+    const { segPks, event, callback, setAlertContext } = this.props;
     const errors = {};
 
     // Validate nextUpdate time cannot be null
@@ -128,9 +128,16 @@ export default class RcsForm extends EventForm {
 
     // Only proceed if there are no validation errors
     if (Object.keys(errors).length === 0) {
-      bulkUpdateRcs(segPks, event).then((response) => {
-        if (response.status === 202) {
-          callback(response);
+      bulkUpdateRcs(segPks, event).then(({ ok, data }) => {
+        // Show error message on Open511 sync error
+        if (!ok) {
+          const messages = data?.open511 || [data?.detail || 'Could not save road conditions'];
+          setAlertContext?.({ message: `Sync to Open511 failed: ${messages.join('\n')}` });
+          return;
+        }
+
+        if (data?.status === 202) {
+          callback({ status: data.status, data: data.data });
         }
       });
     }

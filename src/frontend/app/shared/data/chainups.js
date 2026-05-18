@@ -1,6 +1,17 @@
 import { API_HOST } from '../../env.js';
-import { get, post } from "../helpers.js";
+import { get, getCookie } from "../helpers.js";
 import { getInitialEvent } from "../../events/forms";
+
+const postChainUpEvents = (path, body) =>
+  fetch(`${API_HOST}/api/chainup-events/${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+    },
+    credentials: 'include',
+    body: JSON.stringify(body),
+  }).then(response => response.json().then(data => ({ ok: response.ok, data })));
 
 export function getChainUps() {
   return get(`${API_HOST}/api/chainups`, {});
@@ -19,9 +30,9 @@ export function getChainUpEvents() {
 }
 
 export function toggleChainUps(chainupPks, event) {
-  return post(`${API_HOST}/api/chainup-events/toggle`, { chainupPks, eventData: event });
+  return postChainUpEvents('toggle', { chainupPks, eventData: event });
 }
 
 export function reconfirmChainUps(chainupPks) {
-  return post(`${API_HOST}/api/chainup-events/reconfirm`, { chainupPks });
+  return postChainUpEvents('reconfirm', { chainupPks });
 }

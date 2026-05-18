@@ -4,10 +4,11 @@ import json
 from dataclasses import dataclass, field
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import transaction
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -195,57 +196,62 @@ class RoadConditions(Events):
             )
 
         updated_events = []
-        for seg_pk in segPks:
-            try:
-                segment = Segment.objects.get(uuid=seg_pk)
+        try:
+            with transaction.atomic():
+                for seg_pk in segPks:
+                    try:
+                        segment = Segment.objects.get(uuid=seg_pk)
 
-                existing_event = Event.objects.filter(segment=segment, event_type=EventType.ROAD_CONDITION, latest=True, status='Active').first()
+                        existing_event = Event.objects.filter(segment=segment, event_type=EventType.ROAD_CONDITION, latest=True, status='Active').first()
 
-                # Convert segment geometry to GeoJSON format
-                geometry_geojson = None
-                if segment.geometry:
-                    # Create GeoJSON GeometryCollection with the segment's LineString
-                    geometry_geojson = {
-                        'type': 'GeometryCollection',
-                        'geometries': [
-                            json.loads(segment.geometry.json)  # Convert LineString to GeoJSON
-                        ]
-                    }
+                        # Convert segment geometry to GeoJSON format
+                        geometry_geojson = None
+                        if segment.geometry:
+                            # Create GeoJSON GeometryCollection with the segment's LineString
+                            geometry_geojson = {
+                                'type': 'GeometryCollection',
+                                'geometries': [
+                                    json.loads(segment.geometry.json)  # Convert LineString to GeoJSON
+                                ]
+                            }
 
-                default_event_data = {
-                    'id': existing_event.id if existing_event else None,
-                    'conditions': event_data.get('conditions', []),
-                    'segment': seg_pk,
-                    'geometry': geometry_geojson,
-                    'location': {
-                        'start': {'coords': segment.primary_point.coords},
-                        'end': {'coords': segment.secondary_point.coords} if segment.secondary_point else None
-                    },
-                    'status': 'Active',
-                    'meta': {},  # Ensure meta is always a dict
-                }
+                        default_event_data = {
+                            'id': existing_event.id if existing_event else None,
+                            'conditions': event_data.get('conditions', []),
+                            'segment': seg_pk,
+                            'geometry': geometry_geojson,
+                            'location': {
+                                'start': {'coords': segment.primary_point.coords},
+                                'end': {'coords': segment.secondary_point.coords} if segment.secondary_point else None
+                            },
+                            'status': 'Active',
+                            'meta': {},  # Ensure meta is always a dict
+                        }
 
-                merged_data = {**event_data, **default_event_data}
+                        merged_data = {**event_data, **default_event_data}
 
-                # Use RcSerializer to validate and save
-                # The serializer will handle user via CurrentUserDefault() and meta via default
-                serializer = RcSerializer(
-                    instance=existing_event,
-                    data=merged_data,
-                    context={'request': request}
-                )
+                        # Use RcSerializer to validate and save
+                        # The serializer will handle user via CurrentUserDefault() and meta via default
+                        serializer = RcSerializer(
+                            instance=existing_event,
+                            data=merged_data,
+                            context={'request': request}
+                        )
 
-                if serializer.is_valid():
-                    event = serializer.save()
-                    updated_events.append(RcSerializer(event, context={'request': request}).data)
-                else:
-                    # Log validation errors for debugging
-                    print(f"Validation errors for segment {seg_pk}: {serializer.errors}")
-                    continue
+                        if serializer.is_valid():
+                            event = serializer.save()
+                            updated_events.append(RcSerializer(event, context={'request': request}).data)
+                        else:
+                            # Log validation errors for debugging
+                            print(f"Validation errors for segment {seg_pk}: {serializer.errors}")
+                            continue
 
-            except Segment.DoesNotExist:
-                # Skip segments that don't exist
-                continue
+                    except Segment.DoesNotExist:
+                        # Skip segments that don't exist
+                        continue
+        except ValidationError as exc:
+            # Roll back the whole batch and surface the Open511 sync error to the frontend
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status': status.HTTP_202_ACCEPTED, 'data': updated_events}, status=status.HTTP_202_ACCEPTED)
 
@@ -263,57 +269,62 @@ class ChainUps(Events):
             return Response({'error': 'invalid chainupPks or eventData'}, status=status.HTTP_400_BAD_REQUEST)
 
         toggled_events = []
-        for chainup_pk in chainupPks:
-            try:
-                chainup = ChainUp.objects.get(uuid=chainup_pk)
-                existing_event = Event.objects.filter(chainup=chainup, event_type=EventType.CHAIN_UP, latest=True).order_by('-created').first()
+        try:
+            with transaction.atomic():
+                for chainup_pk in chainupPks:
+                    try:
+                        chainup = ChainUp.objects.get(uuid=chainup_pk)
+                        existing_event = Event.objects.filter(chainup=chainup, event_type=EventType.CHAIN_UP, latest=True).order_by('-created').first()
 
-                next_status = 'Inactive' if existing_event and existing_event.status == 'Active' else 'Active'
+                        next_status = 'Inactive' if existing_event and existing_event.status == 'Active' else 'Active'
 
-                geometry_geojson = None
-                if chainup.geometry:
-                    geometry_geojson = {
-                        'type': 'GeometryCollection',
-                        'geometries': [json.loads(chainup.geometry.json)]
-                    }
+                        geometry_geojson = None
+                        if chainup.geometry:
+                            geometry_geojson = {
+                                'type': 'GeometryCollection',
+                                'geometries': [json.loads(chainup.geometry.json)]
+                            }
 
-                default_event_data = {
-                    'id': existing_event.id if existing_event and next_status == 'Inactive' else None,
-                    'type': EventType.CHAIN_UP.value,
-                    'chainup': chainup_pk,
-                    'geometry': geometry_geojson,
-                    'location': {
-                        'start': {'coords': chainup.primary_point.coords},
-                        'end': {'coords': chainup.secondary_point.coords} if chainup.secondary_point else None
-                    },
-                    'status': next_status,
-                    'meta': {},
-                }
+                        default_event_data = {
+                            'id': existing_event.id if existing_event and next_status == 'Inactive' else None,
+                            'type': EventType.CHAIN_UP.value,
+                            'chainup': chainup_pk,
+                            'geometry': geometry_geojson,
+                            'location': {
+                                'start': {'coords': chainup.primary_point.coords},
+                                'end': {'coords': chainup.secondary_point.coords} if chainup.secondary_point else None
+                            },
+                            'status': next_status,
+                            'meta': {},
+                        }
 
-                merged_data = {**event_data, **default_event_data}
-                merged_data.setdefault('timing', {})
-                merged_data['timing']['nextUpdate'] = (
-                    get_chainup_next_update().isoformat() if next_status == 'Active' else None
-                )
+                        merged_data = {**event_data, **default_event_data}
+                        merged_data.setdefault('timing', {})
+                        merged_data['timing']['nextUpdate'] = (
+                            get_chainup_next_update().isoformat() if next_status == 'Active' else None
+                        )
 
-                # Convert to JSON string and back to dict to ensure proper serialization
-                merged_data = json.loads(json.dumps(merged_data, cls=DjangoJSONEncoder))
+                        # Convert to JSON string and back to dict to ensure proper serialization
+                        merged_data = json.loads(json.dumps(merged_data, cls=DjangoJSONEncoder))
 
-                serializer = ChainUpEventSerializer(
-                    instance=existing_event if existing_event and next_status == 'Inactive' else None,
-                    data=merged_data,
-                    context={'request': request}
-                )
+                        serializer = ChainUpEventSerializer(
+                            instance=existing_event if existing_event and next_status == 'Inactive' else None,
+                            data=merged_data,
+                            context={'request': request}
+                        )
 
-                if serializer.is_valid():
-                    event = serializer.save()
-                    toggled_events.append(ChainUpEventSerializer(event, context={'request': request}).data)
-                else:
-                    # Log validation errors for debugging
-                    print(f"Validation errors for chainup {chainup_pk}: {serializer.errors}")
+                        if serializer.is_valid():
+                            event = serializer.save()
+                            toggled_events.append(ChainUpEventSerializer(event, context={'request': request}).data)
+                        else:
+                            # Log validation errors for debugging
+                            print(f"Validation errors for chainup {chainup_pk}: {serializer.errors}")
 
-            except ChainUp.DoesNotExist:
-                continue
+                    except ChainUp.DoesNotExist:
+                        continue
+        except ValidationError as exc:
+            # Roll back the whole batch and surface the Open511 sync error to the frontend
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status': status.HTTP_202_ACCEPTED, 'data': toggled_events}, status=status.HTTP_202_ACCEPTED)
 
@@ -324,14 +335,19 @@ class ChainUps(Events):
             return Response({'error': 'chainupPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
 
         reconfirmed_events = []
-        existing_events = Event.current.filter(chainup_id__in=chainupPks, event_type=EventType.CHAIN_UP)
-        for event in existing_events:
-            if event.status != 'Active':
-                continue
-            event.next_update = get_chainup_next_update()
-            event.user = request.user
-            event.save()
-            reconfirmed_events.append(ChainUpEventSerializer(event, context={'request': request}).data)
+        try:
+            with transaction.atomic():
+                existing_events = Event.current.filter(chainup_id__in=chainupPks, event_type=EventType.CHAIN_UP)
+                for event in existing_events:
+                    if event.status != 'Active':
+                        continue
+                    event.next_update = get_chainup_next_update()
+                    event.user = request.user
+                    event.save()
+                    reconfirmed_events.append(ChainUpEventSerializer(event, context={'request': request}).data)
+        except ValidationError as exc:
+            # Roll back the whole batch and surface the Open511 sync error to the frontend
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status': status.HTTP_202_ACCEPTED, 'data': reconfirmed_events}, status=status.HTTP_202_ACCEPTED)
 
