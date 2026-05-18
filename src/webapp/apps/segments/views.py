@@ -53,45 +53,6 @@ class ChainUpAPIView(ModelViewSet):
 
         return qs.extra(select={'id_int': 'CAST(id AS INTEGER)'}).order_by('id_int')
 
-    @action(detail=False, methods=['post'], url_path='toggle')
-    def toggle(self, request):
-        uuids = request.data.get('uuids', [])
-        if not isinstance(uuids, list):
-            return Response({'error': 'uuids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
-
-        toggled = []
-        chainups = ChainUp.current.filter(uuid__in=uuids)
-        for chainup in chainups:
-            chainup.active = not chainup.active
-            chainup.user = request.user
-
-            if chainup.active:
-                chainup.next_update = datetime.datetime.now(tz=ZoneInfo("America/Vancouver")) + datetime.timedelta(days=1)
-
-            else:
-                chainup.next_update = None
-
-            chainup.save()
-            toggled.append(ChainUpSerializer(chainup).data)
-
-        return Response({'status': status.HTTP_202_ACCEPTED, 'data': toggled}, status=status.HTTP_202_ACCEPTED)
-
-    @action(detail=False, methods=['post'], url_path='reconfirm')
-    def reconfirm(self, request):
-        uuids = request.data.get('uuids', [])
-        if not isinstance(uuids, list):
-            return Response({'error': 'uuids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
-
-        reconfirmed = []
-        chainups = ChainUp.current.filter(uuid__in=uuids)
-        for chainup in chainups:
-            chainup.next_update = datetime.datetime.now(tz=ZoneInfo("America/Vancouver")) + datetime.timedelta(days=1)
-            chainup.user = request.user
-            chainup.save()
-            reconfirmed.append(ChainUpSerializer(chainup).data)
-
-        return Response({'status': status.HTTP_202_ACCEPTED, 'data': reconfirmed}, status=status.HTTP_202_ACCEPTED)
-
 
 def route_sort_key(route):
     """Sort highways first by number, then non-highways alphabetically."""

@@ -1,5 +1,5 @@
 import { API_HOST } from '../../env.js';
-import {get, post} from "../helpers.js";
+import {get, getCookie, post} from "../helpers.js";
 
 
 export function getRcs() {
@@ -28,5 +28,13 @@ export function bulkUpdateRcs(segPks, event) {
     segPks: segPks
   }
 
-  return post(`${API_HOST}/api/rcs/bulk_update`, payload);
+  return fetch(`${API_HOST}/api/rcs/bulk_update`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  }).then(response => response.json().then(data => ({ ok: response.ok, data })));
 }

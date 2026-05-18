@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 import requests
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
+from rest_framework.exceptions import ValidationError
 
 from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType, PHRASES_LOOKUP
 from apps.events.roads import roads
@@ -484,11 +485,16 @@ def sync_open511_data(event):
         if 'success' in data and data['success']:
             return
 
+        # Roll back the Event.save() transaction and surface error to the frontend
         try:
             if 'event_validation_errors' in data:
                 errors = list(data['event_validation_errors'].values())[0]
                 for error in errors:
                     logger.warning(f'validation error while syncing event {event.id} to Open511: {error}')
 
+                raise ValidationError({'open511': errors})
+
         except:
-            logger.warning(f"unknown error while syncing event {event.id} to Open511")
+            unknown_err_message = f"unknown error while syncing event {event.id} to Open511"
+            logger.warning(unknown_err_message)
+            raise ValidationError({'open511': [unknown_err_message]})

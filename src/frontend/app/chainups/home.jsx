@@ -153,9 +153,16 @@ export default function Home() {
 
   /* Handlers */
   const updateChainups = (response, message) => {
-    if (response.status === 202) {
+    // Show error message on Open511 sync error
+    if (!response.ok) {
+      const messages = response.data?.open511 || [response.data?.detail || 'Could not save chain-up'];
+      setAlertContext({ message: `Sync to Open511 failed: ${messages.join('\n')}` });
+      return;
+    }
+
+    if (response.data?.status === 202) {
       const newChainupsMap = { ...chainupsMap };
-      response.data.forEach(event => {
+      response.data.data.forEach(event => {
         const chainupPk = event.chainup;
         if (chainupPk) {
           newChainupsMap[chainupPk] = event;

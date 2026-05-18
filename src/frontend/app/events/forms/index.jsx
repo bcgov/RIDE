@@ -666,8 +666,15 @@ export default class EventForm extends Component {
         credentials: 'include',
         body: JSON.stringify(form),
 
-      }).then(response => response.json())
-        .then(data => {
+      }).then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+          // Show error message on Open511 sync error
+          if (!ok) {
+            const messages = data?.open511 || [data?.detail || 'Could not save event'];
+            setAlertContext?.({ message: `Sync to Open511 failed: ${messages.join('\n')}` });
+            return;
+          }
+
           const event_type = event.type === 'ROAD_CONDITION' ? 'Road condition' : event.type;
           cancel();
           addEvent(data, map, dispatch, visibleLayers);
