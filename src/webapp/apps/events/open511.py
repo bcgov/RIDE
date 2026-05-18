@@ -227,17 +227,15 @@ def format_open511_datetime(value):
 
 
 def build_open511_schedule(target_event):
-    """Build the Open511 ``schedule`` object for an :class:`~apps.events.models.Event`."""
-    start = format_open511_datetime(target_event.start_time)
-    end = format_open511_datetime(target_event.end_time)
-    if start and end:
-        interval = f"{start}/{end}"
-    elif start and not end:
-        interval = f"{start}/"
-    elif end and not start:
-        interval = f"/{end}"
-    else:
-        interval = f"{format_open511_datetime(target_event.created)}/"
+    # Start time is mandatory, fallback to created time if missing
+    start_time_str = target_event.start_time if target_event.start_time else target_event.created
+    start = format_open511_datetime(start_time_str)
+    interval = f"{start}/"
+
+    # End time is optional
+    end = format_open511_datetime(target_event.end_time) if target_event.end_time else ''
+    interval += f"{end}"
+
     return {"intervals": [interval]}
 
 
