@@ -235,8 +235,49 @@ class EventSerializer(KeyMoveSerializer):
             return f'{EVENT_PREFIX}-{int(event.id.split('-')[-1]) + 1}'
 
 
+def notes_diff_for_event_version(event):
+    '''
+    Return note add/update/remove changes that occurred between the prior
+    event version and this one (by last_updated timestamp).
+    '''
+    prior = event.prior() if event.version > 0 else None
+    start = prior.last_updated if prior else None
+    end = event.last_updated
+
+    qs = Note.objects.filter(event=str(event.id), last_updated__lte=end)
+    if start:
+        qs = qs.filter(last_updated__gt=start)
+
+    result = {}
+    for note in qs.order_by('id', 'version'):
+        if note.deleted:
+            prior_note = note.prior()
+            result.setdefault('remove', []).append({
+                'id': note.id,
+                'text': prior_note.text if prior_note else note.text,
+            })
+        elif note.version == 0:
+            result.setdefault('add', []).append({'id': note.id, 'text': note.text})
+        else:
+            prior_note = note.prior()
+            if prior_note and prior_note.text != note.text:
+                result.setdefault('change', []).append({
+                    'id': note.id,
+                    'previous': prior_note.text,
+                    'current': note.text,
+                })
+
+    return result
+
+
 class EventHistorySerializer(EventSerializer, HistorySerializer):
-    pass
+
+    def get_diff(self, obj):
+        changes = obj.diff()
+        notes_diff = notes_diff_for_event_version(obj)
+        if notes_diff:
+            changes['internal'] = notes_diff
+        return changes
 
 
 class EventDiffSerializer(EventSerializer, HistorySerializer):

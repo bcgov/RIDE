@@ -185,8 +185,28 @@ export function external(event, diff) {
   return [{ label: `${verb} more information link`, icon, verb, previous, current }];
 }
 
+export function internal(event, diff) {
+  const items = [];
+  diff.add?.forEach((add) => {
+    items.push({ label: 'Added internal note', icon: faPlus, verb: 'Added', current: add.text });
+  });
+  diff.remove?.forEach((remove) => {
+    items.push({ label: 'Removed internal note', icon: faMinus, verb: 'Removed', previous: remove.text });
+  });
+  diff.change?.forEach((change) => {
+    items.push({
+      label: 'Updated internal note',
+      icon: faArrowsRotate,
+      verb: 'Updated',
+      previous: change.previous,
+      current: change.current,
+    });
+  });
+  return items;
+}
+
 export default {
-  location, details, impacts, delays, restrictions, timing, schedule, conditions, additional, external
+  location, details, impacts, delays, restrictions, timing, schedule, conditions, additional, external, internal
 };
 
 function getTypeOfChange(current, previous) {

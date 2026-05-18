@@ -30,10 +30,11 @@ const GROUPING = {
   end_time: 'timing',
   ongoing: 'timing',
   schedules: 'timing',
-  link: 'external'
+  link: 'external',
+  notes: 'internal',
 }
 
-const GROUP_ORDER = ['location', 'details', 'impacts', 'delays', 'restrictions', 'conditions', 'timing', 'schedule', 'additional', 'external'];
+const GROUP_ORDER = ['location', 'details', 'impacts', 'delays', 'restrictions', 'conditions', 'timing', 'schedule', 'additional', 'external', 'internal'];
 
 const GROUPS = {
   start: {
@@ -79,6 +80,10 @@ const GROUPS = {
   external: {
     label: 'Additional details external site',
     preprocessor: funcs.external,
+  },
+  internal: {
+    label: 'Internal Notes',
+    preprocessor: funcs.internal,
   },
 };
 
