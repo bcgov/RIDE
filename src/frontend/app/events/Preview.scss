@@ -176,11 +176,27 @@
       text-align: center;
       padding: 0.5rem;
       color: $ViewDetailsText;
-      a { font-weight: bold; }
+      border-radius: 4px;
+      background: $Grey10;
 
-      background: $ViewDetailsText;
+      &:hover {
+        background: $ViewDetailsText;
+        color: $Grey10;
+        cursor: pointer;
+
+        a { 
+          color: $Grey10;
+          text-decoration: underline;
+        }
+      }
+
+      a { 
+        font-weight: bold;
+        color: $ViewDetailsText;
+      }
+
       svg {
-        margin-left: 1rem;
+        margin-left: 8px;
       }
     }
 
