@@ -10,6 +10,9 @@ class Organization(BaseModel):
     contact_name = models.CharField(max_length=60, blank=True, default='')
     contact_id = models.CharField(max_length=60, blank=True, default='')
 
+    def __str__(self):
+        return f'{self.name}'
+
 
 class ServiceArea(BaseModel):
     id = models.PositiveSmallIntegerField(primary_key=True)
@@ -19,3 +22,9 @@ class ServiceArea(BaseModel):
     geometry = gis.PolygonField(geography=True, srid=4326, blank=True, null=True)
     segments = OrderedListField(default=list)
     routes = OrderedListField(default=list)
+
+    def __str__(self):
+        return f'{self.name}{' district' if self.parent is None else ''} - {self.sortingOrder}'
+    
+    class Meta:
+        ordering = ['sortingOrder']

@@ -11,6 +11,9 @@ class Route(BaseModel):
 
     last_updated = models.DateTimeField(auto_now=True, editable=False, null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class SegmentBase(VersionedModel):
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
@@ -28,6 +31,9 @@ class SegmentBase(VersionedModel):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return self.name
+
 
 class Segment(SegmentBase):
     pass
@@ -35,3 +41,4 @@ class Segment(SegmentBase):
 
 class ChainUp(SegmentBase):
     area = models.ForeignKey(ServiceArea, on_delete=models.CASCADE)
+
