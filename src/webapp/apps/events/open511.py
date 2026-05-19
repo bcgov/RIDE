@@ -88,7 +88,7 @@ def build_event_description(target_event, ivr=False):
         if target_event.end:  # end point is optional
             end_point_name = target_event.end['ROAD_NAME_ALIAS1'] or target_event.end['ROAD_NAME_FULL']
             has_different_name = start_point_name != end_point_name
-            has_ref_locs = len(end_locations) > 0
+            has_ref_locs = end_locations and len(end_locations) > 0
 
             if has_different_name or has_ref_locs:
                 res += ' to '
