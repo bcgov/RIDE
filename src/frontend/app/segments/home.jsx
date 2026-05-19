@@ -518,7 +518,8 @@ export default function Home() {
                   }}
                   event={event}
                   dispatch={dispatch}
-                  callback={bulkUpdateCallback} />
+                  callback={bulkUpdateCallback}
+                  setAlertContex={setAlertContext} />
               </div>
             </div>
           </div>

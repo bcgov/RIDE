@@ -484,7 +484,7 @@ export default class EventForm extends Component {
   handleSubmit = (e, submitLabel, overrides={}) => {
     e.preventDefault();
     const err = {};
-    const { event, map, dispatch, visibleLayers, cancel, setMessage } = this.props;
+    const { event, map, dispatch, visibleLayers, cancel, setAlertContext } = this.props;
 
     const form = {...structuredClone(event), ...overrides};
 
@@ -665,15 +665,19 @@ export default class EventForm extends Component {
         },
         credentials: 'include',
         body: JSON.stringify(form),
+
       }).then(response => response.json())
         .then(data => {
           const event_type = event.type === 'ROAD_CONDITION' ? 'Road condition' : event.type;
           cancel();
           addEvent(data, map, dispatch, visibleLayers);
           dispatch({ type: 'reset form' });
-          setMessage(`${event_type} successfully ${label}`);
-          setTimeout(() => setMessage(''), 5000);
+          setAlertContext({
+            type: 'success',
+            message: `${event_type} successfully ${label}`,
+          });
         });
+
     } else {
       console.log('Errors', err);
     }
@@ -857,6 +861,10 @@ export default class EventForm extends Component {
                       { timing: { nextUpdate: pendingNextUpdate.toISOString() } },
                     ).then((event) => {
                       dispatch({ type: 'reset form', cancel: true, value: event, showPreview: true, showForm: false });
+                      this.props.setAlertContext({
+                        type: 'success',
+                        message: 'Event reconfirmed',
+                      });
                     });
                   }
                 }}
@@ -876,6 +884,10 @@ export default class EventForm extends Component {
                     { status: 'Inactive' },
                   ).then((updatedEvent) => {
                     dispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: false, showForm: false });
+                    this.props.setAlertContext({
+                      type: 'success',
+                      message: 'Event cleared',
+                    });
                   });
                 }}
               >

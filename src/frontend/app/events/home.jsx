@@ -14,16 +14,13 @@ import Layer from '../components/Map/Layer';
 import Layers from './Layers';
 import PinLayer from '../components/Map/PinLayer';
 import BoundariesLayer from '../components/Map/BoundariesLayer';
-import { AuthContext, MapContext } from '../contexts';
+import { AlertContext, AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
 import Tabs from '../shared/Tabs';
 import Bubble from '../shared/Bubble';
-import { API_HOST, EVENT_POLLING_REFRESH } from '../env';
-import { get } from '../shared/helpers';
 
 import EventForm, { eventReducer, getInitialEvent } from './forms';
 import Preview from './Preview';
-import Message from './Message';
 import Queue from './Queue';
 import Events from './Events';
 
@@ -40,14 +37,23 @@ export function meta() {
 }
 
 export default function Home() {
+  /* Navigation */
   const navigate = useNavigate();
+
+  /* Hooks */
+  // Contexts
+  const { setAlertContext } = useContext(AlertContext);
   const { authContext } = useContext(AuthContext);
+
+  // Refs
   const mapRef = useRef();
 
+  // States
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
-  const [ message, setMessage ] = useState('');
+
+  // Selectors
   const visibleLayers = useSelector(state => state.visibleLayers);
   const serviceAreaBoundaries = useSelector(selectAllServiceAreaBoundaries);
 
@@ -130,8 +136,7 @@ export default function Home() {
               visibleLayers={visibleLayers}
               serviceAreaBoundaries={serviceAreaBoundaries}
               goToFunc={centerMap}
-              setMessage={setMessage}
-            />
+              setAlertContext={setAlertContext} />
           : <>
               <h3>Events</h3>
               <Tabs>
@@ -166,10 +171,8 @@ export default function Home() {
           event={event}
           dispatch={dispatch}
           preview={() => setPreview(!preview)}
-          mapRef={mapRef}
-        />
+          mapRef={mapRef} />
       }
-      <Message message={message} setMessage={setMessage} />
     </div>
   );
 }
