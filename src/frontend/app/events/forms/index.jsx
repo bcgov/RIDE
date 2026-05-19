@@ -866,7 +866,7 @@ export default class EventForm extends Component {
               </button>
             }
 
-            { event.id && event.type === 'ROAD_CONDITION' &&
+            { event.id &&
               <button
                 type="button"
                 className="secondary"
