@@ -72,7 +72,7 @@ def build_event_description(target_event, ivr=False):
         start_locations = target_event.start[
             'nearby'] if 'nearby' in target_event.start else []  # target_event.start is mandatory
         has_start_locations = start_locations and len(start_locations) > 0
-        start_point_name = target_event.start['ROAD_NAME_ALIAS1']
+        start_point_name = target_event.start['ROAD_NAME_ALIAS1'] or target_event.start['ROAD_NAME_FULL']
 
         end_locations = target_event.end['nearby'] if target_event.end and 'nearby' in target_event.end else []
 
@@ -86,7 +86,7 @@ def build_event_description(target_event, ivr=False):
 
         # End descriptions
         if target_event.end:  # end point is optional
-            end_point_name = target_event.end['ROAD_NAME_ALIAS1']
+            end_point_name = target_event.end['ROAD_NAME_ALIAS1'] or target_event.end['ROAD_NAME_FULL']
             has_different_name = start_point_name != end_point_name
             has_ref_locs = len(end_locations) > 0
 
