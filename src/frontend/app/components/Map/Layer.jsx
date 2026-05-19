@@ -286,7 +286,8 @@ export default function Layer({ event, dispatch }) {
       const raw = feature.get('raw');
 
       if (!event.showForm) {
-        if (raw.status === 'Active' && canCreateAtCoordinate) {
+        // No edit/view history for chainups yet
+        if (raw.status === 'Active' && canCreateAtCoordinate && raw.type !== 'CHAIN_UP') {
           items.push({
             label: 'Edit event',
             action: (e) => {
@@ -297,14 +298,16 @@ export default function Layer({ event, dispatch }) {
           });
         }
 
-        items.push({
-          label: 'View history',
-          action: (e) => {
-            setContextMenu([]);
-            selectFeature(map, feature);
-            dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false, showHistory: true });
-          }
-        });
+        if (raw.type !== 'CHAIN_UP') {
+          items.push({
+            label: 'View history',
+            action: (e) => {
+              setContextMenu([]);
+              selectFeature(map, feature);
+              dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false, showHistory: true });
+            }
+          });
+        }
 
         if (feature.get('raw').status === 'Active') {
           if (feature.get('raw').type === 'ROAD_CONDITION') {
