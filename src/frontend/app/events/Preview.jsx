@@ -48,7 +48,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
     banner.push(`Version ${displayed.version} at ${inEffectUntilFormat(displayed.last_updated)}`);
   }
   if (displayed.approved === false) {
-    banner.push('Event is awaiting approval');
+    banner.push('Event awaiting approval');
   }
 
   banner = banner.length > 0 ? <>{banner.map((item) => <p key={item}>{item}</p>)}</> : null;

@@ -336,10 +336,13 @@ export default function Layer({ event, dispatch }) {
                 patch(
                   `${API_HOST}/api/events/${raw.id}`,
                   { status: 'Inactive' },
+
                 ).then((updatedEvent) => {
                   feature.set('raw', updatedEvent);
                   dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
-                  setAlertContext({ message: 'Event awaiting approval' });
+                  setAlertContext({
+                    message: authContext?.is_approver ? 'Event cleared' : 'Event clearing requested',
+                  });
                 });
               }
             });
