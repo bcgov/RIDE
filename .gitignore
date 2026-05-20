@@ -30,3 +30,7 @@ debug.log
 notes
 
 db.sqlite3
+
+# Agent markdown files
+.cursor/
+*.mdc
