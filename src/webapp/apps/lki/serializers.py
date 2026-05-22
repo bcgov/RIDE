@@ -27,11 +27,23 @@ class Segment(ModelSerializer):
 
 class Landmark(ModelSerializer):
 
+    id = fields.SerializerMethodField()
     distance = fields.SerializerMethodField()
+    source = fields.SerializerMethodField()
+    label = fields.SerializerMethodField()
     segment = Segment()
 
     def get_distance(self, obj):
         return obj.distance.m
+
+    def get_label(self, obj):
+        return obj.description
+
+    def get_id(self, obj):
+        return f'landmark-{obj.id}'
+
+    def get_source(self, obj):
+        return 'landmarks'
 
     class Meta:
         model = models.Landmark
