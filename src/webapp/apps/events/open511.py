@@ -106,8 +106,9 @@ def build_event_description(target_event, ivr=False):
                 res += ' to '
 
                 # Skip road name if identical between start and end
-                if has_different_name:
-                    res += end_point_name + ', '
+                alias1 = target_event.end.get('ROAD_NAME_ALIAS1')
+                if has_different_name and alias1 is not None:
+                    res += alias1 + ', '
 
                 # Add phrase from first end ref location
                 if has_ref_locs:

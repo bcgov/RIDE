@@ -19,7 +19,8 @@ import { ll2g, selectFeature } from '../components/Map/helpers.js';
 import Tabs from '../shared/Tabs';
 import Bubble from '../shared/Bubble';
 
-import EventForm, { eventReducer, getInitialEvent } from './forms';
+import EventForm, { getInitialEvent } from './forms';
+import reducer from './forms/reducer';
 import Preview from './Preview';
 import Queue from './Queue';
 import Events from './Events';
@@ -51,7 +52,7 @@ export default function Home() {
   // States
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
-  const [ event, dispatch ] = useReducer(eventReducer, getInitialEvent());
+  const [ event, dispatch ] = useReducer(reducer, getInitialEvent());
 
   // Selectors
   const visibleLayers = useSelector(state => state.visibleLayers);

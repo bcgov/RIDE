@@ -9,7 +9,7 @@ import VectorSource from 'ol/source/Vector';
 
 import { AlertContext, AuthContext, MapContext } from '../../contexts';
 import { getRoute } from '../../shared';
-import { getNearby } from '../../events/forms/Location';
+import { getNearby } from '../../events/forms/Location/helpers';
 import { getDRA, ll2g, g2ll, getSnapped, Drag, pointerMove } from './helpers';
 import { PinFeature } from './feature';
 import { transform_road_abbreviations } from "../shared/helper";
@@ -69,7 +69,7 @@ function transform_prop_value(value) {
   *
   * `snapped` optional: pass when caller already computed it (e.g. guarded drag).
   */
-export async function applyPinLocationUpdate(e, point, dispatch, snapped) {
+export async function applyPinLocationUpdate(e, point, dispatch, snapped, search) {
   const snappedCoord = snapped ?? getSnapped(e.coordinate, e.pixel, e.map);
   let location = {
     name: 'pending',
@@ -80,10 +80,7 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped) {
     candidates: [],
   };
 
-  dispatch({
-    type: point.action,
-    value: location,
-  });
+  dispatch({ type: point.action, value: location, });
 
   updateRoute(e.map);
   point.getGeometry().setCoordinates(snappedCoord);
@@ -121,6 +118,10 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped) {
 
   if (point.dra.properties) {
     getNearby(point.action, location, dispatch);
+    if (search) {
+      const subkey = point.get('style');
+      getNearby(point.action, location, dispatch, search);
+    }
   }
 }
 
@@ -141,7 +142,7 @@ function canSetStartAtCoordinate(map, coordinate, authContext) {
   ));
 }
 
-export const guardedEndHandler = async (e, point, dispatch, authContext, setAlertContext) => {
+export const guardedEndHandler = async (e, point, dispatch, authContext, setAlertContext, event) => {
   const snapped = getSnapped(e.coordinate, e.pixel, e.map);
   const dragStartCoordinate = point.get('dragStartCoordinate');
 
@@ -156,8 +157,9 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
     return;
   }
 
+  const search = event.location[point.get('style')].search;
   point.unset('dragStartCoordinate', true);
-  applyPinLocationUpdate(e, point, dispatch, snapped);
+  applyPinLocationUpdate(e, point, dispatch, snapped, search);
 };
 
 /* Given an always present (possibly empty) route feature on the map: if
@@ -206,6 +208,7 @@ export default function PinLayer({ event, dispatch }) {
             dispatch,
             authContextRef.current,
             setAlertContext,
+            eventRef.current,
           ),
           menuRef,
           resetContextMenu: () => setContextMenu([]),
