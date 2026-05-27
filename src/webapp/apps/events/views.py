@@ -50,10 +50,12 @@ class Events(viewsets.ModelViewSet):
     queryset = Event.last.all()
     serializer_class = EventSerializer
     lookup_field = 'id'
+    http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options']
 
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update'):
-            return [(IsApprover | EventServiceAreaPermission)()]
+            return [EventServiceAreaPermission()]
+
         return [AllowAny()]
 
     @action(detail=False, methods=['post'], url_path='description')

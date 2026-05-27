@@ -35,20 +35,23 @@ def extract_event_start_coords(request_data, instance=None):
     Accepts either `start` or `location.start` from the client payload. If missing
     (e.g. partial update) and `instance` is provided, uses saved `instance.start`.
     """
+
     if isinstance(request_data, dict):
         start = request_data.get('start')
         if not isinstance(start, dict):
             location = request_data.get('location')
             if isinstance(location, dict):
                 start = location.get('start')
+
         coords = coords_from_start(start)
         if coords is not None:
             return coords
 
-    if instance is None:
-        return None
-    start_saved = getattr(instance, 'start', None)
-    return coords_from_start(start_saved)
+    if instance:
+        start_saved = getattr(instance, 'start', None)
+        return coords_from_start(start_saved)
+
+    return None
 
 
 def user_may_use_point(user, coords):
@@ -66,9 +69,21 @@ class EventServiceAreaPermission(permissions.BasePermission):
     message = 'You do not have permission to create or update an event at this location.'
 
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        # For detail actions (update/partial_update), defer to
+        # has_object_permission so the saved instance's start location is used
+        # when the request payload doesn't include one.
+        if getattr(view, 'detail', False):
+            return True
+
         return self._start_location_allowed(request.user, request.data, instance=None)
 
     def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
+
         return self._start_location_allowed(request.user, request.data, instance=obj)
 
     def _start_location_allowed(self, user, request_data, instance=None):

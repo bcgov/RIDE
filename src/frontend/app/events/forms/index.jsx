@@ -668,10 +668,10 @@ export default class EventForm extends Component {
 
       }).then(response => response.json().then(data => ({ ok: response.ok, data })))
         .then(({ ok, data }) => {
-          // Show error message on Open511 sync error
           if (!ok) {
+            const prefix = data?.open511 ? 'Sync to Open511 failed: ' : '';
             const messages = data?.open511 || [data?.detail || 'Could not save event'];
-            setAlertContext?.({ message: `Sync to Open511 failed: ${messages.join('\n')}` });
+            setAlertContext?.({ message: `${prefix}${messages.join('\n')}` });
             return;
           }
 
@@ -866,12 +866,16 @@ export default class EventForm extends Component {
                     patch(
                       `${API_HOST}/api/events/${event.id}`,
                       { timing: { nextUpdate: pendingNextUpdate.toISOString() } },
+
                     ).then((event) => {
                       dispatch({ type: 'reset form', cancel: true, value: event, showPreview: true, showForm: false });
                       this.props.setAlertContext({
                         type: 'success',
                         message: 'Event reconfirmed',
                       });
+
+                    }).catch((error) => {
+                      this.props.setAlertContext?.({ message: error.message });
                     });
                   }
                 }}
@@ -889,12 +893,16 @@ export default class EventForm extends Component {
                   patch(
                     `${API_HOST}/api/events/${event.id}`,
                     { status: 'Inactive' },
+
                   ).then((updatedEvent) => {
                     dispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: false, showForm: false });
                     this.props.setAlertContext({
                       type: 'success',
                       message: 'Event cleared',
                     });
+
+                  }).catch((error) => {
+                    this.props.setAlertContext?.({ message: error.message });
                   });
                 }}
               >

@@ -322,9 +322,13 @@ export default function Layer({ event, dispatch }) {
                   patch(
                     `${API_HOST}/api/events/${raw.id}`,
                     { timing: { nextUpdate: pending.toISOString() } },
+
                   ).then((updatedEvent) => {
                     feature.set('raw', updatedEvent);
                     dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
+
+                  }).catch((error) => {
+                    setAlertContext?.({ message: error.message });
                   });
                 }
               }
@@ -344,8 +348,11 @@ export default function Layer({ event, dispatch }) {
                   feature.set('raw', updatedEvent);
                   dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
                   setAlertContext({
-                    message: authContext?.is_approver ? 'Event cleared' : 'Event clearing requested',
+                    message: updatedEvent.approved ? 'Event cleared' : 'Event clearing requested',
                   });
+
+                }).catch((error) => {
+                  setAlertContext?.({ message: error.message });
                 });
               }
             });
@@ -360,9 +367,13 @@ export default function Layer({ event, dispatch }) {
               patch(
                 `${API_HOST}/api/events/${raw.id}`,
                 { status: 'Active' },
+
               ).then((updatedEvent) => {
                 feature.set('raw', updatedEvent);
                 dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
+
+              }).catch((error) => {
+                setAlertContext?.({ message: error.message });
               });
             }
           });
