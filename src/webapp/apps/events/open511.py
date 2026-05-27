@@ -85,7 +85,7 @@ def build_event_description(target_event, ivr=False):
             res += ', ' + start_locations[0]['phrase']
 
         # End descriptions
-        if target_event.end:  # end point is optional
+        if target_event.end and target_event.end['name']:  # end point is optional
             end_point_name = target_event.end['ROAD_NAME_ALIAS1'] or target_event.end['ROAD_NAME_FULL']
             has_different_name = start_point_name != end_point_name
             has_ref_locs = end_locations and len(end_locations) > 0
