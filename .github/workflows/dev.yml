@@ -52,6 +52,7 @@ jobs:
             dockerfile: ./compose/frontend/StaticBuild
             build_args: |
               DEBUG_BUILD=true
+              SOURCEMAP=true
             needs_fontawesome: true
 
 ### EVERYTHING PAST THIS POINT SHOULD BE THE SAME IN DEV, TEST AND UAT WORKFLOWS ###            

@@ -10,6 +10,8 @@ COPY ./src/frontend/ /app/
 
 ARG DEBUG_BUILD=false
 ENV DEBUG_BUILD=$DEBUG_BUILD
+ARG SOURCEMAP=false
+ENV SOURCEMAP=$SOURCEMAP
 
 ENV NODE_ENV=production
 RUN --mount=type=secret,id=FONTAWESOME_PACKAGE_TOKEN \

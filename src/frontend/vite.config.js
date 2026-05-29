@@ -17,6 +17,6 @@ export default defineConfig({
   },
   optimizeDeps: { exclude: ['node_modules/.cache'] },
   build: {
-    sourcemap: process.env.DEBUG_BUILD === 'true',
+    sourcemap: process.env.SOURCEMAP === 'true',
   },
 });
