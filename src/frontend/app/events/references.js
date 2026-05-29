@@ -190,7 +190,7 @@ export const IncidentsList = [
   { id: 60, label: 'Medical emergency (Ferries)', },
   { id: 61, label: 'Medical emergency (Ferries)', },
   { id: 62, label: 'Mudslide', },
-  { id: 63, label: 'Multi-vehicle Incident', },
+  // { id: 63, label: 'Multi-vehicle Incident', }, // Removed as of DBC22-5880
   { id: 64, label: 'Obstruction on roadway', },
   { id: 65, label: 'Operational delay (Ferries)', },
   { id: 66, label: 'Police incident', },
@@ -305,7 +305,7 @@ export const PHRASES = [
   ['Incident', 'Hazard', 'Livestock on road', 305, 'PHRASE', 1,' INCIDENT', 1, 'HAZARD'],
   ['Incident', 'Hazard', 'Material spill', 108, 'PHRASE', 1,' INCIDENT', 18, 'SPILL'],
   ['Incident', 'Hazard', 'Mudslide', 103, 'PHRASE', 1,' INCIDENT', 14, 'MUD'],
-  ['Incident', 'Hazard', 'Multi-vehicle Incident', 203, 'PHRASE', 1,' INCIDENT', 1, 'HAZARD'],
+  // ['Incident', 'Hazard', 'Multi-vehicle Incident', 203, 'PHRASE', 1,' INCIDENT', 1, 'HAZARD'], // Removed as of DBC22-5880
   ['Incident', 'Hazard', 'Obstruction on roadway', 105, 'PHRASE', 1,' INCIDENT', 15, 'OBSTRUCTION'],
   ['Incident', 'Hazard', 'Police incident', 81, 'PHRASE', 1,' INCIDENT', 1, 'HAZARD'],
   ['Incident', 'Hazard', 'Railway crossing incident', 93, 'PHRASE', 1,' INCIDENT', 1, 'HAZARD'],
