@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faCircleInfo } from '@fortawesome/pro-regular-svg-icons';
+import { faCheckCircle, faCircleExclamation } from '@fortawesome/pro-regular-svg-icons';
 
 // Internal imports
 import { AlertContext } from "../../contexts.js";
@@ -54,7 +54,7 @@ export default function Alert() {
             .split('\n')
             .map((line, idx) => (
               <React.Fragment key={idx}>
-                <FontAwesomeIcon icon={renderedAlert.icon === 'success' ? faCheckCircle : faCircleInfo} />
+                <FontAwesomeIcon icon={renderedAlert.type === 'success' ? faCheckCircle : faCircleExclamation} />
                 {line}
                 <br />
               </React.Fragment>
