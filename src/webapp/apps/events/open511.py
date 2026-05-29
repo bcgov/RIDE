@@ -57,6 +57,18 @@ def build_event_description(target_event, ivr=False):
         local = value.astimezone(ZoneInfo("America/Vancouver")) if value.tzinfo else value
         return f"{local.strftime('%a %b')} {local.day}"
 
+    def format_long_date(value):
+        if not value:
+            return None
+        local = value.astimezone(ZoneInfo("America/Vancouver")) if value.tzinfo else value
+        day = local.day
+        if 11 <= day <= 13:
+            suffix = "th"
+        else:
+            suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+        time_str = local.strftime("%I:%M%p").lstrip("0").lower()
+        return f"{local.strftime('%B')} {day}{suffix}, {local.year} at {time_str}"
+
     def get_impact_label(impact):
         label = impact.get("label")
         if label:
@@ -199,6 +211,12 @@ def build_event_description(target_event, ivr=False):
             parts.append(sentence(label))
         elif text:
             parts.append(sentence(text))
+
+    # Next update for ivr
+    if ivr:
+        next_update = target_event.next_update
+        if next_update:
+            parts.append(sentence(f"Next update: {format_long_date(next_update)}"))
 
     # Additional
     if target_event.additional:
