@@ -348,7 +348,12 @@ export default function Point({ point, dispatch, goToFunc, subkey, map }) {
               name="search"
               value={suggestionSearch}
               placeholder='search landmarks'
-              onChange={(e) => setSuggestionSearch(e.target.value.substring(0, 100))}
+              onChange={(e) => {
+                if (e.target.value.length === 0 || !suggestionSearch.includes(e.target.value)) {
+                  dispatch({ type: 'set search', subkey, search: '' });
+                }
+                setSuggestionSearch(e.target.value.substring(0, 100));
+              }}
               onKeyPress={(e) => { if (e.charCode === 13) { e.target.blur(); }}}
               onBlur={(e) => {
                 getNearby(`set ${subkey}`, point, dispatch, e.target.value);
