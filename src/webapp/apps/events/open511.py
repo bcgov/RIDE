@@ -81,38 +81,44 @@ def build_event_description(target_event, ivr=False):
         return match.label if match else None
 
     def get_location_description():
-        start_locations = target_event.start[
-            'nearby'] if 'nearby' in target_event.start else []  # target_event.start is mandatory
-        has_start_locations = start_locations and len(start_locations) > 0
-        start_point_name = target_event.start['ROAD_NAME_ALIAS1'] or target_event.start['ROAD_NAME_FULL']
+        res = ''
 
-        end_locations = target_event.end['nearby'] if target_event.end and 'nearby' in target_event.end else []
+        has_start_location = target_event.start and target_event.start.get('name')
+        has_end_location = target_event.end and target_event.end.get('name')
 
-        # Start descriptions
-        res = ' from ' if target_event.end else ' at '
-        res += start_point_name
+        start_point_name = ''
+        if has_start_location:  # Defensive, start point is mandatory
+            start_point_name = target_event.start.get('name')
 
-        # Add phrase from first start ref location
-        if has_start_locations:
-            res += ', ' + start_locations[0]['phrase']
+            # Start descriptions
+            res = ' from ' if has_end_location else ' at '
+            res += start_point_name
+
+            # Add phrase from first start ref location
+            start_ref_locations = target_event.start.get('nearby') if 'nearby' in target_event.start else []  # target_event.start is mandatory
+            if start_ref_locations and len(start_ref_locations) > 0:
+                res += ', ' + start_ref_locations[0]['phrase']
 
         # End descriptions
-        if target_event.end and target_event.end['name']:  # end point is optional
-            end_point_name = target_event.end['ROAD_NAME_ALIAS1'] or target_event.end['ROAD_NAME_FULL']
-            has_different_name = start_point_name != end_point_name
-            has_ref_locs = end_locations and len(end_locations) > 0
+        if has_end_location:  # end point is optional
+            end_point_name = target_event.end.get('name')
 
+            # end point is on a different road
+            has_different_name = start_point_name != end_point_name
+
+            # has at least one reference location
+            end_ref_locations = target_event.end.get('nearby') if 'nearby' in target_event.end else []
+            has_ref_locs = end_ref_locations and len(end_ref_locations) > 0
+
+            # Append to res if either or both is true
             if has_different_name or has_ref_locs:
                 res += ' to '
 
-                # Skip road name if identical between start and end
-                alias1 = target_event.end.get('ROAD_NAME_ALIAS1')
-                if has_different_name and alias1 is not None:
-                    res += alias1 + ', '
+                if has_different_name:
+                    res += end_point_name + ', '
 
-                # Add phrase from first end ref location
                 if has_ref_locs:
-                    res += end_locations[0]['phrase']
+                    res += end_ref_locations[0]['phrase']
 
         return res
 
