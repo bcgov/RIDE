@@ -111,6 +111,13 @@ async function getLandmarks(location, subkey, dispatch, search) {
     const byDescription = {};
 
     for (const landmark of results) {
+      // filter out forest service roads with no name, and landmarks not
+      // matching the search term when it's present
+      if ((landmark.landmark_type === 'G6' && landmark.description.toLowerCase() === 'fsr') ||
+        (search && landmark.description.toLowerCase().indexOf(search) < 0)
+      ) {
+        continue;
+      }
       // filter out landmarks on a highway other than the one the pin is on
       let wrongHighway = true;
       const pinHighways = location.HIGHWAY_ROUTE_NUMBER.split('+');
@@ -121,10 +128,7 @@ async function getLandmarks(location, subkey, dispatch, search) {
           break;
         }
       }
-      if (wrongHighway ||
-          (search && landmark.description.toLowerCase().indexOf(search) < 0)) {
-        continue;
-      }
+      if (wrongHighway) { continue; }
 
       const landmarkCoords = landmark.geometry.coordinates
       const route = await getNonDirectionalRoute(coords, landmarkCoords);
