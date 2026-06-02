@@ -229,6 +229,10 @@ def build_event_description(target_event, ivr=False):
     if target_event.additional:
         parts.append(sentence(target_event.additional))
 
+    # External url, not to be added to ivr. To be removed in rework
+    if target_event.link and not ivr:
+        parts.append(sentence(f"More info: {target_event.link}"))
+
     return " ".join([part for part in parts if part])
 
 def get_username(target_event):
