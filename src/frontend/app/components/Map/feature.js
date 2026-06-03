@@ -12,6 +12,8 @@ export default class RideFeature extends Feature {
     super(...args);
     const props = args[0] || {};
 
+    this.set('cursor', props.cursor || 'pointer');
+
     if (props.style) {
       this.normal = Styles.pin[props.style].normal;
       this.active = Styles.pin[props.style].active;
@@ -24,7 +26,7 @@ export default class RideFeature extends Feature {
     this.action = props.action;
     this.on('propertychange', this.propertyChanged)
     this.set('visible', props.isVisible);
-    this.set('isPreview', false)
+    this.set('isPreview', false);
   }
 
   // used to update available styles based on the underlying event changing

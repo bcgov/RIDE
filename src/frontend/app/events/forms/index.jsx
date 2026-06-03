@@ -26,7 +26,7 @@ import {
 import {
   convertToDateTimeLocalString as convert, g2ll,
 } from "../../components/Map/helpers";
-import { addEvent } from '../../components/Map/Layer';
+import { addEvent } from '../../components/Map/layers/Events';
 import { getCookie } from '../shared';
 import { API_HOST } from '../../env';
 import { AuthContext } from '../../contexts';

@@ -42,6 +42,13 @@
     src: url("/fonts/bc-sans/BCSans-LightItalic.woff2") format("woff2");
 }
 
+@font-face {
+    font-family: "Repetition Scrolling";
+    font-style: normal;
+    font-weight: 400;
+    src: url("/fonts/repetition-scrolling/RepetitionScrolling.woff2") format("woff2");
+}
+
 body, p, h1, h2, h3, h4, a, span {
   font-family: 'BC Sans', 'Noto Sans', Verdana, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

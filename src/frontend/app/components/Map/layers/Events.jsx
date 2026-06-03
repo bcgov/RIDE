@@ -12,21 +12,21 @@ import { linear } from 'ol/easing';
 import { Point, LineString, GeometryCollection, MultiPolygon, Polygon } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
 
-import { AlertContext, AuthContext, MapContext } from '../../contexts';
+import { AlertContext, AuthContext, MapContext } from '../../../contexts.js';
 
-import { g2ll, ll2g, selectFeature, pointerMove } from './helpers.js';
-import RideFeature, { PinFeature } from './feature.js';
-import ContextMenu from '../../events/ContextMenu';
-import { getInitialEvent } from '../../events/forms';
+import { g2ll, ll2g, selectFeature } from '../helpers.js';
+import RideFeature, { PinFeature } from '../feature.js';
+import ContextMenu from '../../../events/ContextMenu.jsx';
+import { getInitialEvent } from '../../../events/forms/index.jsx';
 
-import { API_HOST, EVENT_POLLING_REFRESH } from '../../env.js';
-import { getIconAndStroke } from '../../events/icons';
-import { getNextUpdate, getPendingNextUpdate } from '../../shared/helpers.js';
-import { applyPinLocationUpdate } from './PinLayer';
-import { patch } from '../../shared/helpers';
+import { API_HOST, EVENT_POLLING_REFRESH } from '../../../env.js';
+import { getIconAndStroke } from '../../../events/icons/index.js';
+import { getNextUpdate, getPendingNextUpdate } from '../../../shared/helpers.js';
+import { applyPinLocationUpdate } from './Pins';
+import { patch } from '../../../shared/helpers.js';
 
-import { refreshEvents } from '../../slices/events';
-import { selectAllServiceAreaBoundaries } from '../../slices/serviceAreaBoundaries';
+import { refreshEvents } from '../../../slices/events.js';
+import { selectAllServiceAreaBoundaries } from '../../../slices/serviceAreaBoundaries.js';
 
 
 export function addEvent(event, map, dispatch, visibleLayers) {
@@ -158,7 +158,7 @@ function addEventsLayer(map) {
   }
 }
 
-export default function Layer({ event, dispatch }) {
+export default function EventsLayer({ event, dispatch }) {
 
   const { setAlertContext } = useContext(AlertContext);
   const { authContext } = useContext(AuthContext);
@@ -220,6 +220,8 @@ export default function Layer({ event, dispatch }) {
                 geometry: new Point(coordinate),
                 action: 'set start',
                 isVisible: true,
+                cursor: 'grab',
+                canDrag: true,
               });
               map.pins.getSource().addFeature(map.start);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -236,6 +238,8 @@ export default function Layer({ event, dispatch }) {
                 geometry: new Point(coordinate),
                 action: 'set start',
                 isVisible: true,
+                cursor: 'grab',
+                canDrag: true,
               });
               map.pins.getSource().addFeature(map.start);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -252,6 +256,8 @@ export default function Layer({ event, dispatch }) {
                 geometry: new Point(coordinate),
                 action: 'set start',
                 isVisible: true,
+                cursor: 'grab',
+                canDrag: true,
               });
               map.pins.getSource().addFeature(map.start);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -270,6 +276,8 @@ export default function Layer({ event, dispatch }) {
               geometry: new Point(coordinate),
               action: 'set end',
               isVisible: true,
+              cursor: 'grab',
+              canDrag: true,
             });
             map.pins.getSource().addFeature(map.end);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -435,7 +443,6 @@ export default function Layer({ event, dispatch }) {
   useEffect(() => {
     if (!map) { return; }
     map.on('contextmenu', contextHandler);
-    map.on('pointermove', pointerMove);
     addEventsLayer(map);
     store.subscribe(updateEventsOnMap);
     storeDispatch(refreshEvents());

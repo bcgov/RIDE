@@ -18,6 +18,7 @@ import {
   refreshConditions,
   refreshDistricts,
   refreshDistrictBoundaries,
+  refreshDms,
   refreshRoutes,
   refreshSegments,
   refreshServiceAreas,
@@ -67,6 +68,7 @@ let fetching = false;
 
 store.dispatch(refreshConditions());
 store.dispatch(refreshDistricts());
+store.dispatch(refreshDms());
 store.dispatch(refreshRoutes());
 store.dispatch(refreshServiceAreas());
 store.dispatch(refreshSegments());
@@ -74,6 +76,7 @@ store.dispatch(refreshTrafficImpacts());
 // store.dispatch(refreshSituations());
 store.dispatch(refreshServiceAreaBoundaries());
 store.dispatch(refreshDistrictBoundaries());
+store.dispatch(refreshDms());
 
 export default function App() {
   const [impacts, setImpacts] = useState(getImpacts);
