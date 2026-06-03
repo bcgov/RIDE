@@ -348,6 +348,7 @@ export default function Layer({ event, dispatch }) {
                   feature.set('raw', updatedEvent);
                   dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
                   setAlertContext({
+                    type: 'success',
                     message: updatedEvent.approved ? 'Event cleared' : 'Event clearing requested',
                   });
 
