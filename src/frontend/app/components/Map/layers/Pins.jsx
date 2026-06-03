@@ -7,13 +7,13 @@ import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
-import { AlertContext, AuthContext, MapContext } from '../../contexts';
-import { getRoute } from '../../shared';
-import { getNearby } from '../../events/forms/Location/helpers';
-import { getDRA, ll2g, g2ll, getSnapped, Drag, pointerMove } from './helpers';
-import { PinFeature } from './feature';
-import { transform_road_abbreviations } from "../shared/helper";
-import ContextMenu from '../../events/ContextMenu';
+import { AlertContext, AuthContext, MapContext } from '../../../contexts';
+import { getRoute } from '../../../shared';
+import { getNearby } from '../../../events/forms/Location/helpers';
+import { getDRA, ll2g, g2ll, getSnapped, Drag } from '../helpers';
+import { PinFeature } from '../feature';
+import { transform_road_abbreviations } from "../../shared/helper";
+import ContextMenu from '../../../events/ContextMenu';
 
 globalThis.ol = ol;
 
@@ -184,7 +184,7 @@ export const updateRoute = async (map) => {
   map.route.getGeometry().setCoordinates(route);
 }
 
-export default function PinLayer({ event, dispatch }) {
+export default function PinsLayer({ event, dispatch }) {
   const { authContext } = useContext(AuthContext);
   const { setAlertContext } = useContext(AlertContext);
   const { map } = useContext(MapContext);
@@ -203,7 +203,6 @@ export default function PinLayer({ event, dispatch }) {
       map.pins = layer;
       map.set('pins', layer);
       map.on('contextmenu', contextHandler);
-      map.on('pointermove', pointerMove);
       map.getInteractions().extend([
         new Drag({
           endHandler: (e, point, dispatch) => guardedEndHandler(
@@ -220,7 +219,12 @@ export default function PinLayer({ event, dispatch }) {
         })
       ]);
 
-      map.route = new PinFeature({ style: 'route', geometry: new LineString([]), isVisible: true, noSelect: true })
+      map.route = new PinFeature({
+        style: 'route',
+        geometry: new LineString([]),
+        isVisible: true,
+        noSelect: true
+      });
       layer.getSource().addFeature(map.route);
 
       // pin for search result
@@ -247,7 +251,11 @@ export default function PinLayer({ event, dispatch }) {
         map.start.getGeometry().setCoordinates(coords);
       } else {
         map.start = new PinFeature({
-          style: 'start', geometry: new Point(coords), action: 'set start', isVisible: true
+          style: 'start',
+          geometry: new Point(coords),
+          action: 'set start',
+          isVisible: true,
+          canDrag: true,
         });
         map.start.dra = { properties: evt.location.start }
         map.pins.getSource().addFeature(map.start);
@@ -265,8 +273,11 @@ export default function PinLayer({ event, dispatch }) {
         map.end.getGeometry().setCoordinates(coords);
       } else {
         map.end = new PinFeature({
-          style: 'end', geometry: new Point(coords), action: 'set end', isVisible: true,
-
+          style: 'end',
+          geometry: new Point(coords),
+          action: 'set end',
+          isVisible: true,
+          canDrag: true,
         });
         map.end.dra = { properties: evt.location.end }
         map.pins.getSource().addFeature(map.end);
@@ -391,6 +402,7 @@ export default function PinLayer({ event, dispatch }) {
                 geometry: new Point(coordinate),
                 action: 'set end',
                 isVisible: true,
+                canDrag: true,
               });
               map.pins.getSource().addFeature(map.end);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });

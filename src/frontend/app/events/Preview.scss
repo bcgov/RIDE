@@ -41,7 +41,7 @@
   }
 
   h3, h5 { font-weight: normal; }
-  
+
   &.minor {
     .header {
       background: $Gold30;
@@ -184,13 +184,13 @@
         color: $Grey10;
         cursor: pointer;
 
-        a { 
+        a {
           color: $Grey10;
           text-decoration: underline;
         }
       }
 
-      a { 
+      a {
         font-weight: bold;
         color: $ViewDetailsText;
       }

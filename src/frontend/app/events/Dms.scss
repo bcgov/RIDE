@@ -1,0 +1,72 @@
+@use "../styles/variables.scss" as *;
+
+.preview {
+  &.sign {
+    .header {
+      background: #fef0d8;
+
+      .icons {
+        img {
+          height: 24px;
+        }
+
+        p {
+          flex: 1;
+          margin: 0 1rem;
+          font-weight: 700;
+        }
+
+        button {
+          cursor: pointer;
+        }
+      }
+    }
+    .body {
+      .last-updated {
+        font-size: 0.75rem;
+        color: #605e5c;
+      }
+      .message {
+        .message-title {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+
+          .status {
+            background: #e2e8f0;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 12px;
+            height: 24px;
+            padding: 0.2rem 0.75rem 0 0.75rem;
+            color: #4a5568;
+
+            &.Active {
+              background: #2d7a45;
+              color: white;
+            }
+          }
+        }
+
+        .blackboard {
+          background: black;
+          border: 1px solid #333;
+          border-radius: 8px;
+          min-height: 80px;
+          display: flex;
+          flex-direction: column;
+          color: #f7ce46;
+          font-family: Repetition Scrolling, monospace;
+          padding: 15px 20px;
+          justify-content: center;
+          align-items: center;
+          font-size: 22px;
+          line-height: 30px;
+        }
+      }
+    }
+    .footer {
+      cursor: help;
+    }
+  }
+}

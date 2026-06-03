@@ -5,10 +5,10 @@ import { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {
   selectAllServiceAreaBoundaries, selectServiceAreaBoundariesStatus,
-} from '../../slices/serviceAreaBoundaries';
+} from '../../../slices/serviceAreaBoundaries';
 import {
   selectAllDistrictBoundaries, selectDistrictBoundariesStatus,
-} from '../../slices/districtBoundaries';
+} from '../../../slices/districtBoundaries';
 
 // Openlayers
 import { Polygon } from 'ol/geom';
@@ -19,7 +19,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
 // Internal imports
-import { MapContext } from '../../contexts.js';
+import { MapContext } from '../../../contexts';
 
 function layerStyle(feature, visibleLayers) {
   return feature.get('visible') ? feature.get('style') : null ;

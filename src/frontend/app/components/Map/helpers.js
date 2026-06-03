@@ -38,22 +38,37 @@ proj4.defs([
 
 export const MapContext = createContext();
 
-// handles toggling the hover state over OpenLayers features
+// handles toggling the hover state over OpenLayers features and displaying
+// their preferred cursor
 export function pointerMove(e) {
+  const mapEl = e.map.getTargetElement();
+  const currentCursor = mapEl.style.cursor;
+
   const feature = e.map.getFeaturesAtPixel(e.pixel, {
     layerFilter: (layer) => layer.listenForHover,
   })[0];
-  if (feature?.noHover || feature?.get('isPreview')) { return; }
+  if (feature?.noHover || feature?.get('isPreview')) {
+    return;
+  }
   if (!feature?.styleState) {
     if (e.map.hoveredFeature) {
       e.map.hoveredFeature.set('hovered', false);
       e.map.hoveredFeature = null;
     }
+    if (currentCursor !== 'default') {
+      mapEl.style.cursor = 'default';
+    }
     return;
   }
+
   if (e.map.hoveredFeature && e.map.hoveredFeature !== feature) {
     e.map.hoveredFeature.set('hovered', false);
   }
+
+  if (currentCursor === 'default') {
+    mapEl.style.cursor = feature.get('cursor');
+  }
+
   e.map.hoveredFeature = feature;
   if (!feature.get('hovered')) {
     feature.set('hovered', true);
@@ -68,10 +83,14 @@ export function click(evt, dispatch) {
   const feature = evt.map.getFeaturesAtPixel(evt.pixel,{
     layerFilter: (layer) => layer.listenForClicks,
   })[0];
-
+  console.log(feature);
   if (feature?.noSelect || feature?.get('noSelect')) { return; }
 
-  if (feature?.styleState) { // new selection
+    console.log(feature.get('type'));
+  if (feature.get('type') === 'sign') {
+    console.log(feature.get('raw'));
+  }
+  else if (feature?.styleState) { // new selection
     selectFeature(evt.map, feature);
     const raw = feature.pointFeature.get('raw');
     dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false });
@@ -252,7 +271,6 @@ export class Drag extends PointerInteraction {
     super({
       handleDownEvent: handleDownEvent,
       handleDragEvent: handleDragEvent,
-      handleMoveEvent: handleMoveEvent,
       handleUpEvent: handleUpEvent,
     });
     options = options || {};
@@ -266,12 +284,6 @@ export class Drag extends PointerInteraction {
      * @private
      */
     this.coordinate_ = null;
-
-    /**
-     * @type {string|undefined}
-     * @private
-     */
-    this.cursor_ = 'pointer';
 
     /**
      * @type {Feature}
@@ -306,8 +318,8 @@ function handleDownEvent(evt) {
     layerFilter: (layer) => layer.canDragFeatures,
   })[0];
 
-  if (feature) {
-    if (feature.noSelect || feature.get('isPreview') || feature.get('noSelect')) { return false; }
+  const canDrag = feature?.get('canDrag');
+  if (canDrag) {
     map.route?.clear();
     this.coordinate_ = evt.coordinate;
     feature.set('dragStartCoordinate', [...feature.getGeometry().getCoordinates()]);
@@ -315,50 +327,35 @@ function handleDownEvent(evt) {
     this.feature_ = feature;
   }
 
-  return !!feature;
+  return canDrag;
 }
 
 /**
  * @param {import('ol/MapBrowserEvent.js').default} evt Map browser event.
  */
 function handleDragEvent(evt) {
+  const mapEl = evt.map.getTargetElement();
+  if (mapEl.style.cursor !== 'grabbing') {
+    this.previousCursor_ = mapEl.style.cursor;
+    mapEl.style.cursor = 'grabbing';
+  }
   this.feature_.getGeometry().setCoordinates(evt.coordinate);
   this.coordinate_ = evt.coordinate;
-}
-
-/**
- * @param {import('ol/MapBrowserEvent.js').default} evt Event.
- */
-function handleMoveEvent(evt) {
-  if (this.cursor_) {
-    const map = evt.map;
-    const feature = map.getFeaturesAtPixel(evt.pixel, {
-      layerFilter: (layer) => layer.canDragFeatures,
-    })[0];
-    const element = evt.map.getTargetElement();
-    if (feature) {
-      if (feature.noHover || feature.get('isPreview')) { return; }
-      if (element.style.cursor != this.cursor_) {
-        this.previousCursor_ = element.style.cursor;
-        element.style.cursor = this.cursor_;
-      }
-    } else if (this.previousCursor_ !== undefined) {
-      element.style.cursor = this.previousCursor_;
-      this.previousCursor_ = undefined;
-    }
-  }
 }
 
 /**
  * @return {boolean} `false` to stop the drag sequence.
  */
 function handleUpEvent(e) {
+  e.map.getTargetElement().style.cursor = this.previousCursor_;
+  this.previousCursor_ = undefined;
   if (e.originalEvent?.button === 0) { // ignore right or middle click
     this.endHandler(e, this.feature_, this.dispatch);
     this.coordinate_ = null;
     if (this.feature_.upHandler) { this.feature_.upHandler(e) }
     this.feature_ = null;
   }
+
   return false;
 }
 

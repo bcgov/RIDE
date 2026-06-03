@@ -3,8 +3,9 @@ export default async function client( endpoint, { body, ...customConfig } = {}) 
 
   const config = {
     method: body ? 'POST' : 'GET',
-    ...customConfig,
+    mode: 'cors',
     credentials: "include",
+    ...customConfig,
     headers: {
       ...headers,
       ...customConfig.headers,

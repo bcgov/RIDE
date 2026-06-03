@@ -4,7 +4,7 @@ import AsyncSelect from 'react-select/async';
 
 
 import { DebuggingContext, MapContext } from '../../contexts';
-import { createMap, ll2g } from './helpers';
+import { createMap, ll2g, pointerMove } from './helpers';
 import { get } from '../../shared/helpers';
 
 import { GEOCODER_CLIENT_ID, GEOCODER_HOST } from '../../env';
@@ -89,6 +89,7 @@ export default function Map({ children, dispatch, event, clickHandler }) {
     const map = createMap();
     map.setTarget(elementRef.current);
     map.on('click', click);
+    map.on('pointermove', pointerMove);
     map.on('propertychange', (e) => {
       if (e.key !== 'base') { return; }
       if (e.target.get('base') === 'vector') {

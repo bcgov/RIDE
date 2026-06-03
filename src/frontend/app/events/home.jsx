@@ -10,10 +10,10 @@ import { boundingExtent, getCenter } from 'ol/extent';
 
 // Internal imports
 import Map from '../components/Map';
-import Layer from '../components/Map/Layer';
+import {
+  BoundariesLayer, DmsLayer, EventsLayer, PinsLayer
+} from '../components/Map/layers';
 import Layers from './Layers';
-import PinLayer from '../components/Map/PinLayer';
-import BoundariesLayer from '../components/Map/BoundariesLayer';
 import { AlertContext, AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
 import Tabs from '../shared/Tabs';
@@ -21,6 +21,7 @@ import Bubble from '../shared/Bubble';
 
 import EventForm, { getInitialEvent } from './forms';
 import reducer from './forms/reducer';
+import Dms from './Dms';
 import Preview from './Preview';
 import Queue from './Queue';
 import Events from './Events';
@@ -53,6 +54,7 @@ export default function Home() {
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(reducer, getInitialEvent());
+  const [ sign, setSign ] = useState(null);
 
   // Selectors
   const visibleLayers = useSelector(state => state.visibleLayers);
@@ -111,18 +113,25 @@ export default function Home() {
 
     if (feature?.noSelect || feature?.get('noSelect')) { return; }
 
-    if (feature?.styleState) { // new selection
+    if (feature?.get('type') === 'sign') {
+      selectFeature(e.map, feature);
+      dispatch({ type: 'reset form' });
+      setSign(feature.get('raw'));
+      e.map.route.getGeometry().setCoordinates([]);
+    } else if (feature?.styleState) { // new selection
       selectFeature(e.map, feature);
       const raw = feature.get('raw');
       dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false });
     } else if (e.map.selectedFeature) { // deselect existing selection
       selectFeature(e.map, null);
       dispatch({ type: 'reset form' });
+      setSign(null);
       e.map.route.getGeometry().setCoordinates([]);
     }
   }
 
-  const showLayers = !(event.showPreview && (event.location.start.name || event.type === 'CHAIN_UP'));
+  const showPreview = event.showPreview && (event.location.start.name || event.type === 'CHAIN_UP');
+  const showLayers = !showPreview && !sign;
 
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
@@ -161,19 +170,24 @@ export default function Home() {
 
       <MapContext.Provider value={{ map, setMap }}>
         <Map dispatch={dispatch} event={event} clickHandler={clickHandler}>
-          <PinLayer event={event} dispatch={dispatch} />
+          <PinsLayer event={event} dispatch={dispatch} />
           <BoundariesLayer />
-          <Layer event={event} dispatch={dispatch} />
+          <DmsLayer event={event} dispatch={dispatch} />
+          <EventsLayer event={event} dispatch={dispatch} />
           { showLayers && <Layers /> }
         </Map>
       </MapContext.Provider>
 
-      {(event.location.start.name || event.type === 'CHAIN_UP') && event.showPreview &&
+      { showPreview &&
         <Preview
           event={event}
           dispatch={dispatch}
           preview={() => setPreview(!preview)}
           mapRef={mapRef} />
+      }
+
+      { !showPreview && sign &&
+        <Dms sign={sign} close={() => { selectFeature(map); setSign(null) }} />
       }
     </div>
   );
