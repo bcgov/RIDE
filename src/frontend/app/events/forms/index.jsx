@@ -18,8 +18,7 @@ import AdditionalMessaging from './Additional';
 import External from './External';
 import {
   CONDITIONS_FORMS, DELAYS_FORMS, DETAILS_FORMS, EXTERNAL_FORMS,
-  FORM_PHRASE_CATEGORY, FORMS, IMPACTS_FORMS, INTERNAL_FORMS,
-  RESTRICTIONS_FORMS, TIMING_FORMS,
+  IMPACTS_FORMS, INTERNAL_FORMS, RESTRICTIONS_FORMS, TIMING_FORMS,
 } from '../references';
 import {
   convertToDateTimeLocalString as convert,
@@ -49,16 +48,7 @@ export function getLater(severity) {
   return null;
 }
 
-// SonarQube exemption from javascript:S2245 (weak encryption) because random()
-// not used for security purposes (id is used for React keys)
-const id = () => Math.random().toString(36).substr(2, 9); // NOSONAR
-
-const numDaysOn = (schedule) => (
-  days_of_the_week.reduce((numOn, day) => numOn + (schedule[day] ? 1 : 0), 0)
-)
-
-const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-
+export const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 export const LOCATION_BLANK = {
   name: null,
@@ -90,10 +80,7 @@ export const SCHEDULE_BLANK = {
   sun: false,
 }
 
-function addId(obj) {
-  obj.id = id();
-  return obj;
-}
+
 
 export function getInitialEvent(eventType = 'Incident') {
   return {

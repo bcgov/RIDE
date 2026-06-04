@@ -1,6 +1,9 @@
+import { LOCATION_BLANK, SCHEDULE_BLANK, getInitialEvent, getLater, days_of_the_week } from './index';
+import { FORM_PHRASE_CATEGORY } from '../references';
 import { getNextUpdate } from '../../shared/helpers';
-
-import { LOCATION_BLANK, SCHEDULE_BLANK, getInitialEvent, getLater } from './index';
+import {
+  convertToDateTimeLocalString as convert,
+} from "../../components/Map/helpers";
 
 function ensurePendingSet(point) {
   if (!(point.pending instanceof Set)) {
@@ -8,7 +11,18 @@ function ensurePendingSet(point) {
   }
 }
 
+// SonarQube exemption from javascript:S2245 (weak encryption) because random()
+// not used for security purposes (id is used for React keys)
+const id = () => Math.random().toString(36).substr(2, 9); // NOSONAR
 
+function addId(obj) {
+  obj.id = id();
+  return obj;
+}
+
+const numDaysOn = (schedule) => (
+  days_of_the_week.reduce((numOn, day) => numOn + (schedule[day] ? 1 : 0), 0)
+)
 
 export default function eventReducer(event, action) {
   switch (action.type) {
