@@ -244,7 +244,8 @@ class Event(VersionedModel):
 
             super().save(*args, **kwargs)
 
-            if not _is_sync_disabled():
+            # Do not sync if chain-up or disabled
+            if not _is_sync_disabled() and self.event_type != EventType.CHAIN_UP:
                 sync_open511_data(self)
 
     def get_ignored_fields(self):

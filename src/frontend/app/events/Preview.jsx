@@ -242,7 +242,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
           </div>
         }
 
-        {/*/!**/}
+        {!isChainup &&
           <div className="preview__group">
             <h5>IVR</h5>
             <ul className="preview__group__shadow-box">
@@ -254,7 +254,7 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
               </li>
             </ul>
           </div>
-        {/**!/*/}
+        }
 
         { displayed.impacts.length > 0 &&
           <>
