@@ -215,7 +215,7 @@ export default function Home() {
       id: event ? event.id : 'DBC-000000',
       version: event?.version || 0,
       name: cu.name,
-      description: cu.description
+      chainup: cu
     });
   };
 
