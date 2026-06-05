@@ -14,6 +14,9 @@ class RIDEUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = RIDEUser
         fields = "__all__"
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
     def _get_social_account(self, obj):
         # prefetch_related makes .all() use the cache, .first() does not
