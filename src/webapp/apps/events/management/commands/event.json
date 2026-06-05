@@ -1,0 +1,533 @@
+{
+    "uuid": "1c946db7-724c-4fd8-968c-668b539717df",
+    "is_closure": false,
+    "last_inactivated": null,
+    "notes": [],
+    "editable": true,
+    "description": "Paving operations. Starting Thu May 28. All day on Saturday and Sunday. From 8:30 AM to 5:30 PM PST on Monday. Expect 30 minutes delay. Assessment in progress. Closed intermittently. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi quis ipsum libero. Maecenas nibh tortor, sollicitudin et diam vel, euismod finibus diam. Nunc mattis tellus nec enim iaculis tristique a vitae ex. Phasellus interdum tristique rhoncus. Proin vitae dapibus purus. Vestibulum sed enim at est convallis porta vitae sed ex. Suspendisse sed quam tellus. More info: https://www.google.com/.",
+    "ivr": "Paving operations from 107th Avenue, In Hudson's Hope to Highway 29, In Hudson's Hope. Starting Thu May 28. All day on Saturday and Sunday. From 8:30 AM to 5:30 PM PST on Monday. Expect 30 minutes delay. Assessment in progress. Closed intermittently. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi quis ipsum libero. Maecenas nibh tortor, sollicitudin et diam vel, euismod finibus diam. Nunc mattis tellus nec enim iaculis tristique a vitae ex. Phasellus interdum tristique rhoncus. Proin vitae dapibus purus. Vestibulum sed enim at est convallis porta vitae sed ex. Suspendisse sed quam tellus.",
+    "id": "RIDETSTb114-100038",
+    "version": 0,
+    "latest": true,
+    "created": "2026-05-28T18:34:19.568474Z",
+    "last_updated": "2026-05-28T18:34:19.571677Z",
+    "from_bulk": false,
+    "status": "Active",
+    "approved": true,
+    "latest_approved": true,
+    "geometry": {
+        "type": "GeometryCollection",
+        "geometries": [
+            {
+                "type": "Point",
+                "coordinates": [
+                    -121.90831191461307,
+                    56.0303516730267
+                ]
+            },
+            {
+                "type": "Point",
+                "coordinates": [
+                    -121.84460135129977,
+                    56.06705914580604
+                ]
+            },
+            {
+                "type": "Linestring",
+                "coordinates": [
+                    [
+                        -121.90831,
+                        56.03032000000002
+                    ],
+                    [
+                        -121.90751,
+                        56.03032000000002
+                    ],
+                    [
+                        -121.90723,
+                        56.03036
+                    ],
+                    [
+                        -121.90676,
+                        56.030489999999986
+                    ],
+                    [
+                        -121.90537000000002,
+                        56.03117
+                    ],
+                    [
+                        -121.90539999999999,
+                        56.032520000000005
+                    ],
+                    [
+                        -121.90539999999999,
+                        56.03284000000002
+                    ],
+                    [
+                        -121.90525,
+                        56.033180000000044
+                    ],
+                    [
+                        -121.90510000000002,
+                        56.033379999999994
+                    ],
+                    [
+                        -121.90386,
+                        56.03459000000001
+                    ],
+                    [
+                        -121.90328999999998,
+                        56.03492
+                    ],
+                    [
+                        -121.90249000000001,
+                        56.03531000000001
+                    ],
+                    [
+                        -121.90155999999999,
+                        56.03568999999999
+                    ],
+                    [
+                        -121.90142,
+                        56.03574999999998
+                    ],
+                    [
+                        -121.9011,
+                        56.03589000000002
+                    ],
+                    [
+                        -121.90108,
+                        56.03589000000002
+                    ],
+                    [
+                        -121.90026000000002,
+                        56.03638000000001
+                    ],
+                    [
+                        -121.90000000000002,
+                        56.036580000000015
+                    ],
+                    [
+                        -121.89961,
+                        56.03686999999999
+                    ],
+                    [
+                        -121.89811,
+                        56.03800000000001
+                    ],
+                    [
+                        -121.89666999999999,
+                        56.03910000000002
+                    ],
+                    [
+                        -121.89174000000001,
+                        56.042820000000006
+                    ],
+                    [
+                        -121.88905,
+                        56.04486
+                    ],
+                    [
+                        -121.88866,
+                        56.04515000000001
+                    ],
+                    [
+                        -121.88755,
+                        56.045979999999986
+                    ],
+                    [
+                        -121.88641999999999,
+                        56.04669000000001
+                    ],
+                    [
+                        -121.88531999999998,
+                        56.047240000000016
+                    ],
+                    [
+                        -121.885,
+                        56.047379999999976
+                    ],
+                    [
+                        -121.87288,
+                        56.05274
+                    ],
+                    [
+                        -121.86966000000001,
+                        56.054159999999996
+                    ],
+                    [
+                        -121.86251,
+                        56.057320000000004
+                    ],
+                    [
+                        -121.86046,
+                        56.058220000000006
+                    ],
+                    [
+                        -121.85798999999999,
+                        56.059319999999985
+                    ],
+                    [
+                        -121.85697000000002,
+                        56.059860000000015
+                    ],
+                    [
+                        -121.85616000000002,
+                        56.060370000000006
+                    ],
+                    [
+                        -121.85534000000001,
+                        56.060959999999994
+                    ],
+                    [
+                        -121.85478,
+                        56.06142
+                    ],
+                    [
+                        -121.85445,
+                        56.06166000000002
+                    ],
+                    [
+                        -121.85411,
+                        56.06190999999998
+                    ],
+                    [
+                        -121.85384,
+                        56.06208000000001
+                    ],
+                    [
+                        -121.85363,
+                        56.06221000000002
+                    ],
+                    [
+                        -121.85333000000001,
+                        56.06236999999999
+                    ],
+                    [
+                        -121.85316999999999,
+                        56.06245999999996
+                    ],
+                    [
+                        -121.85291,
+                        56.06259
+                    ],
+                    [
+                        -121.85254,
+                        56.06276
+                    ],
+                    [
+                        -121.85228999999998,
+                        56.062870000000004
+                    ],
+                    [
+                        -121.85201999999998,
+                        56.06297000000001
+                    ],
+                    [
+                        -121.85166,
+                        56.063109999999995
+                    ],
+                    [
+                        -121.85119,
+                        56.063260000000014
+                    ],
+                    [
+                        -121.85069,
+                        56.06342000000001
+                    ],
+                    [
+                        -121.84996000000001,
+                        56.06366
+                    ],
+                    [
+                        -121.84949000000002,
+                        56.06381999999999
+                    ],
+                    [
+                        -121.84917,
+                        56.06394
+                    ],
+                    [
+                        -121.84881,
+                        56.06408999999999
+                    ],
+                    [
+                        -121.84854,
+                        56.06421
+                    ],
+                    [
+                        -121.84827999999999,
+                        56.064329999999956
+                    ],
+                    [
+                        -121.84806999999999,
+                        56.064430000000016
+                    ],
+                    [
+                        -121.84759,
+                        56.06468000000001
+                    ],
+                    [
+                        -121.84739,
+                        56.06479999999999
+                    ],
+                    [
+                        -121.84709000000001,
+                        56.064959999999985
+                    ],
+                    [
+                        -121.84683,
+                        56.06512999999998
+                    ],
+                    [
+                        -121.84660000000001,
+                        56.06528000000003
+                    ],
+                    [
+                        -121.84636999999998,
+                        56.06542999999999
+                    ],
+                    [
+                        -121.8461,
+                        56.065650000000005
+                    ],
+                    [
+                        -121.84585000000001,
+                        56.06584000000001
+                    ],
+                    [
+                        -121.84538999999998,
+                        56.06621999999999
+                    ],
+                    [
+                        -121.84515000000002,
+                        56.06648000000001
+                    ],
+                    [
+                        -121.84490999999998,
+                        56.06675999999999
+                    ],
+                    [
+                        -121.84461000000002,
+                        56.06706
+                    ]
+                ]
+            }
+        ]
+    },
+    "impacts": [
+        {
+            "id": 2,
+            "label": "Assessment in progress",
+            "closed": false
+        },
+        {
+            "id": 11,
+            "label": "Closed intermittently",
+            "closed": false
+        }
+    ],
+    "restrictions": [],
+    "conditions": [],
+    "additional": "",
+    "route_projection": 0,
+    "service_area": 51,
+    "type": "Planned event",
+    "location": {
+        "start": {
+            "name": "107th Avenue",
+            "alias": "Canyon Drive",
+            "other": null,
+            "coords": [
+                -121.90831191461307,
+                56.0303516730267
+            ],
+            "nearby": [
+                {
+                    "id": "start-municipality-65",
+                    "name": "Hudson's Hope",
+                    "phrase": "In Hudson's Hope",
+                    "source": "municipalities",
+                    "distance": 0
+                },
+                {
+                    "id": "start-landmark-7481",
+                    "raw": {
+                        "id": 7481,
+                        "km": 0,
+                        "side": "",
+                        "point": "",
+                        "ext_id": "",
+                        "number": 2,
+                        "source": 4,
+                        "created": "2026-04-15T22:39:56.645000Z",
+                        "deleted": false,
+                        "km_post": null,
+                        "segment": {
+                            "id": "1108",
+                            "highways": [
+                                {
+                                    "letter": "",
+                                    "number": 29,
+                                    "full_name": "29",
+                                    "description": "HUDSON HOPE - DON PHILLIPS WAY"
+                                }
+                            ],
+                            "direction": "N"
+                        },
+                        "distance": 35.56780324,
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -121.908875,
+                                56.030294
+                            ]
+                        },
+                        "description": "JCTN BEATTIE DR / CANYON DR / LEARMONTH ST",
+                        "last_updated": "2026-04-16T01:06:32.117000Z",
+                        "landmark_type": "A1"
+                    },
+                    "type": "intersection",
+                    "class": "A1",
+                    "coords": [
+                        -121.908875,
+                        56.030294
+                    ],
+                    "phrase": "36m East of Jctn Beattie Dr / Canyon Dr / Learmonth St",
+                    "source": "landmarks",
+                    "distance": 0.035,
+                    "direction": "East",
+                    "description": "JCTN BEATTIE DR / CANYON DR / LEARMONTH ST"
+                }
+            ],
+            "aliases": [
+                "Canyon Drive",
+                "Highway 29"
+            ],
+            "pending": {},
+            "OBJECTID": 251875841,
+            "useAlias": true,
+            "useOther": false,
+            "retrieved": [],
+            "ROAD_CLASS": "arterial",
+            "nearbyError": "",
+            "FEATURE_CODE": null,
+            "FEATURE_TYPE": "Road",
+            "ROAD_SURFACE": "paved",
+            "nearbyPending": true,
+            "ROAD_NAME_FULL": "Canyon Drive",
+            "NUMBER_OF_LANES": 2,
+            "FEATURE_LENGTH_M": 107.9973,
+            "ROAD_NAME_ALIAS1": "107th Avenue",
+            "ROAD_NAME_ALIAS2": "Highway 29",
+            "ROAD_NAME_ALIAS3": null,
+            "ROAD_NAME_ALIAS4": null,
+            "SE_ANNO_CAD_DATA": null,
+            "DATA_CAPTURE_DATE": null,
+            "SEGMENT_LENGTH_2D": 107.997,
+            "SEGMENT_LENGTH_3D": null,
+            "HIGHWAY_EXIT_NUMBER": null,
+            "HIGHWAY_ROUTE_NUMBER": "29",
+            "DIGITAL_ROAD_ATLAS_LINE_ID": 237611
+        },
+        "end": {
+            "name": "Highway 29",
+            "alias": "Highway 29 N",
+            "other": null,
+            "coords": [
+                -121.84460135129977,
+                56.06705914580604
+            ],
+            "nearby": [
+                {
+                    "id": "end-municipality-65",
+                    "name": "Hudson's Hope",
+                    "phrase": "In Hudson's Hope",
+                    "source": "municipalities",
+                    "distance": 0
+                }
+            ],
+            "aliases": [
+                "Highway 29 N"
+            ],
+            "pending": {},
+            "OBJECTID": 253686580,
+            "useAlias": true,
+            "useOther": false,
+            "retrieved": [],
+            "ROAD_CLASS": "highway",
+            "nearbyError": "",
+            "FEATURE_CODE": null,
+            "FEATURE_TYPE": "Road",
+            "ROAD_SURFACE": "paved",
+            "nearbyPending": true,
+            "ROAD_NAME_FULL": "Highway 29 N",
+            "NUMBER_OF_LANES": 2,
+            "FEATURE_LENGTH_M": 518.0763,
+            "ROAD_NAME_ALIAS1": "Highway 29",
+            "ROAD_NAME_ALIAS2": null,
+            "ROAD_NAME_ALIAS3": null,
+            "ROAD_NAME_ALIAS4": null,
+            "SE_ANNO_CAD_DATA": null,
+            "DATA_CAPTURE_DATE": null,
+            "SEGMENT_LENGTH_2D": 518.076,
+            "SEGMENT_LENGTH_3D": null,
+            "HIGHWAY_EXIT_NUMBER": null,
+            "HIGHWAY_ROUTE_NUMBER": "29",
+            "DIGITAL_ROAD_ATLAS_LINE_ID": 2671644
+        }
+    },
+    "details": {
+        "direction": "Both directions",
+        "severity": "Minor",
+        "category": "Maintenance",
+        "situation": 69
+    },
+    "delays": {
+        "amount": 30,
+        "unit": "minutes"
+    },
+    "timing": {
+        "nextUpdate": null,
+        "startTime": "2026-05-28T18:30:00.000Z",
+        "endTime": null,
+        "ongoing": true,
+        "schedules": [
+            {
+                "id": "p6y41b9fi",
+                "fri": false,
+                "mon": false,
+                "sat": true,
+                "sun": true,
+                "thu": false,
+                "tue": false,
+                "wed": false,
+                "type": "week",
+                "allDay": true,
+                "endTime": null,
+                "startTime": null
+            },
+            {
+                "id": "gha320pmr",
+                "fri": false,
+                "mon": true,
+                "sat": false,
+                "sun": false,
+                "thu": false,
+                "tue": false,
+                "wed": false,
+                "type": "week",
+                "allDay": false,
+                "endTime": "17:30",
+                "startTime": "08:30"
+            }
+        ]
+    },
+    "external": {
+        "url": "https://www.google.com/"
+    },
+    "was_closure": false,
+    "showPreview": true,
+    "showForm": true,
+    "showHistory": false
+}
