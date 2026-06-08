@@ -362,6 +362,8 @@ def build_event_payload(target_event):
 
     def build_road():
         road_name_keys = (
+            "name",
+            "ROAD_NAME_FULL",
             "ROAD_NAME_ALIAS1",
             "ROAD_NAME_ALIAS2",
             "ROAD_NAME_ALIAS3",
