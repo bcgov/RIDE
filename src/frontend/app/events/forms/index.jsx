@@ -3,7 +3,9 @@ import { Component } from 'react';
 import * as turf from '@turf/turf';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckDouble, faCircleCheck, faCircleInfo, faCircleX, faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
+import {
+  faCheckDouble, faCircleCheck, faCircleX, faTrashCan, faXmark
+} from '@fortawesome/pro-regular-svg-icons';
 
 import Conditions from './Conditions';
 import Details from './Details';
@@ -20,22 +22,22 @@ import {
   CONDITIONS_FORMS, DELAYS_FORMS, DETAILS_FORMS, EXTERNAL_FORMS,
   IMPACTS_FORMS, INTERNAL_FORMS, RESTRICTIONS_FORMS, TIMING_FORMS,
 } from '../references';
+
 import {
-  convertToDateTimeLocalString as convert,
-  g2ll,
+  convertToDateTimeLocalString as convert, g2ll,
 } from "../../components/Map/helpers";
 import { addEvent } from '../../components/Map/Layer';
 import { getCookie } from '../shared';
 import { API_HOST } from '../../env';
 import { AuthContext } from '../../contexts';
-import { patch, getNextUpdate, getPendingNextUpdate } from '../../shared/helpers';
+import { patch, getPendingNextUpdate } from '../../shared/helpers';
 import Tabs from '../../shared/Tabs';
 import History from '../History/History';
 
 import './forms.scss';
 
 const ONE_HOUR = 1000 * 60 * 60;
-const ONE_WEEK = ONE_HOUR * 24 * 7
+const ONE_WEEK = ONE_HOUR * 24 * 7;
 export const INVALID_ADDITIONAL_CHARACTERS = /[<>[\]{}\\|~`!@#$%^&*()_+=]/;
 
 export function getLater(severity) {
@@ -291,6 +293,11 @@ export default class EventForm extends Component {
       form.timing.schedules = [];
     }
 
+    const parts = form.external?.url?.split('//');
+    if (parts.length < 2 || !['http:', 'https:'].includes(parts[0].toLowerCase())) {
+      err['external'] = 'Must be a valid link';
+    }
+
     // submitting existing notes with form gets an error because notes are
     // saved independently of the form, except on event creation where an
     // initial note may be included.
@@ -335,6 +342,7 @@ export default class EventForm extends Component {
           if (!ok) {
             const prefix = data?.open511 ? 'Sync to Open511 failed: ' : '';
             const messages = data?.open511 || [data?.detail || 'Could not save event'];
+            console.error(data);
             setAlertContext?.({ message: `${prefix}${messages.join('\n')}` });
             return;
           }
@@ -374,7 +382,7 @@ export default class EventForm extends Component {
   }
 
   render() {
-    const { event, dispatch, preview, cancel, goToFunc, bulkRc, serviceAreaBoundaries } = this.props;
+    const { event, dispatch, cancel, goToFunc, serviceAreaBoundaries } = this.props;
     const { errors } = this.state;
 
     const { authContext } = this.context;
@@ -484,7 +492,7 @@ export default class EventForm extends Component {
 
                     { EXTERNAL_FORMS.includes(event.type) &&
                       <div className="section external">
-                        <External event={event} dispatch={dispatch} />
+                        <External event={event} dispatch={dispatch} errors={errors} />
                       </div>
                     }
 

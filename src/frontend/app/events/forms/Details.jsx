@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 
 import Select from 'react-select';
 
-import { FORM_CATEGORIES, FORM_CATEGORY_PHRASE, FORM_PHRASES, FORM_PHRASE_CATEGORY, PHRASES_LOOKUP } from "../references";
+import { FORM_CATEGORIES, FORM_CATEGORY_PHRASE, FORM_PHRASES, PHRASES_LOOKUP } from "../references";
 import { selectStyle } from '../../components/Map/helpers';
 
 export default function Details({ errors, event, dispatch }) {

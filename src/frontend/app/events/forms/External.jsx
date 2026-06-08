@@ -1,8 +1,10 @@
-export default function External({ event, dispatch }) {
+export default function External({ errors, event, dispatch }) {
   return (
     <>
-      <div className="title">
-        <p><strong>Additional details external site</strong> (optional)</p>
+      <div className={`title ${errors['external'] && 'error'}`}>
+        <p><strong>Additional details external site</strong> (optional)
+        <span className='error-message'>{errors['external']}</span>
+        </p>
       </div>
       <div className="input">
         <div style={{ display: 'block' }}>
