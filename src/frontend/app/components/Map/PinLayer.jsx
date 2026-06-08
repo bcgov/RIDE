@@ -94,7 +94,11 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
     props?.ROAD_NAME_ALIAS3,
     props?.ROAD_NAME_ALIAS4,
   ].filter(Boolean);
-  let name = props?.ROAD_NAME_ALIAS1 || props?.ROAD_NAME_FULL || `Highway ${props?.HIGHWAY_ROUTE_NUMBER}`;
+
+  // Prioritize Highway name with number
+  let name = props?.HIGHWAY_ROUTE_NUMBER ? `Hwy ${props?.HIGHWAY_ROUTE_NUMBER}` :
+    (props?.ROAD_NAME_ALIAS1 || props?.ROAD_NAME_FULL);
+
   aliases = aliases.filter((alias) => alias !== name);
 
   Object.assign(location, {
