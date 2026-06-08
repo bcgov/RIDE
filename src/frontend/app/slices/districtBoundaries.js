@@ -1,6 +1,6 @@
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 
-import { API_HOST } from '../env.js';
+import { API_HOST, ELIDE_SERVICE_AREA_GEOMETRIES } from '../env.js';
 
 const adapter = createEntityAdapter({
   sortComparer: (a, b) => { return b.sortingOrder < a.sortingOrder ? 1 : -1; }
@@ -16,7 +16,12 @@ const refreshThunk = createAsyncThunk(
     let cached = await cache.match(url);
     if (cached) {
       const data = await cached.json();
-      if (validList(data)) return data;
+      if (validList(data)) {
+        if (ELIDE_SERVICE_AREA_GEOMETRIES) {
+          return data.map((datum) => { datum.geometry.coordinates = []; return datum; } )
+        }
+        return data;
+      }
       await cache.delete(url);
     }
 
@@ -42,6 +47,9 @@ const refreshThunk = createAsyncThunk(
       })
     );
 
+    if (ELIDE_SERVICE_AREA_GEOMETRIES) {
+      return data.map((datum) => { datum.geometry.coordinates = []; return datum; } )
+    }
     return data;
   },
   {

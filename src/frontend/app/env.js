@@ -13,3 +13,6 @@ export const BRANCH = `${getEnv('BRANCH')}`;
 export const RELEASE = `${getEnv('RELEASE')}`;
 export const ALLOW_LOCAL_ACCOUNTS = `${getEnv('ALLOW_LOCAL_ACCOUNTS')}`;
 export const EVENT_POLLING_REFRESH = `${getEnv('EVENT_POLLING_REFRESH')}`;
+// set to true to remove geometries from service areas so that data is small
+// enough for redux-devtools to work with the store
+export const ELIDE_SERVICE_AREA_GEOMETRIES = `${getEnv('ELIDE_SERVICE_AREA_GEOMETRIES')}`;
