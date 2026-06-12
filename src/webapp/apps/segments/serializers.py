@@ -1,5 +1,7 @@
 import re
 
+from functools import cached_property
+
 from rest_framework import serializers
 
 from apps.shared.serializers import UserSerializer
@@ -15,9 +17,17 @@ class SegmentSerializer(serializers.ModelSerializer):
         # fields = "__all__"
         exclude = ["geometry"]
 
+    @cached_property
+    def _segment_to_area(self):
+        # Create map with all SAs to avoid N+1 query
+        mapping = {}
+        for sa in ServiceArea.objects.exclude(parent=None):
+            for segment_id in sa.segments:
+                mapping.setdefault(int(segment_id), sa.id)
+        return mapping
+
     def get_area(self, obj):
-        sa = ServiceArea.objects.filter(segments__contains=int(obj.id)).exclude(parent=None).first()
-        return sa.id if sa else None
+        return self._segment_to_area.get(int(obj.id))
 
 
 class ChainUpSerializer(serializers.ModelSerializer):

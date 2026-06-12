@@ -1,6 +1,7 @@
 import logging
 
 from datetime import datetime, timezone
+from functools import cached_property
 
 from django.contrib.gis.geos import Point
 
@@ -43,8 +44,50 @@ class NoteSerializer(VersionSerializer):
 class NotesListSerializer(fields.ListField):
     child = NoteSerializer()
 
+    def _event_ids_for_prefetch(self):
+        # Should only be used in EventSerializer
+        parent = self.parent
+        if parent is None:
+            return []
+
+        # Return list of event IDs in list serializer, i.e., Events Viewset
+        list_serializer = parent.parent
+        if list_serializer is not None and getattr(list_serializer, 'many', False):
+            iterable = list_serializer.instance
+            if iterable is None:
+                return []
+
+            if hasattr(iterable, 'values_list'):
+                return list(iterable.values_list('id', flat=True).distinct())
+
+            return list({obj.id for obj in iterable})
+
+        # Return single ID if not serializing list
+        if parent.instance is not None:
+            return [parent.instance.id]
+
+        # Empty fallback
+        return []
+
+    @cached_property
+    def _notes_by_event(self):
+        event_ids = self._event_ids_for_prefetch()
+        if not event_ids:
+            return {}
+
+        notes = (
+            Note.current.filter(event__in=event_ids)
+            .select_related('user')
+            .order_by('-created')
+        )
+        by_event = {}
+        for note in notes:
+            by_event.setdefault(note.event, []).append(note)
+
+        return by_event
+
     def get_attribute(self, instance):
-        return Note.current.filter(event=instance.id).order_by('-created')
+        return self._notes_by_event.get(instance.id, [])
 
 
 class EventSerializer(KeyMoveSerializer):
@@ -88,8 +131,7 @@ class EventSerializer(KeyMoveSerializer):
         return notes
 
     def get_is_closure(self, obj):
-        ids = [impact['id'] for impact in obj.impacts]
-        return TrafficImpact.objects.filter(id__in=ids, closed=True).count() > 0
+        return any([impact.get('closed', False) for impact in obj.impacts])
 
     def get_last_inactivated(self, obj):
         return obj.meta.get('last_inactivated')
