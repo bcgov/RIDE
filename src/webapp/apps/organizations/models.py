@@ -24,7 +24,7 @@ class ServiceArea(BaseModel):
     routes = OrderedListField(default=list)
 
     def __str__(self):
-        return f'{self.name}{' district' if self.parent is None else ''} - {self.sortingOrder}'
-    
+        return f'{self.name}{' district' if self.parent_id is None else ''} - {self.sortingOrder}'
+
     class Meta:
         ordering = ['sortingOrder']
