@@ -51,13 +51,11 @@ class EventPreview:
 class Events(viewsets.ModelViewSet):
     queryset = Event.last.all().select_related(
         'user',
-        'segment__route',
-        'chainup__route',
-        'chainup__area',
-        'service_area', 
-    ).prefetch_related(
-        'service_area__parent', 
-        'chainup__area__parent',
+        'segment',
+        'chainup',
+    ).defer(
+        'segment__geometry',
+        'chainup__geometry',
     )
     serializer_class = EventSerializer
     lookup_field = 'id'
@@ -151,10 +149,9 @@ def validate_allowed_segments(user, segPks):
 class RoadConditions(Events):
     queryset = Event.current.filter(event_type=EventType.ROAD_CONDITION, from_bulk=True).select_related(
         'user',
-        'segment__route',
-        'service_area',
-    ).prefetch_related(
-        'service_area__parent',
+        'segment',
+    ).defer(
+        'segment__geometry',
     )
     serializer_class = RcSerializer
 
@@ -278,10 +275,9 @@ class RoadConditions(Events):
 class ChainUps(Events):
     queryset = Event.current.filter(event_type=EventType.CHAIN_UP, from_bulk=True).select_related(
         'user',
-        'chainup__route',
-        'chainup__area',
-    ).prefetch_related(
-        'chainup__area__parent',
+        'chainup',
+    ).defer(
+        'chainup__geometry',
     )
     serializer_class = ChainUpEventSerializer
     permission_classes = [IsApprover]
@@ -380,13 +376,11 @@ class ChainUps(Events):
 class Pending(viewsets.ModelViewSet):
     queryset = Event.pending.all().select_related(
         'user',
-        'segment__route',
-        'chainup__route',
-        'chainup__area',
-    ).prefetch_related(
-        'service_area',
-        'service_area__parent',
-        'chainup__area__parent',
+        'segment',
+        'chainup',
+    ).defer(
+        'segment__geometry',
+        'chainup__geometry',
     )
     serializer_class = PendingSerializer
     lookup_field = 'id'
