@@ -32,5 +32,27 @@ runs:
     - name: Authenticate and set project
       shell: bash
       run: |
-        oc login --server=${{ inputs.server }} --token=${{ inputs.token }}
-        oc project ${{ inputs.namespace }}
+        attempt=1
+        max_attempts=3
+
+        until [ $attempt -gt $max_attempts ]
+        do
+          echo "Attempt $attempt of $max_attempts..."
+
+          if oc login --server=${{ inputs.server }} --token=${{ inputs.token }} \
+            && oc project ${{ inputs.namespace }}; then
+            echo "Login successful"
+            break
+          fi
+
+          if [ $attempt -eq $max_attempts ]; then
+            echo "All attempts failed"
+            exit 1
+          fi
+
+          echo "Login failed. Retrying in 30 seconds..."
+          sleep 30
+
+          attempt=$((attempt+1))
+        done
+
