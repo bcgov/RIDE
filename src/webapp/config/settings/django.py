@@ -150,9 +150,13 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': lambda request: SHOW_DEBUG_TOOLBAR,
     'IS_RUNNING_TESTS': False,
     'PROFILER_MAX_DEPTH': 30,
-    'PROFILER_THRESHOLD_RATIO': 16,
+    
+    # 1. Force the profiler to capture everything, ignoring BASE_DIR rules
+    'PROFILER_CAPTURE_PROJECT_CODE': False, 
+    
+    # 2. Increase threshold (or remove it) so small, fast functions aren't dropped
+    'PROFILER_THRESHOLD_RATIO': 200, 
 }
-
 # Auth
 AUTH_USER_MODEL = "users.RIDEUser"
 AUTH_PASSWORD_VALIDATORS = [
