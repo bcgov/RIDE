@@ -79,10 +79,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # 1. CORS always comes first
     'django.middleware.security.SecurityMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
+    'debug_toolbar.middleware.DebugToolbarMiddleware',  # 2. Debug toolbar right after static assets
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -90,7 +90,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'django.contrib.auth.middleware.LoginRequiredMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',  # 3. Keeps everything below/internal safe
 ]
 
 TEMPLATES = [
