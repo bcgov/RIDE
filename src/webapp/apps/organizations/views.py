@@ -1,3 +1,5 @@
+from django.db.models import Prefetch
+
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,7 +13,12 @@ from .serializers import (
 )
 
 class OrganizationAPIView(ModelViewSet):
-    queryset = Organization.objects.all().prefetch_related('users', 'service_areas').order_by('name')
+    # prevent loading service area geometries into memory
+    queryset = Organization.objects.all().prefetch_related(
+        'users',
+        Prefetch('service_areas', queryset=ServiceArea.objects.only('id')),
+    ).order_by('name')
+
     serializer_class = OrganizationSerializer
     permission_classes = [permissions.IsAdminUser]
 
