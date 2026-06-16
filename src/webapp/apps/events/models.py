@@ -12,7 +12,7 @@ from django.dispatch import receiver
 
 from apps.events.enums import EventType
 from apps.events.helpers import get_route_projection
-from apps.events.open511 import sync_open511_data
+from apps.events.open511 import build_event_description, sync_open511_data
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp, Route
 from apps.shared.models import BaseModel, LocationField, OrderedListField, VersionedModel
@@ -213,6 +213,12 @@ class Event(VersionedModel):
     additional = models.TextField(blank=True, null=True)
     link = models.URLField(max_length=None, blank=True, null=True)
 
+    # Derived presentation values, precomputed on save so the read-heavy
+    # polling endpoints (/events, /pending) don't rebuild them per request.
+    description = models.TextField(blank=True, default='')
+    ivr = models.TextField(blank=True, default='')
+    polygon = models.JSONField(null=True, blank=True)
+
     # for sorting along a highway
     route_projection = models.FloatField(blank=True, default=0)
 
@@ -223,7 +229,7 @@ class Event(VersionedModel):
     pending = PendingManager()
     relevant = RelevantManager()
 
-    ignored_fields = ['meta', 'latest_approved', 'segment']
+    ignored_fields = ['meta', 'latest_approved', 'segment', 'description', 'ivr', 'polygon']
 
     def save(self, *args, **kwargs):
         '''
@@ -259,11 +265,24 @@ class Event(VersionedModel):
             # Update route projection for sorting
             self.route_projection = get_route_projection(self)
 
+            # Precompute derived values
+            self.description = build_event_description(self)
+            self.ivr = build_event_description(self, ivr=True)
+            self.polygon = self._build_polygon()
+
             super().save(*args, **kwargs)
 
             # Do not sync if chain-up or disabled
             if not _is_sync_disabled() and self.event_type != EventType.CHAIN_UP:
                 sync_open511_data(self)
+
+    def _build_polygon(self):
+        # Build and store buffered polygon around road conditions to avoid recomputing
+        if self.event_type == EventType.ROAD_CONDITION and self.geometry:
+            ring = self.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2).coords[0]
+            return [list(point) for point in ring]
+
+        return None
 
     def get_ignored_fields(self):
         ignored = super().get_ignored_fields().copy()
