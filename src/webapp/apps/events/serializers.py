@@ -10,8 +10,7 @@ from rest_framework.serializers import ModelSerializer
 
 from config.settings import EVENT_PREFIX
 from .models import Event, Note, TrafficImpact, Condition
-from .open511 import build_event_description
-from .permissions import coords_from_start, user_may_use_point
+from .permissions import coords_from_start, get_user_service_areas
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
 from apps.segments.serializers import SegmentSerializer, ChainUpSerializer
@@ -102,7 +101,8 @@ class EventSerializer(KeyMoveSerializer):
 
     class Meta:
         model = Event
-        exclude = ['deleted']
+        # 'polygon' in to_representation; only for road conditions
+        exclude = ['deleted', 'polygon']
         keys_to_move = {
             '__orig__': 'meta.source',
             'type': 'event_type',
@@ -138,6 +138,22 @@ class EventSerializer(KeyMoveSerializer):
 
         return False
 
+    @cached_property
+    def _editable_areas(self):
+        '''
+        Resolve the requesting user's editable service areas once per request to avoid repetition
+        '''
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+
+        allowed_area_geometries = (
+            get_user_service_areas(user)
+            .exclude(geometry=None)
+            .values_list('geometry', flat=True)
+        )
+
+        return [geometry.prepared for geometry in allowed_area_geometries]
+
     def get_editable(self, obj):
         request = self.context.get('request')
         user = getattr(request, 'user', None) if request else None
@@ -147,13 +163,19 @@ class EventSerializer(KeyMoveSerializer):
         if user.is_superuser:
             return True
 
-        return user_may_use_point(user, coords_from_start(obj.start))
+        editable_areas = self._editable_areas
+        coords = coords_from_start(obj.start)
+        if coords is None:
+            return False
+
+        point = Point(coords[0], coords[1])
+        return any(area.contains(point) for area in editable_areas)
 
     def get_description(self, obj):
-        return build_event_description(obj)
+        return obj.description
 
     def get_ivr(self, obj):
-        return build_event_description(obj, ivr=True)
+        return obj.ivr
 
     def to_internal_value(self, data):
         request = self.context.get("request")
@@ -208,11 +230,15 @@ class EventSerializer(KeyMoveSerializer):
             if instance.segment:
                 obj['location']['start']['name'] = instance.segment.name
 
-            obj['polygon'] = instance.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2).coords[0]
+            obj['polygon'] = instance.polygon
 
-        # Only serialize segment for road conditions
-        if obj.get('type') != 'ROAD_CONDITION' and 'segment' in obj:
-            del obj['segment']
+        else:
+            # Only serialize polygon/segment for road conditions
+            if 'polygon' in obj:
+                del obj['polygon']
+
+            if 'segment' in obj:
+                del obj['segment']
 
         # Only serialize chainup for chainups
         if obj.get('type') != 'CHAIN_UP' and 'chainup' in obj:
@@ -301,20 +327,45 @@ class PendingSerializer(EventSerializer):
     latest_published_version = serializers.SerializerMethodField()
     clearing = serializers.SerializerMethodField()
 
+    @cached_property
+    def _batched_queries(self):
+        '''
+        Fetch and cache querysets in memory to prevent repeated queries from each instance
+        '''
+
+        # When serializing a list, the loaded objects live on the parent
+        # ListSerializer; for a single object they live on this serializer.
+        instances = self.parent.instance if self.parent is not None else self.instance
+        if instances is None:
+            return {}, set()
+
+        # make single event instance iterable for logic below
+        if not hasattr(instances, '__iter__'):
+            instances = [instances]
+
+        ids = {obj.id for obj in instances}
+        if not ids:
+            return {}, set()
+
+        published_versions = dict(
+            Event.current.filter(id__in=ids).values_list('id', 'version')
+        )
+        active_event_ids = set(
+            Event.objects.filter(id__in=ids, status='Active').values_list('id', flat=True)
+        )
+        return published_versions, active_event_ids
+
     def get_latest_published_version(self, obj):
-        latest = Event.current.filter(id=obj.id).first()
-        return None if latest is None else latest.version
+        published_versions = self._batched_queries[0]
+        return published_versions.get(obj.id)
 
     def get_clearing(self, obj):
         if obj.status == 'Active':
             return False
 
         # is there an earlier version, approved or not, that was active?
-        latest = Event.objects.filter(id=obj.id, status='Active').order_by('-version').first()
-        if latest:
-            return True
-
-        return False
+        active_event_ids = self._batched_queries[1]
+        return obj.id in active_event_ids
 
 
 class TrafficImpactSerializer(ModelSerializer):
