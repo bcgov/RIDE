@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os
 import sys
 from time import strftime, strptime
@@ -5,7 +6,7 @@ from time import strftime, strptime
 from django.contrib.gis.db import models as gis
 from django.conf import settings
 from django.db import models, transaction
-from django.db.models import ForeignKey
+from django.db.models import ForeignKey, Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -36,6 +37,20 @@ class LatestApprovedManager(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(latest_approved=True, deleted=False)
+
+
+class RelevantManager(models.Manager):
+
+    use_in_migrations = True
+
+    def get_queryset(self):
+        cutoff = datetime.now() - timedelta(7)
+        return super().get_queryset().filter(
+            Q(latest_approved=True) | Q(latest=True),
+            Q(status='Active') | Q(status='Inactive', last_inactivated__gte=cutoff),
+            deleted=False
+        )
+
 
 days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 DAY_NAMES = {
@@ -193,6 +208,7 @@ class Event(VersionedModel):
     next_update = models.DateTimeField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
+    last_inactivated = models.DateTimeField(null=True)
 
     additional = models.TextField(blank=True, null=True)
     link = models.URLField(max_length=None, blank=True, null=True)
@@ -205,6 +221,7 @@ class Event(VersionedModel):
     objects = EverythingManager()
     current = LatestApprovedManager()
     pending = PendingManager()
+    relevant = RelevantManager()
 
     ignored_fields = ['meta', 'latest_approved', 'segment']
 

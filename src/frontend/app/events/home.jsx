@@ -25,7 +25,7 @@ import Preview from './Preview';
 import Queue from './Queue';
 import Events from './Events';
 
-import { selectLength } from '../slices/pending';
+import { selectPending } from '../slices/events';
 import { selectAllServiceAreaBoundaries } from '../slices/serviceAreaBoundaries';
 
 // Styling
@@ -148,7 +148,7 @@ export default function Home() {
                 <Tabs.Tab name='queue' label={
                   <span>
                     Awaiting Approval
-                    <Bubble classes={'num'} selector={selectLength} />
+                    <Bubble classes={'num'} selector={selectPending} />
                   </span>
                 }>
                   <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />

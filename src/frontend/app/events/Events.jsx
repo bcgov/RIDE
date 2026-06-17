@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useSelector, useDispatch, useStore } from 'react-redux';
+import { useState, useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import Select from 'react-select';
 
@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 import { formatDistanceToNowStrict } from 'date-fns';
 
+import { AuthContext } from '../contexts';
 import { selectAllEvents } from '../slices/events';
 import { selectAllServiceAreas } from '../slices/serviceAreas';
 import { selectAllRoutes } from '../slices/routes';
@@ -262,11 +263,14 @@ const sortFunctions = {
 }
 
 export default function Events({ goToFunc, dispatch, map, current }) {
+  const { authContext } = useContext(AuthContext);
   const [ type, setType ] = useState();
   const [ area, setArea ] = useState();
   const [ road, setRoad ] = useState();
   const [ sort, setSort ] = useState(sortOptions[0]);
   const [ search, setSearch ] = useState('');
+
+  const userServiceAreas = new Set(authContext.service_areas);
 
   const events = useSelector(selectAllEvents);
   const serviceAreas = useSelector(selectAllServiceAreas);
@@ -284,10 +288,11 @@ export default function Events({ goToFunc, dispatch, map, current }) {
   // between that time and now of less than one hour.  They're annotated with
   // the delta and whether the event is ending at the time.
   const displayed = events.filter((event) => (
-    event.editable &&
+    userServiceAreas.has(event.service_area) &&
     event.status === 'Active' && (
       event.timing.nextUpdate || event.timing.endTime
-    )
+    ) &&
+    event.approved
   )).map((event) => {
     let delta, ending = false;
 
@@ -401,7 +406,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
 
       {displayed.map((event) => {
         return <Event
-          key={event.id}
+          key={`active-${event.id}v${event.version}`}
           event={event}
           goToFunc={goToFunc}
           dispatch={dispatch}
