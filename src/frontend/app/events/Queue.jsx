@@ -1,19 +1,16 @@
 import { useContext } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { createSelector } from '@reduxjs/toolkit'
+import { useSelector } from 'react-redux';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/pro-solid-svg-icons';
 import { getPlainIcon } from './icons';
 
 import { AuthContext } from '../contexts';
-import { EVENT_POLLING_REFRESH } from '../env';
 import { PHRASES_LOOKUP } from './references';
 import { EventCardLocation } from './EventCardLocation.jsx';
 import { selectFeature } from '../components/Map/helpers';
-import PollingComponent from '../shared/PollingComponent';
 
-import { refreshPending } from '../slices/pending';
+import { selectPending } from '../slices/events';
 
 import './Queue.scss';
 
@@ -43,12 +40,14 @@ function Pending({ event, dispatch, goToFunc, map }) {
         <div className='icon'>
           <img src={getPlainIcon(event)} />
         </div>
+
         <div className='title'>
           <div className='situation'>
             {PHRASES_LOOKUP[event.details.situation]}&nbsp;-&nbsp;
             {event.details.severity}&nbsp;{event.type}
           </div>
-          <div className='id'>{event.id}</div>
+
+          <div className='id'>{event.id} v{event.version}</div>
         </div>
       </section>
       <EventCardLocation event={event} />
@@ -72,27 +71,19 @@ function Pending({ event, dispatch, goToFunc, map }) {
   );
 }
 
-const selectPending = (state) => state.pending;
-const selectMemoizedPending = createSelector(
-  [selectPending],
-  (pending) => pending.ids.map((id) => pending.entities[id]),
-);
-
 export default function Queue({ dispatch, goToFunc, map }) {
-  const storeDispatch = useDispatch()
-  const pending = useSelector(selectMemoizedPending).filter((event) => event.editable);
-
+  const pending = useSelector(selectPending);
   return (
     <div className='queue'>
       {pending.map((event) => (
-        <Pending key={event.id} event={event} dispatch={dispatch} goToFunc={goToFunc} map={map} />
+        <Pending
+          key={`pending-${event.id}v${event.version}`}
+          event={event}
+          dispatch={dispatch}
+          goToFunc={goToFunc}
+          map={map}
+        />
       ))}
-
-      <PollingComponent
-        runnable={() => storeDispatch(refreshPending())}
-        interval={EVENT_POLLING_REFRESH || 10000}
-        runImmediately={true}
-      />
     </div>
   )
 }

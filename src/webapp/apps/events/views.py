@@ -126,6 +126,12 @@ class Events(viewsets.ModelViewSet):
         serializer = EventDiffSerializer(queryset, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
 
+    @action(detail=False)
+    def relevant(self, request):
+        queryset = Event.relevant.all()
+        serializer = EventSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 

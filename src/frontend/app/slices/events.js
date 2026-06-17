@@ -12,7 +12,7 @@ const eventsAdapter = createEntityAdapter({
 export const refreshThunk = createAsyncThunk(
   'events/refresh',
   async () => {
-    const response = await client.get(`${API_HOST}/api/events`);
+    const response = await client.get(`${API_HOST}/api/events/relevant`);
     return response.data;
   },
   {
@@ -22,7 +22,12 @@ export const refreshThunk = createAsyncThunk(
   }
 );
 
-const selectStatus = (state) => state.conditions.status;
+const selectStatus = (state) => state.events.status;
+const selectPending = (state) => {
+  return Object.values(state.events.entities).filter(
+    (e) => e.status === 'Active' && e.latest && !e.latest_approved
+  );
+}
 
 export const slice = createSlice({
   name: 'events',
@@ -36,7 +41,7 @@ export const slice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(refreshThunk.pending, (state, action) => {
+      .addCase(refreshThunk.pending, (state) => {
         state.status = 'pending';
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
@@ -58,6 +63,7 @@ export const {
 export {
   refreshThunk as refreshEvents,
   selectStatus as selectEventsStatus,
+  selectPending,
 };
 
 export default slice.reducer;

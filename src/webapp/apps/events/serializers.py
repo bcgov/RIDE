@@ -92,7 +92,6 @@ class NotesListSerializer(fields.ListField):
 
 class EventSerializer(KeyMoveSerializer):
     is_closure = fields.SerializerMethodField()
-    last_inactivated = fields.SerializerMethodField()
     ongoing = fields.SerializerMethodField()
     notes = NotesListSerializer(required=False)
     segment = SegmentSerializer(required=False, allow_null=True)
@@ -132,9 +131,6 @@ class EventSerializer(KeyMoveSerializer):
 
     def get_is_closure(self, obj):
         return any([impact.get('closed', False) for impact in obj.impacts])
-
-    def get_last_inactivated(self, obj):
-        return obj.meta.get('last_inactivated')
 
     def get_ongoing(self, obj):
         if obj.start_time is not None and obj.end_time is None:
@@ -177,9 +173,11 @@ class EventSerializer(KeyMoveSerializer):
                 raise serializers.ValidationError({
                     'Notes': 'Submitting notes with existing events is not allowed.'
                 })
-            if data.get('status') == 'Inactive':
-                now = datetime.now(tz=timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
-                data['meta']['last_inactivated'] = now
+
+            if data.get('status') == 'Inactive' and self.instance.status == 'Active':
+                data['last_inactivated'] = datetime.now(tz=timezone.utc)
+            elif data.get('status') == 'Active' and self.instance.status == 'Inactive':
+                data['last_inactivated'] = None
 
         data['approved'] = self.is_automatically_approved(data)
 
@@ -190,7 +188,7 @@ class EventSerializer(KeyMoveSerializer):
                 sa = ServiceArea.objects.filter(parent__isnull=False,
                                                 geometry__contains=point).first()
                 if sa is not None:
-                   data['service_area'] = sa.id
+                    data['service_area'] = sa.id
             except Exception as e:
                 log.error(f'getting service area failed for coords {coords} for event {data.get('id')}')
                 log.exception(e)
