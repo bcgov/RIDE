@@ -96,8 +96,14 @@ def build_event_description(target_event, ivr=False):
 
             # Add phrase from first start ref location
             start_ref_locations = target_event.start.get('nearby') if 'nearby' in target_event.start else []  # target_event.start is mandatory
-            if start_ref_locations and len(start_ref_locations) > 0:
-                res += ', ' + start_ref_locations[0]['phrase']
+            has_start_ref_locs = start_ref_locations and len(start_ref_locations) > 0
+
+            if has_start_ref_locs:
+                for start_i, start_loc in enumerate(start_ref_locations):
+                    # Add 'and' if last location of many
+                    last_start_loc = start_i == len(start_ref_locations) - 1 and len(start_ref_locations) > 1
+                    res += ' and ' if last_start_loc else ', '
+                    res += start_loc['phrase']
 
         # End descriptions
         if has_end_location:  # end point is optional
@@ -118,7 +124,17 @@ def build_event_description(target_event, ivr=False):
                     res += end_point_name + ', '
 
                 if has_ref_locs:
-                    res += end_ref_locations[0]['phrase']
+                    for end_i, end_loc in enumerate(end_ref_locations):
+                        # Add 'and' if last location of many
+                        last_end_loc = end_i == len(end_ref_locations) - 1 and len(end_ref_locations) > 1
+                        if last_end_loc:
+                            res += ' and '
+
+                        # comma if not first ref location
+                        elif end_i != 0:
+                            res += ', '
+
+                        res += end_loc['phrase']
 
         return res
 
