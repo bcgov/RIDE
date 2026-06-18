@@ -44,6 +44,7 @@ class EventPreview:
     start: dict = field(default_factory=dict)
     end: dict | None = None
     chainup: dict | None = None
+    last_updated: datetime.datetime | None = None
     next_update: datetime.datetime | None = None
     link: str | None = None
 
@@ -101,6 +102,7 @@ class Events(viewsets.ModelViewSet):
             start=data.get('start') or {},
             end=data.get('end'),
             chainup=chainup,
+            last_updated=parse_dt(data.get('last_updated')),
             next_update=parse_dt(data.get('next_update')),
             link=data.get('link', '')
         )
