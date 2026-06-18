@@ -219,8 +219,13 @@ def build_event_description(target_event, ivr=False):
         elif text:
             parts.append(sentence(text))
 
-    # Next update for ivr
     if ivr:
+        # Last update for ivr
+        last_update = target_event.last_updated
+        if last_update:
+            parts.append(sentence(f"Last update: {format_long_date(last_update)}"))
+
+        # Next update for ivr
         next_update = target_event.next_update
         if next_update:
             parts.append(sentence(f"Next update: {format_long_date(next_update)}"))
