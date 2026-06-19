@@ -133,7 +133,7 @@ function getStyle(sign, state) {
 export function addSign(sign, map, visibleLayers) {
   sign = structuredClone(sign);
   const source = map.get('dms').getSource();
-  const existing = source.get(sign.id);
+  const existing = source.get(sign.id)?.get('raw');
 
   if (existing) {
     if (sign.updated_datetime_utc === existing.updated_datetime_utc) { return; }
