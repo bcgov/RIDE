@@ -95,7 +95,6 @@ class EventSerializer(KeyMoveSerializer):
     notes = NotesListSerializer(required=False)
     segment = SegmentSerializer(required=False, allow_null=True)
     chainup = ChainUpSerializer(required=False, allow_null=True)
-    editable = fields.SerializerMethodField()
     description = fields.SerializerMethodField()
     ivr = fields.SerializerMethodField()
 
@@ -153,23 +152,6 @@ class EventSerializer(KeyMoveSerializer):
         )
 
         return [geometry.prepared for geometry in allowed_area_geometries]
-
-    def get_editable(self, obj):
-        request = self.context.get('request')
-        user = getattr(request, 'user', None) if request else None
-        if not user or not user.is_authenticated:
-            return False
-
-        if user.is_superuser:
-            return True
-
-        editable_areas = self._editable_areas
-        coords = coords_from_start(obj.start)
-        if coords is None:
-            return False
-
-        point = Point(coords[0], coords[1])
-        return any(area.contains(point) for area in editable_areas)
 
     def get_description(self, obj):
         return obj.description
