@@ -52,6 +52,7 @@ export default function Home() {
   // States
   const [ map, setMap ] = useState(null);
   const [ preview, setPreview ] = useState(true);
+  const [ eventsListTab, setEventsListTab ] = useState('active');
   const [ event, dispatch ] = useReducer(reducer, getInitialEvent());
 
   // Selectors
@@ -128,7 +129,7 @@ export default function Home() {
     <div className="events-home">
       <div className="panel">
         <h3>Events</h3>
-        <Tabs>
+        <Tabs value={eventsListTab} onChange={setEventsListTab}>
           <Tabs.Tab name='active' label='Active'>
             <Events dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} current={event} />
           </Tabs.Tab>

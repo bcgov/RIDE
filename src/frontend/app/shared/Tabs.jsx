@@ -16,8 +16,9 @@ const getDefault = (children) => {
 
 export const TabContext = createContext('');
 
-export default function Tabs({ children, onChange, hideSingleTabHandle }) {
-  const [currentTab, setCurrentTab] = useState(getDefault(children));
+export default function Tabs({ children, value, onChange, hideSingleTabHandle }) {
+  const [internalTab, setInternalTab] = useState(() => getDefault(children));
+  const currentTab = value ?? internalTab;
 
   let tabs = Array.isArray(children) ? children : [children];
   tabs = tabs.filter((child) => child);
@@ -40,7 +41,7 @@ export default function Tabs({ children, onChange, hideSingleTabHandle }) {
                   onClick={(e) => {
                     e.stopPropagation();
                     if (currentTab !== name) {
-                      setCurrentTab(name);
+                      setInternalTab(name);
                       onChange?.(name);
                     }
                   }}
