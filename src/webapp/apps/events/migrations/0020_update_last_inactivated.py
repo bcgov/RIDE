@@ -33,14 +33,14 @@ class Migration(migrations.Migration):
                 if event.status == 'Inactive' and prev == 'Active':
                     event.last_inactivated = event.last_updated
                     prevDate = event.last_updated
-                    event.save(force_update=True, update_fields=['last_inactivated'])
+                    Event.objects.filter(pk=event.pk).update(last_inactivated=event.last_updated)
                 elif event.status == 'Active' and prev == 'Inactive':
                     event.last_inactivated = None
                     prevDate = None
-                    event.save(force_update=True, update_fields=['last_inactivated'])
+                    Event.objects.filter(pk=event.pk).update(last_inactivated=None)
                 elif prev == 'Inactive' and event.status == 'Inactive':
                     event.last_inactivated = prevDate
-                    event.save(force_update=True, update_fields=['last_inactivated'])
+                    Event.objects.filter(pk=event.pk).update(last_inactivated=prevDate)
                 prev = event.status
 
     def reverse(apps, schema_editor):
