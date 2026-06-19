@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import sys
 from time import strftime, strptime
@@ -44,7 +44,7 @@ class RelevantManager(models.Manager):
     use_in_migrations = True
 
     def get_queryset(self):
-        cutoff = datetime.now() - timedelta(7)
+        cutoff = datetime.now(timezone.utc) - timedelta(7)
         return super().get_queryset().filter(
             Q(latest_approved=True) | Q(latest=True),
             Q(status='Active') | Q(status='Inactive', last_inactivated__gte=cutoff),
