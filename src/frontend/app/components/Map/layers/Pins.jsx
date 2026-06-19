@@ -17,7 +17,7 @@ import ContextMenu from '../../../events/ContextMenu';
 
 globalThis.ol = ol;
 
-function layerStyle(feature, resolution) {
+function layerStyle(feature) {
   if (!feature.get('visible')) { return null; }
   if (feature.get('selected')) { return feature.active; }
   return feature.get('hovered') ? feature.hover : feature.normal;
@@ -96,8 +96,8 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
   ].filter(Boolean);
 
   // Prioritize Highway name with number
-  let name = props?.HIGHWAY_ROUTE_NUMBER ? `Hwy ${props?.HIGHWAY_ROUTE_NUMBER}` :
-    (props?.ROAD_NAME_ALIAS1 || props?.ROAD_NAME_FULL);
+  const routeNumber = props?.HIGHWAY_ROUTE_NUMBER?.split('+')[0];
+  let name = routeNumber ? `Hwy ${routeNumber}` : props?.ROAD_NAME_FULL;
 
   aliases = aliases.filter((alias) => alias !== name);
 
@@ -123,7 +123,6 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
   if (point.dra.properties) {
     getNearby(point.action, location, dispatch);
     if (search) {
-      const subkey = point.get('style');
       getNearby(point.action, location, dispatch, search);
     }
   }
