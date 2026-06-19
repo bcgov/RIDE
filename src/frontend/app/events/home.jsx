@@ -127,8 +127,25 @@ export default function Home() {
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
       <div className="panel">
-        { ((event.showForm || event.showHistory) && event.location.start.name)
-          ? <EventForm
+        <h3>Events</h3>
+        <Tabs>
+          <Tabs.Tab name='active' label='Active'>
+            <Events dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} current={event} />
+          </Tabs.Tab>
+
+          <Tabs.Tab name='queue' label={
+            <span>
+              Awaiting Approval
+              <Bubble classes={'num'} selector={selectPending} />
+            </span>
+          }>
+            <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
+          </Tabs.Tab>
+        </Tabs>
+
+        { (event.showForm || event.showHistory) && event.location.start.name &&
+          <div className="form-overlay">
+            <EventForm
               map={mapRef.current}
               preview={() => setPreview(!preview)}
               cancel={cancel}
@@ -138,23 +155,7 @@ export default function Home() {
               serviceAreaBoundaries={serviceAreaBoundaries}
               goToFunc={centerMap}
               setAlertContext={setAlertContext} />
-          : <>
-              <h3>Events</h3>
-              <Tabs>
-                <Tabs.Tab name='active' label='Active'>
-                  <Events dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} current={event} />
-                </Tabs.Tab>
-
-                <Tabs.Tab name='queue' label={
-                  <span>
-                    Awaiting Approval
-                    <Bubble classes={'num'} selector={selectPending} />
-                  </span>
-                }>
-                  <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
-                </Tabs.Tab>
-              </Tabs>
-            </>
+          </div>
         }
       </div>
 
