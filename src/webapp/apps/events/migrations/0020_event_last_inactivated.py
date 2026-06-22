@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('events', '0018_event_from_bulk'),
+        ('events', '0019_event_description_ivr_polygon'),
     ]
 
     operations = [

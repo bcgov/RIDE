@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
         Event.objects.update(last_inactivated=None)
 
     dependencies = [
-        ('events', '0019_event_last_inactivated'),
+        ('events', '0020_event_last_inactivated'),
     ]
 
     operations = [
