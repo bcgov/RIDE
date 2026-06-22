@@ -97,6 +97,7 @@ export default function Home() {
   const initialEvent = getInitialEvent();
   initialEvent.type = 'ROAD_CONDITION';
   const [ event, dispatch ] = useReducer(eventReducer, initialEvent);
+  const [ computed, setComputed ] = useState(null);
 
   // Effects
   useEffect(() => {
@@ -504,6 +505,7 @@ export default function Home() {
                     event={event}
                     dispatch={dispatch}
                     mapRef={{current: null}}
+                    onComputed={setComputed}
                     segments={segments.filter((seg) => checkedSegs.includes(seg.uuid))}
                   />
                 </div>
@@ -519,8 +521,9 @@ export default function Home() {
                   }}
                   event={event}
                   dispatch={dispatch}
+                  computed={computed}
                   callback={bulkUpdateCallback}
-                  setAlertContex={setAlertContext} />
+                  setAlertContext={setAlertContext} />
               </div>
             </div>
           </div>

@@ -55,6 +55,7 @@ export default function Home() {
   const [ preview, setPreview ] = useState(true);
   const [ event, dispatch ] = useReducer(reducer, getInitialEvent());
   const [ sign, setSign ] = useState(null);
+  const [ computed, setComputed ] = useState(null);
 
   // Selectors
   const visibleLayers = useSelector(state => state.visibleLayers);
@@ -160,6 +161,7 @@ export default function Home() {
               cancel={cancel}
               event={event}
               dispatch={dispatch}
+              computed={computed}
               visibleLayers={visibleLayers}
               serviceAreaBoundaries={serviceAreaBoundaries}
               goToFunc={centerMap}
@@ -183,6 +185,7 @@ export default function Home() {
           event={event}
           dispatch={dispatch}
           preview={() => setPreview(!preview)}
+          onComputed={setComputed}
           mapRef={mapRef} />
       }
 
