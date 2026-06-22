@@ -178,9 +178,9 @@ class EventSerializer(KeyMoveSerializer):
                     'Notes': 'Submitting notes with existing events is not allowed.'
                 })
 
-            if data.get('status') == 'Inactive' and self.instance.status == 'Active':
+            if data.get('status') == 'Inactive' and self.instance and self.instance.status == 'Active':
                 data['last_inactivated'] = datetime.now(tz=timezone.utc)
-            elif data.get('status') == 'Active' and self.instance.status == 'Inactive':
+            elif data.get('status') == 'Active' and self.instance and self.instance.status == 'Inactive':
                 data['last_inactivated'] = None
 
         data['approved'] = self.is_automatically_approved(data)

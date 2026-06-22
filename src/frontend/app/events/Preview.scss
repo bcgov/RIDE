@@ -15,6 +15,18 @@
     }
   }
 
+  .word-count {
+    font-size: 0.75rem;
+    color: $Type-Secondary;
+    display: flex;
+    justify-content: flex-end;
+
+    &.error {
+      color: $Error;
+      font-weight: bolder;
+    }
+  }
+
   .segments-tab {
     background: $Type-Primary;
 
