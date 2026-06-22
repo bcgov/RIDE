@@ -22,6 +22,7 @@ window.__ENV__ = {
   RELEASE: '${RELEASE}',
   BRANCH: '${BRANCH}',
   ALLOW_LOCAL_ACCOUNTS: '${VITE_ALLOW_LOCAL_ACCOUNTS}',
+  DMS_API_URL: '${VITE_DMS_API_URL}',
 };
 </script>
 EOF
