@@ -72,7 +72,7 @@ jobs:
       url: ${{ needs.setup.outputs.openshift_gold_url }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: OC Setup
       uses: ./.github/actions/oc-setup
@@ -96,7 +96,7 @@ jobs:
       url: ${{ needs.setup.outputs.openshift_golddr_url }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: OC Setup
       uses: ./.github/actions/oc-setup
