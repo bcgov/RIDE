@@ -237,7 +237,7 @@ def build_event_description(target_event, ivr=False):
 
     if ivr:
         # Last update for ivr
-        last_update = target_event.last_updated
+        last_update = target_event.last_updated or datetime.datetime.now(ZoneInfo("America/Vancouver"))
         if last_update:
             parts.append(sentence(f"Last update: {format_long_date(last_update)}"))
 
@@ -530,6 +530,7 @@ def sync_open511_data(event):
     request_method = requests.patch if previous_approved else requests.post
 
     response = request_method(api_url, json=payload, headers=headers)
+
     if response.status_code == 200:
         data = response.json()
         if 'success' in data and data['success']:
@@ -545,6 +546,9 @@ def sync_open511_data(event):
                 raise ValidationError({'open511': errors})
 
         except:
-            unknown_err_message = f"unknown error while syncing event {event.id} to Open511"
-            logger.warning(unknown_err_message)
-            raise ValidationError({'open511': [unknown_err_message]})
+            logger.warning(response.text)
+            raise ValidationError({'open511': [response.text]})
+
+    logger.warning(response.text)
+    raise ValidationError({'open511': [response.text]})
+

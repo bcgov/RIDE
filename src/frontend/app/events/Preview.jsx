@@ -29,7 +29,7 @@ const formatDate = (date) => date ? format(new Date(date), 'MMM d, y') : '';
 const formatTimestamp = (date) => date ? format(new Date(date), "MMM d, yyyy 'at' h:mmaaa") : '';
 const inEffectUntilFormat = (date) => date ? format(new Date(date), "h:mm a 'on' EEE, MMM d, yyyy") : '';
 
-export default function Preview({ event, dispatch, mapRef, segments }) {
+export default function Preview({ event, dispatch, mapRef, segments, onComputed }) {
   const displayed = event.preview || event;
 
   const start = displayed.location.start || {};
@@ -68,8 +68,16 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
     setComputed(null);
     const handle = setTimeout(() => {
       post(`${API_HOST}/api/events/description`, displayed)
-        .then((data) => setComputed({ description: data.description || '', ivr: data.ivr || '' }))
-        .catch(() => setComputed({ description: '', ivr: '' }));
+        .then((data) => {
+          const value = { description: data.description || '', ivr: data.ivr || '' };
+          setComputed(value);
+          onComputed?.(value);
+        })
+        .catch(() => {
+          const value = { description: '', ivr: '' };
+          setComputed(value);
+          onComputed?.(value);
+        });
     }, 250);
     return () => clearTimeout(handle);
   }, [displayed, event.preview]);
@@ -251,6 +259,10 @@ export default function Preview({ event, dispatch, mapRef, segments }) {
                 }
               </li>
             </ul>
+
+            {ivr &&
+              <div className={'word-count' + (ivr.length > 480 ? ' error' : '')}>{ivr.length}/480</div>
+            }
           </div>
         }
 

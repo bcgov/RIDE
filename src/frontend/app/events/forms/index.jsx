@@ -150,7 +150,7 @@ export default class EventForm extends Component {
   handleSubmit = (e, submitLabel, overrides={}) => {
     e.preventDefault();
     const err = {};
-    const { event, map, dispatch, visibleLayers, cancel, setAlertContext } = this.props;
+    const { event, map, dispatch, visibleLayers, cancel, setAlertContext, computed } = this.props;
 
     const form = {...structuredClone(event), ...overrides};
 
@@ -300,6 +300,12 @@ export default class EventForm extends Component {
       err['external'] = 'Must be a valid link';
     }
 
+    // DBC22-6688 ivr char limit, to be updated to 2000 as Open511 updates
+    const ivr = computed?.ivr || '';
+    if (ivr.length > 480) {
+      err['ivr'] = `IVR message exceeds 480 characters (currently ${ivr.length}).`;
+    }
+
     // submitting existing notes with form gets an error because notes are
     // saved independently of the form, except on event creation where an
     // initial note may be included.
@@ -360,6 +366,7 @@ export default class EventForm extends Component {
         });
 
     } else {
+      if (err.ivr) { setAlertContext?.({ message: err.ivr }); }
       console.log('Errors', err);
     }
   }

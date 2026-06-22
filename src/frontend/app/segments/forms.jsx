@@ -92,7 +92,7 @@ export default class RcsForm extends EventForm {
   /* Handlers */
   handleSubmit = (e) => {
     e.preventDefault();
-    const { segPks, event, callback, setAlertContext } = this.props;
+    const { segPks, event, callback, setAlertContext, computed } = this.props;
     const errors = {};
 
     // Validate nextUpdate time cannot be null
@@ -123,6 +123,12 @@ export default class RcsForm extends EventForm {
       event.timing.nextUpdate = nextUpdateDt.toISOString();
     }
 
+    // DBC22-6688 ivr char limit, to be updated to 2000 as Open511 updates
+    const ivr = computed?.ivr || '';
+    if (ivr.length > 480) {
+      errors['ivr'] = `IVR message exceeds 480 characters (currently ${ivr.length}).`;
+    }
+
     // Set errors and prevent submission if validation fails
     this.setState({ errors });
 
@@ -140,6 +146,8 @@ export default class RcsForm extends EventForm {
           callback({ status: data.status, data: data.data });
         }
       });
+    } else if (errors['ivr']) {
+      setAlertContext?.({ message: errors['ivr'] });
     }
   }
 
