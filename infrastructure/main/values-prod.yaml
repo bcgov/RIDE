@@ -86,3 +86,56 @@ static:
   podDisruptionBudget: 
     enabled: true # If you have more than 1 replica, you can set this to true. Will also check to ensure more than 1 replica set to prevent issues
     minAvailable: 1 
+
+redis:
+  fullnameOverride: prod-ride-redis
+  nameOverride: prod-ride-redis
+  replicaCount: 1
+  rbac:
+    create: false # The pipeline account is not able to create or update the rbac, so you set this to true for the initial deployment and can for local upgrades but set to false otherwise.
+  image:
+    repository: ghcr.io/bcgov/ride-redis
+    tag: latest-prod
+  deployment:
+    resources:
+      requests:
+        cpu: 5m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+    env:    
+      variables: {}
+  podDisruptionBudget: 
+    enabled: true 
+    minAvailable: 1
+
+tasks:
+  fullnameOverride: prod-ride-tasks
+  nameOverride: prod-ride-tasks
+  replicaCount: 3 # Set to 1 for dev/test. In uat/prod we want at least 2 replicas for high availability, which we can do because it uses Kubernetes leases
+  rbac:
+    namespace: f4dbc3 # The namespace to use for the rbac. This is the same as the vault license plate. It is used to determine the vault path
+    create: false # The pipeline account is not able to create or update the rbac, so you set this to true for the initial deployment and can for local upgrades but set to false otherwise.
+  image:
+    repository: ghcr.io/bcgov/ride-webapp
+    tag: latest-prod
+  deployment:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 200Mi
+      limits:
+        memory: 1000Mi
+    env:
+      postgresSecret: prod-ride-db-crunchy-pguser-prod-ride-db
+      variables:
+        DEBUG: 'False' # Set to False for UAT and Prod
+        ROOT_LOG_LEVEL: WARNING
+  vault:
+    secretName: prod-webapp  # This is the name of the secret in vault that contains the environment variables for the app
+    authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
+  prometheus:
+    enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
+  podDisruptionBudget: 
+    enabled: true 
+    minAvailable: 1

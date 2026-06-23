@@ -5,5 +5,11 @@ dependencies:
 - name: webapp
   repository: file://./charts/webapp
   version: 0.1.0
-digest: sha256:1735138fcf7e08f41c2a07c9d0c4ed5cdf67fec97c3cda4026694b669c3533d8
-generated: "2025-12-04T15:32:25.5091559-08:00"
+- name: redis
+  repository: file://./charts/redis
+  version: 0.1.0
+- name: tasks
+  repository: file://./charts/tasks
+  version: 0.1.0
+digest: sha256:1472b5a9b4e771ba3cbec6c33a082f16bdcc8fc4bdb38ce9758714e06895e20b
+generated: "2026-06-23T11:18:09.8184945-07:00"

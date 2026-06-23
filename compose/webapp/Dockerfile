@@ -22,8 +22,17 @@ RUN pip install --no-cache-dir -r requirements/base.txt
 COPY ./compose/webapp/entrypoint /
 RUN sed -i 's/\r$//g' /entrypoint && chmod +x /entrypoint
 
+COPY ./compose/webapp/leader-election.py /
+RUN sed -i 's/\r$//g' /leader-election.py && chmod +x /leader-election.py
+
 COPY ./compose/webapp/start.sh /
 RUN sed -i 's/\r$//g' /start.sh && chmod +x /start.sh
+
+COPY ./compose/webapp/start_tasks.sh /
+RUN sed -i 's/\r$//g' /start_tasks.sh && chmod +x /start_tasks.sh
+
+COPY ./compose/webapp/start_tasks_openshift.sh /
+RUN sed -i 's/\r$//g' /start_tasks_openshift.sh && chmod +x /start_tasks_openshift.sh
 
 # Add the rest of the code
 COPY ./src/webapp /app/webapp

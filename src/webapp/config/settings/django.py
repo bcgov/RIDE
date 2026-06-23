@@ -68,6 +68,8 @@ INSTALLED_APPS = [
 
     'debug_toolbar',
 
+    "huey.contrib.djhuey",
+
     'apps.ride',
     'apps.events',
     'apps.lki',

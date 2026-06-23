@@ -54,6 +54,13 @@ jobs:
               DEBUG_BUILD=true
               SOURCEMAP=true
             needs_fontawesome: true
+          - name: Redis
+            image_name: ${{ github.repository }}-redis
+            dockerfile: ./compose/redis/Dockerfile
+            build_args: |
+              DEBUG_BUILD=false
+            needs_fontawesome: false
+
 
 ### EVERYTHING PAST THIS POINT SHOULD BE THE SAME IN DEV, TEST AND UAT WORKFLOWS ###            
 
