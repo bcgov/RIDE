@@ -64,6 +64,19 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
+HUEY = {
+    "connection": {
+        "host": env("REDIS_HOST"),
+        "port": env("REDIS_PORT"),
+    },
+    "immediate": False,
+    "consumer": {
+        "flush_locks": True,
+        "workers": 4,
+        "worker_type": "thread",
+    }
+}
+
 # On windows, GDAL and GEOS require explicit paths to the dlls
 if os.name == 'nt':
     GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')

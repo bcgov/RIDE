@@ -7,3 +7,14 @@ static:
     host: uat-ride.apps.golddr.devops.gov.bc.ca # The host name for the route. Ensure set to golddr for the Gold DR cluster.
   vault:
     authPath: auth/k8s-golddr # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
+
+tasks:
+  replicaCount: 0
+  deployment:
+    env:
+      variables:
+        DEBUG: 'True' # Set to False for UAT and Prod
+        ROOT_LOG_LEVEL: WARNING
+  vault:
+    secretName: uat-webapp  # This is the name of the secret in vault that contains the environment variables for the app
+    authPath: auth/k8s-golddr # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald

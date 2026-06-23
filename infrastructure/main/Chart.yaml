@@ -13,3 +13,11 @@ dependencies:
     version: '0.1.0'
     repository: 'file://./charts/webapp'
     condition: webapp.enabled
+  - name: redis
+    version: '0.1.0'
+    repository: 'file://./charts/redis'
+    condition: redis.enabled
+  - name: tasks
+    version: '0.1.0'
+    repository: 'file://./charts/tasks'
+    condition: tasks.enabled
