@@ -106,7 +106,7 @@ export default function Layout() {
   return (
     <>
       <header>
-        <NavLink to="/"><img src='/ride-logo.svg' /></NavLink>
+        <NavLink to="/"><img src='/ride-logo.svg'  alt="Government of British Columbia Route Information and Data Entry"/></NavLink>
 
         {authContext.username &&
           <>
