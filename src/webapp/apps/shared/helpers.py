@@ -1,22 +1,48 @@
 import re
 
+ROAD_ABBREVIATIONS = {
+    r"\bHwy\b": "Highway",
+    r"\bAve\b": "Avenue",
+    r"\bRd\.(?=\s|$)": "Road",
+    r"\bRd\b(?!\.)": "Road",
+    r"\bPl\b": "Place",
+    r"\bCrt\b": "Court",
+    r"\bBlvd\b": "Boulevard",
+    r"\bDr\b": "Drive",
+    r"\bPky\b": "Parkway",
+    r"\bPkwy\.(?=\s|$)": "Parkway",
+    r"\bPkwy\b(?!\.)": "Parkway",
+    r"\bCres\b": "Crescent",
+    r"\bCir\b": "Circle",
+    r"\bTerr\b": "Terrace",
+    r"\bSt\.(?=\s|$)": "Street",
+    r"\bSt\b(?!\.)": "Street",
+    r"\bLn\b": "Lane",
+    r"\bFSR\b": "Forest Service Road",
+    r"\bRte\.(?=\s|$)": "Route",
+    r"\bRte\b(?!\.)": "Route",
+    r"\bJunc\.(?=\s|$)": "Junction",
+    r"\bJunc\b(?!\.)": "Junction",
+    r"\bS/B\b": "Southbound",
+    r"\bN/B\b": "Northbound",
+    r"\bW/B\b": "Westbound",
+    r"\bE/B\b": "Eastbound",
+    r"\bO/P\b": "Overpass",
+    r"\bU/P\b": "Underpass",
+    r"\bO/H\b": "Overhead",
+    r"\bkmhr\b": "km/hr",
+    r"\bkm/h\b": "km/hr",
+    r"\bNo\.(?=\s|$)": "Number",
+    r"\bNo\b(?!\.)": "Number",
+}
+
 
 def transform_road_abbreviations(input):
     if not isinstance(input, str):
         return input
 
     s = input
-    s = re.sub(r"\bHwy\b", "Highway", s)
-    s = re.sub(r"\bAve\b", "Avenue", s)
-    s = re.sub(r"\bRd\b", "Road", s)
-    s = re.sub(r"\bPl\b", "Place", s)
-    s = re.sub(r"\bCrt\b", "Court", s)
-    s = re.sub(r"\bBlvd\b", "Boulevard", s)
-    s = re.sub(r"\bDr\b", "Drive", s)
-    s = re.sub(r"\bPky\b", "Parkway", s)
-    s = re.sub(r"\bCres\b", "Crescent", s)
-    s = re.sub(r"\bCir\b", "Circle", s)
-    s = re.sub(r"\bTerr\b", "Terrace", s)
-    s = re.sub(r"\bSt\b", "Street", s)
-    s = re.sub(r"\bLn\b", "Lane", s)
+    for pattern, full_name in ROAD_ABBREVIATIONS.items():
+        s = re.sub(pattern, full_name, s)
+
     return s
