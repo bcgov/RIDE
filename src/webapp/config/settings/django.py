@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.openid_connect",
     "allauth.usersessions",
 
+    "huey.contrib.djhuey",
+
     'rest_framework',
     'rest_framework_gis',
 

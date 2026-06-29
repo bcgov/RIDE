@@ -96,3 +96,23 @@ ROUTE_PLANNER_API_KEY = env('ROUTE_PLANNER_API_KEY', default='')
 OPEN511_API_URL = env('OPEN511_API_URL', default='')
 OPEN511_API_KEY = env('OPEN511_API_KEY', default='')
 DISABLE_OPEN511_SYNC = env.bool('DISABLE_OPEN511_SYNC', default=False)
+
+HUEY = {
+    "connection": {
+        "host": env("REDIS_HOST"),
+        "port": env("REDIS_PORT"),
+    },
+    "immediate": False,
+    "consumer": {
+        "flush_locks": True,
+        "workers": 4,
+        "worker_type": "thread",
+    }
+}
+
+TASKS_BACKEND = env('TASKS_BACKEND', default='huey.contrib.djhuey.tasks_backend.HueyBackend')
+TASKS = {
+    'default': {
+        'BACKEND': TASKS_BACKEND,
+    },
+}
