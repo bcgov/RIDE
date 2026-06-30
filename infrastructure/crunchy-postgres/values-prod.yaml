@@ -178,6 +178,7 @@ networkPolicy:
   ingressFromSelectors: 
     - app.kubernetes.io/instance: prod-ride-db
     - app.kubernetes.io/name: prod-ride-webapp
+    - app.kubernetes.io/name: prod-ride-tasks
 
 
 # This is a separate backup configuration using the BC GOV backup container. Used for both longer retention and disaster recovery.
