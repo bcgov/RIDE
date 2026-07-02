@@ -25,7 +25,7 @@ def check_end_time():
     cutoff = datetime.now(timezone.utc) + timedelta(minutes=1)
     user = get_task_user()
 
-    for event in Event.current.filter(end_time__lte=cutoff):
+    for event in Event.current.filter(end_time__lte=cutoff, status='Active'):
         event.status = 'Inactive'
         event.user = user
         event.last_inactivated = event.end_time
