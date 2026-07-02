@@ -4,7 +4,11 @@ from apps.events.models import Event, Note
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
-        Event.objects.all().delete()
-        Note.objects.all().delete()
+        events = Event.objects.all().iterator(chunk_size=100)
+        for event_batch in events:
+            event_batch.delete()
+
+        notes = Note.objects.all().iterator(chunk_size=100)
+        for note_batch in notes:
+            note_batch.delete()
