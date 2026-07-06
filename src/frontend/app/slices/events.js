@@ -25,7 +25,7 @@ export const refreshThunk = createAsyncThunk(
 const selectStatus = (state) => state.events.status;
 const selectPending = (state) => {
   return Object.values(state.events.entities).filter(
-    (e) => e.status === 'Active' && e.latest && !e.latest_approved
+    (e) => e.latest && !e.latest_approved
   );
 }
 

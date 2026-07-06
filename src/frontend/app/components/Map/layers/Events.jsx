@@ -2,8 +2,6 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch, useStore } from 'react-redux';
 
 import * as turf from '@turf/turf';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo } from '@fortawesome/pro-regular-svg-icons';
 
 import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
@@ -21,7 +19,7 @@ import { getInitialEvent } from '../../../events/forms/index.jsx';
 
 import { API_HOST, EVENT_POLLING_REFRESH } from '../../../env.js';
 import { getIconAndStroke } from '../../../events/icons/index.js';
-import { getNextUpdate, getPendingNextUpdate } from '../../../shared/helpers.js';
+import { getPendingNextUpdate } from '../../../shared/helpers.js';
 import { applyPinLocationUpdate } from './Pins';
 import { patch } from '../../../shared/helpers.js';
 
@@ -129,14 +127,14 @@ function getVisibility(event, visibleLayers) {
       return visibleLayers[event.details.severity.toLowerCase()];
     }
 
-  } else if (event.status === 'Inactive') {
+  } else if (event.status === 'Inactive' && event.approved) {
     return visibleLayers.cleared7 && new Date(event.last_inactivated) > SEVEN_DAYS_AGO;
   }
 
   return true;
 }
 
-function layerStyle(feature, resolution) {
+function layerStyle(feature) {
   if (!feature.get('visible')) { return null; }
   if (feature.get('selected')) { return feature.active; }
   return feature.get('hovered') ? feature.hover : feature.normal;
@@ -292,13 +290,14 @@ export default function EventsLayer({ event, dispatch }) {
       const map = e.map; // necessary to bind map for callback below
 
       const raw = feature.get('raw');
+      const activeOrPending = raw.status === 'Active' || !raw.approved;
 
       if (!event.showForm) {
         // No edit/view history for chainups yet
-        if (raw.status === 'Active' && canCreateAtCoordinate && raw.type !== 'CHAIN_UP') {
+        if (activeOrPending && canCreateAtCoordinate && raw.type !== 'CHAIN_UP') {
           items.push({
             label: 'Edit event',
-            action: (e) => {
+            action: () => {
               setContextMenu([]);
               selectFeature(map, feature);
               dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: true });
@@ -309,7 +308,7 @@ export default function EventsLayer({ event, dispatch }) {
         if (raw.type !== 'CHAIN_UP') {
           items.push({
             label: 'View history',
-            action: (e) => {
+            action: () => {
               setContextMenu([]);
               selectFeature(map, feature);
               dispatch({ type: 'reset form', value: raw, showPreview: true, showForm: false, showHistory: true });
