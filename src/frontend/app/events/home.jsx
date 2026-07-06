@@ -155,7 +155,7 @@ export default function Home() {
               preview={() => setPreview(!preview)}
               cancel={cancel}
               event={event}
-              dispatch={dispatch}
+              eventDispatch={dispatch}
               computed={computed}
               visibleLayers={visibleLayers}
               serviceAreaBoundaries={serviceAreaBoundaries}
