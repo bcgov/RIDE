@@ -54,8 +54,10 @@ export default function Home() {
   const [ displayedRoutes, setDisplayedRoutes ] = useState([]);
 
   // Selected States
-  const [ selectedRoute, setSelectedRoute ] = useState('All roads');
-  const [ selectedArea, setSelectedArea ] = useState('All service areas');
+  const [ selectedRoute, setSelectedRoute ] = useState(JSON.parse(localStorage.getItem('segmentsRoute')) || 'All roads');
+  const [ selectedArea, setSelectedArea ] = useState(JSON.parse(localStorage.getItem('segmentsArea')) || 'All service areas');
+  localStorage.setItem('segmentsRoute', JSON.stringify(selectedRoute));
+  localStorage.setItem('segmentsArea', JSON.stringify(selectedArea));
 
   // Helper States
   const [ rcsMap, setRcsMap ] = useState({});
@@ -148,12 +150,12 @@ export default function Home() {
     let filteredSegs = segments;
 
     // Filter segments by route
-    if (selectedRoute !== 'All roads') {
+    if (segments && selectedRoute !== 'All roads') {
       filteredSegs = segments.filter(seg => seg.route === selectedRoute.id);
     }
 
     // Filter chainups by area
-    if (selectedArea !== 'All service areas') {
+    if (filteredSegs && selectedArea !== 'All service areas') {
       // Include chainups from the selected area and any of its sub-areas
       const areaIds = new Set([selectedArea.id]);
       serviceAreas.forEach(sa => {
@@ -187,7 +189,7 @@ export default function Home() {
     } else {
       setDisplayedRoutes(routes);
     }
-  }, [selectedRoute, selectedArea]);
+  }, [selectedRoute, selectedArea, segments]);
 
   useEffect(() => {
     if (!checkedSegs.length) {
