@@ -264,11 +264,17 @@ const sortFunctions = {
 
 export default function Events({ goToFunc, dispatch, map, current }) {
   const { authContext } = useContext(AuthContext);
-  const [ type, setType ] = useState();
-  const [ area, setArea ] = useState();
-  const [ road, setRoad ] = useState();
-  const [ sort, setSort ] = useState(sortOptions[0]);
-  const [ search, setSearch ] = useState('');
+  const [ type, setType ] = useState(JSON.parse(localStorage.getItem('activeType')));
+  const [ area, setArea ] = useState(JSON.parse(localStorage.getItem('activeArea')));
+  const [ road, setRoad ] = useState(JSON.parse(localStorage.getItem('activeRoad')));
+  const [ sort, setSort ] = useState(JSON.parse(localStorage.getItem('activeSort')) || sortOptions[0]);
+  const [ search, setSearch ] = useState(JSON.parse(localStorage.getItem('activeSearch')));
+
+  localStorage.setItem('activeType', JSON.stringify(type));
+  localStorage.setItem('activeArea', JSON.stringify(area));
+  localStorage.setItem('activeRoad', JSON.stringify(road));
+  localStorage.setItem('activeSort', JSON.stringify(sort));
+  localStorage.setItem('activeSearch', JSON.stringify(search));
 
   const userServiceAreas = new Set(authContext.service_areas);
 

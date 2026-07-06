@@ -45,8 +45,10 @@ export default function Home() {
   const [ displayedRoutes, setDisplayedRoutes ] = useState([]);
 
   // Selected states
-  const [ selectedRoute, setSelectedRoute ] = useState('All roads');
-  const [ selectedArea, setSelectedArea ] = useState('All service areas');
+  const [ selectedRoute, setSelectedRoute ] = useState(JSON.parse(localStorage.getItem('chainupsRoute')) || 'All roads');
+  const [ selectedArea, setSelectedArea ] = useState(JSON.parse(localStorage.getItem('chainupsArea')) || 'All service areas');
+  localStorage.setItem('chainupsRoute', JSON.stringify(selectedRoute));
+  localStorage.setItem('chainupsArea', JSON.stringify(selectedArea));
 
   // Helper states
   const [ chainupsMap, setChainupsMap ] = useState({});

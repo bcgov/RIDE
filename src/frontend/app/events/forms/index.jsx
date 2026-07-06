@@ -161,7 +161,7 @@ function getVisibilityLayer(event) {
   }
 }
 
-class EventForm extends Component {
+export class EventForm extends Component {
   static contextType = AuthContext;
 
   constructor(props) {

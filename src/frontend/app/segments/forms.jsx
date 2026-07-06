@@ -1,12 +1,13 @@
 // React
 import React from 'react';
+import { connect } from 'react-redux';
 
 // Internal imports
 import { bulkUpdateRcs } from "../shared/data/roadConditions.js";
 import Conditions from "../events/forms/Conditions.jsx";
 import EventTiming from "../events/forms/Timing.jsx";
 import AdditionalMessaging from "../events/forms/Additional.jsx";
-import EventForm, { getInitialEvent, INVALID_ADDITIONAL_CHARACTERS } from "../events/forms";
+import { EventForm, getInitialEvent, INVALID_ADDITIONAL_CHARACTERS } from "../events/forms";
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -88,7 +89,7 @@ export function getInitialRc() {
   return rc;
 }
 
-export default class RcsForm extends EventForm {
+export class RcsForm extends EventForm {
   /* Handlers */
   handleSubmit = (e) => {
     e.preventDefault();
@@ -204,3 +205,5 @@ export default class RcsForm extends EventForm {
     );
   }
 }
+
+export default connect()(RcsForm);
