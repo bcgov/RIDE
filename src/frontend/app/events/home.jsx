@@ -13,6 +13,7 @@ import Map from '../components/Map';
 import {
   BoundariesLayer, DmsLayer, EventsLayer, PinsLayer
 } from '../components/Map/layers';
+import { clearPins } from '../components/Map/layers/Pins';
 import Layers from './Layers';
 import { AlertContext, AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
@@ -93,13 +94,7 @@ export default function Home() {
   }
 
   const cancel = () => {
-    map.pins.getSource().removeFeature(map.start);
-    map.pins.getSource().removeFeature(map.end);
-    map.pins.getSource().remove('start nearby intersections');
-    map.pins.getSource().remove('end nearby intersections');
-    map.route.getGeometry().setCoordinates([]);
-    map.start = map.end = null;
-    selectFeature(map, null);
+    clearPins(map);
     dispatch({ type: 'reset form', cancel: true });
   }
 

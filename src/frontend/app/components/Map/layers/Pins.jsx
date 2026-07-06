@@ -10,7 +10,7 @@ import VectorSource from 'ol/source/Vector';
 import { AlertContext, AuthContext, MapContext } from '../../../contexts';
 import { getRoute } from '../../../shared';
 import { getNearby } from '../../../events/forms/Location/helpers';
-import { getDRA, ll2g, g2ll, getSnapped, Drag } from '../helpers';
+import { Drag, g2ll, getDRA, getSnapped, ll2g, selectFeature } from '../helpers';
 import { PinFeature } from '../feature';
 import { transform_road_abbreviations } from "../../shared/helper";
 import ContextMenu from '../../../events/ContextMenu';
@@ -22,6 +22,18 @@ function layerStyle(feature) {
   if (feature.get('selected')) { return feature.active; }
   return feature.get('hovered') ? feature.hover : feature.normal;
 }
+
+
+export function clearPins(map) {
+  map.pins.getSource().removeFeature(map.start);
+  map.pins.getSource().removeFeature(map.end);
+  map.pins.getSource().remove('start nearby intersections');
+  map.pins.getSource().remove('end nearby intersections');
+  map.route.getGeometry().setCoordinates([]);
+  map.start = map.end = null;
+  selectFeature(map, null);
+}
+
 
 const layer = new VectorLayer({
   classname: 'pins',
@@ -43,6 +55,7 @@ layer.getSource().remove = (name) => {
   });
 }
 
+
 function transform_prop_value(value) {
   // Transform all strings
   if (typeof value === 'string') {
@@ -59,6 +72,7 @@ function transform_prop_value(value) {
   // Do nothing for other types
   return value;
 }
+
 
 /* Handler for any event that triggers updating the point and related info
   * (such as dragging the pin to a new location):
@@ -128,6 +142,7 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
   }
 }
 
+
 function canSetStartAtCoordinate(map, coordinate, authContext) {
   if (authContext?.is_approver) { return true; }
 
@@ -144,6 +159,7 @@ function canSetStartAtCoordinate(map, coordinate, authContext) {
     feature.getGeometry()?.intersectsCoordinate(coordinate)
   ));
 }
+
 
 export const guardedEndHandler = async (e, point, dispatch, authContext, setAlertContext, event) => {
   const snapped = getSnapped(e.coordinate, e.pixel, e.map);
@@ -165,6 +181,7 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
   applyPinLocationUpdate(e, point, dispatch, snapped, search);
 };
 
+
 /* Given an always present (possibly empty) route feature on the map: if
  * there's a start and end point, ask for a route, and if a route is received,
  * update the feature's geometry.  Otherwise, blank the geometry to hide the
@@ -182,6 +199,7 @@ export const updateRoute = async (map) => {
   }
   map.route.getGeometry().setCoordinates(route);
 }
+
 
 export default function PinsLayer({ event, dispatch }) {
   const { authContext } = useContext(AuthContext);
@@ -394,7 +412,7 @@ export default function PinsLayer({ event, dispatch }) {
         if (!eventRef.current.location.end?.name && eventRef.current.showForm) {
           items.push({
             label: 'Add end point',
-            action: (e) => {
+            action: () => {
               setContextMenu([]);
               map.end = new PinFeature({
                 style: 'end',

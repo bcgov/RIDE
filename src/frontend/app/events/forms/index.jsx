@@ -7,6 +7,8 @@ import {
   faCheckDouble, faCircleCheck, faCircleX, faTrashCan, faXmark
 } from '@fortawesome/pro-regular-svg-icons';
 
+import { clearPins } from '../../components/Map/layers/Pins';
+
 import Conditions from './Conditions';
 import Details from './Details';
 import Delays from './Delays';
@@ -577,6 +579,7 @@ export default class EventForm extends Component {
 
                   ).then((updatedEvent) => {
                     dispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: false, showForm: false });
+                    clearPins(this.props.map);
                     this.props.setAlertContext({
                       type: 'success',
                       message: 'Event cleared',
