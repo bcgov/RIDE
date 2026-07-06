@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSelector, useDispatch, useStore } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -12,15 +12,10 @@ import { faDoNotEnter, faCalendarDays, faClockRotateLeft,
 import incidentMajorActiveStatic from './icons/majorincident-default-static.svg';
 import incidentMajorClosureActiveStatic from './icons/closure-default-static.svg';
 import plannedMajorActiveStatic from './icons/majordelay-default-static.svg';
-import plannedMajorClosureActiveStatic from './icons/closure-default-static.svg';
 import plannedMajorFutureActiveStatic from './icons/majorfuture-default-static.svg';
-import plannedMajorFutureClosureActiveStatic from './icons/majorfutureclosure-default-static.svg';
 import incidentMinorActiveStatic from './icons/minorincident-default-static.svg';
-import incidentMinorClosureActiveStatic from './icons/closure-default-static.svg';
 import plannedMinorActiveStatic from './icons/minordelay-default-static.svg';
-import plannedMinorClosureActiveStatic from './icons/closure-default-static.svg';
 import plannedMinorFutureActiveStatic from './icons/minorfuture-default-static.svg';
-import plannedMinorFutureClosureActiveStatic from './icons/minorfutureclosure-default-static.svg';
 import chainupActiveStatic from './icons/chainup-default-static.svg';
 import roadconditionActiveStatic from './icons/roadcondition-default-static.svg';
 import dmsStatic from './icons/dms-static.svg';
@@ -130,10 +125,10 @@ function Legend() {
   );
 }
 
-export default function Layers ({ visibleLayers2, dispatch }) {
+export default function Layers () {
 
   const [tab, setTab] = useState(localStorage.getItem('tab open'));
-  const storeDispatch = useDispatch();
+  const dispatch = useDispatch();
   const visibleLayers = useSelector(state => state.visibleLayers);
 
   const changeTab = (tab) => {
@@ -199,7 +194,7 @@ export default function Layers ({ visibleLayers2, dispatch }) {
                         key={key}
                         className={`${option.classes} ${visibleLayers[key] ? 'enabled' : ''}`}
                         onClick={
-                          () => storeDispatch(set({[key]: !visibleLayers[key]}))
+                          () => dispatch(set({[key]: !visibleLayers[key]}))
                         }
                       >
                         <FontAwesomeIcon icon={option.icon}/>

@@ -154,7 +154,7 @@ export default class RcsForm extends EventForm {
   /* Rendering */
   // Main Component
   render() {
-    const { event, dispatch, preview, cancel } = this.props;
+    const { event, eventDispatch, preview, cancel } = this.props;
     const { errors } = this.state;
 
     return (
@@ -177,15 +177,15 @@ export default class RcsForm extends EventForm {
 
           <div className="form-body">
             <div className="section conditions">
-              <Conditions errors={errors} event={event} dispatch={dispatch} caption={'Top condition is shown as the title of the condition to DriveBC users.'} />
+              <Conditions errors={errors} event={event} dispatch={eventDispatch} caption={'Top condition is shown as the title of the condition to DriveBC users.'} />
             </div>
 
             <div className="section additional">
-              <AdditionalMessaging event={event} dispatch={dispatch} errors={errors} />
+              <AdditionalMessaging event={event} dispatch={eventDispatch} errors={errors} />
             </div>
 
             <div className="section timing">
-              <EventTiming errors={errors} event={event} dispatch={dispatch} isRoadCondition={true} />
+              <EventTiming errors={errors} event={event} dispatch={eventDispatch} isRoadCondition={true} />
             </div>
 
             <div className="section buttons">

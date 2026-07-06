@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { connect } from 'react-redux';
 
 import * as turf from '@turf/turf';
 
@@ -8,6 +9,8 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 
 import { clearPins } from '../../components/Map/layers/Pins';
+
+import { set } from '../../slices';
 
 import Conditions from './Conditions';
 import Details from './Details';
@@ -139,7 +142,26 @@ function getLabel(eventType) {
   }
 }
 
-export default class EventForm extends Component {
+
+function getVisibilityLayer(event) {
+  if (event.is_closure) {
+    return 'closures';
+
+  } else if (['Road condition', 'ROAD_CONDITION'].includes(event.type)) {
+    return 'roadConditions';
+
+  } else if (event.type === 'CHAIN_UP') {
+    return 'chainups';
+
+  } else if (event.timing?.startTime && new Date(event.timing.startTime) > new Date()) {
+    return 'future';
+
+  } else if (event.type === 'Incident' || event.type === 'Planned event') {
+    return event.details.severity.toLowerCase();
+  }
+}
+
+class EventForm extends Component {
   static contextType = AuthContext;
 
   constructor(props) {
@@ -359,6 +381,8 @@ export default class EventForm extends Component {
 
           const event_type = event.type === 'ROAD_CONDITION' ? 'Road condition' : event.type;
           cancel();
+          const key = getVisibilityLayer(event);
+          this.props.dispatch(set({[key]: true}));
           addEvent(data, map, dispatch, visibleLayers);
           dispatch({ type: 'reset form' });
           setAlertContext({
@@ -393,7 +417,7 @@ export default class EventForm extends Component {
   }
 
   render() {
-    const { event, dispatch, cancel, goToFunc, serviceAreaBoundaries } = this.props;
+    const { event, eventDispatch, cancel, goToFunc, serviceAreaBoundaries } = this.props;
     const { errors } = this.state;
 
     const { authContext } = this.context;
@@ -423,7 +447,7 @@ export default class EventForm extends Component {
           <div className="title">
             <h4>{event.id ? 'Edit' : 'Create'} { getLabel(event.type) }</h4>
 
-            <button type="button" onClick={() => dispatch({ type: 'set', value: { showPreview: !event.showPreview } })}>
+            <button type="button" onClick={() => eventDispatch({ type: 'set', value: { showPreview: !event.showPreview } })}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z"/></svg>
               Preview
             </button>
@@ -433,7 +457,7 @@ export default class EventForm extends Component {
 
         <Tabs
           onChange={(tabName) => {
-            dispatch({ type: 'show history', show: tabName === 'history' });
+            eventDispatch({ type: 'show history', show: tabName === 'history' });
           }}>
 
           {canEditStartPoint &&
@@ -445,36 +469,36 @@ export default class EventForm extends Component {
                 <div className="form-body">
                   { event.location.start.name && <>
                     <div className="section location">
-                      <Location errors={errors} event={event} dispatch={dispatch} goToFunc={goToFunc} map={this.props.map} />
+                      <Location errors={errors} event={event} dispatch={eventDispatch} goToFunc={goToFunc} map={this.props.map} />
                     </div>
 
                     { DETAILS_FORMS.includes(event.type) &&
                       <div className="section details">
-                        <Details errors={errors} event={event} dispatch={dispatch} />
+                        <Details errors={errors} event={event} dispatch={eventDispatch} />
                       </div>
                     }
 
                     { IMPACTS_FORMS.includes(event.type) &&
                       <div className="section impacts">
-                        <Impacts errors={errors} event={event} dispatch={dispatch} />
+                        <Impacts errors={errors} event={event} dispatch={eventDispatch} />
                       </div>
                     }
 
                     { DELAYS_FORMS.includes(event.type) &&
                       <div className="section delays">
-                        <Delays errors={errors} event={event} dispatch={dispatch} />
+                        <Delays errors={errors} event={event} dispatch={eventDispatch} />
                       </div>
                     }
 
                     { RESTRICTIONS_FORMS.includes(event.type) &&
                       <div className="section restrictions">
-                        <Restrictions errors={errors} event={event} dispatch={dispatch} />
+                        <Restrictions errors={errors} event={event} dispatch={eventDispatch} />
                       </div>
                     }
 
                     { CONDITIONS_FORMS.includes(event.type) &&
                       <div className="section conditions">
-                        <Conditions errors={errors} event={event} dispatch={dispatch} />
+                        <Conditions errors={errors} event={event} dispatch={eventDispatch} />
                       </div>
                     }
 
@@ -483,7 +507,7 @@ export default class EventForm extends Component {
                         <EventTiming
                           errors={errors}
                           event={event}
-                          dispatch={dispatch}
+                          dispatch={eventDispatch}
                           isRoadCondition={CONDITIONS_FORMS.includes(event.type)}
                         />
                       </div>
@@ -491,25 +515,25 @@ export default class EventForm extends Component {
 
                     { event?.type === 'Planned event' &&
                       <div className="section scheduled">
-                        <Scheduled errors={errors} event={event} dispatch={dispatch} />
+                        <Scheduled errors={errors} event={event} dispatch={eventDispatch} />
                       </div>
                     }
 
                     { event.type &&
                       <div className="section additional">
-                        <AdditionalMessaging event={event} dispatch={dispatch} errors={errors} />
+                        <AdditionalMessaging event={event} dispatch={eventDispatch} errors={errors} />
                       </div>
                     }
 
                     { EXTERNAL_FORMS.includes(event.type) &&
                       <div className="section external">
-                        <External event={event} dispatch={dispatch} errors={errors} />
+                        <External event={event} dispatch={eventDispatch} errors={errors} />
                       </div>
                     }
 
                     { INTERNAL_FORMS.includes(event.type) &&
                       <div className="section internal">
-                        <InternalNotes event={event} dispatch={dispatch} />
+                        <InternalNotes event={event} dispatch={eventDispatch} />
                       </div>
                     }
                   </>}
@@ -521,7 +545,7 @@ export default class EventForm extends Component {
 
           { event.id &&
             <Tabs.Tab name='history' label='Event history' default={event.showHistory}>
-              <History event={event} dispatch={dispatch} />
+              <History event={event} dispatch={eventDispatch} />
             </Tabs.Tab>
           }
         </Tabs>
@@ -551,7 +575,7 @@ export default class EventForm extends Component {
                       { timing: { nextUpdate: pendingNextUpdate.toISOString() } },
 
                     ).then((event) => {
-                      dispatch({ type: 'reset form', cancel: true, value: event, showPreview: true, showForm: false });
+                      eventDispatch({ type: 'reset form', cancel: true, value: event, showPreview: true, showForm: false });
                       this.props.setAlertContext({
                         type: 'success',
                         message: 'Event reconfirmed',
@@ -578,7 +602,7 @@ export default class EventForm extends Component {
                     { status: 'Inactive' },
 
                   ).then((updatedEvent) => {
-                    dispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: false, showForm: false });
+                    eventDispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: false, showForm: false });
                     clearPins(this.props.map);
                     this.props.setAlertContext({
                       type: 'success',
@@ -619,3 +643,5 @@ export default class EventForm extends Component {
     );
   }
 }
+
+export default connect()(EventForm);
