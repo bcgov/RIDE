@@ -17,15 +17,14 @@ import XYZ from 'ol/source/XYZ.js';
 import View from 'ol/View';
 import proj4 from 'proj4';
 import * as turf from '@turf/turf';
-import { Point, MultiLineString } from 'ol/geom';
+import { MultiLineString } from 'ol/geom';
 import { Feature } from 'ol';
 
 import overrides from './overrides.js';
-import { BASE_MAP_URL, MAP_STYLE_URL, ROUTER_CLIENT_ID } from '../../env.js';
+import { BASE_MAP_URL, MAP_STYLE_URL } from '../../env.js';
 import { post } from '../../shared/helpers'
-import { getCardinalDirection, getNonDirectionalRoute } from '../../shared';
 
-import { dotStyle, lineStyle, lineStyle2 } from './styles.js';
+import { lineStyle, lineStyle2 } from './styles.js';
 
 proj4.defs([
   ["EPSG:3005", "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"],
@@ -114,7 +113,7 @@ export function selectFeature(map, feature) {
   }
 }
 
-function layerStyle(feature, resolution) {
+function layerStyle(feature) {
   if (!feature.get('visible')) { return null; }
   if (feature.get('selected')) { return feature.active; }
   return feature.get('hovered') ? feature.hover : feature.normal;
@@ -169,7 +168,8 @@ export function createMap() {
     maxZoom: 22,
     minZoom: 5,
     extent: transformedExtent,
-    enableRotation: false
+    enableRotation: false,
+    zoomFactor: 2.2, // https://stackoverflow.com/questions/47631644/why-is-zoom-level-interpreted-different-in-mapbox-gl-js
   });
   globalThis.view = view;
 
