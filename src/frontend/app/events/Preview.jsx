@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // External imports
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,7 +11,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 // Internal imports
 import { desc } from './forms/Schedule';
 import { getConditionIcon, getPlainIcon } from './icons';
-import { PHRASES_LOOKUP, TrafficImpacts } from './references';
+import { PHRASES_LOOKUP } from './references';
 import { selectFeature } from '../components/Map/helpers';
 import { post } from '../shared/helpers';
 import { API_HOST } from '../env';
@@ -20,12 +20,6 @@ import { API_HOST } from '../env';
 import './Preview.scss';
 import RIDEDropdown from "../components/shared/dropdown";
 
-const itemsByKey = TrafficImpacts.reduce((acc, curr) => {
-  acc[curr.id] = curr;
-  return acc;
-}, {});
-
-const formatDate = (date) => date ? format(new Date(date), 'MMM d, y') : '';
 const formatTimestamp = (date) => date ? format(new Date(date), "MMM d, yyyy 'at' h:mmaaa") : '';
 const inEffectUntilFormat = (date) => date ? format(new Date(date), "h:mm a 'on' EEE, MMM d, yyyy") : '';
 

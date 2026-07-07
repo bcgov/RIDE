@@ -110,7 +110,7 @@ export function desc(schedule, short=false) {
   return (final.length > 40 && !short) ? desc(schedule, true) : final ;
 }
 
-function Schedule({ id, item, change, update, current, dispatch, index, errors }) {
+function Schedule({ id, item, dispatch, index, errors }) {
   const hasErrors = !!(errors || item.error);
   const error = item?.error || errors?.item;
   return <>
