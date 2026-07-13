@@ -369,8 +369,7 @@ export default function EventsLayer({ event, dispatch }) {
         } else if (raw.approved) {
           items.push({
             label: 'Reactivate event',
-            debugging: true,
-            action: (e) => {
+            action: () => {
               setContextMenu([]);
               patch(
                 `${API_HOST}/api/events/${raw.id}`,
@@ -392,7 +391,7 @@ export default function EventsLayer({ event, dispatch }) {
         {
           label: 'Dump feature to console',
           debugging: true,
-          action: (e) => {
+          action: () => {
             console.log(feature);
             setContextMenu([]);
           }
@@ -400,7 +399,7 @@ export default function EventsLayer({ event, dispatch }) {
         {
           label: 'Dump event to console',
           debugging: true,
-          action: (e) => {
+          action: () => {
             console.log(feature.get('raw') || feature?.paired.get('raw'));
             setContextMenu([]);
           }
