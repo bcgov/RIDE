@@ -2,10 +2,12 @@ import datetime
 import logging
 from zoneinfo import ZoneInfo
 
-import requests
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
+import requests
 from rest_framework.exceptions import ValidationError
+from timezonefinder import TimezoneFinder
+tz_finder = TimezoneFinder(in_memory=True)
 
 from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType, PHRASES_LOOKUP
 from apps.events.roads import roads
@@ -14,147 +16,244 @@ logger = logging.getLogger(__name__)
 
 accepted_roads = {road["NAME"]: road["ID"] for road in roads}
 
-def build_event_description(target_event, ivr=False):
-    day_labels = {
-        "mon": "Monday",
-        "tue": "Tuesday",
-        "wed": "Wednesday",
-        "thu": "Thursday",
-        "fri": "Friday",
-        "sat": "Saturday",
-        "sun": "Sunday",
-    }
-    ordered_days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+DEFAULT_ZONEINFO = ZoneInfo("America/Vancouver")
 
-    def sentence(text):
-        text = (text or "").strip()
-        if not text:
-            return ""
-        return text if text.endswith(".") else f"{text}."
 
-    def words_join(items):
-        items = [i for i in items if i]
-        if not items:
-            return ""
-        if len(items) == 1:
-            return items[0]
-        if len(items) == 2:
-            return f"{items[0]} and {items[1]}"
-        return f"{', '.join(items[:-1])}, and {items[-1]}"
+def sentence(text):
+    text = (text or "").strip()
+    if not text:
+        return ""
+    return text if text.endswith(".") else f"{text}."
 
-    def parse_clock(value):
-        if not value:
-            return None
-        try:
-            dt = datetime.datetime.strptime(value, "%H:%M")
-            return dt.strftime("%I:%M %p").lstrip("0")
-        except ValueError:
-            return None
 
-    def format_short_date(value):
-        if not value:
-            return None
-        local = value.astimezone(ZoneInfo("America/Vancouver")) if value.tzinfo else value
-        return f"{local.strftime('%a %b')} {local.day}"
+def words_join(items):
+    items = [i for i in items if i]
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return f"{', '.join(items[:-1])}, and {items[-1]}"
 
-    def format_long_date(value):
-        if not value:
-            return None
-        local = value.astimezone(ZoneInfo("America/Vancouver")) if value.tzinfo else value
-        day = local.day
-        if 11 <= day <= 13:
-            suffix = "th"
+
+def format_long_date(value, zone_info=DEFAULT_ZONEINFO):
+    if not value:
+        return None
+    local = value.astimezone(zone_info) if value.tzinfo else value
+    day = local.day
+    if 11 <= day <= 13:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+    time_str = local.strftime("%I:%M%p").lstrip("0").lower()
+    return f"{local.strftime('%B')} {day}{suffix}, {local.year} at {time_str} {local.strftime("%Z")}"
+
+
+def get_impact_label(impact):
+    label = impact.get("label")
+    if label:
+        return label
+    impact_id = impact.get("id")
+    if not impact_id:
+        return None
+    from apps.events.models import TrafficImpact
+    match = TrafficImpact.objects.filter(id=impact_id).first()
+    return match.label if match else None
+
+
+def get_schedule_description(schedule, start_time):
+    '''
+    Return a one line description for the schedule, or None.
+
+    Parse the schedule object and return a one line description that includes
+    the time of day and the days of the week.  Where possible, condense text
+    as in common usage (e.g., "Monday to Thursday" instead of listing each day,
+    or "weekends" instead of "Saturday, Sunday").
+
+    `start_time` must be a timezone aware datetime that should be geographically
+    correct with respect to the start point of the event (e.g., an event in
+    Cranbrook shows as being in either MST or MDT, rather than PDT)
+
+    If the end time is earlier than the start time, present the times as
+    starting on one day and ending on the next.
+
+    Examples:
+        All day, every day
+        From 9:00 AM to 6:00 PM MDT, weekdays
+        From 6:00 PM to 6:00 AM MDT the next day, Thursday to Saturday
+        All day, Tuesday to Thursday and weekends
+    '''
+
+    # find sequential groups of days in the week
+    group = []
+    groups = [group]
+
+    for day in ORDERED_DAYS:
+        if schedule.get(day):
+            group.append(DAY_LABELS[day])
         else:
-            suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
-        time_str = local.strftime("%I:%M%p").lstrip("0").lower()
-        return f"{local.strftime('%B')} {day}{suffix}, {local.year} at {time_str}"
+            group = []
+            groups.append(group)
 
-    def get_impact_label(impact):
-        label = impact.get("label")
-        if label:
-            return label
-        impact_id = impact.get("id")
-        if not impact_id:
-            return None
-        from apps.events.models import TrafficImpact
-        match = TrafficImpact.objects.filter(id=impact_id).first()
-        return match.label if match else None
+    groups = [group for group in groups if len(group) > 0]
 
-    def get_location_description():
-        res = ''
+    if len(groups) == 0:  # no days selected
+        return None
 
-        has_start_location = target_event.start and target_event.start.get('name')
-        has_end_location = target_event.end and target_event.end.get('name')
+    # convert groups to phrases
+    grouped = []
+    for group in groups:
+        if len(group) == 7:
+            grouped.append('every day')
+        elif len(group) > 2:
+            last_day = group.pop()
+            if group[0] == 'Monday' and last_day == 'Friday':
+                grouped.append('weekdays')
+            else:
+                grouped.append(f'{group[0]} to {last_day}')
+        elif group == ['Saturday', 'Sunday']:
+            grouped.append('weekends')
+        else:
+            grouped = grouped + group
 
-        start_point_name = ''
-        if has_start_location:  # Defensive, start point is mandatory
-            start_point_name = target_event.start.get('name')
+    day_text = words_join(grouped)
 
-            # Start descriptions
-            res = ' from ' if has_end_location else ' at '
-            res += start_point_name
+    if schedule.get("allDay"):
+        return sentence(f"All day, {day_text}")
 
-            # Add phrase from first start ref location
-            start_ref_locations = target_event.start.get('nearby') if 'nearby' in target_event.start else []  # target_event.start is mandatory
-            has_start_ref_locs = start_ref_locations and len(start_ref_locations) > 0
+    starts_dt = starts = ends = next_day = ''
+    timezone = start_time.strftime('%Z')
 
-            if has_start_ref_locs:
-                for start_i, start_loc in enumerate(start_ref_locations):
+    if schedule.get("startTime"):
+        starts_dt = datetime.datetime.strptime(schedule.get("startTime"), '%H:%M')
+        starts_dt = starts_dt.replace(year=start_time.year,
+                                month=start_time.month,
+                                day=start_time.day,
+                                tzinfo=start_time.tzinfo)
+        starts = starts_dt.strftime("%I:%M %p").lstrip("0")
+
+    if schedule.get("endTime"):
+        ends = datetime.datetime.strptime(schedule.get("endTime"), '%H:%M')
+        ends = ends.replace(year=start_time.year,
+                            month=start_time.month,
+                            day=start_time.day,
+                            tzinfo=start_time.tzinfo)
+        if starts_dt and ends <= starts_dt:
+            next_day = ' the next day'
+        ends = ends.strftime("%I:%M %p").lstrip("0")
+
+    text = None
+    if starts and ends:
+        text = sentence(f"From {starts} to {ends} {timezone}{next_day}, {day_text}")
+    elif starts:
+        text = sentence(f"From {starts} {timezone}, {day_text}")
+    elif ends:
+        text = sentence(f"Until {ends} {timezone}, {day_text}")
+
+    return text
+
+
+def get_location_description(event):
+    res = ''
+
+    has_start_location = event.start and event.start.get('name')
+    has_end_location = event.end and event.end.get('name')
+
+    start_point_name = ''
+    if has_start_location:  # Defensive, start point is mandatory
+        start_point_name = event.start.get('name')
+
+        # Start descriptions
+        res = ' from ' if has_end_location else ' at '
+        res += start_point_name
+
+        # Add phrase from first start ref location
+        start_ref_locations = event.start.get('nearby') if 'nearby' in event.start else []  # target_event.start is mandatory
+        has_start_ref_locs = start_ref_locations and len(start_ref_locations) > 0
+
+        if has_start_ref_locs:
+            for start_i, start_loc in enumerate(start_ref_locations):
+                # Add 'and' if last location of many
+                last_start_loc = start_i == len(start_ref_locations) - 1 and len(start_ref_locations) > 1
+                res += ' and ' if last_start_loc else ', '
+                res += start_loc['phrase']
+
+    # End descriptions
+    if has_end_location:  # end point is optional
+        end_point_name = event.end.get('name')
+
+        # end point is on a different road
+        has_different_name = start_point_name != end_point_name
+
+        # has at least one reference location
+        end_ref_locations = event.end.get('nearby') if 'nearby' in event.end else []
+        has_ref_locs = end_ref_locations and len(end_ref_locations) > 0
+
+        # Append to res if either or both is true
+        if has_different_name or has_ref_locs:
+            res += ' to '
+
+            if has_different_name:
+                res += end_point_name + ', '
+
+            if has_ref_locs:
+                for end_i, end_loc in enumerate(end_ref_locations):
                     # Add 'and' if last location of many
-                    last_start_loc = start_i == len(start_ref_locations) - 1 and len(start_ref_locations) > 1
-                    res += ' and ' if last_start_loc else ', '
-                    res += start_loc['phrase']
+                    last_end_loc = end_i == len(end_ref_locations) - 1 and len(end_ref_locations) > 1
+                    if last_end_loc:
+                        res += ' and '
 
-        # End descriptions
-        if has_end_location:  # end point is optional
-            end_point_name = target_event.end.get('name')
+                    # comma if not first ref location
+                    elif end_i != 0:
+                        res += ', '
 
-            # end point is on a different road
-            has_different_name = start_point_name != end_point_name
+                    res += end_loc['phrase']
 
-            # has at least one reference location
-            end_ref_locations = target_event.end.get('nearby') if 'nearby' in target_event.end else []
-            has_ref_locs = end_ref_locations and len(end_ref_locations) > 0
+    return res
 
-            # Append to res if either or both is true
-            if has_different_name or has_ref_locs:
-                res += ' to '
+DAY_LABELS = {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+    "sat": "Saturday",
+    "sun": "Sunday",
+}
+ORDERED_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
-                if has_different_name:
-                    res += end_point_name + ', '
+VANCOUVER = [-123.116226, 49.246292]
 
-                if has_ref_locs:
-                    for end_i, end_loc in enumerate(end_ref_locations):
-                        # Add 'and' if last location of many
-                        last_end_loc = end_i == len(end_ref_locations) - 1 and len(end_ref_locations) > 1
-                        if last_end_loc:
-                            res += ' and '
-
-                        # comma if not first ref location
-                        elif end_i != 0:
-                            res += ', '
-
-                        res += end_loc['phrase']
-
-        return res
+def build_event_description(event, ivr=False):
 
     parts = []
 
+    start_location = event.start or None
+    start_timezone = end_timezone = None
+    if start_location is not None:
+        start_location = start_location.get('coords') or VANCOUVER
+        start_timezone = ZoneInfo(tz_finder.timezone_at(lng=start_location[0], lat=start_location[1]))
+    end_location = event.end or None
+    if end_location is not None:
+        end_location = end_location.get('coords') or VANCOUVER
+        end_timezone = ZoneInfo(tz_finder.timezone_at(lng=end_location[0], lat=end_location[1]))
+
     # Situation
-    if target_event.situation and target_event.situation in PHRASES_LOOKUP:
+    if event.situation and event.situation in PHRASES_LOOKUP:
         # Non-rc location for IVR
-        sitn_loc_description = get_location_description() if ivr else ''
-        parts.append(sentence(PHRASES_LOOKUP[target_event.situation] + sitn_loc_description))
+        sitn_loc_description = get_location_description(event) if ivr else ''
+        parts.append(sentence(PHRASES_LOOKUP[event.situation] + sitn_loc_description))
 
     # Rcs and chainups
-    if target_event.event_type == EventType.ROAD_CONDITION or target_event.event_type == EventType.CHAIN_UP:
+    if event.event_type == EventType.ROAD_CONDITION or event.event_type == EventType.CHAIN_UP:
         conditions_prefix = ''
 
         # Conditions for rcs
-        if target_event.event_type == EventType.ROAD_CONDITION:
-            for index, condition in enumerate(target_event.conditions):
+        if event.event_type == EventType.ROAD_CONDITION:
+            for index, condition in enumerate(event.conditions):
                 if index > 0:
-                    if index == len(target_event.conditions) - 1:
+                    if index == len(event.conditions) - 1:
                         conditions_prefix += " and "
 
                     else:
@@ -170,62 +269,55 @@ def build_event_description(target_event, ivr=False):
         loc_description = ''
         if ivr:
             # Bulk rcs
-            if target_event.segment:
-                loc_description = target_event.segment.description.split(',')[1]
+            if event.segment:
+                loc_description = event.segment.description.split(',')[1]
 
             # Non-segment rcs
-            elif target_event.chainup:
-                loc_description = target_event.chainup.name
+            elif event.chainup:
+                loc_description = event.chainup.name
 
             else:
-                loc_description = get_location_description()
+                loc_description = get_location_description(event)
 
         parts.append(sentence(conditions_prefix + loc_description))
 
     # Schedule
-    if target_event.start_time or target_event.end_time:
-        start_s = format_short_date(target_event.start_time)
-        end_s = format_short_date(target_event.end_time)
-        if start_s and end_s:
-            parts.append(sentence(f"Starting {start_s} until {end_s}"))
-        elif start_s:
-            parts.append(sentence(f"Starting {start_s}"))
-        elif end_s:
-            parts.append(sentence(f"Until {end_s}"))
+    local_start_time = datetime.datetime.now(start_timezone)
+    if event.start_time or event.end_time:
 
-    schedules = target_event.schedules or []
-    for schedule in schedules:
-        active_days = [day_labels[d] for d in ordered_days if schedule.get(d)]
-        day_text = words_join(active_days)
-        if not day_text:
-            continue
+        short_start = short_end = None
 
-        if schedule.get("allDay"):
-            parts.append(sentence(f"All day on {day_text}"))
-            continue
+        if event.start_time:
+            local_start_time = event.start_time.astimezone(start_timezone)
+            short_start = f'{local_start_time.strftime('%a %b')} {local_start_time.day}'
 
-        start_time = parse_clock(schedule.get("startTime"))
-        end_time = parse_clock(schedule.get("endTime"))
-        if start_time and end_time:
-            parts.append(sentence(f"From {start_time} to {end_time} PST on {day_text}"))
-        elif start_time:
-            parts.append(sentence(f"From {start_time} PST on {day_text}"))
-        elif end_time:
-            parts.append(sentence(f"Until {end_time} PST on {day_text}"))
+        if event.end_time:
+            local_end_time = event.end_time.astimezone(end_timezone)
+            short_end = f'{local_end_time.strftime('%a %b')} {local_end_time.day}'
+
+        if short_start and short_end:
+            parts.append(sentence(f"Starting {short_start} until {short_end}"))
+        elif short_start:
+            parts.append(sentence(f"Starting {short_start}"))
+        elif short_end:
+            parts.append(sentence(f"Until {short_end}"))
+
+    for schedule in event.schedules or []:
+        parts.append(get_schedule_description(schedule, local_start_time))
 
     # Estimated delay amount/unit
-    if target_event.delay_amount:
-        unit = target_event.delay_unit or "minutes"
-        parts.append(sentence(f"Expect {target_event.delay_amount} {unit} delay"))
+    if event.delay_amount:
+        unit = event.delay_unit or "minutes"
+        parts.append(sentence(f"Expect {event.delay_amount} {unit} delay"))
 
     # Impacts
-    for impact in target_event.impacts or []:
+    for impact in event.impacts or []:
         label = get_impact_label(impact)
         if label:
             parts.append(sentence(label))
 
     # Restrictions
-    for restriction in target_event.restrictions or []:
+    for restriction in event.restrictions or []:
         label = restriction.get("label")
         text = restriction.get("text")
         if label and text:
@@ -237,27 +329,27 @@ def build_event_description(target_event, ivr=False):
 
     if ivr:
         # Last update for ivr
-        last_update = target_event.last_updated or datetime.datetime.now(ZoneInfo("America/Vancouver"))
+        last_update = event.last_updated or datetime.datetime.now(start_timezone)
         if last_update:
-            parts.append(sentence(f"Last update: {format_long_date(last_update)}"))
+            parts.append(sentence(f"Last update: {format_long_date(last_update, start_timezone)}"))
 
         # Next update for ivr
-        next_update = target_event.next_update
+        next_update = event.next_update
         if next_update:
-            parts.append(sentence(f"Next update: {format_long_date(next_update)}"))
+            parts.append(sentence(f"Next update: {format_long_date(next_update, start_timezone)}"))
 
     # Additional
-    if target_event.additional:
-        parts.append(sentence(target_event.additional))
+    if event.additional:
+        parts.append(sentence(event.additional))
 
     # External url, not to be added to ivr. To be removed in rework
-    if target_event.link and not ivr:
-        parts.append(sentence(f"More info: {target_event.link}"))
+    if event.link and not ivr:
+        parts.append(sentence(f"More info: {event.link}"))
 
     return " ".join([part for part in parts if part])
 
 def get_username(target_event):
-    prefix = 'RIDE_'
+    prefix = getattr(settings, 'EVENT_PREFIX')
     suffix = target_event.user.first_name + " " + target_event.user.last_name
 
     social_account = SocialAccount.objects.filter(user=target_event.user).first()
@@ -272,7 +364,7 @@ def format_open511_datetime(value):
     """Format a datetime for Open511 JSON (America/Vancouver, ISO-8601 with seconds)."""
     if value is None:
         return None
-    local = value.astimezone(ZoneInfo("America/Vancouver"))
+    local = value.astimezone(DEFAULT_ZONEINFO)
     return local.replace(tzinfo=None).isoformat(timespec="seconds")
 
 

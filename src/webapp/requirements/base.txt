@@ -13,3 +13,4 @@ whitenoise==6.11.0
 kubernetes==36.0.1
 huey==3.0.3
 redis==8.0.1
+timezonefinder>=8.2.4
