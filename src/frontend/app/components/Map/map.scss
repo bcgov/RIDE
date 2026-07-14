@@ -1,5 +1,6 @@
 @use "tailwindcss";
 @use 'ol/ol.css';
+@use "../../styles/variables.scss" as *;
 
 .map-container {
   flex: 1;
@@ -72,5 +73,73 @@
     bottom: 20px;
     right: 200px;
     z-index: 1;
+  }
+}
+
+#clear-modal {
+  width: 300px;
+  height: 200px;
+  margin: 1in auto;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  cursor: default;
+  border-radius: 8px;
+
+  &:modal {
+    visibility: visible;
+  }
+
+  div {
+    padding: 0.5rem 1rem;
+  }
+
+  .body {
+    flex: 1;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    font-weight: 700;
+
+    button {
+      padding: 0.25rem 0.5rem 0.25rem 0.2rem;
+      border: solid 1px transparent;
+      border-radius: 4px;
+      color: $Grey80;
+
+      svg {
+        padding-right: 0.25rem;
+      }
+
+      &:hover {
+        border-color: black;
+      }
+
+      &:active {
+        border-color: black;
+        color: black;
+        background: #eee;
+      }
+
+      &.primary {
+        background: black;
+        border-color: black;
+        color: white;
+
+        &:hover {
+          border-color: $Grey80;
+          background: $Grey80;
+        }
+        &:active {
+          border-color: $Grey60;
+          background: $Grey60;
+          color: $Grey20;
+        }
+      }
+    }
   }
 }

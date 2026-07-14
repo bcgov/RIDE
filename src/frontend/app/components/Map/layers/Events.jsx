@@ -3,11 +3,14 @@ import { useSelector, useDispatch, useStore } from 'react-redux';
 
 import * as turf from '@turf/turf';
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashCan, faXmark } from '@fortawesome/pro-regular-svg-icons';
+
 import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { linear } from 'ol/easing';
-import { Point, LineString, GeometryCollection, MultiPolygon, Polygon } from 'ol/geom';
+import { Point, LineString, GeometryCollection, Polygon } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
 
 import { AlertContext, AuthContext, MapContext } from '../../../contexts.js';
@@ -166,6 +169,8 @@ export default function EventsLayer({ event, dispatch }) {
   const menuRef = useRef();
   const eventRef = useRef(); // necessary for early-bound handler to read current prop
   eventRef.current = event;
+  const modalRef = useRef();
+  const [ clearing, setClearing ] = useState();
 
   const status = useSelector(state => state.events.status);
   const storeDispatch = useDispatch()
@@ -228,7 +233,7 @@ export default function EventsLayer({ event, dispatch }) {
 
           }, {
             label: 'Create planned event',
-            action: (e) => {
+            action: () => {
               setContextMenu([]);
               dispatch({ type: 'reset form', value: () => getInitialEvent('Planned event'), showPreview: true, showForm: true });
               map.start = new PinFeature({
@@ -246,7 +251,7 @@ export default function EventsLayer({ event, dispatch }) {
 
           }, {
             label: 'Create road condition',
-            action: (e) => {
+            action: () => {
               setContextMenu([]);
               dispatch({ type: 'reset form', value: () => getInitialEvent('ROAD_CONDITION'), showPreview: true, showForm: true });
               map.start = new PinFeature({
@@ -323,7 +328,7 @@ export default function EventsLayer({ event, dispatch }) {
             items.push({
               label: 'Reconfirm',
               disabled: !pending,
-              action: (e) => {
+              action: () => {
                 setContextMenu([]);
                 if (pending) {
                   patch(
@@ -345,23 +350,10 @@ export default function EventsLayer({ event, dispatch }) {
           if (canCreateAtCoordinate) {
             items.push({
               label: 'Clear event',
-              action: (e) => {
+              action: () => {
                 setContextMenu([]);
-                patch(
-                  `${API_HOST}/api/events/${raw.id}`,
-                  { status: 'Inactive' },
-
-                ).then((updatedEvent) => {
-                  feature.set('raw', updatedEvent);
-                  dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
-                  setAlertContext({
-                    type: 'success',
-                    message: updatedEvent.approved ? 'Event cleared' : 'Event clearing requested',
-                  });
-
-                }).catch((error) => {
-                  setAlertContext?.({ message: error.message });
-                });
+                setClearing(raw);
+                modalRef.current.showModal();
               }
             });
           }
@@ -449,7 +441,53 @@ export default function EventsLayer({ event, dispatch }) {
     }
   }, [map]);
 
+  const needsApproval = (clearing?.is_closure || clearing?.details.severity === 'Major') && !authContext.is_approver;
+
+  function clearEvent(id) {
+    modalRef.current?.close();
+    patch(
+      `${API_HOST}/api/events/${id}`,
+      { status: 'Inactive' },
+
+    ).then((updatedEvent) => {
+      map.get('events').getSource().set('raw', updatedEvent);
+      dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
+      setAlertContext({
+        type: 'success',
+        message: updatedEvent.approved ? 'Event cleared' : 'Event clearing requested',
+      });
+
+    }).catch((error) => {
+      setAlertContext?.({ message: error.message });
+    });
+  }
+
   return (
-    <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} myevent={event} />
+    <>
+      <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} myevent={event} />
+      <dialog id="clear-modal" ref={modalRef}>
+        <div className="header">Clear {clearing?.id}</div>
+        <div className="body">
+          <p>Are you sure you want to { needsApproval ? 'submit this event to be cleared' : 'clear this event'}?</p>
+        </div>
+        <div className="buttons">
+          <button
+            type="button"
+            className='primary'
+            onClick={() => clearEvent(clearing?.id)}
+          >
+            <FontAwesomeIcon icon={faTrashCan} />
+            { needsApproval ? 'Submit' : 'Clear event'}
+          </button>
+          <button
+            type="button"
+            onClick={() => modalRef.current?.close()}
+          >
+            <FontAwesomeIcon icon={faXmark} />
+            Cancel
+          </button>
+        </div>
+      </dialog>
+    </>
   );
 }
