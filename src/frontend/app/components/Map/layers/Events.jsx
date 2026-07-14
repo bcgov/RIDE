@@ -450,7 +450,7 @@ export default function EventsLayer({ event, dispatch }) {
       { status: 'Inactive' },
 
     ).then((updatedEvent) => {
-      map.get('events').getSource().set('raw', updatedEvent);
+      map.get('events').getSource().get(id).set('raw', updatedEvent);
       dispatch({ type: 'reset form', value: updatedEvent, showPreview: true, showForm: false });
       setAlertContext({
         type: 'success',
