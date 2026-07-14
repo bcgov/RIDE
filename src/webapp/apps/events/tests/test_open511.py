@@ -48,14 +48,6 @@ schedules = [
         'cranbrook': 'Until 6:00 PM MDT, every day.',
         'fort_st_john': 'Until 6:00 PM MST, every day.',
     },
-    # every day
-    {
-        'schedule': {'type': 'week', 'allDay': False, 'startTime': '09:00', 'endTime': '18:00',
-                     'mon': True, 'tue': True, 'wed': True, 'thu': True, 'fri': True, 'sat': True, 'sun': True},
-        'vancouver': 'From 9:00 AM to 6:00 PM PDT, every day.',
-        'cranbrook': 'From 9:00 AM to 6:00 PM MDT, every day.',
-        'fort_st_john': 'From 9:00 AM to 6:00 PM MST, every day.',
-    },
     {
         'schedule': {'type': 'week', 'allDay': True, 'startTime': None, 'endTime': None,
                      'mon': True, 'tue': True, 'wed': True, 'thu': True, 'fri': True, 'sat': True, 'sun': True},

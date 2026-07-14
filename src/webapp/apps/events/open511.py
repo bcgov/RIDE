@@ -230,14 +230,11 @@ def build_event_description(event, ivr=False):
     parts = []
 
     start_location = event.start or None
-    start_timezone = end_timezone = None
+    timezone = ZoneInfo('America/Vancouver')
     if start_location is not None:
-        start_location = start_location.get('coords') or VANCOUVER
-        start_timezone = ZoneInfo(tz_finder.timezone_at(lng=start_location[0], lat=start_location[1]))
-    end_location = event.end or None
-    if end_location is not None:
-        end_location = end_location.get('coords') or VANCOUVER
-        end_timezone = ZoneInfo(tz_finder.timezone_at(lng=end_location[0], lat=end_location[1]))
+        coords = start_location.get('coords') or VANCOUVER
+        zone = tz_finder.timezone_at(lng=coords[0], lat=coords[1]) or 'America/Vancouver'
+        timezone = ZoneInfo(zone)
 
     # Situation
     if event.situation and event.situation in PHRASES_LOOKUP:
@@ -282,17 +279,17 @@ def build_event_description(event, ivr=False):
         parts.append(sentence(conditions_prefix + loc_description))
 
     # Schedule
-    local_start_time = datetime.datetime.now(start_timezone)
+    local_start_time = datetime.datetime.now(timezone)
     if event.start_time or event.end_time:
 
         short_start = short_end = None
 
         if event.start_time:
-            local_start_time = event.start_time.astimezone(start_timezone)
+            local_start_time = event.start_time.astimezone(timezone)
             short_start = f'{local_start_time.strftime('%a %b')} {local_start_time.day}'
 
         if event.end_time:
-            local_end_time = event.end_time.astimezone(end_timezone)
+            local_end_time = event.end_time.astimezone(timezone)
             short_end = f'{local_end_time.strftime('%a %b')} {local_end_time.day}'
 
         if short_start and short_end:
@@ -329,14 +326,14 @@ def build_event_description(event, ivr=False):
 
     if ivr:
         # Last update for ivr
-        last_update = event.last_updated or datetime.datetime.now(start_timezone)
+        last_update = event.last_updated or datetime.datetime.now(timezone)
         if last_update:
-            parts.append(sentence(f"Last update: {format_long_date(last_update, start_timezone)}"))
+            parts.append(sentence(f"Last update: {format_long_date(last_update, timezone)}"))
 
         # Next update for ivr
         next_update = event.next_update
         if next_update:
-            parts.append(sentence(f"Next update: {format_long_date(next_update, start_timezone)}"))
+            parts.append(sentence(f"Next update: {format_long_date(next_update, timezone)}"))
 
     # Additional
     if event.additional:
@@ -349,7 +346,7 @@ def build_event_description(event, ivr=False):
     return " ".join([part for part in parts if part])
 
 def get_username(target_event):
-    prefix = getattr(settings, 'EVENT_PREFIX')
+    prefix = getattr(settings, 'EVENT_PREFIX', 'RIDE') + '_'
     suffix = target_event.user.first_name + " " + target_event.user.last_name
 
     social_account = SocialAccount.objects.filter(user=target_event.user).first()
