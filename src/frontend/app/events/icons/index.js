@@ -1,4 +1,6 @@
-import { Fill, Stroke, Style } from 'ol/style.js';
+import { Fill, Stroke } from 'ol/style.js';
+
+import { CLEARING_TIMEOUT } from '../../env';
 
 import incidentMajorActiveStatic from './majorincident-default-static.svg';
 import incidentMajorActiveHover from './majorincident-default-hover.svg';
@@ -156,18 +158,6 @@ import {
   faMountain,
   faWater
 } from '@fortawesome/pro-regular-svg-icons';
-
-import chainup from './chainup.svg';
-import closure from './closure.svg';
-import majordelay from './majordelay.svg';
-import majorfuture from './majorfuture.svg';
-import majorfutureclosure from './majorfutureclosure.svg';
-import majorincident from './majorincident.svg';
-import minordelay from './minordelay.svg';
-import minorfuture from './minorfuture.svg';
-import minorfutureclosure from './minorfutureclosure.svg';
-import MinorIncident from './minorincident.svg?react';
-import roadcondition from './roadcondition.svg';
 
 import './icons.scss';
 
@@ -800,7 +790,7 @@ export function getIconAndStroke(event, state='static', includePending=true) {
 
       if (status === 'inactive') { // TODO: cleared determine by time of last inactivation
         const lastUpdated = new Date(event.last_updated);
-        if (!event.approved || lastUpdated > Date.now() - 60000 * 15) {  // TODO: time window move to env variable
+        if (!event.approved || lastUpdated > Date.now() - CLEARING_TIMEOUT) {
           status = 'clearing';
         }
       }

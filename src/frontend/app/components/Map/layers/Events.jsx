@@ -20,7 +20,7 @@ import RideFeature, { PinFeature } from '../feature.js';
 import ContextMenu from '../../../events/ContextMenu.jsx';
 import { getInitialEvent } from '../../../events/forms/index.jsx';
 
-import { API_HOST, EVENT_POLLING_REFRESH } from '../../../env.js';
+import { API_HOST, CLEARING_TIMEOUT, EVENT_POLLING_REFRESH } from '../../../env.js';
 import { getIconAndStroke } from '../../../events/icons/index.js';
 import { getPendingNextUpdate } from '../../../shared/helpers.js';
 import { applyPinLocationUpdate } from './Pins';
@@ -101,7 +101,7 @@ export function addEvent(event, map, dispatch, visibleLayers) {
 function getVisibility(event, visibleLayers) {
   const now = new Date()
   const SEVEN_DAYS_AGO = now - 1000 * 60 * 60 * 24 * 7;
-  const FIFTEEN_MINUTES_AGO = now - 1000 * 60 * 15;
+  const FIFTEEN_MINUTES_AGO = now - CLEARING_TIMEOUT;
 
   const normalizedType = (event.type || '').toLowerCase().replaceAll(/\s|_|-/g, '');
   const typeLayerMap = {
@@ -456,6 +456,12 @@ export default function EventsLayer({ event, dispatch }) {
         type: 'success',
         message: updatedEvent.approved ? 'Event cleared' : 'Event clearing requested',
       });
+      setTimeout(() => {
+        const feature = map.get('events').getSource().get(id);
+        feature.set('visible', getVisibility(updatedEvent, visibleLayers));
+        feature.updateStyles();
+        feature.changed();
+      }, CLEARING_TIMEOUT + 1000);
 
     }).catch((error) => {
       setAlertContext?.({ message: error.message });
