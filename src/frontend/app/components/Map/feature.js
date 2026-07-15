@@ -32,13 +32,18 @@ export default class RideFeature extends Feature {
   // used to update available styles based on the underlying event changing
   propertyChanged(e) {
     if (e.key === 'raw') {
-      const event = this.get('raw');
-      ['static', 'hover', 'active'].forEach((state) => {
-        const [icon, stroke2] = getIconAndStroke(event, state);
-        this[state] = new Style({ image: new Icon({ src: icon }), ...stroke2 });
-      });
+      this.updateStyles();
       this.changed();
     }
+  }
+
+  updateStyles() {
+    const event = this.get('raw');
+    ['static', 'hover', 'active'].forEach((state) => {
+      const [icon, stroke2] = getIconAndStroke(event, state);
+      if (state === 'static') { state = 'normal'; }
+      this[state] = new Style({ image: new Icon({ src: icon }), ...stroke2 });
+    });
   }
 
   clear() { // used by the route feature on the map
