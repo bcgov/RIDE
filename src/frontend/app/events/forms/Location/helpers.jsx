@@ -250,7 +250,7 @@ const MajorPopulationCenterTypes = [
 ];
 
 const MinorPopulationCenterTypes = [
-  // 'Locality', // < 50
+  'Locality', // < 50
   'Community', // > 50, unincorporated
 ];
 
@@ -266,6 +266,9 @@ async function filterByTypes(features, types, fromCoords) {
 
     if (!route || route.distance < 0) { continue; }
 
+    const displayed = route.distance < 1 ? route.distance * 1000 : route.distance;
+    const unit = route.distance < 1 ? 'm' : 'km';
+
     results.push({
       id: `bcgnws-${feature.properties.feature.id}`,
       source: "bcgnws",
@@ -275,7 +278,7 @@ async function filterByTypes(features, types, fromCoords) {
       coords: feature.geometry.coordinates,
       distance: route.distance,
       direction,
-      phrase: `${Math.round(route.distance)}km ${direction} of ${feature.properties.name}`,
+      phrase: `${Math.round(displayed)}${unit} ${direction} of ${feature.properties.name}`,
       size: types === MajorPopulationCenterTypes ? 'major' : 'minor',
     });
   }
@@ -326,7 +329,7 @@ export async function getNearbyFromBCGNWS(coords, search='') {
     }
 
     results.sort((a, b) => a.distance - b.distance);
-    return results.map((result) => ({... result, source: 'bcgnws', displayDistance: Math.round(result.distance)})).slice(0, 6);
+    return results.map((result) => ({... result, source: 'bcgnws' }));
   } catch (err) {
     console.error(err);
     return [{ source: 'bcgnws', name: 'error', phrase: 'Problem retrieving population centres data.' }];
