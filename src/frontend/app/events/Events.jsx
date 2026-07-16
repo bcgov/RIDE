@@ -310,9 +310,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
     }
 
     return { ...event, delta, ending, };
-  }).filter(
-    (event) => event.delta < ONE_HOUR_MS
-  ).filter((event) => { // apply filters
+  }).filter((event) => { // apply filters
     if (type) { return event?.type === type.value; }
     if (area) { return event?.service_area === area.value; }
     if (road) { return matchRoad(event, road) }

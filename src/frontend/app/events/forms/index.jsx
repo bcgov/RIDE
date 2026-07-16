@@ -318,7 +318,6 @@ export class EventForm extends Component {
     }
 
     const parts = form.external?.url?.split('//').filter(Boolean);
-    console.log(parts, parts[0], parts.length, !['http:', 'https:'].includes((parts[0] || 'https:').toLowerCase()));
     if (parts.length === 1 ||
         (parts[0] && !['http:', 'https:'].includes(parts[0].toLowerCase()))) {
       err['external'] = 'Must be a valid link';
