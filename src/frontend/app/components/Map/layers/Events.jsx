@@ -111,7 +111,8 @@ function getVisibility(event, visibleLayers) {
   const typeLayer = typeLayerMap[normalizedType];
   if (typeLayer) {
     // DBC22-6330: Inactive rcs should not show in map
-    if (typeLayer === 'roadConditions' && event.status === 'Inactive') {
+    // DBC22-6446: Inactive chainups also hidden
+    if (['chainups', 'roadConditions'].includes(typeLayer) && event.status === 'Inactive') {
       return false;
     }
 
