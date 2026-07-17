@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, createRef } from 'react';
 import { connect } from 'react-redux';
 
 import * as turf from '@turf/turf';
@@ -8,7 +8,7 @@ import {
   faCheckDouble, faCircleCheck, faCircleX, faTrashCan, faXmark
 } from '@fortawesome/pro-regular-svg-icons';
 
-import { clearPins } from '../../components/Map/layers/Pins';
+import { getVisibility } from '../../components/Map/layers/Events';
 
 import { set } from '../../slices';
 
@@ -33,7 +33,7 @@ import {
 } from "../../components/Map/helpers";
 import { addEvent } from '../../components/Map/layers/Events';
 import { getCookie } from '../shared';
-import { API_HOST } from '../../env';
+import { API_HOST, CLEARING_TIMEOUT } from '../../env';
 import { AuthContext } from '../../contexts';
 import { patch, getPendingNextUpdate } from '../../shared/helpers';
 import Tabs from '../../shared/Tabs';
@@ -129,6 +129,7 @@ export function getInitialEvent(eventType = 'Incident') {
   }
 }
 
+
 function getLabel(eventType) {
   switch (eventType) {
     case 'Incident':
@@ -167,6 +168,7 @@ export class EventForm extends Component {
     this.state = {
       errors: {},
     };
+    this.modalRef = createRef();
   }
 
   handleSubmit = (e, submitLabel, overrides={}) => {
@@ -413,11 +415,38 @@ export class EventForm extends Component {
     document.querySelector('.error')?.parentNode?.scrollIntoView(true);
   }
 
+  clearEvent = (id) => {
+    this.modalRef.current?.close();
+    patch(
+      `${API_HOST}/api/events/${id}`,
+      { status: 'Inactive' },
+
+    ).then((updatedEvent) => {
+      this.props.map.get('events').getSource().get(id).set('raw', updatedEvent);
+      this.props.eventDispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: true, showForm: false });
+      this.props.setAlertContext({
+        type: 'success',
+        message: updatedEvent.approved ? 'Event cleared' : 'Event clearing requested',
+      });
+      setTimeout(() => {
+        const feature = this.props.map.get('events').getSource().get(id);
+        feature.set('visible', getVisibility(updatedEvent, this.props.visibleLayers));
+        feature.updateStyles();
+        feature.changed();
+      }, CLEARING_TIMEOUT + 1000);
+
+    }).catch((error) => {
+      this.props.setAlertContext?.({ message: error.message });
+    });
+  }
+
   render() {
     const { event, eventDispatch, cancel, goToFunc, serviceAreaBoundaries } = this.props;
     const { errors } = this.state;
 
     const { authContext } = this.context;
+
+    const needsApproval = (event?.is_closure || event?.details?.severity === 'Major') && !authContext?.is_approver;
 
     // User can only edit events within the service area that contains the event start point.
     let canEditStartPoint = !!authContext?.is_approver;
@@ -594,21 +623,7 @@ export class EventForm extends Component {
                 type="button"
                 className="secondary"
                 onClick={() => {
-                  patch(
-                    `${API_HOST}/api/events/${event.id}`,
-                    { status: 'Inactive' },
-
-                  ).then((updatedEvent) => {
-                    eventDispatch({ type: 'reset form', cancel: true, value: updatedEvent, showPreview: false, showForm: false });
-                    clearPins(this.props.map);
-                    this.props.setAlertContext({
-                      type: 'success',
-                      message: 'Event cleared',
-                    });
-
-                  }).catch((error) => {
-                    this.props.setAlertContext?.({ message: error.message });
-                  });
+                  this.modalRef.current.showModal();
                 }}
               >
                 <FontAwesomeIcon icon={faTrashCan} />
@@ -636,6 +651,29 @@ export class EventForm extends Component {
           </div>
         }
       </form>
+      <dialog id="clear-modal" ref={this.modalRef}>
+        <div className="header">Clear {event?.id}</div>
+        <div className="body">
+          <p>Are you sure you want to { needsApproval ? 'submit this event to be cleared' : 'clear this event'}?</p>
+        </div>
+        <div className="buttons">
+          <button
+            type="button"
+            className='primary'
+            onClick={() => this.clearEvent(event?.id)}
+          >
+            <FontAwesomeIcon icon={faTrashCan} />
+            { needsApproval ? 'Submit' : 'Clear event'}
+          </button>
+          <button
+            type="button"
+            onClick={() => this.modalRef.current?.close()}
+          >
+            <FontAwesomeIcon icon={faXmark} />
+            Cancel
+          </button>
+        </div>
+      </dialog>
     </div>
     );
   }
