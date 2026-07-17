@@ -42,7 +42,6 @@ import History from '../History/History';
 import './forms.scss';
 
 const ONE_HOUR = 1000 * 60 * 60;
-const ONE_WEEK = ONE_HOUR * 24 * 7;
 export const INVALID_ADDITIONAL_CHARACTERS = /[<>[\]{}\\|~`!@#$%^&*()_+=]/;
 
 export function getLater(severity) {
@@ -50,7 +49,7 @@ export function getLater(severity) {
   if (severity.startsWith('Major')) {
     return new Date(Date.now() + ONE_HOUR);
   } else if (severity.startsWith('Minor')) {
-    return new Date(Date.now() + ONE_WEEK);
+    return new Date(Date.now() + ONE_HOUR * 3); // DBC22-5438
   }
   return null;
 }
