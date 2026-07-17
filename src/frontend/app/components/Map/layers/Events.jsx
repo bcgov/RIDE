@@ -98,7 +98,7 @@ export function addEvent(event, map, dispatch, visibleLayers) {
   }
 }
 
-function getVisibility(event, visibleLayers) {
+export function getVisibility(event, visibleLayers) {
   const now = new Date()
   const SEVEN_DAYS_AGO = now - 1000 * 60 * 60 * 24 * 7;
   const FIFTEEN_MINUTES_AGO = now - CLEARING_TIMEOUT;
