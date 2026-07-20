@@ -1,6 +1,7 @@
 import { getCardinalDirection, getNonDirectionalRoute, titleCase } from '../../../shared';
 
 import { ll2bc } from '../../../components/Map/helpers';
+import { transform_road_abbreviations } from '../../../components/shared/helper';
 
 import { API_HOST } from '../../../env';
 
@@ -45,15 +46,16 @@ async function getIntersections(coords, subkey, roadName, dispatch, search) {
       if (!name.includes(roadName) || (search && !name.toLowerCase().includes(search))) {
         continue;
       }
+      const displayName = transform_road_abbreviations(name);
       const intCoords = result.geometry.coordinates
       const route = await getNonDirectionalRoute(coords, result.geometry.coordinates)
       result.source = 'intersections';
       result.distance = route.distance;
       result.direction = getCardinalDirection(coords, intCoords, true);
       if (route.distance < 0.01) {
-        result.phrase = `At ${result.properties.intersectionName}`;
+        result.phrase = `At ${displayName}`;
       } else {
-        result.phrase = `${route.distance * 1000}m ${result.direction} of ${result.properties.intersectionName}`;
+        result.phrase = `${route.distance * 1000}m ${result.direction} of ${displayName}`;
       }
       result.id = `${subkey}-intersection-${result.properties.intersectionID}`;
       result.coords = result.geometry.coordinates;
@@ -145,9 +147,10 @@ async function getLandmarks(location, subkey, dispatch, search) {
         km_post = landmark.description.split(' ')[0];
       }
 
-      let phrase = `${displayDistance}${unit} ${direction} of ${titleCase(landmark.description)}`;
+      const displayName = transform_road_abbreviations(titleCase(landmark.description));
+      let phrase = `${displayDistance}${unit} ${direction} of ${displayName}`;
       if (route.distance < 0.01) {
-        phrase = `At ${titleCase(landmark.description)}`;
+        phrase = `At ${displayName}`;
       }
 
       const candidate = {
@@ -213,10 +216,10 @@ async function getMunicipality(coords, subkey, dispatch) {
     const cql = `INTERSECTS(SHAPE, POINT(${coords[0]} ${coords[1]}))`;
     const params = getGeoserverParams(LAYERS.municipalities, cql);
     const results = await fetch(`${HOST}?${params}`, {'mode': 'cors'}).then((body) => body.json());
-    const name = results.features[0]?.properties?.ADMIN_AREA_ABBREVIATION;
+    const name = transform_road_abbreviations(results.features[0]?.properties?.ADMIN_AREA_ABBREVIATION);
     if (name) {
       municipality.push({
-        name: results.features[0].properties.ADMIN_AREA_ABBREVIATION,
+        name,
         id: `${subkey}-municipality-${results.features[0].properties.LGL_ADMIN_AREA_ID}`,
         source: 'municipalities',
         distance: 0,
@@ -266,16 +269,17 @@ async function filterByTypes(features, types, fromCoords) {
 
     if (!route || route.distance < 0) { continue; }
 
+    const displayName = transform_road_abbreviations(feature.properties.name);
     results.push({
       id: `bcgnws-${feature.properties.feature.id}`,
       source: "bcgnws",
-      name: feature.properties.name,
+      name: displayName,
       type: feature.properties.featureType,
       coordinates: feature.geometry.coordinates,
       coords: feature.geometry.coordinates,
       distance: route.distance,
       direction,
-      phrase: `${Math.round(route.distance)}km ${direction} of ${feature.properties.name}`,
+      phrase: `${Math.round(route.distance)}km ${direction} of ${displayName}`,
       size: types === MajorPopulationCenterTypes ? 'major' : 'minor',
     });
   }

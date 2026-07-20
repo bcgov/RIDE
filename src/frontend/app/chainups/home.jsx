@@ -9,6 +9,7 @@ import { AlertContext, AuthContext } from "../contexts";
 import { getChainUps, getChainUpEvents, getInitialChainUp, toggleChainUps, reconfirmChainUps } from "../shared/data/chainups";
 import { getServiceAreas } from "../shared/data/organizations";
 import { getRoutes } from "../shared/data/segments";
+import { transform_road_abbreviations } from "../components/shared/helper";
 import RIDEDropdown from '../components/shared/dropdown';
 import Spinner from "../components/shared/spinner.jsx";
 import Preview from "../events/Preview.jsx";
@@ -216,7 +217,7 @@ export default function Home() {
       showPreview: true,
       id: event ? event.id : 'DBC-000000',
       version: event?.version || 0,
-      name: cu.name,
+      name: transform_road_abbreviations(cu.name),
       chainup: cu
     });
   };
@@ -323,7 +324,7 @@ export default function Home() {
               return (
               <div key={cu.uuid} className='chainup-row'>
                 <div className={'chainup-cell main-cell'}>
-                  <div className={'name'}>{cu.name}</div>
+                  <div className={'name'}>{transform_road_abbreviations(cu.name)}</div>
                     <div className={'action-row'}>
                       <div className={'action'} onClick={() => toggle(chainupPk, active)}>
                         <FontAwesomeIcon icon={active ? faToggleOn : faToggleOff} aria-hidden="true" />
