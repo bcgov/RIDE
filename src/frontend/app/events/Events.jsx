@@ -118,6 +118,8 @@ function Event({ event, goToFunc, dispatch, map, selected }) {
     label = 'Overdue';
   } else if (event.ending) {
     label = 'Ending soon';
+  } else if (event.ongoing) {
+    label = 'Ongoing';
   }
 
   let situation = PHRASES_LOOKUP[event.details.situation];
@@ -145,9 +147,10 @@ function Event({ event, goToFunc, dispatch, map, selected }) {
         `}
       >
         <div className='card-name'>{label}</div>
-        <div className='lozenge'>
-          <FontAwesomeIcon icon={faStopwatch} />{time}
-        </div>
+        { !event.ongoing && <div className='lozenge'>
+            <FontAwesomeIcon icon={faStopwatch} />{time}
+          </div>
+        }
       </div>
 
       <div className='body'>
@@ -262,6 +265,8 @@ const sortFunctions = {
   id: (a, b) => a.id < b.id ? -1 : 1,
 }
 
+const TEN_YEARS = 1000 * 60 * 60 * 24 * 365 * 10;
+
 export default function Events({ goToFunc, dispatch, map, current }) {
   const { authContext } = useContext(AuthContext);
   const [ type, setType ] = useState(JSON.parse(localStorage.getItem('activeType')));
@@ -295,21 +300,24 @@ export default function Events({ goToFunc, dispatch, map, current }) {
   // the delta and whether the event is ending at the time.
   const displayed = events.filter((event) => (
     userServiceAreas.has(event.service_area) &&
-    event.status === 'Active' && (
-      event.timing.nextUpdate || event.timing.endTime
-    ) &&
+    event.status === 'Active' &&
     event.approved
   )).map((event) => {
-    let delta, ending = false;
+    let delta, ending, ongoing = false;
 
     if (event.timing.nextUpdate) {
       delta = new Date(event.timing.nextUpdate) - now;
+
     } else if (event.timing.endTime) {
       delta = new Date(event.timing.endTime) - now;
       ending = true;
+
+    } else if (event.timing.startTime) { // until further notice planned events
+      delta = new Date(event.timing.startTime) - now + TEN_YEARS;
+      ongoing = true;
     }
 
-    return { ...event, delta, ending, };
+    return { ...event, delta, ending, ongoing };
   }).filter((event) => { // apply filters
     if (type) { return event?.type === type.value; }
     if (area) { return event?.service_area === area.value; }
