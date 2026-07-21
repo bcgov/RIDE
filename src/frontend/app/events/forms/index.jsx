@@ -87,7 +87,6 @@ export const SCHEDULE_BLANK = {
 }
 
 
-
 export function getInitialEvent(eventType = 'Incident') {
   return {
     showPreview: true,
@@ -380,9 +379,9 @@ export class EventForm extends Component {
           const event_type = event.type === 'ROAD_CONDITION' ? 'Road condition' : event.type;
           cancel();
           const key = getVisibilityLayer(event);
-          this.props.dispatch(set({[key]: true}));
-          addEvent(data, map, dispatch, visibleLayers);
-          dispatch({ type: 'reset form' });
+          dispatch(set({[key]: true}));
+          addEvent(data, map, this.props.eventDispatch, visibleLayers);
+          this.props.eventDispatch({ type: 'reset form' });
           setAlertContext({
             type: 'success',
             message: `${event_type} successfully ${label}`,
