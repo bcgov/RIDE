@@ -300,6 +300,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
   // the delta and whether the event is ending at the time.
   const displayed = events.filter((event) => (
     userServiceAreas.has(event.service_area) &&
+    (event.timing.endTime || event.timing.nextUpdate || event.timing.startTime) &&
     event.status === 'Active' &&
     event.approved
   )).map((event) => {
