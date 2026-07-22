@@ -170,6 +170,7 @@ export class EventForm extends Component {
   }
 
   handleSubmit = (e, submitLabel, overrides={}) => {
+    e.target.disabled = true;
     e.preventDefault();
     const err = {};
     const { event, map, dispatch, visibleLayers, cancel, setAlertContext, computed } = this.props;
@@ -386,11 +387,13 @@ export class EventForm extends Component {
             type: 'success',
             message: `${event_type} successfully ${label}`,
           });
-        });
+        })
+        .finally(() => e.target.disabled = false);
 
     } else {
       if (err.ivr) { setAlertContext?.({ message: err.ivr }); }
       console.log('Errors', err);
+      e.target.disabled = false;
     }
   }
 

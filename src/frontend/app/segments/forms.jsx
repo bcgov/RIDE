@@ -92,6 +92,7 @@ export function getInitialRc() {
 export class RcsForm extends EventForm {
   /* Handlers */
   handleSubmit = (e) => {
+    e.target.disabled = true;
     e.preventDefault();
     const { segPks, event, callback, setAlertContext, computed } = this.props;
     const errors = {};
@@ -146,9 +147,11 @@ export class RcsForm extends EventForm {
         if (data?.status === 202) {
           callback({ status: data.status, data: data.data });
         }
-      });
+
+      }).finally(() => e.target.disabled = false);
     } else if (errors['ivr']) {
       setAlertContext?.({ message: errors['ivr'] });
+      e.target.disabled = false;
     }
   }
 
