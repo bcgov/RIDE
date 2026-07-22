@@ -6,17 +6,17 @@ export function getRcs() {
   return get(`${API_HOST}/api/rcs`, {});
 }
 
-export function clearRcs(segPks) {
+export function clearRcs(eventPks) {
   const payload = {
-    segPks: segPks
+    eventPks: eventPks
   }
 
   return post(`${API_HOST}/api/rcs/clear`, payload);
 }
 
-export function confirmRcs(segPks) {
+export function confirmRcs(eventPks) {
   const payload = {
-    segPks: segPks
+    eventPks: eventPks
   }
 
   return post(`${API_HOST}/api/rcs/confirm`, payload);
