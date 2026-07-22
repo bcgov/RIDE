@@ -722,6 +722,10 @@
               background-color: #eee;
             }
 
+            &:disabled {
+              background-color: #999;
+            }
+
             svg {
               margin-right: 0.5rem;
               &.spinner {
@@ -804,6 +808,11 @@
         &:active {
           border-color: 999;
           background: #999;
+        }
+
+        &:disabled {
+          color: #ccc;
+          background-color: #999;
         }
 
         &.secondary {
