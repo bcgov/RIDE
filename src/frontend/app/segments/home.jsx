@@ -225,7 +225,7 @@ export default function Home() {
 
   /* Handlers */
   const clearConditions = (segPks) => {
-    const payload = segPks.filter(pk => pk in rcsMap);
+    const payload = segPks.map(pk => rcsMap[pk]?.uuid).filter(Boolean);
     clearRcs(payload).then((response) => {
       if (response.status === 202) {
         // Update road conditions map
@@ -251,7 +251,7 @@ export default function Home() {
   }
 
   const reconfirmConditions = (segPks) => {
-    const payload = segPks.filter(pk => pk in rcsMap);
+    const payload = segPks.map(pk => rcsMap[pk]?.uuid).filter(Boolean);
     confirmRcs(payload).then((response) => {
       if (response.status === 202) {
         // Update road conditions map

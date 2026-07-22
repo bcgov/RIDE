@@ -165,20 +165,22 @@ class RoadConditions(Events):
 
     @action(detail=False, methods=['post'], url_path='clear')
     def clear_rcs(self, request):
-        segPks = request.data.get('segPks', [])
-        if not isinstance(segPks, list):
-            return Response({'error': 'segPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+        event_pks = request.data.get('eventPks', [])
+        if not isinstance(event_pks, list):
+            return Response({'error': 'eventPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not validate_allowed_segments(request.user, segPks):
+        existing_events = list(self.get_queryset().filter(pk__in=event_pks))
+        seg_pks = [str(event.segment_id) for event in existing_events if event.segment_id]
+        if not validate_allowed_segments(request.user, seg_pks):
             return Response(
                 {'error': 'unauthorized', 'detail': 'Segment outside your service area.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
         cleared_events = []
-        existing_events = Event.current.filter(segment_id__in=segPks)
         for event in existing_events:
             event.status = 'Inactive'
+            event.last_inactivated = datetime.datetime.now(tz=datetime.timezone.utc)
             event.save()
             cleared_events.append(RcSerializer(event, context=self.get_serializer_context()).data)
 
@@ -186,18 +188,19 @@ class RoadConditions(Events):
 
     @action(detail=False, methods=['post'], url_path='confirm')
     def confirm_rcs(self, request):
-        segPks = request.data.get('segPks', [])
-        if not isinstance(segPks, list):
-            return Response({'error': 'segPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+        event_pks = request.data.get('eventPks', [])
+        if not isinstance(event_pks, list):
+            return Response({'error': 'eventPks must be a list'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not validate_allowed_segments(request.user, segPks):
+        existing_events = list(self.get_queryset().filter(pk__in=event_pks))
+        seg_pks = [str(event.segment_id) for event in existing_events if event.segment_id]
+        if not validate_allowed_segments(request.user, seg_pks):
             return Response(
                 {'error': 'unauthorized', 'detail': 'Segment outside your service area.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
         confirmed_events = []
-        existing_events = Event.current.filter(segment_id__in=segPks)
         for event in existing_events:
             event.next_update = get_default_next_update()
             event.user = request.user
