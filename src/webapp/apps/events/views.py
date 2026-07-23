@@ -181,6 +181,8 @@ class RoadConditions(Events):
         for event in existing_events:
             event.status = 'Inactive'
             event.last_inactivated = datetime.datetime.now(tz=datetime.timezone.utc)
+            event.user = request.user
+            event.meta = {'source': 'clear_rcs'}
             event.save()
             cleared_events.append(RcSerializer(event, context=self.get_serializer_context()).data)
 
@@ -204,6 +206,7 @@ class RoadConditions(Events):
         for event in existing_events:
             event.next_update = get_default_next_update()
             event.user = request.user
+            event.meta = {'source': 'confirm_rcs'}
             event.save()
             confirmed_events.append(RcSerializer(event).data)
 
