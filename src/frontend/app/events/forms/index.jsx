@@ -8,8 +8,6 @@ import {
   faCheckDouble, faCircleCheck, faCircleX, faTrashCan, faXmark
 } from '@fortawesome/pro-regular-svg-icons';
 
-import { getVisibility } from '../../components/Map/layers/Events';
-
 import { set } from '../../slices';
 
 import Conditions from './Conditions';
@@ -31,7 +29,8 @@ import {
 import {
   convertToDateTimeLocalString as convert, g2ll,
 } from "../../components/Map/helpers";
-import { addEvent } from '../../components/Map/layers/Events';
+import { addEvent, getVisibility } from '../../components/Map/layers/Events';
+import { clearPins } from '../../components/Map/layers/Pins';
 import { getCookie } from '../shared';
 import { API_HOST, CLEARING_TIMEOUT } from '../../env';
 import { AuthContext } from '../../contexts';
@@ -431,6 +430,7 @@ export class EventForm extends Component {
         type: 'success',
         message: updatedEvent.approved ? 'Event cleared' : 'Event clearing requested',
       });
+      clearPins(this.props.map);
       setTimeout(() => {
         const feature = this.props.map.get('events').getSource().get(id);
         feature.set('visible', getVisibility(updatedEvent, this.props.visibleLayers));
@@ -654,7 +654,7 @@ export class EventForm extends Component {
           </div>
         }
       </form>
-      <dialog id="clear-modal" ref={this.modalRef}>
+      <dialog className="clear-modal" ref={this.modalRef}>
         <div className="header">Clear {event?.id}</div>
         <div className="body">
           <p>Are you sure you want to { needsApproval ? 'submit this event to be cleared' : 'clear this event'}?</p>
@@ -666,7 +666,7 @@ export class EventForm extends Component {
             onClick={() => this.clearEvent(event?.id)}
           >
             <FontAwesomeIcon icon={faTrashCan} />
-            { needsApproval ? 'Submit' : 'Clear event'}
+            { needsApproval ? 'Submit' : 'Clear event' }
           </button>
           <button
             type="button"
