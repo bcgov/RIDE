@@ -370,6 +370,7 @@ export const PHRASES = [
   ['Road condition', '-', 'Road condition', 2, 'PHRASE', 2,' CHAIN_UP', 1, 'HAZARD'],
 ];
 
+export const CHANGE_TYPE_FORMS = ['Incident', 'Planned event'];
 export const DETAILS_FORMS = ['Incident', 'Planned event'];
 export const DELAYS_FORMS = ['Incident', 'Planned event'];
 export const EXTERNAL_FORMS = ['Incident', 'Planned event'];
@@ -379,12 +380,12 @@ export const RESTRICTIONS_FORMS = ['Incident', 'Planned event'];
 export const TIMING_FORMS = ['Incident', 'Road condition', 'ROAD_CONDITION'];
 export const CONDITIONS_FORMS = ['Road condition', 'ROAD_CONDITION'];
 
-export const FORMS = []; globalThis.FORMS = FORMS;
-export const FORM_CATEGORIES = {}; globalThis.FORM_CATEGORIES = FORM_CATEGORIES;
-export const FORM_PHRASES = {}; globalThis.FORM_PHRASES = FORM_PHRASES;
-export const FORM_PHRASE_CATEGORY = {}; globalThis.FORM_PHRASE_CATEGORY = FORM_PHRASE_CATEGORY;
-export const PHRASES_LOOKUP = {}; globalThis.PHRASES_LOOKUP = PHRASES_LOOKUP;
-export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row, ii) => {
+export const FORMS = [];
+export const FORM_CATEGORIES = {};
+export const FORM_PHRASES = {};
+export const FORM_PHRASE_CATEGORY = {};
+export const PHRASES_LOOKUP = {};
+export const FORM_CATEGORY_PHRASE = PHRASES.reduce((acc, row) => {
   const form = row[0];
   const category = row[1];
   const phrase = row[2];
