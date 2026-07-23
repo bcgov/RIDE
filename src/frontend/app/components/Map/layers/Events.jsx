@@ -472,7 +472,7 @@ export default function EventsLayer({ event, dispatch }) {
   return (
     <>
       <ContextMenu ref={menuRef} options={contextMenu} setContextMenu={setContextMenu} myevent={event} />
-      <dialog id="clear-modal" ref={modalRef}>
+      <dialog className="clear-modal" ref={modalRef}>
         <div className="header">Clear {clearing?.id}</div>
         <div className="body">
           <p>Are you sure you want to { needsApproval ? 'submit this event to be cleared' : 'clear this event'}?</p>
