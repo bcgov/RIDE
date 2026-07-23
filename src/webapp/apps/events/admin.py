@@ -90,3 +90,4 @@ class EventAdmin(admin.ModelAdmin):
         LatestApprovedFilter,
     )
     list_display = ('id', 'event_type', 'status', 'user', 'latest', 'approved', 'latest_approved')
+    search_fields = ['id']

@@ -5,7 +5,7 @@ from .models import Segment, Route, ChainUp
 
 @admin.register(Segment)
 class SegmentAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ['name']
 
 
 @admin.register(Route)

@@ -9,3 +9,4 @@ class RIDEUserAdmin(admin.ModelAdmin):
         'first_name', 'last_name',
         'is_staff', 'is_superuser',
     )
+    search_fields = ['username', 'email', 'first_name', 'last_name']
