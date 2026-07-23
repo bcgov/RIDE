@@ -19,7 +19,13 @@
   .form-header {
     h4 {
       font-size: 24px;
+
+      select {
+        outline: none;
+        padding-right: 10px;
+      }
     }
+
     button {
       border-radius: 4px;
       padding: 0.25rem 0.5rem;
