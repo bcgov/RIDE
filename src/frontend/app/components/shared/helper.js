@@ -32,6 +32,7 @@ const ROAD_ABBREVIATIONS = {
   '\\bkm/h\\b': 'km/hr',
   '\\bNo\\.(?=\\s|$)': 'Number',
   '\\bNo\\b(?!\\.)': 'Number',
+  '\\bXing\\b': 'Crossing',
 };
 
 export const transform_road_abbreviations = (input) => {
