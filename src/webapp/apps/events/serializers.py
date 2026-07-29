@@ -10,10 +10,11 @@ from rest_framework.serializers import ModelSerializer
 
 from config.settings import EVENT_PREFIX
 from .models import Event, Note, TrafficImpact, Condition
-from .permissions import coords_from_start, get_user_service_areas
+from .permissions import get_user_service_areas
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
 from apps.segments.serializers import SegmentSerializer, ChainUpSerializer
+from apps.shared.helpers import transform_road_abbreviations
 from apps.shared.serializers import HistorySerializer, KeyMoveSerializer, UserSerializer, VersionSerializer
 
 log = logging.getLogger('debug')
@@ -210,7 +211,7 @@ class EventSerializer(KeyMoveSerializer):
 
         if obj.get('type') == 'ROAD_CONDITION':
             if instance.segment:
-                obj['location']['start']['name'] = instance.segment.name
+                obj['location']['start']['name'] = transform_road_abbreviations(instance.segment.name)
 
             obj['polygon'] = instance.polygon
 

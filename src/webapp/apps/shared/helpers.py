@@ -23,6 +23,11 @@ ROAD_ABBREVIATIONS = {
     r"\bRte\b(?!\.)": "Route",
     r"\bJunc\.(?=\s|$)": "Junction",
     r"\bJunc\b(?!\.)": "Junction",
+    r"\bJunct\b": "Junction",
+    r"\bJct\b": "Junction",
+    r"\bJCT\b": "Junction",
+    r"\bJctn\b": "Junction",
+    r"\bJntc\b": "Junction",
     r"\bS/B\b": "Southbound",
     r"\bN/B\b": "Northbound",
     r"\bW/B\b": "Westbound",
@@ -34,6 +39,16 @@ ROAD_ABBREVIATIONS = {
     r"\bkm/h\b": "km/hr",
     r"\bNo\.(?=\s|$)": "Number",
     r"\bNo\b(?!\.)": "Number",
+    r"\bXing\b": "Crossing",
+    r"\bMt\.(?=\s|$)": "Mount",
+    r"\bMt\b(?!\.)": "Mount",
+    r"\bLk\b": "Lake",
+    r"\bCr\b": "Creek",
+    r"\bNat\b": "National",
+    r"\bGt\b": "Gate",
+    r"\bMtnc\b": "Maintenance",
+    r"\bW/\s*": "with ",
+    r"\bw/\s*": "with ",
 }
 
 

@@ -15,6 +15,7 @@ import eventReducer from "../events/forms/reducer";
 import Preview from "../events/Preview.jsx";
 import RIDEDropdown from '../components/shared/dropdown';
 import Spinner from '../components/shared/spinner.jsx';
+import { transform_road_abbreviations } from '../components/shared/helper';
 
 // External imports
 import { Checkbox } from "@headlessui/react";
@@ -117,8 +118,14 @@ export default function Home() {
       const routeIndex = {};
       routeData.forEach((r, i) => { routeIndex[r.id] = i; });
 
+      const transformedSegs = segData.map(seg => ({
+        ...seg,
+        name: transform_road_abbreviations(seg.name),
+        description: transform_road_abbreviations(seg.description),
+      }));
+
       // Sort by route order, then area, then sorting_order
-      const orderedSegs = segData.sort((a, b) => {
+      const orderedSegs = transformedSegs.sort((a, b) => {
         const ra = routeIndex[a.route] ?? Infinity;
         const rb = routeIndex[b.route] ?? Infinity;
         if (ra !== rb) return ra - rb;

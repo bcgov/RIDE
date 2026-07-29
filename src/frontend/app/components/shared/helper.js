@@ -21,6 +21,11 @@ const ROAD_ABBREVIATIONS = {
   '\\bRte\\b(?!\\.)': 'Route',
   '\\bJunc\\.(?=\\s|$)': 'Junction',
   '\\bJunc\\b(?!\\.)': 'Junction',
+  '\\bJunct\\b': 'Junction',
+  '\\bJct\\b': 'Junction',
+  '\\bJCT\\b': 'Junction',
+  '\\bJctn\\b': 'Junction',
+  '\\bJntc\\b': 'Junction',
   '\\bS/B\\b': 'Southbound',
   '\\bN/B\\b': 'Northbound',
   '\\bW/B\\b': 'Westbound',
@@ -33,6 +38,15 @@ const ROAD_ABBREVIATIONS = {
   '\\bNo\\.(?=\\s|$)': 'Number',
   '\\bNo\\b(?!\\.)': 'Number',
   '\\bXing\\b': 'Crossing',
+  '\\bMt\\.(?=\\s|$)': 'Mount',
+  '\\bMt\\b(?!\\.)': 'Mount',
+  '\\bLk\\b': 'Lake',
+  '\\bCr\\b': 'Creek',
+  '\\bNat\\b': 'National',
+  '\\bGt\\b': 'Gate',
+  '\\bMtnc\\b': 'Maintenance',
+  '\\bW/\\s*': 'with ',
+  '\\bw/\\s*': 'with ',
 };
 
 export const transform_road_abbreviations = (input) => {
