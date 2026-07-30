@@ -275,7 +275,7 @@ export default function Home() {
   };
 
   const columns = [
-    'Segments',
+    'Chain-up Location',
     'Current chain-up',
     'First reported',
     'Last updated',
