@@ -96,6 +96,7 @@ const LANDMARK_TYPES = {
   Y4: 'point of interest',
 }
 
+
 async function getLandmarks(location, subkey, dispatch, search) {
   if (!location.HIGHWAY_ROUTE_NUMBER) { return []; }
   let landmarks = [];
@@ -202,6 +203,82 @@ async function getLandmarks(location, subkey, dispatch, search) {
   dispatch(landmarks.slice(0, 20));
 }
 
+async function getCrossroads(location, subkey, dispatch, search) {
+  let crossroads = [];
+  search = search.toLowerCase();
+
+  try {
+    const coords = location.coords;
+    const params = new URLSearchParams({ lat: coords[1], lon: coords[0], });
+
+    const results = await fetch(`${API_HOST}/api/crossroads?${params}`, {'mode': 'cors'}).then((body) => body.json());
+
+    for (const crossroad of results) {
+      // filter out crossroads not matching the search term when it's present
+      if (search && crossroad.label.toLowerCase().indexOf(search) < 0) {
+        continue;
+      }
+
+      // filter out crossroads on a highway other than the one the pin is on
+      if (location.name !== crossroad.route) { continue; }
+
+      const crossroadCoords = crossroad.geometry.coordinates
+      const route = await getNonDirectionalRoute(coords, crossroadCoords);
+
+      // if the road linear distance is greater than twice the crow-flies
+      // distance, filter it out as it's probably on a parallel highway
+      if (route.distance > (crossroad.distance * 0.002)) { continue; }
+
+      const displayDistance = Math.round(route.distance < 1 ? crossroad.distance : route.distance);
+      const unit = route.distance < 1 ? 'm' : 'km';
+      const direction = getCardinalDirection(coords, crossroadCoords, true);
+      let km_post;
+
+      const displayName = transform_road_abbreviations(crossroad.label);
+      let phrase = `${displayDistance}${unit} ${direction} of ${displayName}`;
+      if (route.distance < 0.01) {
+        phrase = `At ${displayName}`;
+      }
+
+      const candidate = {
+        id: `${subkey}-${crossroad.id}`,
+        source: 'crossroads',
+        type: 'road',
+        class: 'crossroad',
+        distance: route.distance,
+        direction,
+        description: `[${crossroad.label}]`,
+        phrase,
+        coords: crossroadCoords,
+        raw: crossroad,
+        from: coords,
+        km_post,
+        search,
+      }
+
+      crossroads.push(candidate);
+
+      // stop at 20 since they're coming from the backend sorted by crow-flies
+      // distance, and already filtered for landmarks on the current highway, so
+      // it's unlikely that a short linear distance might have a long road
+      // distance; this saves us a lot of calls to the router that are adding a
+      // noticeable lag.
+      if (crossroads.length > 20) { break; }
+    }
+
+  } catch (err) {
+    console.error(err);
+    crossroads.push({
+      source: 'crossroads',
+      distance: 1,
+      phrase: 'Problem retrieving crossroads data. Refresh to try again.',
+      id: `${subkey}-crossroads-error`,
+      isError: true,
+    });
+  }
+  dispatch(crossroads.slice(0, 20));
+}
+
 
 const HOST = 'https://openmaps.gov.bc.ca/geo/wfs';
 const LAYERS = {
@@ -240,6 +317,7 @@ async function getMunicipality(coords, subkey, dispatch) {
   dispatch(municipality);
 }
 
+
 const MajorPopulationCenterTypes = [
   // 'Locality', // < 50
   // 'Community', // > 50, unincorporated
@@ -256,6 +334,7 @@ const MinorPopulationCenterTypes = [
   'Locality', // < 50
   'Community', // > 50, unincorporated
 ];
+
 
 async function filterByTypes(features, types, fromCoords) {
   const results = [];
@@ -372,6 +451,11 @@ export async function getNearby(action, location, dispatch, search='') {
       dispatch({ type, subkey, value, source: 'intersections', search });
     }, search);
   }
+
+  dispatch({ type: 'add to pending', subkey, value: 'crossroads' });
+  getCrossroads(location, subkey, (value => {
+    dispatch({ type, subkey, value, source: 'crossroads', search });
+  }), search);
 
   dispatch({ type: 'add to pending', subkey, value: 'bcgnws' });
   const value = await getNearbyFromBCGNWS(location.coords, search);

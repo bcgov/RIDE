@@ -179,6 +179,8 @@ export default function EventsLayer({ event, dispatch }) {
   const visibleLayers = useSelector(state => state.visibleLayers);
   const serviceAreaBoundaries = useSelector(selectAllServiceAreaBoundaries);
 
+  globalThis.event = event;
+
   const contextHandler = (e) => {
     e.preventDefault();
     const event = eventRef.current; // updated event prop
@@ -216,7 +218,7 @@ export default function EventsLayer({ event, dispatch }) {
         if (canCreateAtCoordinate){
           items.push({
             label: 'Create incident',
-            action: (e) => {
+            action: () => {
               setContextMenu([]);
               dispatch({ type: 'reset form', value: () => getInitialEvent('Incident'), showPreview: true, showForm: true });
               map.start = new PinFeature({

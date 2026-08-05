@@ -17,6 +17,7 @@ const ROAD_ABBREVIATIONS = {
   '\\bSt\\b(?!\\.)': 'Street',
   '\\bLn\\b': 'Lane',
   '\\bFSR\\b': 'Forest Service Road',
+  '\\bFsr\\b': 'Forest Service Road',
   '\\bRte\\.(?=\\s|$)': 'Route',
   '\\bRte\\b(?!\\.)': 'Route',
   '\\bJunc\\.(?=\\s|$)': 'Junction',

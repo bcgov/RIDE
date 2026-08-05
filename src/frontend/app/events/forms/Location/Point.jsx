@@ -1,8 +1,7 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
-import { Circle, Fill, Icon, Style, Stroke, Text } from 'ol/style';
-import { Point as olPoint, LineString, Polygon } from 'ol/geom';
+import { Point as olPoint } from 'ol/geom';
 
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
@@ -15,13 +14,9 @@ import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifi
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faApartment,
-  faArrowRightArrowLeft,
   faArrowRotateRight,
   faBuilding,
-  faBuildings,
   faCity,
-  faHouseBuilding,
   faInputText,
   faMagnifyingGlass,
   faPlus,
@@ -35,24 +30,15 @@ import {
   faTree
 } from '@fortawesome/duotone-regular-svg-icons';
 
-import AsyncSelect from 'react-select/async';
-
 import pinStart from '../../icons/pin-start.svg';
 import pinEnd from '../../icons/pin-end.svg';
 import kmMarker from '../../icons/km-marker.svg';
 
-// import { getCardinalDirection, getNonDirectionalRoute, titleCase } from '../../../shared';
-import Tabs from '../../../shared/Tabs';
-
-import {
-  ll2g
-} from '../../../components/Map/helpers';
+import { ll2g } from '../../../components/Map/helpers';
 import RideFeature from '../../../components/Map/feature';
 import { iconStyles, intersectionStyles, markerStyles } from '../../../components/Map/styles';
 
 import { TabContext } from '../../../shared/Tabs';
-
-import { API_HOST } from '../../../env';
 
 import Tooltip from '../../Tooltip';
 
@@ -76,7 +62,7 @@ function updateMap(map, point, subkey, visible=true) {
   const points = point.candidates.concat(point.searched || []).concat(point.nearby.filter((feature) => feature.search));
 
   for (const candidate of points) {
-    if (!['intersections', 'landmarks'].includes(candidate.source) || candidate.isError) { continue; }
+    if (!['crossroads', 'intersections', 'landmarks'].includes(candidate.source) || candidate.isError) { continue; }
 
     // update feature styles's text
     let styles = intersectionStyles;
@@ -184,7 +170,7 @@ function getIcon(loc) {
     return <img src={kmMarker} style={{ width: '16px', height: '16px', filter: "dropShadow1px 1px 10px black" }} />
   }
   let icon = faCity;
-  if (loc.source === 'intersections' || loc.source === 'landmarks') {
+  if (loc.source === 'intersections' || loc.source === 'landmarks' || loc.source === 'crossroads') {
     icon = ICONS[loc?.class] || faRoad;
   } else if (loc.type === 'other') {
     icon = faInputText;
@@ -197,7 +183,7 @@ function getIcon(loc) {
 const INTERSECTION_LETTERS = ['A', 'B', 'G'];
 
 function isIntersection(location) {
-  if (location.source === 'intersections') { return true; }
+  if (location.source === 'intersections' || location.source === 'crossroads') { return true; }
   if (INTERSECTION_LETTERS.includes(location.class?.charAt(0))) { return true; }
 }
 
@@ -241,7 +227,7 @@ export default function Point({ point, dispatch, goToFunc, subkey, map }) {
     })
     .slice(0, 5);
 
-  const otherInNearby = nearbyIds.includes('other');
+  // const otherInNearby = nearbyIds.includes('other');
 
   function handleDragEnd(event) {
     if (event.active.id !== event.over.id) {
@@ -254,18 +240,6 @@ export default function Point({ point, dispatch, goToFunc, subkey, map }) {
   let nearbyPending = point.pending ? point.pending.size > 0 : false;
 
   updateMap(map, point, subkey, subkey === tab);
-
-  const getOptions = async (term, callback) => {
-    if (term.length < 4) { return []; }
-
-    const params = new URLSearchParams({
-      lon: point.coords[0],
-      lat: point.coords[1],
-      term,
-    });
-    const results = await fetch(`${API_HOST}/api/search?${params}`).then((body) => body.json())
-    return callback(results);
-  }
 
   const highlight = (phrase) => {
     if (!suggestionSearch) { return phrase }
@@ -291,7 +265,7 @@ export default function Point({ point, dispatch, goToFunc, subkey, map }) {
             <img
               src={PINS[subkey]}
               style={{ width: '20px' }}
-              onClick={(e) => goToFunc(point?.coords)}
+              onClick={() => goToFunc(point?.coords)}
             />
           </Tooltip>
         </div>
@@ -326,7 +300,7 @@ export default function Point({ point, dispatch, goToFunc, subkey, map }) {
                   index={ii}
                   key={loc.id}
                   classes='landmark'
-                  remove={(e) => dispatch({ type: 'remove nearby', key: subkey, id: loc.id})}
+                  remove={() => dispatch({ type: 'remove nearby', key: subkey, id: loc.id})}
                 >
                   <button
                     type='button'
@@ -407,18 +381,18 @@ export default function Point({ point, dispatch, goToFunc, subkey, map }) {
             }
           </div>
 
-          { candidates.map((loc, ii) => (
-            <div className={`landmark suggestion ${loc.isError ? 'error' : ''}`} key={loc.id}>
+          { candidates.map((location) => (
+            <div className={`landmark suggestion ${location.isError ? 'error' : ''}`} key={location.id}>
               <button
                 type='button'
                 className='icon'
-                onClick={() => goToFunc(loc.coords) }
-              >{getIcon(loc)}</button>
-              <div className='phrase'>{highlight(loc.phrase)}</div>
+                onClick={() => goToFunc(location.coords) }
+              >{getIcon(location)}</button>
+              <div className='phrase'>{highlight(location.phrase)}</div>
               <button
                 type='button'
                 className='close'
-                onClick={(e) => dispatch({ type: 'add nearby', key: subkey, candidate: loc})}
+                onClick={() => dispatch({ type: 'add nearby', key: subkey, candidate: location})}
               ><FontAwesomeIcon icon={faPlus} /></button>
             </div>
           ))}

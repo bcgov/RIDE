@@ -437,12 +437,12 @@ export default {
 "TRANSPORTATION/DRA/Large/Trail": {
   layout: {
     "visibility": "none"
-  },  
+  },
 },
 "TRANSPORTATION/DRA/Large/Trail Recreation": {
   layout: {
     "visibility": "none"
-  },  
+  },
 },
 "TRANSPORTATION/DRA Roads (L)/Resource Roads/0": {
   layout: {
