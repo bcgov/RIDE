@@ -129,3 +129,11 @@ class Intersection(BaseModel):
     landmarks = models.ManyToManyField(Landmark)
     year_signalized = models.IntegerField(null=True)
 
+class Crossroad(BaseModel):
+
+    service_area = models.ForeignKey(ServiceArea, on_delete=models.CASCADE)
+    route = models.CharField()
+    km_from_start = models.FloatField()
+    locality = models.CharField(blank=True)
+    name = models.CharField()
+    geometry = gis.PointField()

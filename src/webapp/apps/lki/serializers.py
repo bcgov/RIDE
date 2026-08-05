@@ -25,6 +25,33 @@ class Segment(ModelSerializer):
         fields = ['id', 'highways', 'direction']
 
 
+class Crossroad(ModelSerializer):
+
+    id = fields.SerializerMethodField()
+    distance = fields.SerializerMethodField()
+    source = fields.SerializerMethodField()
+    label = fields.SerializerMethodField()
+
+    def get_distance(self, obj):
+        if not hasattr(obj, 'distance'):
+            return -1
+
+        return obj.distance.m
+
+    def get_label(self, obj):
+        return obj.name
+
+    def get_id(self, obj):
+        return f'crossroad-{obj.id}'
+
+    def get_source(self, obj):
+        return 'crossroads'
+
+    class Meta:
+        model = models.Crossroad
+        fields = '__all__'
+
+
 class Landmark(ModelSerializer):
 
     id = fields.SerializerMethodField()
