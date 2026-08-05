@@ -147,11 +147,9 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
       <div className="body">
         {!segments && !isChainup &&
           <h3 className="direction">
-            {!isRoadCondition && `${displayed.details?.direction} on `}
             {start.name}
-            {isLinear && end.name !== start.name &&
-              <>&nbsp;to {end.name}</>
-            }
+            {isLinear && end.name !== start.name && <>&nbsp;to {end.name}</>}
+            {!isRoadCondition && ` ${displayed.details?.direction}`}
           </h3>
         }
 
@@ -180,21 +178,21 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
           <>
             { (startNearbies.length > 1 || endNearbies.length > 1) ?
               <>
-                <p>starts:</p>
+                <p>between:</p>
                 <ul className="unboxed">
                   {startNearbies.map((loc, ii) => <li key={`loc ${ii}`}>{loc}</li>)}
                 </ul>
               </> :
-              <>{ startNearbies.length === 1 && <p>starts {startNearbies[0]}</p> }</>
+              <>{ startNearbies.length === 1 && <p>between {startNearbies[0]}</p> }</>
             }
             { (startNearbies.length > 1 || endNearbies.length > 1) ?
               <>
-                <p>ends:</p>
+                <p>and:</p>
                 <ul className="unboxed">
                   {endNearbies.map((loc, ii) => <li key={`loc ${ii}`}>{loc}</li>)}
                 </ul>
               </> :
-              <>{ endNearbies.length === 1 && <p>ends {endNearbies[0]}</p> }</>
+              <>{ endNearbies.length === 1 && <p>and {endNearbies[0]}</p> }</>
             }
           </> :
           <>
