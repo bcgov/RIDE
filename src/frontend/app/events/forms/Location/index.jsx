@@ -3,7 +3,6 @@ import 'react';
 import Tabs from '../../../shared/Tabs';
 import Tooltip from '../../Tooltip';
 
-import { getNearby } from './helpers';
 import Point from './Point';
 
 export default function Location({ errors, event, dispatch, goToFunc, map }) {
