@@ -169,7 +169,7 @@ def get_location_description(event):
         res += start_point_name
 
         # Add phrase from first start ref location
-        start_ref_locations = event.start.get('nearby') if 'nearby' in event.start else []  # target_event.start is mandatory
+        start_ref_locations = event.start.get('nearby', [])  # target_event.start is mandatory
         has_start_ref_locs = start_ref_locations and len(start_ref_locations) > 0
 
         if has_start_ref_locs:
@@ -187,7 +187,7 @@ def get_location_description(event):
         has_different_name = start_point_name != end_point_name
 
         # has at least one reference location
-        end_ref_locations = event.end.get('nearby') if 'nearby' in event.end else []
+        end_ref_locations = event.end.get('nearby', [])
         has_ref_locs = end_ref_locations and len(end_ref_locations) > 0
 
         # Append to res if either or both is true

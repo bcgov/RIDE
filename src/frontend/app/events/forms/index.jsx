@@ -474,6 +474,8 @@ export class EventForm extends Component {
     // user may switch types of event
     const switchType = !event.id && CHANGE_TYPE_FORMS.includes(event.type);
 
+    const clearingRequested = this.context.authContext.is_approver && !event.approved && event.status === 'Inactive';
+
     return (
     <div className="form">
       <form id='event-form'>
@@ -598,17 +600,44 @@ export class EventForm extends Component {
 
         { event.location.start.name && !event.showHistory &&
           <div className="section buttons">
-            <button type="button" onClick={(e) => this.handleSubmit(e, this.getLabel())}>
-                <FontAwesomeIcon icon={faCircleCheck} />
-              {this.getLabel()}
-            </button>
+            { clearingRequested
+              ? <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      this.modalRef.current.showModal();
+                    }}
+                  ><FontAwesomeIcon icon={faTrashCan} />
+                    Clear
+                  </button>
 
-            { this.context.authContext.is_approver && !event.approved && event.status === 'Inactive' && (
-              <button type="button" onClick={(e) => this.handleSubmit(e, 'Reject Clear', { status: 'Active' })}>
-                  <FontAwesomeIcon icon={faCircleX} />
-                Reject Clear
-              </button>
-            )}
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={(e) => this.handleSubmit(e, 'Reject Clear', { status: 'Active' })}
+                  ><FontAwesomeIcon icon={faCircleX} />
+                    Reject Clear
+                  </button>
+                </>
+              : <>
+                  <button type="button" onClick={(e) => this.handleSubmit(e, this.getLabel())}>
+                    <FontAwesomeIcon icon={faCircleCheck} />
+                    {this.getLabel()}
+                  </button>
+
+                  { event.id &&
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => {
+                        this.modalRef.current.showModal();
+                      }}
+                    ><FontAwesomeIcon icon={faTrashCan} />
+                      Clear
+                    </button>
+                  }
+                </>
+            }
 
             { event.id && event.type === 'ROAD_CONDITION' &&
               <button
@@ -638,18 +667,6 @@ export class EventForm extends Component {
               </button>
             }
 
-            { event.id &&
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => {
-                  this.modalRef.current.showModal();
-                }}
-              >
-                <FontAwesomeIcon icon={faTrashCan} />
-                Clear
-              </button>
-            }
 
             <div style={{flex: 1}}></div>
 
