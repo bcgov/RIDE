@@ -140,8 +140,11 @@ class TestOpen511Sync(TestCase):
         assert payload["events"][0]["headline"] == "Incident"
         assert payload["events"][1]["headline"] == "Planned event"
 
+        # DBC22-7081: Open511 description must use the IVR message (includes locations)
         assert payload["events"][0]["description"] == payload["events"][0]["+ivr_message"]
         assert payload["events"][1]["description"] == payload["events"][1]["+ivr_message"]
+        assert "Last update:" in payload["events"][0]["description"]
+        assert "Last update:" in payload["events"][1]["description"]
 
         expected = self._normalize(self.post_payload)
         for evt, event in zip(expected["events"], (e1, e2)):

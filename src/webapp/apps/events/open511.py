@@ -534,7 +534,7 @@ def build_event_payload(target_event):
         "created": format_open511_datetime(target_event.created),
         "updated": format_open511_datetime(target_event.last_updated),
         "timezone": "America/Vancouver",
-        "description": build_event_description(target_event),
+        "description": build_event_description(target_event, ivr=True),
         "+ivr_message": build_event_description(target_event, ivr=True),
         "+linear_reference_km": 0,
         "schedule": build_open511_schedule(target_event),
