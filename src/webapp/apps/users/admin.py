@@ -10,3 +10,4 @@ class RIDEUserAdmin(admin.ModelAdmin):
         'is_staff', 'is_superuser',
     )
     search_fields = ['username', 'email', 'first_name', 'last_name']
+    exclude = ['password']
