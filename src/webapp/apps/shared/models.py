@@ -49,14 +49,16 @@ class LocationField(models.JSONField):
             else:
                 result['coords']['change'] = f'[{coords_a[0]:.6f}, {coords_a[1]:.6f}]'
 
-        if b.get('name') != a.get('name'):
+        name_a = a.get('name')
+        name_b = b.get('name')
+        if name_b != name_a:
             result['name'] = {}
-            if not a['name']:
-                result['name']['add'] = b.get('name')
-            elif not b['name']:
-                result['name']['remove'] = a.get('name')
+            if not name_a:
+                result['name']['add'] = name_b
+            elif not name_b:
+                result['name']['remove'] = name_a
             else:
-                result['name']['change'] = [a.get('name'), b.get('name')]
+                result['name']['change'] = [name_a, name_b]
 
         alias_a = a.get('alias') if a.get('alias') and a.get('useAlias', False) else None
         alias_b = b.get('alias') if b.get('alias') and b.get('useAlias', False) else None
@@ -70,11 +72,11 @@ class LocationField(models.JSONField):
                 result['alias']['change'] = [alias_a, alias_b]
 
         other_a = a.get('other') if a.get('other') and a.get('useOther', False) else None
-        nearby_a = {n['phrase'] for n in a['nearby'] if n.get('include', False)}
+        nearby_a = {n['phrase'] for n in a.get('nearby') or [] if n.get('include', False)}
         if other_a:
             nearby_a.add(other_a)
         other_b = b.get('other') if b.get('other') and b.get('useOther', False) else None
-        nearby_b = {n['phrase'] for n in b['nearby'] if n.get('include', False)}
+        nearby_b = {n['phrase'] for n in b.get('nearby') or [] if n.get('include', False)}
         if other_b:
             nearby_b.add(other_b)
         added = nearby_b.difference(nearby_a)
