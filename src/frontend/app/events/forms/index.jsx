@@ -187,36 +187,44 @@ export class EventForm extends Component {
     now.setSeconds(0);
     now.setMilliseconds(0);
 
-    const geometries = [{
-      type: "Point",
-      coordinates: form.location.start.coords,
-    }];
+    // Bulk road conditions use segment geometry; location isn't pin-editable.
+    // Don't rebuild geometry from start/end — bulk ends often have coords only
+    // (no name), which previously wiped the LineString and cleared the map polygon.
+    const isBulkRoadCondition = form.from_bulk &&
+      (form.type === 'ROAD_CONDITION' || form.type === 'Road condition');
 
-    if (form.location.end?.name) {
-      geometries.push({
+    if (!isBulkRoadCondition) {
+      const geometries = [{
         type: "Point",
-        coordinates: form.location.end.coords,
-      });
-      let route = map.route.getGeometry().getCoordinates();
-      if (route.length === 0) {
-        route = event?.geometry?.geometries[2]?.coordinates;
-      } else {
-        route = route.map((pair) => g2ll(pair));
-      }
+        coordinates: form.location.start.coords,
+      }];
 
-      geometries.push({
-        type: "Linestring",
-        coordinates: route,
-      });
-    } else if (form.type !== 'Road condition' && form.type === 'ROAD_CONDITION' && !form.segment) {
-      err['End location'] = 'An end location is required';
-    } else {
-      form.location.end = null;
+      if (form.location.end?.name) {
+        geometries.push({
+          type: "Point",
+          coordinates: form.location.end.coords,
+        });
+        let route = map.route.getGeometry().getCoordinates();
+        if (route.length === 0) {
+          route = event?.geometry?.geometries[2]?.coordinates;
+        } else {
+          route = route.map((pair) => g2ll(pair));
+        }
+
+        geometries.push({
+          type: "Linestring",
+          coordinates: route,
+        });
+      } else if (form.type !== 'Road condition' && form.type === 'ROAD_CONDITION' && !form.segment) {
+        err['End location'] = 'An end location is required';
+      } else {
+        form.location.end = null;
+      }
+      form.geometry = {
+        type: "GeometryCollection",
+        geometries,
+      };
     }
-    form.geometry = {
-      type: "GeometryCollection",
-      geometries,
-    };
 
     if (form.location.start?.candidates) {
       delete form.location.start.candidates;

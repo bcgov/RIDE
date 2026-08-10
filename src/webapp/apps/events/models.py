@@ -4,6 +4,7 @@ import sys
 from time import strftime, strptime
 
 from django.contrib.gis.db import models as gis
+from django.contrib.gis.geos import GeometryCollection
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import ForeignKey, Q
@@ -261,6 +262,26 @@ class Event(VersionedModel):
                     buffered_geometry.transform(event_srid)
                     segment = Segment.objects.filter(geometry__intersects=buffered_geometry, route=event_route).first()
                     self.segment = segment
+
+            # Bulk RCs always derive geometry from the segment. Event-form saves
+            # can otherwise replace the LineString with a start Point (bulk ends
+            # have coords but no name), which clears the map polygon.
+            if (
+                self.event_type == EventType.ROAD_CONDITION
+                and self.from_bulk
+                and self.segment_id
+                and self.segment
+                and self.segment.geometry
+            ):
+                self.geometry = GeometryCollection(self.segment.geometry.clone())
+                if self.segment.primary_point:
+                    start = dict(self.start or {})
+                    start['coords'] = list(self.segment.primary_point.coords)
+                    self.start = start
+                if self.segment.secondary_point:
+                    end = dict(self.end or {})
+                    end['coords'] = list(self.segment.secondary_point.coords)
+                    self.end = end
 
             # Update route projection for sorting
             self.route_projection = get_route_projection(self)
