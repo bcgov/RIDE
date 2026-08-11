@@ -13,6 +13,10 @@ import {
 
 import BasicsTab from './BasicsTab';
 import SetupTab from './SetupTab';
+import ViewsTab from './ViewsTab';
+import NotesTab from './NotesTab';
+import LogsTab from './LogsTab';
+import HistoryTab from './HistoryTab';
 import './CameraDetails.scss';
 
 export default function CameraDetails({ camera, onBack }) {
@@ -89,6 +93,148 @@ export default function CameraDetails({ camera, onBack }) {
     { id: 5, direction: 'Southeast', is_on: true, time: '1:10 pm PST' },
     { id: 6, direction: 'Southwest', is_on: true, time: '1:12 pm PST' },
   ];
+
+  // Views Tab State
+  const [viewsData, setViewsData] = useState([
+    {
+      id: '893',
+      direction: 'North',
+      enabled: true,
+      isDefault: true,
+      imagePath: 'https://images.camera123.gov.bc.ca/image/north/123.jpg',
+      description: 'Looking north',
+    },
+    {
+      id: '894',
+      direction: 'South',
+      enabled: true,
+      isDefault: false,
+      imagePath: 'https://images.camera123.gov.bc.ca/image/south/125.jpg',
+      description: 'Looking south',
+    },
+    {
+      id: '895',
+      direction: 'East',
+      enabled: true,
+      isDefault: false,
+      imagePath: 'https://images.camera123.gov.bc.ca/image/east/127.jpg',
+      description: 'Looking east',
+    },
+    { id: '896', direction: 'West', enabled: false, isDefault: false, imagePath: '', description: '' },
+    { id: '897', direction: 'Northeast', enabled: false, isDefault: false, imagePath: '', description: '' },
+    { id: '898', direction: 'Northwest', enabled: false, isDefault: false, imagePath: '', description: '' },
+    { id: '899', direction: 'Southeast', enabled: false, isDefault: false, imagePath: '', description: '' },
+  ]);
+
+  const handleSetDefaultView = (selectedId) => {
+    setViewsData((prev) =>
+      prev.map((view) => ({
+        ...view,
+        isDefault: view.id === selectedId,
+      }))
+    );
+  };
+
+  // Notes Tab State
+  const [notesData, setNotesData] = useState([
+    {
+      id: '1',
+      author: 'Peter Taylor',
+      updatedAt: 'Wed Jan 22, 2026',
+      content: 'Camera modem replaced on Jan 21, 2026',
+    },
+    {
+      id: '2',
+      author: 'Chris Masterton',
+      updatedAt: 'Wed Apr 25, 2025',
+      content:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc nunc erat, lobortis eu velit eget, malesuada maximus ipsum. Aliquam vitae tincidunt felis. Sed scelerisque eu lorem id porta. In in viverra turpis. Vestibulum eleifend tortor eget ante malesuada viverra. Vivamus suscipit mattis ornare. Sed augue diam, mattis ut vulputate in, rutrum ac quam. Aliquam massa mauris, blandit vitae enim ut, feugiat pellentesque tortor. Praesent consequat ante non metus fringilla, et volutpat diam suscipit. Mauris vel nibh rhoncus, pulvinar dui in, accumsan risus. Vivamus lobortis condimentum elit.',
+    },
+  ]);
+
+  const handleAddNote = (newNote) => {
+    setNotesData((prev) => [
+      { id: Date.now().toString(), ...newNote },
+      ...prev,
+    ]);
+  };
+
+  const handleUpdateNote = (id, newContent) => {
+    setNotesData((prev) =>
+      prev.map((note) =>
+        note.id === id ? { ...note, content: newContent } : note
+      )
+    );
+  };
+
+  // Logs Tab State
+  const [logsData] = useState([
+    {
+      id: '1',
+      time: '12:35 pm',
+      message: 'No image received - West',
+      isError: true,
+      date: '01-Aug-2026',
+    },
+    {
+      id: '2',
+      time: '12:30 pm',
+      message: 'No image received - East',
+      isError: true,
+      date: '01-Aug-2026',
+    },
+    {
+      id: '3',
+      time: '12:15 pm',
+      message: 'Image updated successfully - North',
+      isError: false,
+      date: '01-Aug-2026',
+    },
+  ]);
+
+  // History Tab State
+  const [historyData] = useState([
+    {
+      id: '1',
+      timestamp: 'Thurs, May 22, 2026 10:00 am PST',
+      user: 'David Jupp',
+      sections: [
+        {
+          category: 'Visibility',
+          actions: [
+            {
+              type: 'visibility-off',
+              text: 'Turned off North view',
+              subtext: '"Traffic accident"',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: '2',
+      timestamp: 'Thurs, May 22, 2026 9:00 am PST',
+      user: 'Peter Taylor',
+      sections: [
+        {
+          category: 'Setup',
+          actions: [
+            { type: 'update', text: 'Updated connection type' },
+            { type: 'update', text: 'Created new password' },
+            { type: 'add', text: 'Added modem serial number' },
+            { type: 'remove', text: 'Removed antennae' },
+          ],
+        },
+        {
+          category: 'Views',
+          actions: [
+            { type: 'add', text: 'Added view ID for north' },
+            { type: 'add', text: 'Added path for north' },
+          ],
+        },
+      ],
+    },
+  ]);
 
   const mainImageUrl = camera?.locations_thumbnail_map_url || camera?.url || '';
 
@@ -201,6 +347,26 @@ export default function CameraDetails({ camera, onBack }) {
           {activeTab === 'Setup' && (
             <SetupTab setupData={setupData} onChange={handleSetupChange} />
           )}
+
+          {activeTab === 'Views' && (
+          <ViewsTab
+            views={viewsData}
+            onChange={setViewsData}
+            onSetDefault={handleSetDefaultView}
+          />
+        )}
+
+        {activeTab === 'Notes' && (
+          <NotesTab
+            notes={notesData}
+            onAddNote={handleAddNote}
+            onUpdateNote={handleUpdateNote}
+          />
+        )}
+
+        {activeTab === 'Logs' && <LogsTab logs={logsData} />}
+
+        {activeTab === 'History' && <HistoryTab history={historyData} />}
 
           {/* Save Button Footer */}
           <footer className="form-footer">
