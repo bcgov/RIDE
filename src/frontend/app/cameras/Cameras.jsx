@@ -17,6 +17,7 @@ import {
   faUpRightFromSquare,
 } from '@fortawesome/pro-regular-svg-icons';
 import CameraForm from './CameraForm';
+import CameraDetails from './CameraDetails';
 import './Cameras.scss';
 
 
@@ -67,7 +68,7 @@ function getCameraDirection(camera) {
 /*
  * Camera card.
  */
-function CameraCard({ camera, onEdit, onDelete }) {
+function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
   const imageUrl = getCameraImage(camera);
   const direction = getCameraDirection(camera);
 
@@ -87,7 +88,11 @@ function CameraCard({ camera, onEdit, onDelete }) {
         </span>
       </div>
 
-      <div className="camera-image">
+      <div
+        className="camera-image"
+        onClick={() => onSelectCamera?.(camera)}
+        style={{ cursor: 'pointer' }}
+      >
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -143,6 +148,7 @@ function CameraLocation({
   onViewOnDriveBC,
   onServiceRequest,
   onClone,
+  onSelectCamera,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -239,6 +245,7 @@ function CameraLocation({
             camera={camera}
             onEdit={onEdit}
             onDelete={onDelete}
+            onSelectCamera={onSelectCamera}
           />
         ))}
       </div>
@@ -254,6 +261,7 @@ function CameraHighwayGroup({
   cameras,
   onEdit,
   onDelete,
+  onSelectCamera,
 }) {
   const locations = useMemo(() => {
     const grouped = {};
@@ -283,6 +291,7 @@ function CameraHighwayGroup({
             cameras={locationCameras}
             onEdit={onEdit}
             onDelete={onDelete}
+            onSelectCamera={onSelectCamera}
           />
         )
       )}
@@ -325,6 +334,7 @@ export default function Cameras() {
   const [cameraType, setCameraType] = useState('');
   const [communicationMethod, setCommunicationMethod] = useState('');
   const [powerSource, setPowerSource] = useState('');
+  const [selectedCamera, setSelectedCamera] = useState(null);
 
   const loadCameras = async () => {
     try {
@@ -675,7 +685,15 @@ export default function Cameras() {
     );
   }
 
-  
+  // Render details view if a camera is selected
+  if (selectedCamera) {
+    return (
+      <CameraDetails
+        camera={selectedCamera}
+        onBack={() => setSelectedCamera(null)}
+      />
+    );
+  }
 
   return (
     <div className="cameras-page">
@@ -976,6 +994,7 @@ export default function Cameras() {
                   setEditingCamera(camera);
                 }}
                 onDelete={deleteCamera}
+                onSelectCamera={(camera) => setSelectedCamera(camera)}
               />
             )
           )}
