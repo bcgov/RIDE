@@ -22,24 +22,16 @@ import './Cameras.scss';
  */
 function getCameraImage(camera) {
   return (
-    camera.image_url ||
-    camera.imageUrl ||
-    camera.image ||
-    camera.cam_image_url ||
-    camera.camImageUrl ||
     camera.locations_thumbnail_map_url
   );
 }
 
 
 /*
- * Return a useful display name for the camera.
+ * Return a useful display name for the camera highway group.
  */
 function getCameraName(camera) {
   return (
-    camera.name ||
-    camera.cam_internet_name ||
-    camera.cam_internet_caption ||
     camera.locations_highway ||
     'Unnamed camera'
   );
@@ -51,8 +43,6 @@ function getCameraName(camera) {
  */
 function getCameraLocation(camera) {
   return (
-    camera.location ||
-    camera.cam_internet_caption ||
     getCameraName(camera)
   );
 }
@@ -63,8 +53,6 @@ function getCameraLocation(camera) {
  */
 function getCameraDirection(camera) {
   return (
-    camera.direction ||
-    camera.cam_direction ||
     camera.locations_orientation
   );
 }
@@ -149,12 +137,15 @@ function CameraLocation({
 }) {
   return (
     <section className="camera-location">
-      <div className="camera-location-title">
-        <h3>{locationName}</h3>
+      <div className="camera-location-header">
+        <h3 className="camera-location-name">{locationName}</h3>
+        <div className="camera-location-meta">
+          <h4 className="camera-landmark">{cameras[0]?.locations_landmark}</h4>
 
-        <div className="camera-update-time">
-          <FontAwesomeIcon icon={faRotate} />
-          <span>5 minutes</span>
+          <div className="camera-update-time">
+            <FontAwesomeIcon icon={faRotate} />
+            <span>5 minutes</span>
+          </div>
         </div>
       </div>
 
@@ -169,6 +160,10 @@ function CameraLocation({
         ))}
       </div>
     </section>
+
+
+
+
   );
 }
 
@@ -400,6 +395,10 @@ export default function Cameras() {
           camera.highway,
           camera.highway_group,
           camera.direction,
+          camera.locations_highway,
+          camera.locations_region,
+          camera.locations_orientation,
+          camera.locations_thumbnail_map_url,
         ]
           .filter(Boolean)
           .join(' ')
@@ -672,10 +671,7 @@ export default function Cameras() {
 
       </aside>
 
-
-      {/* MAIN CAMERA CONTENT */}
-      <main className="camera-content">
-
+      <div className="camera-content-wrapper">
         <div className="cameras-header">
           <div>
             <h1>Cameras</h1>
@@ -750,6 +746,11 @@ export default function Cameras() {
           )}
         </div>
 
+        {/* MAIN CAMERA CONTENT */}
+      <main className="camera-content">
+
+
+
 
         {/* CAMERA GROUPS */}
         <div className="camera-groups">
@@ -780,6 +781,11 @@ export default function Cameras() {
         )}
 
       </main>
+        
+      </div>
+
+
+      
 
     </div>
   );
