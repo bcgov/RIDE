@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.organizations',
     'apps.segments',
+    'apps.cameras',
 
     'django.contrib.admin',
 ]
@@ -177,7 +178,13 @@ LOGIN_REDIRECT_URL = FRONTEND_BASE_URL
 IDIR_LOGIN_PATH = 'accounts/oidc/idir/login/?process=login&next=%2Fdrivebc-admin%2F&auth_params=kc_idp_hint=azureidir'
 LOGIN_URL = (('http://localhost:8000/' if 'localhost' in FRONTEND_BASE_URL else FRONTEND_BASE_URL) + IDIR_LOGIN_PATH)
 
+
+# Email
 EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND')
 EMAIL_HOST = env('DJANGO_EMAIL_HOST')
 EMAIL_PORT = env('DJANGO_EMAIL_PORT')
-DEFAULT_FROM_EMAIL = 'DoNotReply@gov.bc.ca'
+DEFAULT_FROM_EMAIL = 'DoNotReply_DriveBC@gov.bc.ca'
+
+DRIVEBC_TIMELAPSE_API_KEY = env('DRIVEBC_TIMELAPSE_API_KEY')
+DRIVEBC_TIMELAPSE_CLIENT_ID = env('DRIVEBC_TIMELAPSE_CLIENT_ID')
+DRIVEBC_TIMELAPSE_API_ROOT = env('DRIVEBC_TIMELAPSE_API_ROOT')

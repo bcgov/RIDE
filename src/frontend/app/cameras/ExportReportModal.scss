@@ -1,0 +1,22 @@
+@use './Modal.scss';
+
+.export-report-modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+  .modal-body-text {
+    margin: 0 0 24px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+
+    a {
+      color: #2b6cb0;
+      text-decoration: underline;
+    }
+  }
+}
