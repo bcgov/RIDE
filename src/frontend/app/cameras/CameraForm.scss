@@ -1,0 +1,22 @@
+.camera-form {
+  padding: 20px;
+
+  > div {
+    margin-bottom: 15px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px;
+  }
+
+  button {
+    margin-right: 10px;
+  }
+}

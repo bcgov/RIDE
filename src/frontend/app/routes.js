@@ -18,5 +18,8 @@ export default [
     route("chainups", "./chainups/layout.jsx", [
       index("./chainups/home.jsx"),
     ]),
+    route("cameras", "./cameras/layout.jsx", [
+      index("./cameras/home.jsx"),
+    ]),
   ]),
 ];
