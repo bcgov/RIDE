@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
 
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMagnifyingGlass,
@@ -7,10 +7,16 @@ import {
   faSliders,
   faChevronDown,
   faRotate,
+  faEllipsisVertical,
+  faPlus,
+  faFileLines,
+  faWrench,
+  faCloudSun,
+  faBolt,
+  faFire,
+  faUpRightFromSquare,
 } from '@fortawesome/pro-regular-svg-icons';
-
 import CameraForm from './CameraForm';
-
 import './Cameras.scss';
 
 
@@ -134,18 +140,95 @@ function CameraLocation({
   locationName,
   onEdit,
   onDelete,
+  onViewOnDriveBC,
+  onServiceRequest,
+  onClone,
 }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
+
   return (
     <section className="camera-location">
       <div className="camera-location-header">
-        <h3 className="camera-location-name">{locationName}</h3>
-        <div className="camera-location-meta">
-          <h4 className="camera-landmark">{cameras[0]?.locations_landmark}</h4>
-
-          <div className="camera-update-time">
-            <FontAwesomeIcon icon={faRotate} />
-            <span>5 minutes</span>
+        {/* Title and metadata container */}
+        <div className="camera-location-title-group">
+          <h3 className="camera-location-name">
+            {cameras[0]?.locations_landmark || locationName}
+          </h3>
+          <div className="camera-location-meta">
+            <h4 className="camera-landmark">{locationName}</h4>
+            <div className="camera-update-time">
+              <FontAwesomeIcon icon={faRotate} />
+              <span>5 minutes</span>
+            </div>
           </div>
+        </div>
+
+        {/* Menu button aligned to the far right */}
+        <div className="camera-header-menu" ref={menuRef}>
+          <button
+            type="button"
+            className={`circle-menu-btn ${isMenuOpen ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-label="Location options"
+          >
+            <FontAwesomeIcon icon={faEllipsisVertical} />
+          </button>
+
+          {isMenuOpen && (
+            <div className="context-flyout">
+              <div className="flyout-section">
+                <button
+                  type="button"
+                  className="flyout-item"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onViewOnDriveBC?.(locationName, cameras);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faUpRightFromSquare} className="item-icon" />
+                  <span>View on DriveBC</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="flyout-item"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onServiceRequest?.(locationName, cameras);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faWrench} className="item-icon" />
+                  <span>Service request</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="flyout-item"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onClone?.(locationName, cameras);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPlus} className="item-icon" />
+                  <span>Clone</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -160,13 +243,8 @@ function CameraLocation({
         ))}
       </div>
     </section>
-
-
-
-
   );
 }
-
 
 /*
  * Highway group.
@@ -209,6 +287,23 @@ function CameraHighwayGroup({
         )
       )}
     </section>
+
+    // <section className="camera-highway-group">
+    //   <h2>{highwayName}</h2>
+
+    //   {Object.entries(locations).map(([locationName, locationCameras]) => (
+    //     <CameraLocation
+    //       key={locationName}
+    //       locationName={locationName}
+    //       cameras={locationCameras}
+    //       onEdit={onEdit}
+    //       onDelete={onDelete}
+    //       onViewOnDriveBC={onViewOnDriveBC}
+    //       onServiceRequest={onServiceRequest}
+    //       onClone={onClone}
+    //     />
+    //   ))}
+    // </section>
   );
 }
 
@@ -554,6 +649,23 @@ export default function Cameras() {
     setSearch('');
   };
 
+  // Context Menu State
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+
 
   if (loading) {
     return (
@@ -563,6 +675,7 @@ export default function Cameras() {
     );
   }
 
+  
 
   return (
     <div className="cameras-page">
@@ -680,6 +793,103 @@ export default function Cameras() {
               Filtered to {filteredCameras.length}{' '}
               camera locations
             </div>
+          </div>
+
+
+          {/* Context Menu Container */}
+          <div className="camera-header-menu" ref={menuRef}>
+            <button
+              type="button"
+              className={`circle-menu-btn ${isMenuOpen ? 'active' : ''}`}
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              aria-label="More options"
+            >
+              <FontAwesomeIcon icon={faEllipsisVertical} />
+            </button>
+
+            {isMenuOpen && (
+              <div className="context-flyout">
+                {/* Actions Section */}
+                <div className="flyout-section">
+                  <span className="flyout-title">Actions</span>
+
+                  <button
+                    type="button"
+                    className="flyout-item"
+                    onClick={() => {
+                      setEditingCamera(null);
+                      setShowForm(true);
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faPlus} className="item-icon" />
+                    <span>New camera</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="flyout-item"
+                    onClick={() => {
+                      // Handle export report logic
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faFileLines} className="item-icon" />
+                    <span>Export report</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="flyout-item"
+                    onClick={() => {
+                      // Handle manage settings logic
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faWrench} className="item-icon" />
+                    <span>Manage settings</span>
+                  </button>
+                </div>
+
+                {/* External Links Section */}
+                <div className="flyout-section">
+                  <span className="flyout-title">External links</span>
+
+                  <a
+                    href="https://weather.gc.ca"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flyout-item"
+                  >
+                    <FontAwesomeIcon icon={faCloudSun} className="item-icon" />
+                    <span>Weather</span>
+                    <FontAwesomeIcon icon={faUpRightFromSquare} className="external-icon" />
+                  </a>
+
+                  <a
+                    href="#electrical-outages"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flyout-item"
+                  >
+                    <FontAwesomeIcon icon={faBolt} className="item-icon" />
+                    <span>Electrical outages</span>
+                    <FontAwesomeIcon icon={faUpRightFromSquare} className="external-icon" />
+                  </a>
+
+                  <a
+                    href="#forest-fires"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flyout-item"
+                  >
+                    <FontAwesomeIcon icon={faFire} className="item-icon" />
+                    <span>Forest fires</span>
+                    <FontAwesomeIcon icon={faUpRightFromSquare} className="external-icon" />
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           <button
