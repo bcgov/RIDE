@@ -1,0 +1,186 @@
+@use "../../styles/variables.scss" as *;
+@use "../../styles/mixins.scss" as *;
+
+// Figma: "Buttons / *"
+.ride-btn {
+  @include text-small-body;
+  @include focus-ring;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 400;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  @include transition(background-color, border-color, color, transform);
+
+  svg {
+    font-size: 0.75rem;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  // Sizes (md is the default above)
+  &--sm {
+    @include text-label;
+    min-height: 28px;
+    padding: 0 6px;
+
+    svg {
+      font-size: 0.625rem;
+    }
+  }
+
+  // Figma "Medium": 36px, with the same padding and weight as md
+  &--lg {
+    min-height: 36px;
+  }
+
+  // Figma: the buttons that close a modal (a confirm action, then a plain Cancel)
+  &--dialog {
+    min-height: 0;
+    padding: 6px 12px;
+    border-width: 0;
+    line-height: 1.5;
+
+    svg {
+      width: auto;
+      font-size: 0.875rem;
+    }
+
+    &.ride-btn--tertiary {
+      @include text-body;
+      color: $Type-Primary;
+    }
+  }
+
+  // The icon-and-label "More" button on a grey header (use with tertiary)
+  &--pill {
+    gap: 4px;
+    min-height: 30px;
+    padding: 0 4px;
+    background: $Grey10;
+    font-weight: 700;
+    color: $Type-Secondary;
+  }
+
+  // Variants
+  &--primary {
+    background: $BC-Blue;
+    color: $White;
+
+    &:hover:not(:disabled) {
+      background: $BtnHover-Primary;
+    }
+
+    &:active:not(:disabled) {
+      background: $BtnActive-Primary;
+    }
+  }
+
+  &--secondary {
+    border-color: $Border-dark;
+    background: $White;
+    color: $Type-Primary;
+
+    &:hover:not(:disabled) {
+      background: $BtnHover-Secondary;
+    }
+
+    &:active:not(:disabled) {
+      background: $BtnActive-Secondary;
+    }
+  }
+
+  &--tertiary {
+    color: $Type-Secondary;
+  }
+
+  &--danger {
+    color: $Red-dark;
+  }
+
+  // Sits flush with its container: no border or padding, and the icon takes
+  // the width of its shape instead of Font Awesome's fixed 1.25em box.
+  &--link {
+    @include text-label;
+    min-height: 20px; // Figma: the icon's line-height sets the link's height
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    font-weight: 700;
+    color: $ViewDetailsText;
+
+    svg {
+      width: auto;
+    }
+
+    &:hover:not(:disabled) {
+      text-decoration: underline;
+    }
+  }
+
+  // Circle, icon only. Size comes from --ride-btn-icon-size: sm 24, md 36.
+  &--icon {
+    --ride-btn-icon-size: 36px;
+    width: var(--ride-btn-icon-size);
+    height: var(--ride-btn-icon-size);
+    min-height: 0;
+    padding: 0;
+    border-radius: 50%;
+    background: $Grey10;
+    color: $ViewDetailsText;
+
+    svg {
+      font-size: 1rem;
+    }
+
+    &.ride-btn--sm {
+      --ride-btn-icon-size: 24px;
+
+      svg {
+        font-size: 0.75rem;
+      }
+    }
+  }
+
+  // Variants that only tint their background on hover, or while their menu is open
+  &--tertiary,
+  &--danger,
+  &--icon {
+    &:hover:not(:disabled),
+    &[aria-expanded='true'] {
+      background: $BtnHover-Tertiary;
+    }
+  }
+
+  // Figma: destructive confirmation (e.g. "Delete organization")
+  &--danger.ride-btn--filled {
+    background: $Error;
+    color: $White;
+
+    &:hover:not(:disabled) {
+      background: $Red-dark;
+    }
+  }
+
+  &--outlined {
+    border-color: $Divider;
+    background: $White;
+  }
+}
