@@ -329,3 +329,115 @@
     }
   }
 }
+
+/* Setup Tab Styles */
+.setup-tab {
+  .setup-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .camera-id-group {
+      .field-label-sm {
+        display: block;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 2px;
+      }
+
+      .camera-id-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+    }
+
+    .toggle-label-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #334155;
+
+      input[type='checkbox'] {
+        display: none;
+
+        &:checked + .toggle-switch-ui {
+          background-color: #0f3d6c;
+
+          &::before {
+            transform: translateX(16px);
+          }
+        }
+      }
+
+      .toggle-switch-ui {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        background-color: #cbd5e1;
+        border-radius: 20px;
+        transition: background-color 0.2s;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 16px;
+          height: 16px;
+          background-color: #ffffff;
+          border-radius: 50%;
+          transition: transform 0.2s;
+        }
+      }
+    }
+  }
+
+  .form-section {
+    margin-bottom: 28px;
+
+    .section-title {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 14px;
+    }
+  }
+
+  /* Inputs with right-aligned icons (Calendar / Password eye) */
+  .input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input {
+      width: 100%;
+      padding-right: 36px;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 12px;
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    .icon-btn-toggle {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      color: #64748b;
+      padding: 4px 6px;
+      cursor: pointer;
+
+      &:hover {
+        color: #1e293b;
+      }
+    }
+  }
+}

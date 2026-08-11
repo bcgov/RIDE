@@ -1,79 +1,3 @@
-// import React from 'react';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faArrowLeft } from '@fortawesome/pro-regular-svg-icons';
-
-// export default function CameraDetails({ camera, onBack }) {
-//   if (!camera) {
-//     return (
-//       <div className="camera-details-container">
-//         <p>No camera selected.</p>
-//         <button type="button" onClick={onBack}>
-//           Back to list
-//         </button>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="camera-details-page" style={{ padding: '24px' }}>
-//       <button
-//         type="button"
-//         onClick={onBack}
-//         style={{
-//           display: 'inline-flex',
-//           alignItems: 'center',
-//           gap: '8px',
-//           marginBottom: '16px',
-//           cursor: 'pointer',
-//           padding: '8px 16px',
-//           borderRadius: '4px',
-//           border: '1px solid #ccc',
-//           background: '#fff',
-//         }}
-//       >
-//         <FontAwesomeIcon icon={faArrowLeft} />
-//         Back to Cameras
-//       </button>
-
-//       <div
-//         style={{
-//           border: '1px solid #e2e8f0',
-//           borderRadius: '8px',
-//           padding: '24px',
-//           background: '#fff',
-//           maxWidth: '800px',
-//         }}
-//       >
-//         <h1 style={{ marginTop: 0 }}>Camera Details Test Page</h1>
-
-//         <div style={{ marginBottom: '16px' }}>
-//           <strong>ID:</strong> {camera.id}
-//         </div>
-//         <div style={{ marginBottom: '16px' }}>
-//           <strong>Highway / Group:</strong> {camera.locations_highway || camera.highway_group || 'N/A'}
-//         </div>
-//         <div style={{ marginBottom: '16px' }}>
-//           <strong>Orientation:</strong> {camera.locations_orientation || 'N/A'}
-//         </div>
-//         <div style={{ marginBottom: '16px' }}>
-//           <strong>Landmark:</strong> {camera.locations_landmark || 'N/A'}
-//         </div>
-
-//         {camera.locations_thumbnail_map_url && (
-//           <div style={{ marginTop: '16px' }}>
-//             <img
-//               src={camera.locations_thumbnail_map_url}
-//               alt={camera.locations_highway || 'Camera thumbnail'}
-//               style={{ maxWidth: '100%', borderRadius: '4px', border: '1px solid #ccc' }}
-//             />
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -85,16 +9,16 @@ import {
   faClock,
   faExpand,
   faFloppyDisk,
-  faChevronDown,
-  faPlus,
 } from '@fortawesome/pro-regular-svg-icons';
+
+import BasicsTab from './BasicsTab';
+import SetupTab from './SetupTab';
 import './CameraDetails.scss';
 
 export default function CameraDetails({ camera, onBack }) {
   const [activeTab, setActiveTab] = useState('Basics');
-  const [selectedViewId, setSelectedViewId] = useState(camera?.id || null);
 
-  // Form field state pre-populated with camera data
+  // Basics Form State
   const [formData, setFormData] = useState({
     locationDescription:
       camera?.cam_internet_caption ||
@@ -118,13 +42,43 @@ export default function CameraDetails({ camera, onBack }) {
       'https://www2.gov.bc.ca/gov/content/governments/...',
   });
 
-  const handleChange = (field, value) => {
+  // Setup Form State
+  const [setupData, setSetupData] = useState({
+    cameraId: camera?.id || '1234567890',
+    isOnDemand: camera?.is_ondemand ?? true,
+    cameraType: camera?.type || 'AXIS',
+    cameraMake: camera?.make || 'P5515',
+    installedDate: camera?.installed_at || '2018-08-27',
+    lastInspectedDate: camera?.inspected_at || '2026-01-12',
+    updateFrequency: camera?.update_frequency || '15',
+    macAddress: camera?.mac_address || '00:e0:4d:91:12:13',
+    connectionType: camera?.connection_type || 'Images are pulled',
+    connectionProtocol: camera?.connection_protocol || 'File share',
+    username: camera?.username || 'admin',
+    password: camera?.password || 'password123',
+    commType: camera?.comm_type || 'Cellular',
+    commDevice: camera?.comm_device || 'RV50X',
+    antennae: camera?.antennae || '',
+    serviceProvider: camera?.service_provider || 'Telus',
+    modemSerial: camera?.modem_serial || '12312412467-21',
+    modemPhone: camera?.modem_phone || '250-576-2481',
+    modemBaudRate: camera?.modem_baud || '',
+    modemInstalledDate: camera?.modem_installed_at || '2018-08-27',
+    powerSource: camera?.power_source || 'Wired',
+    powerSupplyType: camera?.power_supply_type || '',
+    powerSupplySerial: camera?.power_supply_serial || '',
+  });
+
+  const handleBasicsChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSetupChange = (field, value) => {
+    setSetupData((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSave = () => {
-    // Implement API submit call here
-    console.log('Saving changes:', formData);
+    console.log('Saving all changes:', { formData, setupData });
   };
 
   const viewsList = camera?.location_cameras || [
@@ -136,12 +90,11 @@ export default function CameraDetails({ camera, onBack }) {
     { id: 6, direction: 'Southwest', is_on: true, time: '1:12 pm PST' },
   ];
 
-  const mainImageUrl =
-    camera?.locations_thumbnail_map_url || camera?.url || '';
+  const mainImageUrl = camera?.locations_thumbnail_map_url || camera?.url || '';
 
   return (
     <div className="camera-details-container">
-      {/* 2. Top Title Header & Action Toolbar */}
+      {/* Header Bar */}
       <header className="details-header">
         <div className="title-section">
           <h1>{camera?.locations_landmark || camera?.name || 'Hwy 16 at Toronto Street'}</h1>
@@ -150,7 +103,6 @@ export default function CameraDetails({ camera, onBack }) {
           </button>
         </div>
 
-        {/* 3. Action Buttons */}
         <div className="actions-toolbar">
           <button type="button" className="btn-secondary btn-service">
             <FontAwesomeIcon icon={faWrench} />
@@ -168,11 +120,10 @@ export default function CameraDetails({ camera, onBack }) {
         </div>
       </header>
 
-      {/* Main Grid: Left Media Pane + Right Form Tabs Pane */}
+      {/* Main Grid Pane */}
       <div className="details-grid">
-        {/* Left Media Pane */}
+        {/* Left Side: Media & Views */}
         <div className="media-pane">
-          {/* 10. Main Preview Player */}
           <div className="main-preview-card">
             <div className="preview-toolbar">
               <span className="badge-ondemand">
@@ -185,17 +136,13 @@ export default function CameraDetails({ camera, onBack }) {
 
             <div className="main-image-wrapper">
               {mainImageUrl ? (
-                <img
-                  src={mainImageUrl}
-                  alt={camera?.locations_landmark || 'Camera view'}
-                />
+                <img src={mainImageUrl} alt={camera?.locations_landmark || 'Camera view'} />
               ) : (
                 <div className="image-placeholder">No image preview available</div>
               )}
             </div>
           </div>
 
-          {/* 5. Camera Views Grid */}
           <div className="views-section">
             <div className="views-header">
               <h2>Views</h2>
@@ -206,20 +153,11 @@ export default function CameraDetails({ camera, onBack }) {
 
             <div className="views-grid">
               {viewsList.map((view) => (
-                <div
-                  key={view.id}
-                  className={`view-card ${
-                    selectedViewId === view.id || view.active ? 'selected' : ''
-                  }`}
-                  onClick={() => setSelectedViewId(view.id)}
-                >
+                <div key={view.id} className={`view-card ${view.active ? 'selected' : ''}`}>
                   <div className="view-card-top">
                     <span className="direction-label">{view.direction}</span>
                     <label className="toggle-switch">
-                      <input
-                        type="checkbox"
-                        defaultChecked={view.is_on ?? true}
-                      />
+                      <input type="checkbox" defaultChecked={view.is_on ?? true} />
                       <span className="slider round" />
                     </label>
                   </div>
@@ -240,192 +178,31 @@ export default function CameraDetails({ camera, onBack }) {
           </div>
         </div>
 
-        {/* Right Form & Configuration Pane */}
+        {/* Right Side: Tabbed Form Panels */}
         <div className="form-pane">
-          {/* 6. Navigation Tabs */}
           <nav className="details-tabs">
-            {['Basics', 'Setup', 'Views', 'Notes', 'Logs', 'History'].map(
-              (tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
-              )
-            )}
+            {['Basics', 'Setup', 'Views', 'Notes', 'Logs', 'History'].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
           </nav>
 
-          {/* 7. Tab Content - Required & Optional Details */}
+          {/* Dynamic Tab Render */}
           {activeTab === 'Basics' && (
-            <div className="tab-content">
-              <div className="form-section">
-                <span className="section-title">Required details</span>
-
-                <div className="form-group">
-                  <label htmlFor="locationDescription">Location description</label>
-                  <textarea
-                    id="locationDescription"
-                    rows={3}
-                    value={formData.locationDescription}
-                    onChange={(e) =>
-                      handleChange('locationDescription', e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="businessArea">Business area</label>
-                  <select
-                    id="businessArea"
-                    value={formData.businessArea}
-                    onChange={(e) => handleChange('businessArea', e.target.value)}
-                  >
-                    <option value="MoTT Electrical">MoTT Electrical</option>
-                    <option value="Maintenance">Maintenance</option>
-                  </select>
-                </div>
-
-                <div className="form-row two-col">
-                  <div className="form-group">
-                    <label htmlFor="region">Region</label>
-                    <select
-                      id="region"
-                      value={formData.region}
-                      onChange={(e) => handleChange('region', e.target.value)}
-                    >
-                      <option value="Northern">Northern</option>
-                      <option value="South Coast">South Coast</option>
-                      <option value="Southern Interior">Southern Interior</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="highway">Road or highway</label>
-                    <select
-                      id="highway"
-                      value={formData.highway}
-                      onChange={(e) => handleChange('highway', e.target.value)}
-                    >
-                      <option value="Highway 16">Highway 16</option>
-                      <option value="Highway 1">Highway 1</option>
-                      <option value="Highway 99">Highway 99</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-row two-col">
-                  <div className="form-group">
-                    <label htmlFor="maintenanceContractor">
-                      Road maintenance contractor
-                    </label>
-                    <select
-                      id="maintenanceContractor"
-                      value={formData.maintenanceContractor}
-                      onChange={(e) =>
-                        handleChange('maintenanceContractor', e.target.value)
-                      }
-                    >
-                      <option value="Dawson Road Maintenance">
-                        Dawson Road Maintenance
-                      </option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="electricalContractor">
-                      Electrical contractor
-                    </label>
-                    <select
-                      id="electricalContractor"
-                      value={formData.electricalContractor}
-                      onChange={(e) =>
-                        handleChange('electricalContractor', e.target.value)
-                      }
-                    >
-                      <option value="Westcana Electric">Westcana Electric</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-row three-col">
-                  <div className="form-group">
-                    <label htmlFor="latitude">Latitude</label>
-                    <input
-                      type="text"
-                      id="latitude"
-                      value={formData.latitude}
-                      onChange={(e) => handleChange('latitude', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="longitude">Longitude</label>
-                    <input
-                      type="text"
-                      id="longitude"
-                      value={formData.longitude}
-                      onChange={(e) => handleChange('longitude', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="elevation">Elevation (metres)</label>
-                    <input
-                      type="text"
-                      id="elevation"
-                      value={formData.elevation}
-                      onChange={(e) => handleChange('elevation', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <span className="section-title">Optional</span>
-
-                <div className="form-group">
-                  <label htmlFor="imageWatermark">Image watermark</label>
-                  <input
-                    type="text"
-                    id="imageWatermark"
-                    value={formData.imageWatermark}
-                    onChange={(e) =>
-                      handleChange('imageWatermark', e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="cameraCredit">Camera credit</label>
-                  <input
-                    type="text"
-                    id="cameraCredit"
-                    value={formData.cameraCredit}
-                    onChange={(e) =>
-                      handleChange('cameraCredit', e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="cameraCreditUrl">Camera credit URL</label>
-                  <input
-                    type="text"
-                    id="cameraCreditUrl"
-                    value={formData.cameraCreditUrl}
-                    onChange={(e) =>
-                      handleChange('cameraCreditUrl', e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
+            <BasicsTab formData={formData} onChange={handleBasicsChange} />
           )}
 
-          {/* 8. Save Action Footer */}
+          {activeTab === 'Setup' && (
+            <SetupTab setupData={setupData} onChange={handleSetupChange} />
+          )}
+
+          {/* Save Button Footer */}
           <footer className="form-footer">
             <button type="button" className="btn-save" onClick={handleSave}>
               <FontAwesomeIcon icon={faFloppyDisk} />
