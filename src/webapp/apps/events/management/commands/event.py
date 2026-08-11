@@ -1,194 +1,53 @@
 import json
+import os
 from pprint import pprint
 from django.core.management.base import BaseCommand, CommandError
 from rest_framework.test import APIRequestFactory
+from timezonefinder import TimezoneFinder
+from zoneinfo import ZoneInfo
 
 from apps.events.models import Event
 from apps.events.serializers import EventSerializer
 from apps.users.models import RIDEUser
 
 
-NEW_EVENT = {
-    'id': 'RIDE-100006',
-    'event_type': 'Incident',
-}
-TEST = {
-    "uuid": "ec7a89c3-b36b-48f2-8e5b-310e31694694",
-    "geometry": {
-        "type": "GeometryCollection",
-        "geometries": [
-            {
-                "type": "Point",
-                "coordinates": [
-                    -121.4373779296624,
-                    49.7717549592025
-                ]
-            }
-        ]
-    },
-    "is_closure": False,
-    "last_inactivated": None,
-    "notes": [],
-    "chainup": None,
-    "id": "RIDE-100031",
-    "version": 6,
-    "latest": True,
-    "created": "2026-03-25T17:48:48.418066Z",
-    "last_updated": "2026-04-02T15:52:48.022062Z",
-    "from_bulk": False,
-    "status": "Active",
-    "approved": True,
-    "latest_approved": True,
-    "impacts": [
-        {
-            "id": 2,
-            "label": "Assessment in progress",
-            "closed": False
-        },
-        {
-            "id": 4,
-            "label": "Centre lane blocked",
-            "closed": False
-        }
-    ],
-    "restrictions": [],
-    "conditions": [],
-    "additional": "",
-    "route_projection": 399.2,
-    "service_area": 6,
-    "type": "Incident",
-    "location": {
-        "start": {
-            "name": "Hwy 1",
-            "alias": "Trans-Canada Hwy",
-            "other": "",
-            "coords": [
-                -121.4373779296624,
-                49.7717549592025
-            ],
-            "nearby": [
-                {
-                    "name": "Chilliwack",
-                    "type": "City",
-                    "phrase": "105km NE of Chilliwack",
-                    "source": "BCGNWS",
-                    "include": True,
-                    "distance": 104.986,
-                    "priority": 6,
-                    "direction": "NE",
-                    "coordinates": [
-                        -121.9508333002,
-                        49.1577777667
-                    ]
-                },
-                {
-                    "name": "Merritt",
-                    "type": "City",
-                    "phrase": "173.5km SW of Merritt",
-                    "source": "BCGNWS",
-                    "distance": 173.458,
-                    "priority": 6,
-                    "direction": "SW",
-                    "coordinates": [
-                        -120.788333334,
-                        50.1124999965
-                    ]
-                },
-                {
-                    "name": "Hope",
-                    "type": "District Municipality (1)",
-                    "phrase": "53km N of Hope",
-                    "source": "BCGNWS",
-                    "distance": 52.996,
-                    "priority": 5,
-                    "direction": "N",
-                    "coordinates": [
-                        -121.4413888893,
-                        49.3799999959
-                    ]
-                },
-                {
-                    "name": "Kent",
-                    "type": "District Municipality (1)",
-                    "phrase": "80.7km N of Kent",
-                    "source": "BCGNWS",
-                    "distance": 80.703,
-                    "priority": 5,
-                    "direction": "N",
-                    "coordinates": [
-                        -121.7625000004,
-                        49.2380555511
-                    ]
-                },
-                {
-                    "name": "Mission",
-                    "type": "District Municipality (1)",
-                    "phrase": "128.5km NE of Mission",
-                    "source": "BCGNWS",
-                    "distance": 128.489,
-                    "priority": 5,
-                    "direction": "NE",
-                    "coordinates": [
-                        -122.283888889,
-                        49.1591666625
-                    ]
-                }
-            ],
-            "aliases": [
-                "Trans-Canada Hwy"
-            ],
-            "pending": False,
-            "OBJECTID": 248030890,
-            "useAlias": True,
-            "useOther": False,
-            "ROAD_CLASS": "highway",
-            "FEATURE_CODE": None,
-            "FEATURE_TYPE": "Road",
-            "ROAD_SURFACE": "paved",
-            "nearbyPending": False,
-            "ROAD_NAME_FULL": "Trans-Canada Hwy",
-            "NUMBER_OF_LANES": 2,
-            "FEATURE_LENGTH_M": 728.6307,
-            "ROAD_NAME_ALIAS1": "Hwy 1",
-            "ROAD_NAME_ALIAS2": None,
-            "ROAD_NAME_ALIAS3": None,
-            "ROAD_NAME_ALIAS4": None,
-            "SE_ANNO_CAD_DATA": None,
-            "DATA_CAPTURE_DATE": None,
-            "SEGMENT_LENGTH_2D": 728.631,
-            "SEGMENT_LENGTH_3D": None,
-            "HIGHWAY_EXIT_NUMBER": None,
-            "HIGHWAY_ROUTE_NUMBER": "1",
-            "DIGITAL_ROAD_ATLAS_LINE_ID": 385896
-        },
-        "end": None
-    },
-    "details": {
-        "direction": "Both directions",
-        "severity": "Minor",
-        "category": "Hazard",
-        "situation": 76
-    },
-    "delays": {
-        "amount": 20,
-        "unit": "minutes"
-    },
-    "timing": {
-        "nextUpdate": "2026-05-02T16:00:00.000Z",
-        "startTime": None,
-        "endTime": None,
-        "ongoing": False,
-        "schedules": [],
-        "nextUpdateIsDefault": False
-    },
-    "external": {
-        "url": ""
-    },
-    "was_closure": False,
-    "showPreview": True,
-    "showForm": True,
-    "showHistory": False
-}
+tz_finder = TimezoneFinder(in_memory=True)
+
+def format_timestamp(dt, zone):
+    suffix = get_day_suffix(dt.astimezone(zone).day)
+    format_string = f'%A, %B %-d{suffix}, %Y %I:%M:%S %p %Z'
+    if os.name == 'nt':
+        format_string = f'%A, %B %#d{suffix}, %Y %I:%M:%S %p %Z'
+    return dt.astimezone(zone).strftime(format_string)
+
+def get_day_suffix(day):
+    if day in [1, 21, 31]:
+        return 'st'
+    if day in [2, 22]:
+        return 'nd'
+    return 'th'
+
+DETAILS = '''
+      id: {id} v{version} ({uuid})
+    type: {event_type}
+  status: {status}
+  latest: {latest} {current}
+approved: {approved} (latest: {latest_approved})
+    bulk: {from_bulk}
+ created: {created} (v0)
+ updated: {updated} (v{version} created)
+    user: {user}
+'''
+
+def get_username(user):
+    for account in user.socialaccount_set.all():
+        return getattr(account, 'extra_data', {}).get('idir_username', 'BCeID')
+    return 'Django'
+
+USER = '{first_name} {last_name} <{email}> ({account})'
+
+VANCOUVER = [-123.116226, 49.246292]
+
 
 class Command(BaseCommand):
 
@@ -197,41 +56,67 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('id', )
         parser.add_argument('version', nargs='?', default=None)
-        # parser.add_argument('-e', '--event-version', action='store',
-        #                     help='Specify the version (default latest)')
         parser.add_argument('-d', '--details', action='store_true',
                             default=True, help='Show user info')
 
-        parser.add_argument('-a', '--active', action='store_true',
-                            help='Set active flag to true')
-        parser.add_argument('-na', '--not-active', action='store_true',
-                            help='Set staff flag to false')
-        parser.add_argument('-s', '--staff', action='store_true',
-                            help='Set staff flag to true')
-        parser.add_argument('-ns', '--not-staff', action='store_true',
-                            help='Set staff flag to false')
-        parser.add_argument('-su', '--superuser', action='store_true',
-                            help='Set superuser flag to true')
-        parser.add_argument('-nsu', '--not-superuser', action='store_true',
-                            help='Set superuser flag to false')
+        parser.add_argument('-m', '--meta', action='store_true',
+                            help='Show event meta')
+
+        parser.add_argument('-s', '--source', action='store_true',
+                            help='Show event source')
+
+        # parser.add_argument('-c', '--clear', action='store_true',
+        #                     help='Clear this event')
+        # parser.add_argument('-r', '--reactivate', action='store_true',
+        #                     help='Reactivate this event')
 
     def handle(self, *args, **options):
 
         filters = { 'id': options['id'] }
         if options['version']:
             filters['version'] = options['version']
-        latest = Event.objects.filter(**filters).order_by('-version').first()
+        event = Event.objects.filter(**filters)\
+                             .select_related('user')\
+                             .prefetch_related('user__socialaccount_set')\
+                             .order_by('-version').first()
 
-        if latest is None:
-            latest = Event.objects.filter(id=options['id']).order_by('-version').first()
+        if event is None:
+            event = Event.objects.filter(id=options['id'])\
+                                 .select_related('user')\
+                                 .prefetch_related('user__socialaccount_set')\
+                                 .order_by('-version').first()
             version = f', v{options['version']}' if options['version'] else ''
-            if latest:
-                latest = f' (highest is v{latest.version})'
+            if event:
+                event = f' (highest is v{event.version})'
             else:
-                latest = ''
+                event = ''
                 version = ''
 
-            raise CommandError(f'No event found with id {options['id']}{version}{latest}')
+            raise CommandError(f'No event found with id {options['id']}{version}{event}')
+
+        current = event
+        latest = ''
+        if not event.latest:
+            current = Event.objects.filter(id=options['id']).order_by('-version').first()
+            latest = f'(v{current.version} is current)'
+
+        coords = event.start.get('coords', VANCOUVER)
+        zone = tz_finder.timezone_at(lng=coords[0], lat=coords[1]) or 'America/Vancouver'
+        timezone = ZoneInfo(zone)
 
         if options['details']:
-            print(latest)
+            data = vars(event)
+            data['current'] = latest
+            data['created'] = format_timestamp(event.created, timezone)
+            data['updated'] = format_timestamp(event.last_updated, timezone)
+            data['user'] = USER.format(**vars(event.user),
+                                       account=get_username(event.user))
+            print(DETAILS.format(**data))
+
+        if options['meta']:
+            print('Meta:')
+            pprint(event.meta)
+
+        if options['source']:
+            print('Source:')
+            pprint(event.meta.get('source'))
