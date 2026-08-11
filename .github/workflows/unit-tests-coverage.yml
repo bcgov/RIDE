@@ -78,8 +78,10 @@ jobs:
           REDIS_PORT: 6379
           ROUTE_PLANNER_API_URL: http://route-mock:8080
           ROUTE_PLANNER_API_KEY: test-key
+          DRIVEBC_TIMELAPSE_API_KEY: test-key
           OPEN511_API_URL: http://open511-mock:8080
           OPEN511_API_KEY: test-key
+          DRIVEBC_TIMELAPSE_API_ROOT: http://timelapse-mock:8080
         run: |
           coverage run manage.py test --noinput
           coverage report

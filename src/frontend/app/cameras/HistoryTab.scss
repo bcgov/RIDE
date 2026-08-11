@@ -1,0 +1,141 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// Figma: History tab. Cards sit 12px from the panel edges instead of 16px.
+.camera-details-container .form-pane .tab-content.history-tab {
+  padding: 20px 12px 12px;
+}
+
+.history-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 12px;
+  border: 1px solid $Divider;
+  border-radius: 8px;
+  overflow: hidden;
+  background: $White;
+}
+
+.history-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: $Grey20;
+
+  .ride-btn--outlined {
+    background: $Grey10;
+  }
+}
+
+.timestamp-title {
+  @include text-label;
+  font-weight: 700;
+  color: $Type-Primary;
+}
+
+.history-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 12px;
+}
+
+.history-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-label {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: $Type-Secondary;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.4286;
+  color: $Type-Primary;
+}
+
+.action-icon {
+  width: 19px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: $Type-Secondary;
+}
+
+.value-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 20px;
+}
+
+.chip {
+  display: block;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  line-height: 1.4286;
+}
+
+.chip-new {
+  background: $Green20;
+  color: $Green-text;
+}
+
+.chip-old {
+  background: $Surface-major;
+  color: $Red-dark;
+  text-decoration: line-through;
+}
+
+// Figma: view changes use the lighter green
+.history-section--views .chip-new {
+  background: $Green10;
+}
+
+.history-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  line-height: 1.3333;
+  letter-spacing: 0.3px;
+  color: $Type-Secondary;
+
+  svg {
+    width: auto;
+    font-size: 0.625rem;
+  }
+}

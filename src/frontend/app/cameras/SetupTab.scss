@@ -1,0 +1,96 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+.setup-tab {
+  // Figma: rows and the section title are 12px apart on this tab (16px on Basics)
+  --form-section-gap: 12px;
+
+  font-family: inherit;
+
+  // Figma: "Form / Text field" (Camera ID) and "Form / Switcher"
+  .setup-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+
+    .camera-id-group {
+      .field-label-sm {
+        display: block;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: $Type-Primary;
+      }
+
+      .camera-id-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.5;
+        color: $Type-Primary;
+      }
+    }
+
+    .toggle-label-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      cursor: pointer;
+      color: $Type-Secondary;
+      @include text-small-body;
+
+      input[type='checkbox'] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        &:focus-visible + .toggle-switch-ui {
+          outline: 2px solid $Focus;
+          outline-offset: 2px;
+        }
+      }
+
+      .toggle-switch-ui {
+        position: relative;
+        flex-shrink: 0;
+        width: 28px;
+        height: 14px;
+        border-radius: 999px;
+        background-color: $Grey50;
+        transition: background-color 0.15s ease;
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: $White;
+          transition: transform 0.15s ease;
+        }
+      }
+
+      input:checked + .toggle-switch-ui {
+        background-color: $BC-Blue;
+
+        &::after {
+          transform: translateX(14px);
+        }
+      }
+
+      // Figma: "Form / Switcher" hover (on state only)
+      &:hover input:checked + .toggle-switch-ui {
+        background-color: $BtnHover-Primary;
+      }
+    }
+  }
+}
+
+.link-style {
+  color: $ViewDetailsText;
+  text-decoration: underline;
+  cursor: pointer;
+}

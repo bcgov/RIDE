@@ -1,0 +1,734 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// The card (background, border, rounded corners) comes from SidebarLayout;
+// this is the scrolling content inside it.
+.camera-details-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  // Figma: page header (32px left, 16px right, 12px above and below)
+  .details-header {
+    position: relative;
+    z-index: 100; // keeps the flyout above the media area
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 1200px;
+    padding: 12px 16px 12px 32px;
+    border-bottom: 1px solid $Divider;
+    border-top-left-radius: 8px;
+
+    .title-section {
+      gap: 24px;
+      min-width: 0;
+    }
+
+    // Figma: "Status / Pills"
+    .badge-ondemand {
+      @include text-label;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 22px;
+      padding: 2px 8px;
+      border-radius: 32px;
+      background: $Blue10;
+      font-weight: 700;
+      color: $BC-Blue;
+      white-space: nowrap;
+
+      svg {
+        width: auto;
+        font-size: 0.75rem;
+      }
+    }
+
+    .actions-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      // Figma: "View on DriveBC" is a borderless button in the primary text color
+      .ride-btn--tertiary {
+        color: $Type-Primary;
+      }
+
+      // 12px + 8px = the 20px Figma leaves before the menu button
+      .context-menu-wrapper {
+        margin-left: 8px;
+      }
+    }
+  }
+
+  .details-grid {
+    display: grid;
+    flex: 1 0 auto;
+    grid-template-columns: 1fr 510px;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Left Media Section */
+  // Left media section (Figma: 32px each side, 16px above)
+  .media-pane {
+    width: 100%;
+    max-width: 1200px;
+    min-width: 800px;
+    margin: 0 auto;
+    padding: 16px 32px 24px;
+
+    .main-preview-card {
+      margin-bottom: 22px;
+
+      .preview-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding: 8px 12px 8px 0;
+
+        .current-view-label {
+          font-size: 1.25rem;
+          font-weight: 700;
+          line-height: 1.7;
+          color: $Type-Secondary;
+        }
+      }
+
+      .main-image-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-height: 820px;
+        overflow: hidden;
+        border-radius: 8px 8px 0 0;
+
+        img {
+          width: 100%;
+          height: auto;
+          border-radius: 8px;
+        }
+
+        .image-placeholder {
+          width: 100%;
+          height: 100%;
+          color: #94a3b8;
+        }
+      }
+    }
+
+    .views-section {
+      .views-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px 8px 0;
+
+        h2 {
+          margin: 0;
+          font-size: 1.25rem;
+          font-weight: 700;
+          line-height: 1.7;
+          color: $Type-Secondary;
+        }
+      }
+
+      // 8px gap + 4px card wrapper padding in Figma
+      .views-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 12px;
+      }
+    }
+  }
+
+  // Figma: "Camera location settings" panel
+  .form-pane {
+    display: flex;
+    flex-direction: column;
+    padding-top: 7px;
+    border-left: 1px solid $Divider;
+    background: $White;
+
+    .form-pane-title {
+      margin: 0;
+      padding: 8px 16px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.7;
+      color: $Type-Primary;
+    }
+
+    .details-tabs {
+      display: flex;
+      gap: 30px;
+      padding: 4px 16px 0;
+      border-bottom: 1px solid $Divider;
+
+      // The active underline overlaps the bar's own bottom line
+      .tab-btn {
+        @include text-small-body;
+        @include focus-ring;
+        margin-bottom: -1px;
+        padding: 8px 0 6px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        color: $Type-Primary;
+        cursor: pointer;
+
+        // Figma: "Parts / Tabs" hover (inactive tabs only) shows the text in $Grey80
+        &:hover:not(.active) {
+          color: $Grey80;
+        }
+
+        &.active {
+          border-bottom-color: $Focus;
+          font-weight: 700;
+        }
+      }
+    }
+
+    .tab-content {
+      flex-grow: 1;
+      padding: 20px 16px 24px;
+
+      .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--form-section-gap, 16px);
+        margin-bottom: 24px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .section-title {
+          display: block;
+          margin: 0;
+          font-size: 0.75rem;
+          font-weight: 700;
+          line-height: 1.5;
+          color: $Grey80;
+        }
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 0;
+
+        label {
+          font-size: 0.75rem;
+          font-weight: 400;
+          line-height: 1.5;
+          color: $Type-Secondary;
+        }
+
+        input:not([type='checkbox']):not([type='radio']),
+        select,
+        textarea {
+          @include text-small-body;
+          @include focus-ring;
+          width: 100%;
+          height: 32px;
+          padding: 0 var(--field-padding-right, 8px) 0 8px;
+          border: 1px solid $Divider;
+          border-radius: 4px;
+          box-sizing: border-box;
+          background: $White;
+          font-family: inherit;
+          color: $Type-Primary;
+        }
+
+        textarea {
+          height: 112px;
+          padding: 8px;
+          resize: vertical;
+        }
+
+        // Figma: 14px chevron in a 20px box, 8px from the right edge
+        select {
+          padding-right: 36px;
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+          background-repeat: no-repeat;
+          background-position: right 6px center;
+          background-size: 24px 24px;
+          appearance: none;
+          cursor: pointer;
+        }
+      }
+
+      .form-row {
+        display: grid;
+        gap: 16px;
+
+        &.two-col {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        &.three-col {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+
+      // Inputs with a trailing icon (calendar, password eye)
+      .input-with-icon {
+        --field-padding-right: 36px; // room for the icon
+        position: relative;
+
+        .input-icon {
+          position: absolute;
+          top: 50%;
+          right: 12px;
+          transform: translateY(-50%);
+          color: $Type-Primary;
+          pointer-events: none;
+        }
+
+        .icon-btn-toggle {
+          position: absolute;
+          top: 50%;
+          right: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          border: none;
+          background: none;
+          transform: translateY(-50%);
+          color: $Type-Primary;
+          cursor: pointer;
+
+          &:hover {
+            color: $Type-Secondary;
+          }
+        }
+      }
+    }
+
+    // Figma: "publish actions". Sticks to the bottom of the visible area.
+    .form-footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      margin-top: auto;
+      padding: 12px 24px;
+      box-sizing: border-box;
+      background: $White;
+      box-shadow: $Shadow-medium;
+
+      .ride-btn {
+        min-height: 36px;
+      }
+    }
+  }
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.6875;
+    color: $Type-Primary;
+  }
+
+  // Same height as the title so the header does not jump while editing
+  .camera-name-input {
+    width: 360px;
+    height: 54px;
+    padding: 0 8px;
+    border: 1px solid $Focus;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.6875;
+    color: $Type-Primary;
+    outline: none;
+  }
+}
+
+// Figma: "Form / Switcher" (28×14)
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 28px;
+  height: 14px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background-color: $Grey50;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.slider::before {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: $White;
+  content: "";
+  transition: 0.2s ease;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: $BC-Blue;
+}
+
+// Figma: "Form / Switcher" hover (on state only)
+.toggle-switch:hover input:checked + .slider {
+  background-color: $BtnHover-Primary;
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(14px);
+}
+
+.toggle-switch input:focus-visible + .slider {
+  outline: 2px solid $Focus;
+  outline-offset: 2px;
+}
+
+.image-placeholder {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fce8ea;
+
+  svg {
+    font-size: 2rem;
+    color: #c0132f;
+  }
+}
+
+.camera-status--unavailable-details {
+  position: absolute !important;
+  top: 10px;
+  right: 10px;
+  bottom: auto;
+  left: auto;
+  width: auto;
+  height: auto;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+  background-color: #c0132f;
+  color: $White;
+}
+
+.placeholder-thumb--unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fce8ea;
+  width: 100%;
+  height: 100%;
+
+  svg {
+    font-size: 1rem;
+    color: #c0132f;
+  }
+}
+
+
+.context-menu-wrapper {
+  position: relative;
+}
+
+
+
+
+
+
+
+
+// Figma: "Camera details - expand all views"
+.expanded-views-section {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+  padding: 16px 32px 4px;
+  box-sizing: border-box;
+}
+
+.expanded-views-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.7;
+    color: $Type-Primary;
+  }
+}
+
+.expanded-views-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px 22px;
+}
+
+// Figma: view card, shared by the views grid and the expanded view
+.view-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 2px solid $Divider;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background: $White;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: $Grey70;
+  }
+
+  &.selected {
+    border-color: $Focus;
+
+    .view-card-footer {
+      background: $Blue10;
+    }
+  }
+
+  .view-card-select-area {
+    @include focus-ring;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .view-card-image {
+    width: 100%;
+    height: 132px;
+    background-color: $Grey110;
+    overflow: hidden;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .placeholder-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: 1.25rem;
+      color: $Grey70;
+    }
+  }
+
+  .view-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background: $White;
+  }
+
+  .view-info-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .direction-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: $Type-Primary;
+    white-space: nowrap;
+  }
+
+  .view-info-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: $Type-Secondary;
+    white-space: nowrap;
+
+    .timestamp-icon {
+      width: auto;
+      font-size: 0.625rem;
+    }
+  }
+
+  // Expanded view: borderless cards with a larger image and a grey 48px footer
+  &.view-card--expanded {
+    border: 0;
+    cursor: default; // not selectable here
+
+    .view-card-image {
+      height: auto;
+      aspect-ratio: 800 / 468;
+    }
+
+    .view-card-footer,
+    &.selected .view-card-footer {
+      height: 48px;
+      box-sizing: border-box;
+      background: $Grey10;
+    }
+
+    .direction-label,
+    .view-info-right {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .view-info-right .timestamp-icon {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Figma: "Form / Switcher" (28×14), the card's on/off button
+.status-toggle-pill {
+  @include focus-ring;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 14px;
+  padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  box-sizing: border-box;
+  background: $Grey50;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  .toggle-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: $White;
+    transition: transform 0.2s ease;
+  }
+
+  &.active {
+    background: $BC-Blue;
+
+    &:hover {
+      background: $BtnHover-Primary; // Figma: "Form / Switcher" hover (on state only)
+    }
+
+    .toggle-dot {
+      transform: translateX(14px);
+    }
+  }
+}
+
+.view-card-image--off {
+  img {
+    filter: grayscale(60%) brightness(0.75);
+    opacity: 0.7;
+  }
+}
+
+.view-card-image {
+  position: relative; // needed so .camera-off-badge can be absolutely positioned inside it
+
+  .camera-off-badge {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%); /* Centers the badge horizontally relative to itself */
+    
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.75);
+    color: $White;
+    border-radius: 50%;
+    font-size: 0.6875rem;
+  }
+}
+
+
+
+.camera-off-badge {
+  position: absolute;
+  top: 6px;
+  left: 60px;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 29px;
+  height: 18px;
+
+  border-radius: 16px;
+  background-color: rgba($Black, 0.65);
+  color: $White;
+  font-size: 0.6875rem;
+
+  svg {
+    font-size: 0.6875rem;
+    color: $White;
+  }
+}

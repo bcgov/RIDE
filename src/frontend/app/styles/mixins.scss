@@ -1,0 +1,28 @@
+@use "./variables.scss" as *;
+
+// Keyboard focus ring
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $Focus;
+    outline-offset: 2px;
+  }
+}
+
+// Figma "regular/smallBody": 14px text, 20px line-height
+@mixin text-small-body {
+  font-size: 0.875rem;
+  line-height: 1.4286;
+}
+
+// Figma "regular/body": 16px text, 27px line-height
+@mixin text-body {
+  font-size: 1rem;
+  line-height: 1.688;
+}
+
+// Figma "label": 12px text, 16px line-height, 0.3px letter-spacing
+@mixin text-label {
+  font-size: 0.75rem;
+  line-height: 1.3333;
+  letter-spacing: 0.3px;
+}
