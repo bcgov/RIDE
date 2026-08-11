@@ -90,6 +90,8 @@ export default function Layout() {
             ret.email = data.email;
             ret.is_superuser = data.is_superuser;
             ret.is_approver = data.is_approver;
+            ret.is_camera_role = data.is_camera_role || data.is_camera_admin;
+            ret.is_camera_admin = data.is_camera_admin;
             ret.service_areas = Array.isArray(data.service_areas) ? data.service_areas : [];
             ret.request_organization = data.request_organization;
           }
@@ -99,7 +101,8 @@ export default function Layout() {
             if (ret.email != prior.email) { return ret; }
             if (ret.is_superuser != prior.is_superuser) { return ret; }
             if (ret.is_approver != prior.is_approver) { return ret; }
-            if (ret.request_organization != prior.request_organization) { return ret; }
+            if (ret.is_camera_role != prior.is_camera_role || prior.is_camera_admin) { return ret; }
+            if (ret.is_camera_admin != prior.is_camera_admin) { return ret; }
             if ((ret.service_areas || []).join(',') != (prior.service_areas || []).join(',')) { return ret; }
             return prior;
           });
@@ -131,6 +134,10 @@ export default function Layout() {
 
             {authContext.is_approver &&
               <NavLink to="/chainups/">Chain-Ups</NavLink>
+            }
+
+            {authContext.is_camera_role &&
+              <NavLink to="/cameras/">Cameras</NavLink>
             }
           </>
         }
