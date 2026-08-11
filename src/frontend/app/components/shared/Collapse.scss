@@ -1,0 +1,28 @@
+@use "../../styles/variables.scss" as *;
+
+// Animates height by growing a grid row from 0fr to 1fr, so the content never needs measuring.
+.ride-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  // Hidden only once the row has closed
+  transition: grid-template-rows $Motion-slow $Ease-standard, visibility 0s linear $Motion-slow;
+
+  &[data-open] {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition: grid-template-rows $Motion-slow $Ease-standard, visibility 0s;
+  }
+
+  // Clipped while it moves; once open it lets focus rings and shadows spill out again
+  &__inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &[data-open] > &__inner {
+    overflow: visible;
+    transition: overflow 0s linear $Motion-slow;
+    transition-behavior: allow-discrete;
+  }
+}
