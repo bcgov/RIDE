@@ -58,6 +58,24 @@ services:
     # command: /bin/sh -c 'cd /app && npm run dev'
     # command: node
 
+  
+  tasks:
+    env_file: .env
+    build:
+      context: .
+      dockerfile: ./compose/webapp/Dockerfile
+      args:
+        DEBUG_BUILD: true
+    volumes:
+      - ./src/webapp:/app/webapp
+    depends_on:
+      - db
+    container_name: ride-tasks
+    command: ./apps/cameras/start_poll_webcams.sh
+    restart: unless-stopped
+    networks:
+      - ride
+
 networks:
   ride:
     name: ride_default
