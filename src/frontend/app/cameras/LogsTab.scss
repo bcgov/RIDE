@@ -1,0 +1,145 @@
+.logs-tab {
+  font-family: inherit;
+
+  .form-group {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+  }
+
+  input[type='text'] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #111827;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+
+  .input-with-icon {
+    position: relative;
+
+    input {
+      padding-right: 40px;
+    }
+
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      color: #6b7280;
+      pointer-events: none;
+    }
+  }
+
+  // "Errors only" pill toggle
+  .filter-actions {
+    margin-bottom: 20px;
+
+    .btn-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      background: #f1f1f1;
+      color: #333;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: #e5e5e5;
+      }
+
+      &.active {
+        background: #e0e0e0;
+        color: #000;
+      }
+    }
+  }
+
+  // Log entries
+  .logs-list {
+    .log-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #e5e5e5;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .log-time {
+        width: 90px;
+        flex-shrink: 0;
+        font-weight: 700;
+        color: #333;
+        font-size: 15px;
+      }
+
+      .log-details {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .log-message {
+        font-size: 15px;
+        color: #333;
+      }
+
+      .success-icon {
+        color: #333;
+        font-size: 16px;
+      }
+
+      .error-icon {
+        color: #d64545;
+        font-size: 16px;
+      }
+
+      &--error {
+        .log-message {
+          color: #d64545;
+        }
+      }
+    }
+  }
+
+  .no-logs {
+    padding: 24px 0;
+    color: #6b7280;
+    font-size: 14px;
+  }
+}
+
+.input-with-icon {
+  .react-datepicker-wrapper,
+  .react-datepicker__input-container {
+    display: block;
+    width: 100%;
+  }
+}

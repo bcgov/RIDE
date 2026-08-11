@@ -1,0 +1,152 @@
+.notes-card {
+  padding: 0;
+}
+
+.notes-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.notes-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.btn-add-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-add-entry:hover {
+  background: #f9fafb;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.note-item {
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.note-item:last-child {
+  border-bottom: none;
+}
+
+.note-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.author-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #111827;
+}
+
+.note-icon {
+  display: none; /* mock doesn't show an icon next to the name */
+}
+
+.updated-time {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.note-content {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  margin: 0 0 6px 0;
+  white-space: pre-wrap;
+}
+
+.btn-edit-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #255A90;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-edit-note:hover {
+  text-decoration: underline;
+}
+
+.add-note-form,
+.edit-note-form {
+  margin-bottom: 14px;
+}
+
+.add-note-form textarea,
+.edit-note-form textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-primary {
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.notes-loading,
+.notes-empty {
+  color: #9ca3af;
+  font-size: 14px;
+  padding: 12px 0;
+}

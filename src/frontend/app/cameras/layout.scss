@@ -1,0 +1,19 @@
+.cameras-page {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.log-item {
+  &--error {
+    .log-message,
+    .error-icon {
+      color: #d64545; // match the red in your mock
+    }
+  }
+
+  .success-icon {
+    color: #333; // the dark grey checkmark in the mock
+  }
+}
