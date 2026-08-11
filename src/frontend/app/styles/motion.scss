@@ -1,0 +1,30 @@
+@use "./variables.scss" as *;
+
+// Global motion: the shared keyframes, a fade for content that replaces a skeleton,
+// and the reduced-motion switch-off for everything in the app.
+@keyframes ride-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ride-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: ride-fade-in $Motion-base $Ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -18,5 +18,20 @@ export default [
     route("chainups", "./chainups/layout.jsx", [
       index("./chainups/home.jsx"),
     ]),
+    route("cameras", "./cameras/layout.jsx", [
+      index("./cameras/home.jsx"),
+
+      route("new", "./cameras/CameraDetails.jsx", {
+        id: "cameras/new",
+      }),
+
+      route("settings", "./cameras/CameraSettings.jsx", {
+        id: "cameras/settings",
+      }),
+
+      route(":id", "./cameras/CameraDetails.jsx", {
+        id: "cameras/details",
+      }),
+    ]),
   ]),
 ];
