@@ -1,0 +1,159 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// Figma: "Modal - Timelapse"
+.timelapse-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timelapse-timeframe {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// "Beginning:" / "Ending:" label with its field inline
+.timelapse-field {
+  @include text-small-body;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: $Type-Primary;
+
+  .ride-dialog__input {
+    height: 32px;
+    padding: 0 8px;
+  }
+}
+
+.timelapse-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 800 / 468;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  background: $Grey110;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.timelapse-skeleton {
+  display: block;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+}
+
+.timelapse-placeholder {
+  @include text-small-body;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $White;
+}
+
+// Figma: play controls, then the scrubber taking the rest of the row
+.timelapse-controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 14px;
+}
+
+.timelapse-play-controls {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+}
+
+.ctrl-btn {
+  @include focus-ring;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 1rem;
+  line-height: 1.3125;
+  color: $Type-Primary;
+  cursor: pointer;
+
+  svg {
+    width: auto;
+  }
+
+  @include transition(color);
+
+  &--play {
+    font-size: 1.125rem;
+  }
+
+  &:hover:not(:disabled) {
+    color: $Type-Secondary;
+  }
+
+  &:disabled {
+    color: $Type-Disabled;
+    cursor: not-allowed;
+  }
+}
+
+// Figma: a 7px track. The thumb is not drawn in the wireframe; a round one is added so it can be dragged.
+.timelapse-scrubber {
+  @include focus-ring;
+  flex: 1;
+  min-width: 0;
+  height: 16px;
+  margin: 0;
+  background: none;
+  appearance: none;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: 7px;
+    border-radius: 4px;
+    background: $Divider;
+  }
+
+  &::-moz-range-track {
+    height: 7px;
+    border-radius: 4px;
+    background: $Divider;
+  }
+
+  &::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    margin-top: -4.5px;
+    border: 0;
+    border-radius: 50%;
+    background: $BC-Blue;
+    appearance: none;
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 0;
+    border-radius: 50%;
+    background: $BC-Blue;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+
+    &::-webkit-slider-thumb {
+      background: $Grey70;
+    }
+
+    &::-moz-range-thumb {
+      background: $Grey70;
+    }
+  }
+}
