@@ -1,0 +1,183 @@
+.service-request-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding-top: 28px;
+
+  background: rgba(0, 0, 0, 0.65);
+
+  overflow-y: auto;
+}
+
+.service-request-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 600px;
+  max-width: 90vw;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+}
+
+.service-request-modal::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.service-request-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px 18px 14px;
+}
+
+.service-request-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #29405b;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+}
+
+.service-request-close {
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+
+  color: #29405b;
+  font-size: 18px;
+}
+
+.service-request-content {
+  padding: 8px 18px 18px;
+}
+
+.recipient-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 42px;
+}
+
+.recipient-label {
+  width: 16px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #4b4b4b;
+}
+
+.recipient-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recipient-chip {
+  border: 0;
+  border-radius: 5px;
+
+  padding: 6px 10px;
+
+  background: #e5e5e5;
+
+  color: #666;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.recipient-chip--selected {
+  background: #3d62a8;
+  color: #fff;
+}
+
+.service-request-subject {
+  width: 100%;
+
+  margin-top: 12px;
+  padding: 10px;
+
+  border: 1px solid #d0d5db;
+  border-radius: 5px;
+
+  font-size: 16px;
+
+  box-sizing: border-box;
+}
+
+.service-request-body {
+  width: 100%;
+  min-height: 265px;
+
+  margin-top: 14px;
+  padding: 12px;
+
+  border: 1px solid #d0d5db;
+  border-radius: 5px;
+
+  resize: vertical;
+
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+
+  box-sizing: border-box;
+}
+
+.service-request-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  padding: 10px 18px 18px;
+}
+
+.send-request-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  border: 0;
+  border-radius: 4px;
+
+  padding: 9px 14px;
+
+  background: #173f67;
+  color: #fff;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.cancel-request-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 9px 4px;
+  background: transparent;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+}

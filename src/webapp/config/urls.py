@@ -15,6 +15,7 @@ from apps.users import urls as user_urls
 from apps.organizations import urls as organization_urls
 from apps.segments import urls as segment_urls
 from apps.users.views import session
+from apps.cameras import urls as camera_urls
 
 admin.autodiscover()
 admin.site.login = secure_admin_login(admin.site.login)
@@ -27,6 +28,7 @@ urlpatterns = [
     path('api/', include((user_urls, 'users'), namespace='users')),
     path('api/', include((organization_urls, 'organizations'), namespace='organizations')),
     path('api/', include((segment_urls, 'segments'), namespace='segments')),
+    path('api/', include((camera_urls, 'cameras'), namespace='cameras')),
 
     # Auth
     path('session', session.as_view()),
