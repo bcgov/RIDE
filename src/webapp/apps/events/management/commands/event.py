@@ -52,18 +52,32 @@ VANCOUVER = [-123.116226, 49.246292]
 class Command(BaseCommand):
 
     help = 'Review or modify individual events'
+    requires_system_checks = []
+    suppressed_base_arguments = ['--verbosity', '--no-color', '--force-color',
+                                 '--traceback', '--pythonpath', '--settings',
+                                 '--version', ]
 
     def add_arguments(self, parser):
         parser.add_argument('id', )
-        parser.add_argument('version', nargs='?', default=None)
+        parser.add_argument('version', nargs='?', default=None,
+                            help='Optional; latest by default')
         parser.add_argument('-d', '--details', action='store_true',
-                            default=True, help='Show user info')
+                            help='Show user info')
 
         parser.add_argument('-m', '--meta', action='store_true',
                             help='Show event meta')
 
         parser.add_argument('-s', '--source', action='store_true',
                             help='Show event source')
+
+        parser.add_argument('-c', '--current', action='store_true',
+                            help='Show current version (i.e., latest approved)')
+
+        parser.add_argument('-p', '--pending', action='store_true',
+                            help='Show pending changes')
+
+        parser.add_argument('--history', action='store_true',
+                            help='Show history as diffs')
 
         # parser.add_argument('-c', '--clear', action='store_true',
         #                     help='Clear this event')
@@ -72,9 +86,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        if options['current'] and options['version']:
+            raise CommandError('Specify either a version or --current, not both')
+
         filters = { 'id': options['id'] }
+
         if options['version']:
             filters['version'] = options['version']
+
+        elif options['current']:
+            filters['latest_approved'] = True
+
         event = Event.objects.filter(**filters)\
                              .select_related('user')\
                              .prefetch_related('user__socialaccount_set')\
@@ -85,6 +107,11 @@ class Command(BaseCommand):
                                  .select_related('user')\
                                  .prefetch_related('user__socialaccount_set')\
                                  .order_by('-version').first()
+
+            if options['current']:
+                raise CommandError('No current (i.e., approved) version for this event.\n'
+                                    '    Use --pending to see the unapproved event')
+
             version = f', v{options['version']}' if options['version'] else ''
             if event:
                 event = f' (highest is v{event.version})'
@@ -103,6 +130,11 @@ class Command(BaseCommand):
         coords = event.start.get('coords', VANCOUVER)
         zone = tz_finder.timezone_at(lng=coords[0], lat=coords[1]) or 'America/Vancouver'
         timezone = ZoneInfo(zone)
+
+        # if no specific output is requested, print details
+        outputs = [options[option] for option in ['details', 'meta', 'source', 'pending', 'history']]
+        if not any(outputs):
+            options['details'] = True
 
         if options['details']:
             data = vars(event)
