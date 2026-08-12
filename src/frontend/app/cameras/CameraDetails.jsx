@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useParams, useNavigate } from "react-router";
 import {
   faPenToSquare,
   faWrench,
@@ -9,7 +10,9 @@ import {
   faClock,
   faExpand,
   faFloppyDisk,
+  faXmark,
 } from '@fortawesome/pro-regular-svg-icons';
+import { getCookie } from "../shared/helpers.js";
 
 import BasicsTab from './BasicsTab';
 import SetupTab from './SetupTab';
@@ -19,58 +22,119 @@ import LogsTab from './LogsTab';
 import HistoryTab from './HistoryTab';
 import './CameraDetails.scss';
 
-export default function CameraDetails({ camera, onBack }) {
+export default function CameraDetails({ onBack }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [camera, setCamera] = useState(null);
   const [activeTab, setActiveTab] = useState('Basics');
 
-  // Basics Form State
   const [formData, setFormData] = useState({
-    locationDescription:
-      camera?.cam_internet_caption ||
-      camera?.caption ||
-      'Highway 16 at Toronto Street in Smithers',
-    businessArea: camera?.business_area || 'MoTT Electrical',
-    region: camera?.region_name || camera?.region || 'Northern',
-    highway: camera?.highway || camera?.locations_highway || 'Highway 16',
-    maintenanceContractor:
-      camera?.maintenance_contractor || 'Dawson Road Maintenance',
-    electricalContractor:
-      camera?.electrical_contractor || 'Westcana Electric',
-    latitude: camera?.latitude || '52.108937',
-    longitude: camera?.longitude || '-119.309045',
-    elevation: camera?.elevation || '686',
-    imageWatermark: camera?.image_watermark || 'DriveBC.ca',
-    cameraCredit:
-      camera?.credit || 'Ministry of Transportation and Transit',
-    cameraCreditUrl:
-      camera?.credit_url ||
-      'https://www2.gov.bc.ca/gov/content/governments/...',
+    cameraName: camera
+      ? camera.internet_name || ''
+      : '',
+    locationDescription: camera
+      ? camera.locations_description || ''
+      : '',
+
+    businessArea: camera
+      ? camera.business_area || ''
+      : '',
+
+    region: camera
+      ? camera.locations_region || ''
+      : '',
+
+    highway: camera
+      ? camera.locations_highway || ''
+      : '',
+
+    maintenanceContractor: camera
+      ? camera.maintenance_contractor || ''
+      : '',
+
+    electricalContractor: camera
+      ? camera.electrical_contractor || ''
+      : '',
+
+    latitude: camera
+      ? camera.locations_geo_latitude || ''
+      : '',
+
+    longitude: camera
+      ? camera.locations_geo_longitude || ''
+      : '',
+
+    elevation: camera
+      ? camera.locations_elevation || ''
+      : '',
+
+    imageWatermark: camera
+      ? camera.image_watermark || ''
+      : '',
+
+    cameraCredit: camera
+      ? camera.cam_internet_credit || ''
+      : '',
+
+    cameraCreditUrl: camera
+      ? camera.cam_internet_website_url || ''
+      : '',
   });
 
-  // Setup Form State
+  const isNewCamera = !camera;
+
   const [setupData, setSetupData] = useState({
-    cameraId: camera?.id || '1234567890',
-    isOnDemand: camera?.is_ondemand ?? true,
-    cameraType: camera?.type || 'AXIS',
-    cameraMake: camera?.make || 'P5515',
-    installedDate: camera?.installed_at || '2018-08-27',
-    lastInspectedDate: camera?.inspected_at || '2026-01-12',
-    updateFrequency: camera?.update_frequency || '15',
-    macAddress: camera?.mac_address || '00:e0:4d:91:12:13',
-    connectionType: camera?.connection_type || 'Images are pulled',
-    connectionProtocol: camera?.connection_protocol || 'File share',
-    username: camera?.username || 'admin',
-    password: camera?.password || 'password123',
-    commType: camera?.comm_type || 'Cellular',
-    commDevice: camera?.comm_device || 'RV50X',
-    antennae: camera?.antennae || '',
-    serviceProvider: camera?.service_provider || 'Telus',
-    modemSerial: camera?.modem_serial || '12312412467-21',
-    modemPhone: camera?.modem_phone || '250-576-2481',
-    modemBaudRate: camera?.modem_baud || '',
-    modemInstalledDate: camera?.modem_installed_at || '2018-08-27',
-    powerSource: camera?.power_source || 'Wired',
-    powerSupplyType: camera?.power_supply_type || '',
-    powerSupplySerial: camera?.power_supply_serial || '',
+    cameraName: camera
+      ? camera.internet_name || ''
+      : '',
+    locationDescription: camera
+      ? camera.cam_internet_caption || ''
+      : '',
+
+    businessArea: camera
+      ? camera.business_area || ''
+      : '',
+
+    region: camera
+      ? camera.locations_region || ''
+      : '',
+
+    highway: camera
+      ? camera.locations_highway || ''
+      : '',
+
+    maintenanceContractor: camera
+      ? camera.maintenance_contractor || ''
+      : '',
+
+    electricalContractor: camera
+      ? camera.electrical_contractor || ''
+      : '',
+
+    latitude: camera
+      ? camera.locations_geo_latitude || ''
+      : '',
+
+    longitude: camera
+      ? camera.locations_geo_longitude || ''
+      : '',
+
+    elevation: camera
+      ? camera.locations_elevation || ''
+      : '',
+
+    imageWatermark: camera
+      ? camera.image_watermark || ''
+      : '',
+
+    cameraCredit: camera
+      ? camera.cam_internet_credit || ''
+      : '',
+
+    cameraCreditUrl: camera
+      ? camera.cam_internet_website_url || ''
+      : '',
   });
 
   const handleBasicsChange = (field, value) => {
@@ -81,8 +145,119 @@ export default function CameraDetails({ camera, onBack }) {
     setSetupData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    console.log('Saving all changes:', { formData, setupData });
+  const handleSave = async () => {
+    try {
+      const payload = {
+        internet_name: formData.cameraName,
+        internet_caption: formData.locationDescription,
+        internet_credit: formData.cameraCredit,
+        internet_website_url: formData.cameraCreditUrl,
+
+        locations_description: formData.locationDescription,
+        locations_region: formData.region,
+        locations_business_area: formData.businessArea,
+        locations_highway: formData.highway,
+        locations_geo_latitude: formData.latitude,
+        locations_geo_longitude: formData.longitude,
+        locations_elevation: formData.elevation,
+
+        maintenance_contractor:
+          formData.maintenanceContractor,
+
+        maintenance_electrical_contractor:
+          formData.electricalContractor,
+
+        image_watermark: formData.imageWatermark,
+
+        maintenance_camera_make:
+          setupData.cameraMake,
+
+        maintenance_uploads_every:
+          setupData.updateFrequency,
+
+        maintenance_comm_tech:
+          setupData.commType,
+
+      };
+
+      const url = camera
+        ? `/api/cameras/${camera.id}/`
+        : '/api/cameras/';
+
+      const method = camera ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+
+        console.error('Camera save failed:', errorData);
+
+        throw new Error(
+          `Failed to save camera: ${response.status}`
+        );
+      }
+
+      const savedCamera = await response.json();
+
+      console.log('Camera saved:', savedCamera);
+
+      if (onBack) {
+        onBack(savedCamera);
+      }
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+    navigate('/cameras');
+  };
+
+  const handleDelete = async () => {
+    if (!id) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this camera?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/cameras/${id}/`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+
+        console.error('Camera delete failed:', {
+          status: response.status,
+          response: errorText,
+        });
+
+        throw new Error(`Failed to delete camera: ${response.status}`);
+      }
+
+      console.log(`Camera ${id} deleted successfully`);
+
+      navigate('/cameras');
+    } catch (error) {
+      console.error('Failed to delete camera:', error);
+      alert(error.message);
+    }
   };
 
   const viewsList = camera?.location_cameras || [
@@ -238,16 +413,166 @@ export default function CameraDetails({ camera, onBack }) {
 
   const mainImageUrl = camera?.locations_thumbnail_map_url || camera?.url || '';
 
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [cameraName, setCameraName] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+
+  useEffect(() => {
+    const loadCamera = async () => {
+      try {
+        const response = await fetch(`/api/cameras/${id}/`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to load camera: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        console.log("Camera loaded:", data);
+
+        setCamera(data);
+        setFormData((prev) => ({
+          ...prev,
+          cameraName: data.internet_name || '',
+          locationDescription: data.locations_description || '',
+          businessArea: data.business_area || '',
+          region: data.locations_region || '',
+          highway: data.locations_highway || '',
+          maintenanceContractor: data.maintenance_contractor || '',
+          electricalContractor: data.maintenance_electrical_contractor || '',
+          latitude: data.locations_geo_latitude || '',
+          longitude: data.locations_geo_longitude || '',
+          elevation: data.locations_elevation || '',
+          imageWatermark: data.image_watermark || '',
+          cameraCredit: data.cam_internet_credit || '',
+          cameraCreditUrl: data.cam_internet_website_url || '',
+        }));
+      } catch (error) {
+        console.error("Failed to load camera:", error);
+      }
+    };
+
+    if (id) {
+      loadCamera();
+    }
+  }, [id]);
+
+  const handleSaveCameraName = async () => {
+    const trimmedName = cameraName.trim();
+
+    if (!trimmedName) {
+      return;
+    }
+
+    if (trimmedName === camera?.internet_name) {
+      setIsEditingName(false);
+      return;
+    }
+
+    try {
+      setIsSavingName(true);
+
+      const response = await fetch(`/api/cameras/${camera.id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+          internet_name: trimmedName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+
+        console.error('Failed to update camera name:', errorData);
+
+        throw new Error(
+          `Failed to update camera name: ${response.status}`
+        );
+      }
+
+      const updatedCamera = await response.json();
+
+      setCamera(updatedCamera);
+      setIsEditingName(false);
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
+  const handleCameraNameKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSaveCameraName();
+    }
+
+    if (event.key === 'Escape') {
+      handleCancelCameraName();
+    }
+  };
+
+  useEffect(() => {
+    if (!camera) {
+      return;
+    }
+
+  setFormData({
+    cameraName: camera.internet_name || '',
+    locationDescription: camera.locations_description || '',
+    businessArea: camera.business_area || '',
+    region: camera.locations_region || '',
+    highway: camera.locations_highway || '',
+    maintenanceContractor: camera.maintenance_contractor || '',
+    electricalContractor: camera.maintenance_electrical_contractor || '',
+    latitude: camera.locations_geo_latitude || '',
+    longitude: camera.locations_geo_longitude || '',
+    elevation: camera.locations_elevation || '',
+    imageWatermark: camera.image_watermark || '',
+    cameraCredit: camera.cam_internet_credit || '',
+    cameraCreditUrl: camera.cam_internet_website_url || '',
+  });
+}, [camera]);
+
   return (
     <div className="camera-details-container">
       {/* Header Bar */}
       <header className="details-header">
-        <div className="title-section">
-          <h1>{camera?.locations_landmark || camera?.name || 'Hwy 16 at Toronto Street'}</h1>
-          <button type="button" className="icon-edit-btn" aria-label="Edit title">
+
+    <div className="title-section">
+      {isEditingName ? (
+        <input
+          type="text"
+          className="camera-name-input"
+          value={formData.cameraName}
+          onChange={(event) =>
+            setFormData((prev) => ({
+              ...prev,
+              cameraName: event.target.value,
+            }))
+          }
+          onBlur={() => setIsEditingName(false)}
+          autoFocus
+        />
+      ) : (
+        <>
+          <h1>{formData.cameraName || 'New Camera'}</h1>
+
+          <button
+            type="button"
+            className="icon-edit-btn"
+            aria-label="Edit title"
+            onClick={() => setIsEditingName(true)}
+          >
             <FontAwesomeIcon icon={faPenToSquare} />
           </button>
-        </div>
+        </>
+      )}
+    </div>
 
         <div className="actions-toolbar">
           <button type="button" className="btn-secondary btn-service">
@@ -257,9 +582,16 @@ export default function CameraDetails({ camera, onBack }) {
           <button type="button" className="circle-action-btn" aria-label="View link">
             <FontAwesomeIcon icon={faInfoCircle} />
           </button>
-          <button type="button" className="circle-action-btn danger" aria-label="Delete camera">
-            <FontAwesomeIcon icon={faTrash} />
-          </button>
+            <button
+              type="button"
+              className="circle-action-btn danger"
+              aria-label="Delete camera"
+              onClick={handleDelete}
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+            
+          
           <button type="button" className="circle-action-btn" aria-label="More options">
             <FontAwesomeIcon icon={faEllipsisVertical} />
           </button>
@@ -282,7 +614,7 @@ export default function CameraDetails({ camera, onBack }) {
 
             <div className="main-image-wrapper">
               {mainImageUrl ? (
-                <img src={mainImageUrl} alt={camera?.locations_landmark || 'Camera view'} />
+                <img src={mainImageUrl} alt={camera?.internet_name} />
               ) : (
                 <div className="image-placeholder">No image preview available</div>
               )}

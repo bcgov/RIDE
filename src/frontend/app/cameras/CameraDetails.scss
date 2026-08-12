@@ -1,7 +1,7 @@
 .camera-details-container {
+  width: 100%;
   padding: 24px 32px;
   background-color: #f8fafc;
-  min-height: 100vh;
   box-sizing: border-box;
 
   .details-header {
@@ -439,5 +439,56 @@
         color: #1e293b;
       }
     }
+  }
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .camera-name-input {
+    width: 360px;
+    padding: 6px 10px;
+    border: 1px solid #0284c7;
+    border-radius: 6px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+  }
+
+  .icon-edit-btn,
+  .icon-cancel-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .icon-edit-btn {
+    color: #0284c7;
+  }
+
+  .icon-cancel-btn {
+    color: #64748b;
   }
 }

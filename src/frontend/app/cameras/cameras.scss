@@ -30,6 +30,8 @@ main {
   min-width: 0;
   min-height: 0;
   background: #fff;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   /* Target the intermediate wrapper section */
   > section {

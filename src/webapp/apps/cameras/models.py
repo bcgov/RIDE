@@ -19,7 +19,7 @@ class Camera(models.Model):
     internet_display_filename = models.CharField(max_length=50, null=True, blank=True)
     internet_contact_notes = models.TextField(null=True, blank=True)
     internet_dbc_mark = models.CharField(max_length=50, null=True, blank=True)
-    internet_inset_horizontal = models.BooleanField()
+    internet_inset_horizontal = models.BooleanField(default=False)
     internet_updated_by = models.CharField(max_length=50, null=True, blank=True)
     internet_last_updated = models.DateTimeField(null=True, blank=True)
 
@@ -27,6 +27,7 @@ class Camera(models.Model):
     # Locations
     # ============================================================
 
+    locations_description = models.CharField(max_length=255, null=True, blank=True)
     locations_region = models.CharField(max_length=50, null=True, blank=True)
     locations_business_area = models.CharField(max_length=50, null=True, blank=True)
     locations_highway = models.CharField(max_length=50, null=True, blank=True)

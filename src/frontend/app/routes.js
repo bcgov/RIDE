@@ -20,6 +20,14 @@ export default [
     ]),
     route("cameras", "./cameras/layout.jsx", [
       index("./cameras/home.jsx"),
+
+      route("new", "./cameras/CameraDetails.jsx", {
+        id: "cameras/new",
+      }),
+
+      route(":id", "./cameras/CameraDetails.jsx", {
+        id: "cameras/details",
+      }),
     ]),
   ]),
 ];

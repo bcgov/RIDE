@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useNavigate } from "react-router";
 import {
   faMagnifyingGlass,
   faXmark,
@@ -17,7 +18,6 @@ import {
   faUpRightFromSquare,
 } from '@fortawesome/pro-regular-svg-icons';
 import CameraForm from './CameraForm';
-import CameraDetails from './CameraDetails';
 import './Cameras.scss';
 
 
@@ -171,11 +171,8 @@ function CameraLocation({
       <div className="camera-location-header">
         {/* Title and metadata container */}
         <div className="camera-location-title-group">
-          <h3 className="camera-location-name">
-            {cameras[0]?.locations_landmark || locationName}
-          </h3>
           <div className="camera-location-meta">
-            <h4 className="camera-landmark">{locationName}</h4>
+            <h4 className="camera-landmark">{cameras[0]?.locations_landmark}</h4>
             <div className="camera-update-time">
               <FontAwesomeIcon icon={faRotate} />
               <span>5 minutes</span>
@@ -297,25 +294,8 @@ function CameraHighwayGroup({
       )}
     </section>
 
-    // <section className="camera-highway-group">
-    //   <h2>{highwayName}</h2>
-
-    //   {Object.entries(locations).map(([locationName, locationCameras]) => (
-    //     <CameraLocation
-    //       key={locationName}
-    //       locationName={locationName}
-    //       cameras={locationCameras}
-    //       onEdit={onEdit}
-    //       onDelete={onDelete}
-    //       onViewOnDriveBC={onViewOnDriveBC}
-    //       onServiceRequest={onServiceRequest}
-    //       onClone={onClone}
-    //     />
-    //   ))}
-    // </section>
   );
 }
-
 
 export default function Cameras() {
   const [cameras, setCameras] = useState([]);
@@ -334,7 +314,7 @@ export default function Cameras() {
   const [cameraType, setCameraType] = useState('');
   const [communicationMethod, setCommunicationMethod] = useState('');
   const [powerSource, setPowerSource] = useState('');
-  const [selectedCamera, setSelectedCamera] = useState(null);
+  const navigate = useNavigate();
 
   const loadCameras = async () => {
     try {
@@ -633,8 +613,7 @@ export default function Cameras() {
 
     filteredCameras.forEach((camera) => {
       const groupName =
-        camera.highway_group ||
-        camera.highway ||
+        camera.locations_highway ||
         'Other';
 
       if (!groups[groupName]) {
@@ -682,16 +661,6 @@ export default function Cameras() {
       <div className="cameras-loading">
         Loading cameras...
       </div>
-    );
-  }
-
-  // Render details view if a camera is selected
-  if (selectedCamera) {
-    return (
-      <CameraDetails
-        camera={selectedCamera}
-        onBack={() => setSelectedCamera(null)}
-      />
     );
   }
 
@@ -835,8 +804,7 @@ export default function Cameras() {
                     type="button"
                     className="flyout-item"
                     onClick={() => {
-                      setEditingCamera(null);
-                      setShowForm(true);
+                      navigate('/cameras/new');
                       setIsMenuOpen(false);
                     }}
                   >
@@ -994,7 +962,11 @@ export default function Cameras() {
                   setEditingCamera(camera);
                 }}
                 onDelete={deleteCamera}
-                onSelectCamera={(camera) => setSelectedCamera(camera)}
+                onSelectCamera={(camera) => {
+                  navigate(`/cameras/${camera.id}`, {
+                    state: { camera },
+                  });
+                }}
               />
             )
           )}
