@@ -151,42 +151,32 @@ export default function CameraDetails({ onBack }) {
   const handleSave = async () => {
     try {
       const payload = {
+        ccp_camera_title: formData.ccp_camera_title,
+        ccp_camera_description: formData.ccp_camera_description,
+        ccp_camera_highway: formData.ccp_camera_highway,
+        
         internet_name: formData.cameraName,
         internet_caption: formData.locationDescription,
-        internet_credit: formData.cameraCredit,
-        internet_website_url: formData.cameraCreditUrl,
-
         locations_description: formData.locationDescription,
         locations_region: formData.region,
         locations_business_area: formData.businessArea,
         locations_highway: formData.highway,
         locations_geo_latitude: formData.latitude,
         locations_geo_longitude: formData.longitude,
-        locations_elevation: formData.elevation,
 
-        maintenance_contractor:
-          formData.maintenanceContractor,
-
-        maintenance_electrical_contractor:
-          formData.electricalContractor,
-
-        image_watermark: formData.imageWatermark,
-
-        maintenance_camera_make:
-          setupData.cameraMake,
-
-        maintenance_uploads_every:
-          setupData.updateFrequency,
-
-        maintenance_comm_tech:
-          setupData.commType,
-
+        // Pass nested views list to backend
+        views: viewsData.map((v, index) => ({
+          id: v.id && !isNaN(v.id) ? Number(v.id) : undefined, // Keep ID so Django updates existing rows
+          orientation: v.orientation ? v.orientation.toUpperCase() : '',
+          image_url: v.image_url,
+          description: v.description,
+          is_on: v.is_on,
+          is_default: v.is_default,
+          display_order: index,
+        })),
       };
 
-      const url = camera
-        ? `/api/cameras/${camera.id}/`
-        : '/api/cameras/';
-
+      const url = camera ? `/api/cameras/${camera.id}/` : '/api/cameras/';
       const method = camera ? 'PATCH' : 'POST';
 
       const response = await fetch(url, {
@@ -200,16 +190,11 @@ export default function CameraDetails({ onBack }) {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-
         console.error('Camera save failed:', errorData);
-
-        throw new Error(
-          `Failed to save camera: ${response.status}`
-        );
+        throw new Error(`Failed to save camera: ${response.status}`);
       }
 
       const savedCamera = await response.json();
-
       console.log('Camera saved:', savedCamera);
 
       if (onBack) {
