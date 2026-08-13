@@ -505,10 +505,11 @@ export class EventForm extends Component {
               { event.id ? 'Edit' : 'Create' }&nbsp;
               { switchType
                 ? <select
+                    value={event.type}
                     onChange={(e) => eventDispatch({ type: 'set', value: { type: e.target.value } })}
                   >
                     { CHANGE_TYPE_FORMS.map((t) => {
-                      return <option key={t} selected={t === event.type}>{t}</option>
+                      return <option key={t}>{t}</option>
                     })}
                   </select>
                 : getLabel(event.type)

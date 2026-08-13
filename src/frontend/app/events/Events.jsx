@@ -273,7 +273,7 @@ export default function Events({ goToFunc, dispatch, map, current }) {
   const [ area, setArea ] = useState(JSON.parse(localStorage.getItem('activeArea')));
   const [ road, setRoad ] = useState(JSON.parse(localStorage.getItem('activeRoad')));
   const [ sort, setSort ] = useState(JSON.parse(localStorage.getItem('activeSort')) || sortOptions[0]);
-  const [ search, setSearch ] = useState(JSON.parse(localStorage.getItem('activeSearch')));
+  const [ search, setSearch ] = useState(JSON.parse(localStorage.getItem('activeSearch')) || '');
 
   localStorage.setItem('activeType', JSON.stringify(type));
   localStorage.setItem('activeArea', JSON.stringify(area));

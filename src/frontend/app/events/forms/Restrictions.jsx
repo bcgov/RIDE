@@ -1,5 +1,3 @@
-import { useCallback, useState } from 'react';
-
 import Select from 'react-select';
 
 import { RestrictionsList } from '../references';
@@ -19,7 +17,7 @@ function Restriction({ id, item, change, update, current, }) {
         value={[{ value: id, label: item.label }]}
         options={ RestrictionsList.filter((item) => (
             item.id !== id && !current.includes(item.id)
-          )).map((item, ii) => ({ value: item.id, label: item.label }))
+          )).map((item) => ({ value: item.id, label: item.label }))
         }
         key={`restriction ${id}`}
         styles={selectStyle}

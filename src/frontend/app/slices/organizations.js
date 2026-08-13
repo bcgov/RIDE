@@ -2,16 +2,16 @@ import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/too
 
 import { API_HOST } from '../env.js';
 
-import client from './client';
+import client from './client.js';
 
 const adapter = createEntityAdapter({
-  sortComparer: (a, b) => { return b.name < a.name ? 1 : -1; }
+  sortComparer: (a, b) => { return b.sortingOrder < a.sortingOrder ? 1 : -1; }
 })
 
 const refreshThunk = createAsyncThunk(
-  'trafficImpacts/refresh',
+  'organizations/refresh',
   async () => {
-    const response = await client.get(`${API_HOST}/api/traffic-impacts`);
+    const response = await client.get(`${API_HOST}/api/organizations`);
     return response.data;
   },
   {
@@ -21,10 +21,10 @@ const refreshThunk = createAsyncThunk(
   }
 );
 
-const selectStatus = (state) => state.trafficImpacts.status;
+const selectStatus = (state) => state.organizations.status;
 
 export const slice = createSlice({
-  name: 'trafficImpacts',
+  name: 'organizations',
   initialState: adapter.getInitialState({
     status: 'idle',
     error: null,
@@ -38,8 +38,14 @@ export const slice = createSlice({
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
-        action.payload.sort((a, b) => a.label < b.label ? 1 : -1);
-        adapter.setAll(state, action.payload);
+        adapter.setAll(state, action.payload.map((item) => ({
+          name: item.name,
+          id: item.id,
+          sortingOrder: item.sortingOrder,
+          value: item.id,
+          label: `${item.sortingOrder} - ${item.name}`,
+          routes: item.routes,
+        })));
       })
       .addCase(refreshThunk.rejected, (state, action) => {
         state.status = 'failed';
@@ -49,13 +55,13 @@ export const slice = createSlice({
 });
 
 export const {
-  selectAll: selectAllTrafficImpacts,
-  selectById: selectTrafficImpactById,
-  selectIds: selectTrafficImpactIds,
-} = adapter.getSelectors((state) => state.trafficImpacts);
+  selectAll: selectAllOrganizations,
+  selectById: selectOrganizationById,
+  selectIds: selectOrganizationIds,
+} = adapter.getSelectors((state) => state.organizations);
 export {
-  refreshThunk as refreshTrafficImpacts,
-  selectStatus as selectTrafficImpactStatus,
+  refreshThunk as refreshOrganizations,
+  selectStatus as selectOrganizationStatus,
 };
 
 export default slice.reducer;

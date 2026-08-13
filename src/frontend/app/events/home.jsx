@@ -1,5 +1,6 @@
 // React
 import { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { createSelector } from '@reduxjs/toolkit';
 
 // Navigation
 import { useNavigate } from 'react-router';
@@ -27,7 +28,7 @@ import Preview from './Preview';
 import Queue from './Queue';
 import Events from './Events';
 
-import { selectPending } from '../slices/events';
+import { memoizedPending } from '../slices/events';
 import { selectAllServiceAreaBoundaries } from '../slices/serviceAreaBoundaries';
 
 // Styling
@@ -38,6 +39,7 @@ export function meta() {
     { title: "RIDE Events" },
   ];
 }
+
 
 export default function Home() {
   /* Navigation */
@@ -141,7 +143,7 @@ export default function Home() {
           <Tabs.Tab name='queue' label={
             <span>
               Awaiting Approval
-              <Bubble classes={'num'} selector={selectPending} />
+              <Bubble classes={'num'} selector={memoizedPending} />
             </span>
           }>
             <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />

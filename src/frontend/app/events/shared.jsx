@@ -141,7 +141,7 @@ export function DraggableRows({
               <DraggableRow
                 id={item.id}
                 isDraggable={true}
-                remove={(e) => dispatch({ type: 'remove from list', section, id: item.id })}
+                remove={() => dispatch({ type: 'remove from list', section, id: item.id })}
                 key={`${label} row ${i}`}
                 noX={noX}
               >
@@ -149,6 +149,7 @@ export function DraggableRows({
                   id={item.id}
                   index={i}
                   item={{ ...item, value: item.id, label: item.label }}
+                  itemsSource={itemsSource}
                   change={change}
                   update={update}
                   current={current}
@@ -170,6 +171,7 @@ export function DraggableRows({
                 <Child
                   id={0}
                   item={{id: 0, label: ''}}
+                  itemsSource={itemsSource}
                   change={change}
                   update={update}
                   current={current}

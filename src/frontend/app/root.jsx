@@ -12,8 +12,6 @@ import store from './store';
 globalThis.store = store;
 import { Provider } from 'react-redux';
 
-import { API_HOST } from './env.js';
-import { DataContext } from './contexts';
 import {
   refreshConditions,
   refreshDistricts,
@@ -51,8 +49,6 @@ export function HydrateFallback() {
   return <p>Loading RIDE...</p>;
 }
 
-let fetching = false;
-
 store.dispatch(refreshConditions());
 store.dispatch(refreshDistricts());
 store.dispatch(refreshDms());
@@ -66,29 +62,9 @@ store.dispatch(refreshDistrictBoundaries());
 store.dispatch(refreshDms());
 
 export default function App() {
-  const [impacts, setImpacts] = useState(getImpacts);
-
-  function getImpacts() {
-    if (fetching) { return; }
-    fetching = true;
-
-    fetch(`${API_HOST}/api/traffic-impacts`, {
-      headers: { 'Accept': 'application/json' }
-    }).then((response) => response.json())
-      .then((data) => {
-        setImpacts(data);
-      })
-      .finally(() => {
-        fetching = false;
-      });
-    return [];
-  }
-
   return (
     <Provider store={store}>
-      <DataContext.Provider value={{ impacts }}>
-        <Outlet />
-      </DataContext.Provider>
+      <Outlet />
     </Provider>
   )
 }
