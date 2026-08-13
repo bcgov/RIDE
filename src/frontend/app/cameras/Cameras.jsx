@@ -447,10 +447,6 @@ export default function Cameras() {
     ].sort();
   }, [cameras]);
 
-
-  /*
-   * Filter cameras.
-   */
   const filteredCameras = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -467,9 +463,14 @@ export default function Cameras() {
         '';
 
       /*
-       * Search.
-       */
+      * Search.
+      */
       if (term) {
+        // Extract and combine all view descriptions and orientations
+        const viewsSearchable = (camera.views || [])
+          .map((view) => `${view.description || ''} ${view.orientation || ''} ${view.direction || ''}`)
+          .join(' ');
+
         const searchable = [
           camera.ccp_camera_title,
           camera.ccp_camera_description,
@@ -486,6 +487,7 @@ export default function Cameras() {
           camera.locations_region,
           camera.locations_orientation,
           camera.locations_thumbnail_map_url,
+          viewsSearchable, // Added view descriptions here
         ]
           .filter(Boolean)
           .join(' ')
@@ -497,8 +499,8 @@ export default function Cameras() {
       }
 
       /*
-       * Region.
-       */
+      * Region.
+      */
       if (
         region &&
         cameraRegion !== region
@@ -507,8 +509,8 @@ export default function Cameras() {
       }
 
       /*
-       * Highway.
-       */
+      * Highway.
+      */
       if (
         highway &&
         cameraHighway !== highway
@@ -517,8 +519,8 @@ export default function Cameras() {
       }
 
       /*
-       * Status.
-       */
+      * Status.
+      */
       if (status === 'online' && !camera.is_on) {
         return false;
       }
@@ -542,8 +544,8 @@ export default function Cameras() {
       }
 
       /*
-       * Visibility.
-       */
+      * Visibility.
+      */
       if (
         visibility === 'visible' &&
         camera.should_appear === false
@@ -559,11 +561,8 @@ export default function Cameras() {
       }
 
       /*
-       * Camera type.
-       *
-       * This assumes your API has camera_type.
-       * Remove this filter until that field exists if necessary.
-       */
+      * Camera type.
+      */
       if (
         cameraType &&
         camera.camera_type !== cameraType
@@ -572,19 +571,18 @@ export default function Cameras() {
       }
 
       /*
-       * Communication method.
-       */
+      * Communication method.
+      */
       if (
         communicationMethod &&
-        camera.communication_method !==
-          communicationMethod
+        camera.communication_method !== communicationMethod
       ) {
         return false;
       }
 
       /*
-       * Power source.
-       */
+      * Power source.
+      */
       if (
         powerSource &&
         camera.power_source !== powerSource
