@@ -28,9 +28,27 @@ import './Cameras.scss';
  * the current camera image.
  */
 function getCameraImage(camera) {
-  return (
-    camera.locations_thumbnail_map_url
-  );
+  if (!camera) return '';
+
+  // Safely check `views` or fallback to Django's default `cameraview_set`
+  const viewsList = camera.views || camera.cameraview_set || [];
+
+  // Find the view where is_default is true
+  const defaultView = viewsList.find((view) => view.is_default);
+
+  // Return default view image if available
+  if (defaultView?.image_url) {
+    return defaultView.image_url;
+  }
+
+  // Fallback to first available view image if no default is marked
+  const activeView = viewsList.find((view) => view.image_url);
+  if (activeView?.image_url) {
+    return activeView.image_url;
+  }
+
+  // Final fallback to camera thumbnail map URL
+  return camera.locations_thumbnail_map_url || '';
 }
 
 
@@ -474,20 +492,9 @@ export default function Cameras() {
         const searchable = [
           camera.ccp_camera_title,
           camera.ccp_camera_description,
+          camera.ccp_camera_highway,
           camera.id,
-          camera.name,
-          camera.caption,
-          camera.cam_internet_name,
-          camera.cam_internet_caption,
-          camera.location,
-          camera.highway,
-          camera.highway_group,
-          camera.direction,
-          camera.locations_highway,
-          camera.locations_region,
-          camera.locations_orientation,
-          camera.locations_thumbnail_map_url,
-          viewsSearchable, // Added view descriptions here
+          viewsSearchable,
         ]
           .filter(Boolean)
           .join(' ')

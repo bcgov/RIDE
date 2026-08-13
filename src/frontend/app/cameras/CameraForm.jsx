@@ -3,7 +3,7 @@ import { useState } from 'react';
 import './CameraForm.scss';
 
 export default function CameraForm({ camera, onSubmit, onCancel }) {
-  const [name, setName] = useState(camera?.cam_internet_name || '');
+  const [name, setName] = useState(camera?.ccp_camera_title || '');
   const [caption, setCaption] = useState(
     camera?.cam_internet_caption || ''
   );
@@ -13,8 +13,8 @@ export default function CameraForm({ camera, onSubmit, onCancel }) {
 
     await onSubmit({
       ...(camera || {}),
-      cam_internet_name: name,
-      cam_internet_caption: caption,
+      ccp_camera_title: name,
+      ccp_camera_description: caption,
     });
   };
 

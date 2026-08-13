@@ -89,7 +89,7 @@ export default function CameraDetails({ onBack }) {
 
   const [setupData, setSetupData] = useState({
     cameraName: camera
-      ? camera.internet_name || ''
+      ? camera.ccp_camera_title || ''
       : '',
     locationDescription: camera
       ? camera.cam_internet_caption || ''
@@ -154,19 +154,28 @@ export default function CameraDetails({ onBack }) {
         ccp_camera_title: formData.ccp_camera_title,
         ccp_camera_description: formData.ccp_camera_description,
         ccp_camera_highway: formData.ccp_camera_highway,
-        
-        internet_name: formData.cameraName,
+
+        // ccp_camera_title: formData.cameraName,
         internet_caption: formData.locationDescription,
         locations_description: formData.locationDescription,
         locations_region: formData.region,
         locations_business_area: formData.businessArea,
         locations_highway: formData.highway,
-        locations_geo_latitude: formData.latitude,
-        locations_geo_longitude: formData.longitude,
+        // locations_geo_latitude: formData.latitude,
+        // locations_geo_longitude: formData.longitude,
+
+        // Pass null instead of empty string "" for numeric fields
+        locations_geo_latitude: formData.latitude ? Number(formData.latitude) : null,
+        locations_geo_longitude: formData.longitude ? Number(formData.longitude) : null,
 
         // Pass nested views list to backend
         views: viewsData.map((v, index) => ({
-          id: v.id && !isNaN(v.id) ? Number(v.id) : undefined, // Keep ID so Django updates existing rows
+          // id: v.id && !isNaN(v.id) ? Number(v.id) : undefined, // Keep ID so Django updates existing rows
+          // orientation: v.orientation ? v.orientation.toUpperCase() : '',
+          
+          // Only send integer IDs for existing rows; send undefined for new rows
+          id: v.id && !isNaN(Number(v.id)) && !String(v.id).startsWith('new-') ? Number(v.id) : undefined,
+          
           orientation: v.orientation ? v.orientation.toUpperCase() : '',
           image_url: v.image_url,
           description: v.description,
@@ -248,11 +257,26 @@ export default function CameraDetails({ onBack }) {
     }
   };
 
+  // Default template for a brand-new camera
+  const DEFAULT_VIEWS = [
+    { id: 'new-1', orientation: 'NORTH', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-2', orientation: 'SOUTH', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-3', orientation: 'EAST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-4', orientation: 'WEST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-5', orientation: 'NORTHEAST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-6', orientation: 'NORTHWEST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-7', orientation: 'SOUTHEAST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-8', orientation: 'SOUTHWEST', description: '', image_url: '', is_on: false, is_default: false },
+  ];
+
   const viewsList = [...(camera?.views || [])].sort(
       (a, b) => a.display_order - b.display_order
   );
 
   const [viewsData, setViewsData] = useState(() => {
+    if (!camera?.views?.length) {
+      return DEFAULT_VIEWS;
+    }
     const viewsList = [...(camera?.views || [])].sort(
       (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
     );
@@ -406,46 +430,47 @@ export default function CameraDetails({ onBack }) {
   const [isSavingName, setIsSavingName] = useState(false);
 
   useEffect(() => {
-    const loadCamera = async () => {
-      try {
-        const response = await fetch(`/api/cameras/${id}/`);
+  const loadCamera = async () => {
+    try {
+      const response = await fetch(`/api/cameras/${id}/`);
 
-        if (!response.ok) {
-          throw new Error(`Failed to load camera: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        console.log("Camera loaded:", data);
-
-        setCamera(data);
-        setFormData((prev) => ({
-          ...prev,
-          ccp_camera_title: data.ccp_camera_title || '',
-          ccp_camera_description: data.ccp_camera_description || '',
-          cameraName: data.internet_name || '',
-          locationDescription: data.locations_description || '',
-          businessArea: data.business_area || '',
-          region: data.locations_region || '',
-          highway: data.locations_highway || '',
-          maintenanceContractor: data.maintenance_contractor || '',
-          electricalContractor: data.maintenance_electrical_contractor || '',
-          latitude: data.locations_geo_latitude || '',
-          longitude: data.locations_geo_longitude || '',
-          elevation: data.locations_elevation || '',
-          imageWatermark: data.image_watermark || '',
-          cameraCredit: data.cam_internet_credit || '',
-          cameraCreditUrl: data.cam_internet_website_url || '',
-        }));
-      } catch (error) {
-        console.error("Failed to load camera:", error);
+      if (!response.ok) {
+        throw new Error(`Failed to load camera: ${response.status}`);
       }
-    };
 
-    if (id) {
-      loadCamera();
+      const data = await response.json();
+      console.log("Camera loaded:", data);
+
+      setCamera(data);
+
+      // Populate form data immediately from backend response
+      setFormData({
+        ccp_camera_title: data.ccp_camera_title || data.internet_caption || '',
+        ccp_camera_description: data.ccp_camera_description || '',
+        ccp_camera_highway: data.ccp_camera_highway || '',
+        cameraName: data.ccp_camera_title || '',
+        locationDescription: data.locations_description || data.internet_caption || '',
+        businessArea: data.business_area || data.locations_business_area || '',
+        region: data.locations_region || '',
+        highway: data.locations_highway || '',
+        maintenanceContractor: data.maintenance_contractor || '',
+        electricalContractor: data.maintenance_electrical_contractor || '',
+        latitude: data.locations_geo_latitude ?? '',
+        longitude: data.locations_geo_longitude ?? '',
+        elevation: data.locations_elevation || '',
+        imageWatermark: data.image_watermark || '',
+        cameraCredit: data.cam_internet_credit || '',
+        cameraCreditUrl: data.cam_internet_website_url || '',
+      });
+    } catch (error) {
+      console.error("Failed to load camera:", error);
     }
-  }, [id]);
+  };
+
+  if (id) {
+    loadCamera();
+  }
+}, [id]);
 
   // Update viewsData whenever camera.views arrives or updates
   useEffect(() => {
@@ -474,7 +499,7 @@ export default function CameraDetails({ onBack }) {
       return;
     }
 
-    if (trimmedName === camera?.internet_name) {
+    if (trimmedName === camera?.ccp_camera_title) {
       setIsEditingName(false);
       return;
     }
@@ -489,7 +514,7 @@ export default function CameraDetails({ onBack }) {
           'X-CSRFToken': getCookie('csrftoken'),
         },
         body: JSON.stringify({
-          internet_name: trimmedName,
+          ccp_camera_title: trimmedName,
         }),
       });
 
@@ -535,7 +560,7 @@ export default function CameraDetails({ onBack }) {
     ccp_camera_title: camera.ccp_camera_title || '',
     ccp_camera_description: camera.ccp_camera_description || '',
     ccp_camera_highway: camera.ccp_camera_highway || '',
-    cameraName: camera.internet_name || '',
+    cameraName: camera.ccp_camera_title || '',
     locationDescription: camera.locations_description || '',
     businessArea: camera.business_area || '',
     region: camera.locations_region || '',
@@ -556,7 +581,7 @@ export default function CameraDetails({ onBack }) {
       {/* Header Bar */}
       <header className="details-header">
 
-    <div className="title-section">
+    {/* <div className="title-section">
       {isEditingName ? (
         <input
           type="text"
@@ -573,7 +598,43 @@ export default function CameraDetails({ onBack }) {
         />
       ) : (
         <>
-          <h1>{formData.cameraName || 'New Camera'}</h1>
+          <h1>{formData.ccp_camera_title || 'New Camera'}</h1>
+
+          <button
+            type="button"
+            className="icon-edit-btn"
+            aria-label="Edit title"
+            onClick={() => setIsEditingName(true)}
+          >
+            <FontAwesomeIcon icon={faPenToSquare} />
+          </button>
+        </>
+      )}
+    </div> */}
+
+
+    <div className="title-section">
+      {isEditingName ? (
+        <input
+          type="text"
+          className="camera-name-input"
+          value={formData.ccp_camera_title}
+          onChange={(event) =>
+            setFormData((prev) => ({
+              ...prev,
+              ccp_camera_title: event.target.value,
+              cameraName: event.target.value,
+            }))
+          }
+          onKeyDown={handleCameraNameKeyDown}
+          onBlur={() => setIsEditingName(false)}
+          autoFocus
+        />
+      ) : (
+        <>
+          <h1>
+            {formData.ccp_camera_title || camera?.ccp_camera_title || 'New Camera'}
+          </h1>
 
           <button
             type="button"
@@ -627,7 +688,7 @@ export default function CameraDetails({ onBack }) {
 
             <div className="main-image-wrapper">
               {mainImageUrl ? (
-                <img src={mainImageUrl} alt={camera?.internet_name} />
+                <img src={mainImageUrl} alt={camera?.ccp_camera_title} />
               ) : (
                 <div className="image-placeholder">No image preview available</div>
               )}
@@ -642,7 +703,7 @@ export default function CameraDetails({ onBack }) {
               </button>
             </div>
 
-            <div className="views-grid">
+            {/* <div className="views-grid">
               {viewsList.map((view) => (
                 <div key={view.id} className={`view-card ${view.active ? 'selected' : ''}`}>
                   <div className="view-card-top">
@@ -665,7 +726,38 @@ export default function CameraDetails({ onBack }) {
                   </div>
                 </div>
               ))}
+            </div> */}
+
+            <div className="views-grid">
+              {viewsList
+                .filter((view) => view.is_on ?? true)
+                .map((view) => (
+                  <div key={view.id} className={`view-card ${view.active ? 'selected' : ''}`}>
+                    <div className="view-card-top">
+                      <span className="direction-label">{view.orientation}</span>
+                      <label className="toggle-switch">
+                        <input type="checkbox" defaultChecked={view.is_on ?? true} />
+                        <span className="slider round" />
+                      </label>
+                    </div>
+                    <div className="view-card-image">
+                      {mainImageUrl ? (
+                        <img src={getViewImageUrl(view)} alt={view.orientation} />
+                      ) : (
+                        <div className="placeholder-thumb" />
+                      )}
+                    </div>
+                    <div className="view-card-footer">
+                      <FontAwesomeIcon icon={faClock} />
+                      <span>{view.time || '1:00 pm PST'}</span>
+                    </div>
+                  </div>
+                ))}
             </div>
+
+
+
+
           </div>
         </div>
 

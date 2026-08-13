@@ -15,7 +15,6 @@ class Camera(models.Model):
     # Internet
     # ============================================================
 
-    internet_name = models.CharField(max_length=255, null=True, blank=True)
     internet_caption = models.CharField(max_length=255, null=True, blank=True)
     internet_credit = models.CharField(max_length=255, null=True, blank=True)
     internet_comments = models.TextField(null=True, blank=True)
