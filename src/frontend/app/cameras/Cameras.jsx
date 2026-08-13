@@ -39,7 +39,7 @@ function getCameraImage(camera) {
  */
 function getCameraName(camera) {
   return (
-    camera.locations_highway ||
+    camera.ccp_camera_highway ||
     'Unnamed camera'
   );
 }
@@ -172,7 +172,7 @@ function CameraLocation({
         {/* Title and metadata container */}
         <div className="camera-location-title-group">
           <div className="camera-location-meta">
-            <h4 className="camera-landmark">{cameras[0]?.locations_landmark}</h4>
+            <h4 className="camera-landmark">{cameras[0]?.ccp_camera_title}</h4>
             <div className="camera-update-time">
               <FontAwesomeIcon icon={faRotate} />
               <span>5 minutes</span>
@@ -471,6 +471,8 @@ export default function Cameras() {
        */
       if (term) {
         const searchable = [
+          camera.ccp_camera_title,
+          camera.ccp_camera_description,
           camera.id,
           camera.name,
           camera.caption,
@@ -613,7 +615,7 @@ export default function Cameras() {
 
     filteredCameras.forEach((camera) => {
       const groupName =
-        camera.locations_highway ||
+        camera.ccp_camera_highway ||
         'Other';
 
       if (!groups[groupName]) {
@@ -984,10 +986,6 @@ export default function Cameras() {
       </main>
         
       </div>
-
-
-      
-
     </div>
   );
 }

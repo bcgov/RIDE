@@ -1,6 +1,16 @@
 from django.db import models
 
 class Camera(models.Model):
+
+    # ============================================================
+    # CCP
+    # ============================================================
+    ccp_camera_title = models.CharField(max_length=255, null=True, blank=True)
+    ccp_camera_description = models.CharField(max_length=255, null=True, blank=True)
+    ccp_camera_highway = models.CharField(max_length=50, null=True, blank=True)
+
+
+
     # ============================================================
     # Internet
     # ============================================================
@@ -120,3 +130,32 @@ class Camera(models.Model):
     maintenance_notes = models.TextField(null=True, blank=True)
     maintenance_hardware_notes = models.TextField(null=True, blank=True)
 
+
+class CameraView(models.Model):
+
+    class Orientation(models.TextChoices):
+        NORTH = "NORTH", "North"
+        SOUTH = "SOUTH", "South"
+        EAST = "EAST", "East"
+        WEST = "WEST", "West"
+        NORTHEAST = "NORTHEAST", "Northeast"
+        NORTHWEST = "NORTHWEST", "Northwest"
+        SOUTHEAST = "SOUTHEAST", "Southeast"
+        SOUTHWEST = "SOUTHWEST", "Southwest"
+
+
+    camera = models.ForeignKey(
+        Camera,
+        on_delete=models.CASCADE,
+        related_name="views",
+    )
+
+    description = models.CharField(max_length=255, null=True, blank=True)
+    orientation = models.CharField(max_length=20, choices=Orientation.choices)
+
+    image_url = models.URLField(null=True, blank=True)
+    image_name = models.CharField(max_length=255, null=True, blank=True)
+
+    display_order = models.PositiveIntegerField(default=0)
+    is_on = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False)

@@ -30,11 +30,14 @@ export default function CameraDetails({ onBack }) {
   const [activeTab, setActiveTab] = useState('Basics');
 
   const [formData, setFormData] = useState({
-    cameraName: camera
-      ? camera.internet_name || ''
+    ccp_camera_title: camera
+      ? camera.ccp_camera_title || ''
       : '',
-    locationDescription: camera
-      ? camera.locations_description || ''
+    ccp_camera_description: camera
+      ? camera.ccp_camera_description || ''
+      : '',
+    ccp_camera_highway: camera
+      ? camera.ccp_camera_highway || ''
       : '',
 
     businessArea: camera
@@ -260,52 +263,30 @@ export default function CameraDetails({ onBack }) {
     }
   };
 
-  const viewsList = camera?.location_cameras || [
-    { id: 1, direction: 'North', is_on: true, time: '1:00 pm PST', active: true },
-    { id: 2, direction: 'East', is_on: true, time: '1:02 pm PST' },
-    { id: 3, direction: 'South', is_on: true, time: '1:04 pm PST' },
-    { id: 4, direction: 'West', is_on: true, time: '1:07 pm PST' },
-    { id: 5, direction: 'Southeast', is_on: true, time: '1:10 pm PST' },
-    { id: 6, direction: 'Southwest', is_on: true, time: '1:12 pm PST' },
-  ];
+  const viewsList = [...(camera?.views || [])].sort(
+      (a, b) => a.display_order - b.display_order
+  );
 
-  // Views Tab State
-  const [viewsData, setViewsData] = useState([
-    {
-      id: '893',
-      direction: 'North',
-      enabled: true,
-      isDefault: true,
-      imagePath: 'https://images.camera123.gov.bc.ca/image/north/123.jpg',
-      description: 'Looking north',
-    },
-    {
-      id: '894',
-      direction: 'South',
-      enabled: true,
-      isDefault: false,
-      imagePath: 'https://images.camera123.gov.bc.ca/image/south/125.jpg',
-      description: 'Looking south',
-    },
-    {
-      id: '895',
-      direction: 'East',
-      enabled: true,
-      isDefault: false,
-      imagePath: 'https://images.camera123.gov.bc.ca/image/east/127.jpg',
-      description: 'Looking east',
-    },
-    { id: '896', direction: 'West', enabled: false, isDefault: false, imagePath: '', description: '' },
-    { id: '897', direction: 'Northeast', enabled: false, isDefault: false, imagePath: '', description: '' },
-    { id: '898', direction: 'Northwest', enabled: false, isDefault: false, imagePath: '', description: '' },
-    { id: '899', direction: 'Southeast', enabled: false, isDefault: false, imagePath: '', description: '' },
-  ]);
+  const [viewsData, setViewsData] = useState(() => {
+    const viewsList = [...(camera?.views || [])].sort(
+      (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+    );
+
+    return viewsList.map((view) => ({
+      id: String(view.id),
+      orientation: view.orientation || '',
+      image_url: view.image_url || '',
+      description: view.description || '',
+      is_on: view.is_on ?? true,
+      is_default: view.is_default ?? false,
+    }));
+  });
 
   const handleSetDefaultView = (selectedId) => {
     setViewsData((prev) =>
       prev.map((view) => ({
         ...view,
-        isDefault: view.id === selectedId,
+        is_default: view.id === selectedId,
       }))
     );
   };
@@ -411,7 +392,29 @@ export default function CameraDetails({ onBack }) {
     },
   ]);
 
-  const mainImageUrl = camera?.locations_thumbnail_map_url || camera?.url || '';
+  // const mainImageUrl = camera?.locations_thumbnail_map_url || camera?.url || '';
+  const getMainImageUrl = (camera) => {
+    const views = camera?.views;
+    if (!views || views.length === 0) return '';
+
+    // 1. Look for the view marked as default
+    const defaultView = views.find((v) => v.is_default);
+    if (defaultView?.image_url) return defaultView.image_url;
+
+    // 2. Fallback to the first active (is_on) view
+    const activeView = views.find((v) => v.is_on);
+    if (activeView?.image_url) return activeView.image_url;
+
+    // 3. Fallback to the first view in the array
+    return views[0]?.image_url || '';
+  };
+
+  // Usage:
+  const mainImageUrl = getMainImageUrl(camera);
+
+  const getViewImageUrl = (view) => {
+    return view?.image_url || '';
+  };
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [cameraName, setCameraName] = useState('');
@@ -433,6 +436,8 @@ export default function CameraDetails({ onBack }) {
         setCamera(data);
         setFormData((prev) => ({
           ...prev,
+          ccp_camera_title: data.ccp_camera_title || '',
+          ccp_camera_description: data.ccp_camera_description || '',
           cameraName: data.internet_name || '',
           locationDescription: data.locations_description || '',
           businessArea: data.business_area || '',
@@ -456,6 +461,26 @@ export default function CameraDetails({ onBack }) {
       loadCamera();
     }
   }, [id]);
+
+  // Update viewsData whenever camera.views arrives or updates
+  useEffect(() => {
+    if (camera?.views?.length) {
+      const viewsList = [...camera.views].sort(
+        (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+      );
+
+      const formattedViews = viewsList.map((view) => ({
+        id: String(view.id),
+        orientation: view.orientation || '',
+        image_url: view.image_url || '',
+        description: view.description || '',
+        is_on: view.is_on ?? true,
+        is_default: view.is_default ?? false,
+      }));
+
+      setViewsData(formattedViews);
+    }
+  }, [camera?.views]);
 
   const handleSaveCameraName = async () => {
     const trimmedName = cameraName.trim();
@@ -522,6 +547,9 @@ export default function CameraDetails({ onBack }) {
     }
 
   setFormData({
+    ccp_camera_title: camera.ccp_camera_title || '',
+    ccp_camera_description: camera.ccp_camera_description || '',
+    ccp_camera_highway: camera.ccp_camera_highway || '',
     cameraName: camera.internet_name || '',
     locationDescription: camera.locations_description || '',
     businessArea: camera.business_area || '',
@@ -633,7 +661,7 @@ export default function CameraDetails({ onBack }) {
               {viewsList.map((view) => (
                 <div key={view.id} className={`view-card ${view.active ? 'selected' : ''}`}>
                   <div className="view-card-top">
-                    <span className="direction-label">{view.direction}</span>
+                    <span className="direction-label">{view.orientation}</span>
                     <label className="toggle-switch">
                       <input type="checkbox" defaultChecked={view.is_on ?? true} />
                       <span className="slider round" />
@@ -641,7 +669,7 @@ export default function CameraDetails({ onBack }) {
                   </div>
                   <div className="view-card-image">
                     {mainImageUrl ? (
-                      <img src={mainImageUrl} alt={view.direction} />
+                      <img src={getViewImageUrl(view)} alt={view.orientation} />
                     ) : (
                       <div className="placeholder-thumb" />
                     )}
