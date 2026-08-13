@@ -1,21 +1,19 @@
-import { useCallback, useState, useContext } from 'react';
+import { useSelector } from 'react-redux';
 
 import Select from 'react-select';
 
-import { TrafficImpacts } from '../references';
 import { DraggableRows } from '../shared';
 import { selectStyle } from '../../components/Map/helpers';
+import { selectAllTrafficImpacts } from '../../slices/trafficImpacts';
 
-import { DataContext } from '../../contexts';
-
-function Impact({ id, item, change, update, current, }) {
+function Impact({ id, item, change, current, itemsSource=[] }) {
   return (
     <Select
       name={`impact`}
       value={[{ value: id, label: item.label, closed: item.closed }]}
-      options={ TrafficImpacts.filter((item) => (
+      options={ itemsSource.filter((item) => (
           item.id !== id && !current.includes(item.id)
-        )).map((item, ii) => ({ value: item.id, label: item.label, closed: item.closed }))
+        )).map((item) => ({ value: item.id, label: item.label, closed: item.closed }))
       }
       styles={selectStyle}
       onChange={(changed) => { change(id, { id: changed.value, label: changed.label, closed: changed.closed }) }}
@@ -24,7 +22,7 @@ function Impact({ id, item, change, update, current, }) {
 }
 
 export default function Impacts({ errors, event, dispatch }) {
-  const { impacts } = useContext(DataContext);
+  const impacts = useSelector(selectAllTrafficImpacts);
 
   return (
     <DraggableRows

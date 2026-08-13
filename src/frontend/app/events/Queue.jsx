@@ -10,7 +10,7 @@ import { PHRASES_LOOKUP } from './references';
 import { EventCardLocation } from './EventCardLocation.jsx';
 import { selectFeature } from '../components/Map/helpers';
 
-import { selectPending } from '../slices/events';
+import { memoizedPending } from '../slices/events';
 
 import './Queue.scss';
 
@@ -72,7 +72,8 @@ function Pending({ event, dispatch, goToFunc, map }) {
 }
 
 export default function Queue({ dispatch, goToFunc, map }) {
-  const pending = useSelector(selectPending);
+  const pending = useSelector(memoizedPending);
+
   return (
     <div className='queue'>
       {pending.map((event) => (

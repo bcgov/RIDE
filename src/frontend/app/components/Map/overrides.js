@@ -281,7 +281,7 @@ export default {
   },
   "TRANSPORTATION/DRA/Large/Resource Roads/Line": {
     layout: {
-      "visibility": "none"
+      // "visibility": "none"
     },
   },
   "TRANSPORTATION/DRA/Overpasses/Ramp/Line": {
@@ -446,12 +446,12 @@ export default {
 },
 "TRANSPORTATION/DRA Roads (L)/Resource Roads/0": {
   layout: {
-    "visibility": "none"
+    // "visibility": "none"
   },
 },
 "TRANSPORTATION/DRA Roads (L)/Resource Roads/1": {
   layout : {
-    "visibility": "none"
+    // "visibility": "none"
   },
 },
 "TRANSPORTATION/DRA/Seasonal/Large/Fill": {

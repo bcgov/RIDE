@@ -1,4 +1,4 @@
-import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
 
 import { API_HOST } from '../env.js';
 
@@ -28,6 +28,11 @@ const selectPending = (state) => {
     (e) => e.latest && !e.latest_approved
   );
 }
+
+const memoizedPending = createSelector(
+  state => state.events.entities,
+  (events) =>  Object.values(events).filter((event) => event.latest && !event.latest_approved),
+);
 
 export const slice = createSlice({
   name: 'events',
@@ -61,6 +66,7 @@ export const {
   selectIds: selectEventIds,
 } = eventsAdapter.getSelectors((state) => state.events)
 export {
+  memoizedPending,
   refreshThunk as refreshEvents,
   selectStatus as selectEventsStatus,
   selectPending,

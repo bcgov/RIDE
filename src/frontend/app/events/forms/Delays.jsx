@@ -1,9 +1,3 @@
-import { useCallback, useState } from 'react';
-
-import Select from 'react-select';
-
-import { TrafficImpacts } from '../references';
-import { DraggableRows } from '../shared';
 import { selectStyle } from '../../components/Map/helpers';
 
 export default function Delays({ event, dispatch }) {

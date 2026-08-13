@@ -33,11 +33,12 @@ export const slice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(refreshThunk.pending, (state, action) => {
+      .addCase(refreshThunk.pending, (state) => {
         state.status = 'pending';
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
+        action.payload.sort((a, b) => a.label < b.label ? 1 : -1);
         adapter.setAll(state, action.payload);
       })
       .addCase(refreshThunk.rejected, (state, action) => {

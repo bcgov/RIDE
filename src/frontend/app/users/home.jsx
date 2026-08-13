@@ -223,7 +223,7 @@ export default function Home() {
     });
   }
 
-  const removeOrgHanlder = () => {
+  const removeOrgHandler = () => {
     deleteOrganization(selectedOrg.id).then(() => {
       setAlertContext({
         type: 'success',
@@ -325,11 +325,11 @@ export default function Home() {
             <div
               className={'toolbar-btn'}
               tabIndex={0}
-              onClick={() => removeOrgHanlder()}
+              onClick={() => removeOrgHandler()}
               onKeyDown={
                 (keyEvent) => {
                   if (['Enter', 'NumpadEnter'].includes(keyEvent.key)) {
-                    removeOrgHanlder();
+                    removeOrgHandler();
                   }
                 }
               }>

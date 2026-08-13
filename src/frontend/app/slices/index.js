@@ -2,6 +2,7 @@ export { default as dms, refreshDms } from './dms';
 export { default as events } from './events';
 export { default as routes, refreshRoutes } from './routes';
 export { default as conditions, refreshConditions } from './conditions';
+export { default as organizations, refreshOrganizations } from './organizations';
 export { default as segments, refreshSegments } from './segments';
 export { default as serviceAreas, refreshServiceAreas } from './serviceAreas';
 export {
