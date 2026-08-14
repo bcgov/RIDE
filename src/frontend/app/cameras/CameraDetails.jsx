@@ -153,6 +153,7 @@ export default function CameraDetails({ onBack }) {
         region_id: formData.region ? Number(formData.region) : null,
         road_id: formData.road ? Number(formData.road) : null,
         road_maintenance_contractor_id: formData.roadMaintenanceContractor ? Number(formData.roadMaintenanceContractor) : null,
+        electrical_contractor_id: formData.electricalContractor ? Number(formData.electricalContractor) : null,
         
 
         // Pass null instead of empty string "" for numeric fields
@@ -442,11 +443,9 @@ export default function CameraDetails({ onBack }) {
           road: data.road?.id ?? null,
           region: data.region?.id ?? '',
           roadMaintenanceContractor: data.road_maintenance_contractor?.id ?? null,
+          electricalContractor: data.electrical_contractor?.id ?? null,
           businessArea: data.business_area?.id ?? null,
           
-          highway: data.locations_highway || '',
-          maintenanceContractor: data.maintenance_contractor || '',
-          electricalContractor: data.maintenance_electrical_contractor || '',
           latitude: data.locations_geo_latitude ?? '',
           longitude: data.locations_geo_longitude ?? '',
           elevation: data.locations_elevation || '',
@@ -555,12 +554,12 @@ export default function CameraDetails({ onBack }) {
     road: camera.road?.id ?? null,
     region: camera.region?.id ?? '',
     roadMaintenanceContractor: camera.road_maintenance_contractor?.id ?? null,
-
+    electricalContractor: camera.electrical_contractor?.id ?? null,
     businessArea: camera.business_area?.id ?? null,
 
 
     maintenanceContractor: camera.maintenance_contractor || '',
-    electricalContractor: camera.maintenance_electrical_contractor || '',
+    
     latitude: camera.locations_geo_latitude || '',
     longitude: camera.locations_geo_longitude || '',
     elevation: camera.locations_elevation || '',

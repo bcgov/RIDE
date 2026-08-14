@@ -6,6 +6,7 @@ export default function BasicsTab({ formData, onChange }) {
   const [roads, setRoads] = useState([]);
   const [businessAreas, setBusinessAreas] = useState([]);
   const [roadMaintenanceContractors, setRoadMaintenanceContractors] = useState([]);
+  const [electricalContractors, setElectricalContractors] = useState([]);
 
   useEffect(() => {
     const loadRegions = async () => {
@@ -53,6 +54,21 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
+  const loadElectricalContractors = async () => {
+    try {
+      const response = await fetch('/api/electrical-contractors/');
+      if (!response.ok) throw new Error('Failed to load electrical contractors');
+      const data = await response.json();
+      setElectricalContractors(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadElectricalContractors();
+}, []);
+
+useEffect(() => {
   const loadBusinessAreas = async () => {
     try {
       const response = await fetch('/api/business-areas/');
@@ -85,17 +101,6 @@ useEffect(() => {
 
         <div className="form-group">
           <label htmlFor="businessArea">Business area</label>
-          {/* <select
-            id="businessArea"
-            value={formData.businessArea}
-            onChange={(e) => onChange('businessArea', e.target.value)}
-          >
-            <option value="MoTT Electrical">MoTT Electrical</option>
-            <option value="Maintenance">Maintenance</option>
-          </select> */}
-
-
-          
           <select
               id="businessArea"
               value={formData.businessArea ?? ''}
@@ -155,17 +160,6 @@ useEffect(() => {
             <label htmlFor="maintenanceContractor">
               Road maintenance contractor
             </label>
-            {/* <select
-              id="maintenanceContractor"
-              value={formData.maintenanceContractor}
-              onChange={(e) =>
-                onChange('maintenanceContractor', e.target.value)
-              }
-            >
-              <option value="Dawson Road Maintenance">
-                Dawson Road Maintenance
-              </option>
-            </select> */}
             <select
               id="roadMaintenanceContractor"
               value={formData.roadMaintenanceContractor ?? ''}
@@ -188,12 +182,17 @@ useEffect(() => {
             </label>
             <select
               id="electricalContractor"
-              value={formData.electricalContractor}
-              onChange={(e) =>
-                onChange('electricalContractor', e.target.value)
-              }
+              value={formData.electricalContractor ?? ''}
+              onChange={(e) => onChange('electricalContractor', e.target.value)}
             >
-              <option value="Westcana Electric">Westcana Electric</option>
+              <option value="" disabled>
+                Select an electrical contractor
+              </option>
+              {electricalContractors.map((contractor) => (
+                <option key={contractor.id} value={contractor.id}>
+                  {contractor.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>

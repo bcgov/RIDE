@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from rest_framework import viewsets
 
-from .models import Camera, Region, Road, RoadMaintenanceContractor, BusinessArea
-from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer
+from .models import Camera, Region, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor
+from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer
 
 
 class CameraViewSet(viewsets.ModelViewSet):
@@ -25,3 +25,7 @@ class RoadMaintenanceContractorViewSet(viewsets.ReadOnlyModelViewSet):
 class BusinessAreaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = BusinessArea.objects.filter(is_active=True)
     serializer_class = BusinessAreaSerializer
+
+class ElectricalContractorViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ElectricalContractor.objects.filter(is_active=True)
+    serializer_class = ElectricalContractorSerializer

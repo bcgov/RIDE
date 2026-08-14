@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView, Region, Road, RoadMaintenanceContractor, BusinessArea
+from .models import Camera, CameraView, Region, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -36,6 +36,11 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
         model = BusinessArea
         fields = ["id", "name", "description", "is_active", "code"]
 
+class ElectricalContractorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ElectricalContractor
+        fields = ["id", "name", "description", "is_active", "contact_email", "contact_phone"]
+
 class CameraSerializer(serializers.ModelSerializer):
     views = CameraViewSerializer(many=True, required=False)
 
@@ -70,6 +75,15 @@ class CameraSerializer(serializers.ModelSerializer):
     business_area_id = serializers.PrimaryKeyRelatedField(
             queryset=BusinessArea.objects.all(),
             source='business_area',
+            write_only=True,
+            required=False,
+            allow_null=True,
+        )
+
+    electrical_contractor = ElectricalContractorSerializer(read_only=True)
+    electrical_contractor_id = serializers.PrimaryKeyRelatedField(
+            queryset=ElectricalContractor.objects.all(),
+            source='electrical_contractor',
             write_only=True,
             required=False,
             allow_null=True,
