@@ -190,7 +190,7 @@ function CameraLocation({
         {/* Title and metadata container */}
         <div className="camera-location-title-group">
           <div className="camera-location-meta">
-            <h4 className="camera-landmark">{cameras[0]?.ccp_camera_title}</h4>
+            <h4 className="camera-landmark">{cameras[0]?.title}</h4>
             <div className="camera-update-time">
               <FontAwesomeIcon icon={faRotate} />
               <span>5 minutes</span>
@@ -475,9 +475,9 @@ export default function Cameras() {
           .join(' ');
 
         const searchable = [
-          camera.ccp_camera_title,
-          camera.ccp_camera_description,
-          camera.ccp_camera_highway,
+          camera.title,
+          camera.description,
+          camera.road?.name,
           camera.id,
           viewsSearchable,
         ]

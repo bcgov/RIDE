@@ -28,8 +28,26 @@ class RegionSerializer(serializers.ModelSerializer):
 
 class CameraSerializer(serializers.ModelSerializer):
     views = CameraViewSerializer(many=True, required=False)
+    # road = RoadSerializer(read_only=True)
+    # region = RegionSerializer(read_only=True)
+
     road = RoadSerializer(read_only=True)
+    road_id = serializers.PrimaryKeyRelatedField(
+        queryset=Road.objects.all(),
+        source='road',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
     region = RegionSerializer(read_only=True)
+    region_id = serializers.PrimaryKeyRelatedField(
+        queryset=Region.objects.all(),
+        source='region',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = Camera

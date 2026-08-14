@@ -1,6 +1,41 @@
 import React from 'react';
+import { useEffect, useState } from 'react';
 
 export default function BasicsTab({ formData, onChange }) {
+  const [regions, setRegions] = useState([]);
+  const [roads, setRoads] = useState([]);
+
+  useEffect(() => {
+    const loadRegions = async () => {
+      try {
+        const response = await fetch('/api/regions/');
+        if (!response.ok) throw new Error('Failed to load regions');
+        const data = await response.json();
+        setRegions(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadRegions();
+  }, []);
+
+useEffect(() => {
+  const loadRoads = async () => {
+    try {
+      const response = await fetch('/api/roads/');
+      if (!response.ok) throw new Error('Failed to load roads');
+      const data = await response.json();
+      setRoads(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadRoads();
+}, []);
+
+
   return (
     <div className="tab-content basics-tab">
       {/* Required Details */}
@@ -8,12 +43,12 @@ export default function BasicsTab({ formData, onChange }) {
         <span className="section-title">Required details</span>
 
         <div className="form-group">
-          <label htmlFor="locationDescription">Location description</label>
+          <label htmlFor="description">Location description</label>
           <textarea
-            id="locationDescription"
+            id="description"
             rows={3}
-            value={formData.locationDescription}
-            onChange={(e) => onChange('locationDescription', e.target.value)}
+            value={formData.description}
+            onChange={(e) => onChange('description', e.target.value)}
           />
         </div>
 
@@ -34,25 +69,35 @@ export default function BasicsTab({ formData, onChange }) {
             <label htmlFor="region">Region</label>
             <select
               id="region"
-              value={formData.region}
+              value={formData.region ?? ''}
               onChange={(e) => onChange('region', e.target.value)}
             >
-              <option value="Northern">Northern</option>
-              <option value="South Coast">South Coast</option>
-              <option value="Southern Interior">Southern Interior</option>
+              <option value="" disabled>
+                Select a region
+              </option>
+              {regions.map((region) => (
+                <option key={region.id} value={region.id}>
+                  {region.name}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="form-group">
             <label htmlFor="highway">Road or highway</label>
             <select
-              id="highway"
-              value={formData.highway}
-              onChange={(e) => onChange('highway', e.target.value)}
+              id="road"
+              value={formData.road ?? ''}
+              onChange={(e) => onChange('road', e.target.value)}
             >
-              <option value="Highway 16">Highway 16</option>
-              <option value="Highway 1">Highway 1</option>
-              <option value="Highway 99">Highway 99</option>
+              <option value="" disabled>
+                Select a road
+              </option>
+              {roads.map((road) => (
+                <option key={road.id} value={road.id}>
+                  {road.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>

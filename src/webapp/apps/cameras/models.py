@@ -83,12 +83,10 @@ class PowerSource(BaseLookupModel):
 class Camera(models.Model):
 
     # ============================================================
-    # CCP
+    # Camera Identification
     # ============================================================
-    ccp_camera_title = models.CharField(max_length=255, null=True, blank=True)
-    ccp_camera_description = models.CharField(max_length=255, null=True, blank=True)
-    ccp_camera_highway = models.CharField(max_length=50, null=True, blank=True)
-    ccp_region = models.CharField(max_length=50, null=True, blank=True)
+    title = models.CharField(max_length=255, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
 
     # ============================================================ 
     # Location & Jurisdiction
@@ -192,7 +190,7 @@ class Camera(models.Model):
     )
 
     def __str__(self):
-        return self.ccp_camera_title or f"Camera {self.pk}"
+        return self.title or f"Camera {self.pk}"
 
 
 class CameraView(models.Model):

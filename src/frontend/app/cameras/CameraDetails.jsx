@@ -30,31 +30,31 @@ export default function CameraDetails({ onBack }) {
   const [activeTab, setActiveTab] = useState('Basics');
 
   const [formData, setFormData] = useState({
-    ccp_camera_title: camera
-      ? camera.ccp_camera_title || ''
+    title: camera
+      ? camera.title || ''
       : '',
-    ccp_camera_description: camera
-      ? camera.ccp_camera_description || ''
+    description: camera
+      ? camera.description || ''
       : '',
-    ccp_camera_highway: camera
-      ? camera.ccp_camera_highway || ''
+
+    // road: camera
+    //   ? camera.road || null
+    //   : null,
+
+    // region: camera
+    //   ? camera.region || ''
+    //   : '',
+
+    region: camera
+      ? camera.region?.id ?? ''
       : '',
 
     road: camera
-      ? camera.road || null
+      ? camera.road?.id ?? null
       : null,
 
-    businessArea: camera
-      ? camera.business_area || ''
-      : '',
+    
 
-    region: camera
-      ? camera.ccp_region || ''
-      : '',
-
-    highway: camera
-      ? camera.locations_highway || ''
-      : '',
 
     maintenanceContractor: camera
       ? camera.maintenance_contractor || ''
@@ -92,23 +92,19 @@ export default function CameraDetails({ onBack }) {
   const isNewCamera = !camera;
 
   const [setupData, setSetupData] = useState({
-    cameraName: camera
-      ? camera.ccp_camera_title || ''
+    title: camera
+      ? camera.title || ''
       : '',
-    locationDescription: camera
-      ? camera.cam_internet_caption || ''
-      : '',
-
-    businessArea: camera
-      ? camera.business_area || ''
+    description: camera
+      ? camera.description || ''
       : '',
 
     region: camera
-      ? camera.ccp_region || ''
+      ? camera.region || ''
       : '',
 
-    highway: camera
-      ? camera.locations_highway || ''
+    road: camera
+      ? camera.road || ''
       : '',
 
     maintenanceContractor: camera
@@ -155,20 +151,11 @@ export default function CameraDetails({ onBack }) {
   const handleSave = async () => {
     try {
       const payload = {
-        ccp_camera_title: formData.ccp_camera_title,
-        ccp_camera_description: formData.ccp_camera_description,
-        ccp_camera_highway: formData.ccp_camera_highway,
-
-        road: formData.road ? formData.road.id : null, // Send road ID or null if not selected
-
-        // ccp_camera_title: formData.cameraName,
-        internet_caption: formData.locationDescription,
-        locations_description: formData.locationDescription,
-        ccp_region: formData.region,
-        locations_business_area: formData.businessArea,
-        locations_highway: formData.highway,
-        // locations_geo_latitude: formData.latitude,
-        // locations_geo_longitude: formData.longitude,
+        title: formData.title,
+        description: formData.description,
+        region_id: formData.region ? Number(formData.region) : null,
+        road_id: formData.road ? Number(formData.road) : null,
+        
 
         // Pass null instead of empty string "" for numeric fields
         locations_geo_latitude: formData.latitude ? Number(formData.latitude) : null,
@@ -436,51 +423,54 @@ export default function CameraDetails({ onBack }) {
   const [isSavingName, setIsSavingName] = useState(false);
 
   useEffect(() => {
-  const loadCamera = async () => {
-    try {
-      const response = await fetch(`/api/cameras/${id}/`);
+    const loadCamera = async () => {
+      try {
+        const response = await fetch(`/api/cameras/${id}/`);
 
-      if (!response.ok) {
-        throw new Error(`Failed to load camera: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to load camera: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Camera loaded:", data);
+
+        setCamera(data);
+
+        // Populate form data immediately from backend response
+        setFormData({
+          cameraName: data.title || '',
+          description: data.description || '',
+
+          // road: data.road || null, // Use the road object from the backend
+          // region: data.region || '',
+
+          road: data.road?.id ?? null,
+          region: data.region?.id ?? '',
+
+
+          
+          description: data.description || '',
+          businessArea: data.business_area || data.locations_business_area || '',
+          
+          highway: data.locations_highway || '',
+          maintenanceContractor: data.maintenance_contractor || '',
+          electricalContractor: data.maintenance_electrical_contractor || '',
+          latitude: data.locations_geo_latitude ?? '',
+          longitude: data.locations_geo_longitude ?? '',
+          elevation: data.locations_elevation || '',
+          imageWatermark: data.image_watermark || '',
+          cameraCredit: data.cam_internet_credit || '',
+          cameraCreditUrl: data.cam_internet_website_url || '',
+        });
+      } catch (error) {
+        console.error("Failed to load camera:", error);
       }
+    };
 
-      const data = await response.json();
-      console.log("Camera loaded:", data);
-
-      setCamera(data);
-
-      // Populate form data immediately from backend response
-      setFormData({
-        ccp_camera_title: data.ccp_camera_title || data.internet_caption || '',
-        ccp_camera_description: data.ccp_camera_description || '',
-        ccp_camera_highway: data.ccp_camera_highway || '',
-
-        road: data.road || null, // Use the road object from the backend
-
-        
-        cameraName: data.ccp_camera_title || '',
-        locationDescription: data.locations_description || data.internet_caption || '',
-        businessArea: data.business_area || data.locations_business_area || '',
-        region: data.ccp_region || '',
-        highway: data.locations_highway || '',
-        maintenanceContractor: data.maintenance_contractor || '',
-        electricalContractor: data.maintenance_electrical_contractor || '',
-        latitude: data.locations_geo_latitude ?? '',
-        longitude: data.locations_geo_longitude ?? '',
-        elevation: data.locations_elevation || '',
-        imageWatermark: data.image_watermark || '',
-        cameraCredit: data.cam_internet_credit || '',
-        cameraCreditUrl: data.cam_internet_website_url || '',
-      });
-    } catch (error) {
-      console.error("Failed to load camera:", error);
+    if (id) {
+      loadCamera();
     }
-  };
-
-  if (id) {
-    loadCamera();
-  }
-}, [id]);
+  }, [id]);
 
   // Update viewsData whenever camera.views arrives or updates
   useEffect(() => {
@@ -509,7 +499,7 @@ export default function CameraDetails({ onBack }) {
       return;
     }
 
-    if (trimmedName === camera?.ccp_camera_title) {
+    if (trimmedName === camera?.title) {
       setIsEditingName(false);
       return;
     }
@@ -524,7 +514,7 @@ export default function CameraDetails({ onBack }) {
           'X-CSRFToken': getCookie('csrftoken'),
         },
         body: JSON.stringify({
-          ccp_camera_title: trimmedName,
+          title: trimmedName,
         }),
       });
 
@@ -567,18 +557,12 @@ export default function CameraDetails({ onBack }) {
     }
 
   setFormData({
-    ccp_camera_title: camera.ccp_camera_title || '',
-    ccp_camera_description: camera.ccp_camera_description || '',
-    ccp_camera_highway: camera.ccp_camera_highway || '',
+    title: camera.title || '',
+    description: camera.description || '',
+    road: camera.road?.id ?? null,
+    region: camera.region?.id ?? '',
 
-    road: camera.road || null,
-
-
-    cameraName: camera.ccp_camera_title || '',
-    locationDescription: camera.locations_description || '',
     businessArea: camera.business_area || '',
-    region: camera.ccp_region || '',
-    highway: camera.locations_highway || '',
     maintenanceContractor: camera.maintenance_contractor || '',
     electricalContractor: camera.maintenance_electrical_contractor || '',
     latitude: camera.locations_geo_latitude || '',
@@ -595,48 +579,16 @@ export default function CameraDetails({ onBack }) {
       {/* Header Bar */}
       <header className="details-header">
 
-    {/* <div className="title-section">
-      {isEditingName ? (
-        <input
-          type="text"
-          className="camera-name-input"
-          value={formData.cameraName}
-          onChange={(event) =>
-            setFormData((prev) => ({
-              ...prev,
-              cameraName: event.target.value,
-            }))
-          }
-          onBlur={() => setIsEditingName(false)}
-          autoFocus
-        />
-      ) : (
-        <>
-          <h1>{formData.ccp_camera_title || 'New Camera'}</h1>
-
-          <button
-            type="button"
-            className="icon-edit-btn"
-            aria-label="Edit title"
-            onClick={() => setIsEditingName(true)}
-          >
-            <FontAwesomeIcon icon={faPenToSquare} />
-          </button>
-        </>
-      )}
-    </div> */}
-
-
     <div className="title-section">
       {isEditingName ? (
         <input
           type="text"
           className="camera-name-input"
-          value={formData.ccp_camera_title}
+          value={formData.title}
           onChange={(event) =>
             setFormData((prev) => ({
               ...prev,
-              ccp_camera_title: event.target.value,
+              title: event.target.value,
               cameraName: event.target.value,
             }))
           }
@@ -647,7 +599,7 @@ export default function CameraDetails({ onBack }) {
       ) : (
         <>
           <h1>
-            {formData.ccp_camera_title || camera?.ccp_camera_title || 'New Camera'}
+            {formData.title || 'New Camera'}
           </h1>
 
           <button
@@ -702,7 +654,7 @@ export default function CameraDetails({ onBack }) {
 
             <div className="main-image-wrapper">
               {mainImageUrl ? (
-                <img src={mainImageUrl} alt={camera?.ccp_camera_title} />
+                <img src={mainImageUrl} alt={camera?.title} />
               ) : (
                 <div className="image-placeholder">No image preview available</div>
               )}
@@ -716,31 +668,6 @@ export default function CameraDetails({ onBack }) {
                 <FontAwesomeIcon icon={faExpand} /> Expand all
               </button>
             </div>
-
-            {/* <div className="views-grid">
-              {viewsList.map((view) => (
-                <div key={view.id} className={`view-card ${view.active ? 'selected' : ''}`}>
-                  <div className="view-card-top">
-                    <span className="direction-label">{view.orientation}</span>
-                    <label className="toggle-switch">
-                      <input type="checkbox" defaultChecked={view.is_on ?? true} />
-                      <span className="slider round" />
-                    </label>
-                  </div>
-                  <div className="view-card-image">
-                    {mainImageUrl ? (
-                      <img src={getViewImageUrl(view)} alt={view.orientation} />
-                    ) : (
-                      <div className="placeholder-thumb" />
-                    )}
-                  </div>
-                  <div className="view-card-footer">
-                    <FontAwesomeIcon icon={faClock} />
-                    <span>{view.time || '1:00 pm PST'}</span>
-                  </div>
-                </div>
-              ))}
-            </div> */}
 
             <div className="views-grid">
               {viewsList

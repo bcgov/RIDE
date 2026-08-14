@@ -3,9 +3,9 @@ import { useState } from 'react';
 import './CameraForm.scss';
 
 export default function CameraForm({ camera, onSubmit, onCancel }) {
-  const [name, setName] = useState(camera?.ccp_camera_title || '');
+  const [name, setName] = useState(camera?.title || '');
   const [caption, setCaption] = useState(
-    camera?.cam_internet_caption || ''
+    camera?.description || ''
   );
 
   const handleSubmit = async (event) => {
@@ -13,8 +13,8 @@ export default function CameraForm({ camera, onSubmit, onCancel }) {
 
     await onSubmit({
       ...(camera || {}),
-      ccp_camera_title: name,
-      ccp_camera_description: caption,
+      title: name,
+      description: caption,
     });
   };
 
