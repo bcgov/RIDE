@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 export default function BasicsTab({ formData, onChange }) {
   const [regions, setRegions] = useState([]);
   const [roads, setRoads] = useState([]);
+  // const [businessAreas, setBusinessAreas] = useState([]);
+  const [roadMaintenanceContractors, setRoadMaintenanceContractors] = useState([]);
 
   useEffect(() => {
     const loadRegions = async () => {
@@ -35,6 +37,35 @@ useEffect(() => {
   loadRoads();
 }, []);
 
+useEffect(() => {
+  const loadRoadMaintenanceContractors = async () => {
+    try {
+      const response = await fetch('/api/road-maintenance-contractors/');
+      if (!response.ok) throw new Error('Failed to load road maintenance contractors');
+      const data = await response.json();
+      setRoadMaintenanceContractors(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadRoadMaintenanceContractors();
+}, []);
+
+// useEffect(() => {
+//   const loadBusinessAreas = async () => {
+//     try {
+//       const response = await fetch('/api/business-areas/');
+//       if (!response.ok) throw new Error('Failed to load business areas');
+//       const data = await response.json();
+//       setBusinessAreas(data);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   loadBusinessAreas();
+// }, []);
 
   return (
     <div className="tab-content basics-tab">
@@ -62,6 +93,23 @@ useEffect(() => {
             <option value="MoTT Electrical">MoTT Electrical</option>
             <option value="Maintenance">Maintenance</option>
           </select>
+
+
+          
+          {/* <select
+              id="businessArea"
+              value={formData.businessArea ?? ''}
+              onChange={(e) => onChange('businessArea', e.target.value)}
+            >
+              <option value="" disabled>
+                Select a business area
+              </option>
+              {businessAreas.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {area.name}
+                </option>
+              ))}
+            </select> */}
         </div>
 
         <div className="form-row two-col">
@@ -107,7 +155,7 @@ useEffect(() => {
             <label htmlFor="maintenanceContractor">
               Road maintenance contractor
             </label>
-            <select
+            {/* <select
               id="maintenanceContractor"
               value={formData.maintenanceContractor}
               onChange={(e) =>
@@ -117,6 +165,20 @@ useEffect(() => {
               <option value="Dawson Road Maintenance">
                 Dawson Road Maintenance
               </option>
+            </select> */}
+            <select
+              id="roadMaintenanceContractor"
+              value={formData.roadMaintenanceContractor ?? ''}
+              onChange={(e) => onChange('roadMaintenanceContractor', e.target.value)}
+            >
+              <option value="" disabled>
+                Select a road maintenance contractor
+              </option>
+              {roadMaintenanceContractors.map((contractor) => (
+                <option key={contractor.id} value={contractor.id}>
+                  {contractor.name}
+                </option>
+              ))}
             </select>
           </div>
 

@@ -37,13 +37,9 @@ export default function CameraDetails({ onBack }) {
       ? camera.description || ''
       : '',
 
-    // road: camera
-    //   ? camera.road || null
-    //   : null,
-
-    // region: camera
-    //   ? camera.region || ''
-    //   : '',
+    businessArea: camera
+      ? camera.business_area?.id || ''
+      : '',
 
     region: camera
       ? camera.region?.id ?? ''
@@ -56,8 +52,8 @@ export default function CameraDetails({ onBack }) {
     
 
 
-    maintenanceContractor: camera
-      ? camera.maintenance_contractor || ''
+    roadMaintenanceContractor: camera
+      ? camera.road_maintenance_contractor?.id ?? null
       : '',
 
     electricalContractor: camera
@@ -153,8 +149,10 @@ export default function CameraDetails({ onBack }) {
       const payload = {
         title: formData.title,
         description: formData.description,
+        // business_area_id: formData.businessArea ? Number(formData.businessArea) : null,
         region_id: formData.region ? Number(formData.region) : null,
         road_id: formData.road ? Number(formData.road) : null,
+        road_maintenance_contractor_id: formData.roadMaintenanceContractor ? Number(formData.roadMaintenanceContractor) : null,
         
 
         // Pass null instead of empty string "" for numeric fields
@@ -443,9 +441,11 @@ export default function CameraDetails({ onBack }) {
 
           // road: data.road || null, // Use the road object from the backend
           // region: data.region || '',
+          // businessArea: data.business_area || '',
 
           road: data.road?.id ?? null,
           region: data.region?.id ?? '',
+          roadMaintenanceContractor: data.road_maintenance_contractor?.id ?? null,
 
 
           
@@ -559,8 +559,10 @@ export default function CameraDetails({ onBack }) {
   setFormData({
     title: camera.title || '',
     description: camera.description || '',
+    businessArea: camera.business_area || '',
     road: camera.road?.id ?? null,
     region: camera.region?.id ?? '',
+    roadMaintenanceContractor: camera.road_maintenance_contractor?.id ?? null,
 
     businessArea: camera.business_area || '',
     maintenanceContractor: camera.maintenance_contractor || '',

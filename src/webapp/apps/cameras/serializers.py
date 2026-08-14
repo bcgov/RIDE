@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView, Region, Road
+from .models import Camera, CameraView, Region, Road, RoadMaintenanceContractor, BusinessArea
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -24,7 +24,17 @@ class RoadSerializer(serializers.ModelSerializer):
 class RegionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Region
-        fields = ["id", "name", "description"]
+        fields = ["id", "name", "description", "is_active"]
+
+class RoadMaintenanceContractorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoadMaintenanceContractor
+        fields = ["id", "name", "description", "is_active", "contact_email", "contact_phone"]
+
+# class BusinessAreaSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = BusinessArea
+#         fields = ["id", "name", "code"]
 
 class CameraSerializer(serializers.ModelSerializer):
     views = CameraViewSerializer(many=True, required=False)
@@ -44,6 +54,15 @@ class CameraSerializer(serializers.ModelSerializer):
     region_id = serializers.PrimaryKeyRelatedField(
         queryset=Region.objects.all(),
         source='region',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    road_maintenance_contractor = RoadMaintenanceContractorSerializer(read_only=True)
+    road_maintenance_contractor_id = serializers.PrimaryKeyRelatedField(
+        queryset=RoadMaintenanceContractor.objects.all(),
+        source='road_maintenance_contractor',
         write_only=True,
         required=False,
         allow_null=True,
