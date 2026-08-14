@@ -431,24 +431,18 @@ export default function Cameras() {
     await loadCameras();
   };
 
-
-  /*
-   * Get unique values for filters.
-   */
   const regions = useMemo(() => {
-    return [
-      ...new Set(
-        cameras
-          .map((camera) =>
-            camera.region_name ||
-            camera.region ||
-            camera.ccp_region ||
-            ''
-          )
-          .filter(Boolean)
-      ),
-    ].sort();
-  }, [cameras]);
+  return [
+    ...new Set(
+      cameras
+        .map((camera) =>
+          camera.region?.name ||
+          ''
+        )
+        .filter(Boolean)
+    ),
+  ].sort();
+}, [cameras]);
 
 
   const highways = useMemo(() => {
@@ -466,9 +460,7 @@ export default function Cameras() {
 
     return cameras.filter((camera) => {
       const cameraRegion =
-        camera.region_name ||
-        camera.region ||
-        camera.ccp_region ||
+        camera.region?.name ||
         '';
 
       const cameraHighway = camera.road?.name || '';
