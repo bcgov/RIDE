@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from timezonefinder import TimezoneFinder
 tz_finder = TimezoneFinder(in_memory=True)
 
-from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType, PHRASES_LOOKUP
+from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType, SITUATION_LOOKUP, EventSubtype
 from apps.events.roads import roads
 
 logger = logging.getLogger(__name__)
@@ -237,10 +237,10 @@ def build_event_description(event, ivr=False):
         timezone = ZoneInfo(zone)
 
     # Situation
-    if event.situation and event.situation in PHRASES_LOOKUP:
+    if event.situation and event.situation in SITUATION_LOOKUP:
         # Non-rc location for IVR
         sitn_loc_description = get_location_description(event) if ivr else ''
-        parts.append(sentence(PHRASES_LOOKUP[event.situation] + sitn_loc_description))
+        parts.append(sentence(SITUATION_LOOKUP[event.situation].label + sitn_loc_description))
 
     # Rcs and chainups
     if event.event_type == EventType.ROAD_CONDITION or event.event_type == EventType.CHAIN_UP:
@@ -451,15 +451,19 @@ def build_event_payload(target_event):
         return target_event.event_type
 
     def get_event_subtypes():
-        category = target_event.category or ""
-        matched = []
-        for subtype, labels in EVENT_SUBTYPE_GROUPS.items():
-            if category in labels:
-                matched.append(subtype)
+        event_sitr = target_event.situation or ""
+        matched_subtypes = []
+        for subtype, subtype_sitrs in EVENT_SUBTYPE_GROUPS.items():
+            if event_sitr in subtype_sitrs:
+                matched_subtypes.append(subtype)
                 break
+
+        # Append 'Planned event' for all planned events
         if target_event.event_type == "Planned event":
-            matched.append("PLANNED_EVENT")
-        return matched or ["HAZARD"]
+            matched_subtypes.append(EventSubtype.PLANNED_EVENT.value)
+
+        # Default to HAZARD if nothing matched, must use .value for capitalized text
+        return [s.value for s in matched_subtypes] or [EventSubtype.HAZARD.value]
 
     def get_default_road_name():
         road_name = "Other Roads"
