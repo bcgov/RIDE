@@ -149,7 +149,7 @@ export default function CameraDetails({ onBack }) {
       const payload = {
         title: formData.title,
         description: formData.description,
-        // business_area_id: formData.businessArea ? Number(formData.businessArea) : null,
+        business_area_id: formData.businessArea ? Number(formData.businessArea) : null,
         region_id: formData.region ? Number(formData.region) : null,
         road_id: formData.road ? Number(formData.road) : null,
         road_maintenance_contractor_id: formData.roadMaintenanceContractor ? Number(formData.roadMaintenanceContractor) : null,
@@ -439,18 +439,10 @@ export default function CameraDetails({ onBack }) {
           cameraName: data.title || '',
           description: data.description || '',
 
-          // road: data.road || null, // Use the road object from the backend
-          // region: data.region || '',
-          // businessArea: data.business_area || '',
-
           road: data.road?.id ?? null,
           region: data.region?.id ?? '',
           roadMaintenanceContractor: data.road_maintenance_contractor?.id ?? null,
-
-
-          
-          description: data.description || '',
-          businessArea: data.business_area || data.locations_business_area || '',
+          businessArea: data.business_area?.id ?? null,
           
           highway: data.locations_highway || '',
           maintenanceContractor: data.maintenance_contractor || '',
@@ -559,12 +551,14 @@ export default function CameraDetails({ onBack }) {
   setFormData({
     title: camera.title || '',
     description: camera.description || '',
-    businessArea: camera.business_area || '',
+    
     road: camera.road?.id ?? null,
     region: camera.region?.id ?? '',
     roadMaintenanceContractor: camera.road_maintenance_contractor?.id ?? null,
 
-    businessArea: camera.business_area || '',
+    businessArea: camera.business_area?.id ?? null,
+
+
     maintenanceContractor: camera.maintenance_contractor || '',
     electricalContractor: camera.maintenance_electrical_contractor || '',
     latitude: camera.locations_geo_latitude || '',

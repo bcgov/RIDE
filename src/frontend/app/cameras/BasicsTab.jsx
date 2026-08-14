@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 export default function BasicsTab({ formData, onChange }) {
   const [regions, setRegions] = useState([]);
   const [roads, setRoads] = useState([]);
-  // const [businessAreas, setBusinessAreas] = useState([]);
+  const [businessAreas, setBusinessAreas] = useState([]);
   const [roadMaintenanceContractors, setRoadMaintenanceContractors] = useState([]);
 
   useEffect(() => {
@@ -52,20 +52,20 @@ useEffect(() => {
   loadRoadMaintenanceContractors();
 }, []);
 
-// useEffect(() => {
-//   const loadBusinessAreas = async () => {
-//     try {
-//       const response = await fetch('/api/business-areas/');
-//       if (!response.ok) throw new Error('Failed to load business areas');
-//       const data = await response.json();
-//       setBusinessAreas(data);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
+useEffect(() => {
+  const loadBusinessAreas = async () => {
+    try {
+      const response = await fetch('/api/business-areas/');
+      if (!response.ok) throw new Error('Failed to load business areas');
+      const data = await response.json();
+      setBusinessAreas(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-//   loadBusinessAreas();
-// }, []);
+  loadBusinessAreas();
+}, []);
 
   return (
     <div className="tab-content basics-tab">
@@ -85,18 +85,18 @@ useEffect(() => {
 
         <div className="form-group">
           <label htmlFor="businessArea">Business area</label>
-          <select
+          {/* <select
             id="businessArea"
             value={formData.businessArea}
             onChange={(e) => onChange('businessArea', e.target.value)}
           >
             <option value="MoTT Electrical">MoTT Electrical</option>
             <option value="Maintenance">Maintenance</option>
-          </select>
+          </select> */}
 
 
           
-          {/* <select
+          <select
               id="businessArea"
               value={formData.businessArea ?? ''}
               onChange={(e) => onChange('businessArea', e.target.value)}
@@ -109,7 +109,7 @@ useEffect(() => {
                   {area.name}
                 </option>
               ))}
-            </select> */}
+            </select>
         </div>
 
         <div className="form-row two-col">

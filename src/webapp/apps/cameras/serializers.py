@@ -31,15 +31,13 @@ class RoadMaintenanceContractorSerializer(serializers.ModelSerializer):
         model = RoadMaintenanceContractor
         fields = ["id", "name", "description", "is_active", "contact_email", "contact_phone"]
 
-# class BusinessAreaSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = BusinessArea
-#         fields = ["id", "name", "code"]
+class BusinessAreaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BusinessArea
+        fields = ["id", "name", "description", "is_active", "code"]
 
 class CameraSerializer(serializers.ModelSerializer):
     views = CameraViewSerializer(many=True, required=False)
-    # road = RoadSerializer(read_only=True)
-    # region = RegionSerializer(read_only=True)
 
     road = RoadSerializer(read_only=True)
     road_id = serializers.PrimaryKeyRelatedField(
@@ -67,6 +65,15 @@ class CameraSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+
+    business_area = BusinessAreaSerializer(read_only=True)
+    business_area_id = serializers.PrimaryKeyRelatedField(
+            queryset=BusinessArea.objects.all(),
+            source='business_area',
+            write_only=True,
+            required=False,
+            allow_null=True,
+        )
 
     class Meta:
         model = Camera
