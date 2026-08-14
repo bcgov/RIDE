@@ -1,5 +1,85 @@
 from django.db import models
 
+
+class BaseLookupModel(models.Model):
+    """Abstract base class for standard lookup/reference tables."""
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Road(BaseLookupModel):
+    """MOTT managed roads and highways."""
+    code = models.CharField(max_length=50, null=True, blank=True, help_text="e.g. Hwy 1, Hwy 99")
+
+    class Meta:
+        verbose_name = "Road / Highway"
+        verbose_name_plural = "Roads & Highways"
+
+
+class Region(BaseLookupModel):
+    """Transportation regions."""
+    number = models.PositiveIntegerField(null=True, blank=True)
+
+
+class RoadMaintenanceContractor(BaseLookupModel):
+    """Road maintenance service providers / contractors."""
+    contact_email = models.EmailField(null=True, blank=True)
+    contact_phone = models.CharField(max_length=30, null=True, blank=True)
+
+
+class ElectricalContractor(BaseLookupModel):
+    """Electrical service contractors."""
+    contact_email = models.EmailField(null=True, blank=True)
+    contact_phone = models.CharField(max_length=30, null=True, blank=True)
+
+
+class BusinessArea(BaseLookupModel):
+    """Business areas or operational districts."""
+    code = models.CharField(max_length=50, null=True, blank=True)
+
+
+class ConnectionType(BaseLookupModel):
+    """Type of network/data connection (e.g., Cellular, Fiber, Satellite)."""
+    pass
+
+
+class ConnectionProtocol(BaseLookupModel):
+    """Protocol used for connection (e.g., HTTP, HTTPS, RTSP, SNMP)."""
+    pass
+
+
+class CommunicationType(BaseLookupModel):
+    """Type of communication method (e.g., Serial, IP, Wireless)."""
+    pass
+
+
+class CommunicationDevice(BaseLookupModel):
+    """Hardware device for comms (e.g., Modem model, Router model)."""
+    model_number = models.CharField(max_length=100, null=True, blank=True)
+
+
+class Antenna(BaseLookupModel):
+    """Antenna type/hardware used for wireless links."""
+    gain_dbi = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+
+class ServiceProvider(BaseLookupModel):
+    """Telecom / ISP service providers (e.g., Telus, Rogers)."""
+    account_number = models.CharField(max_length=100, null=True, blank=True)
+
+
+class PowerSource(BaseLookupModel):
+    """Power grid / generation source (e.g., Solar, AC Grid, Battery)."""
+    pass
+
 class Camera(models.Model):
 
     # ============================================================
@@ -8,126 +88,111 @@ class Camera(models.Model):
     ccp_camera_title = models.CharField(max_length=255, null=True, blank=True)
     ccp_camera_description = models.CharField(max_length=255, null=True, blank=True)
     ccp_camera_highway = models.CharField(max_length=50, null=True, blank=True)
+    ccp_region = models.CharField(max_length=50, null=True, blank=True)
 
-
-
-    # ============================================================
-    # Internet
-    # ============================================================
-
-    internet_caption = models.CharField(max_length=255, null=True, blank=True)
-    internet_credit = models.CharField(max_length=255, null=True, blank=True)
-    internet_comments = models.TextField(null=True, blank=True)
-    internet_website_url = models.CharField(max_length=255, null=True, blank=True)
-    internet_getfile2_url = models.CharField(max_length=255, null=True, blank=True)
-    internet_drivebc_url = models.CharField(max_length=255, null=True, blank=True)
-    internet_ftp_path = models.CharField(max_length=255, null=True, blank=True)
-    internet_ftp_folder = models.CharField(max_length=255, null=True, blank=True)
-    internet_ftp_filename = models.CharField(max_length=255, null=True, blank=True)
-    internet_display_folder = models.CharField(max_length=255, null=True, blank=True)
-    internet_display_filename = models.CharField(max_length=50, null=True, blank=True)
-    internet_contact_notes = models.TextField(null=True, blank=True)
-    internet_dbc_mark = models.CharField(max_length=50, null=True, blank=True)
-    internet_inset_horizontal = models.BooleanField(default=False)
-    internet_updated_by = models.CharField(max_length=50, null=True, blank=True)
-    internet_last_updated = models.DateTimeField(null=True, blank=True)
-
-    # ============================================================
-    # Locations
-    # ============================================================
-
-    locations_description = models.CharField(max_length=255, null=True, blank=True)
-    locations_region = models.CharField(max_length=50, null=True, blank=True)
-    locations_business_area = models.CharField(max_length=50, null=True, blank=True)
-    locations_highway = models.CharField(max_length=50, null=True, blank=True)
-    locations_highway_section = models.CharField(max_length=255, null=True, blank=True)
-    locations_orientation = models.CharField(max_length=50, null=True, blank=True)
-    locations_landmark = models.CharField(max_length=255, null=True, blank=True)
-    locations_crossroad = models.CharField(max_length=255, null=True, blank=True)
-    locations_elevation = models.CharField(max_length=50, null=True, blank=True)
-    locations_cam_group = models.CharField(max_length=50, null=True, blank=True)
-    locations_geo_latitude = models.CharField(max_length=32, null=True, blank=True)
-    locations_geo_longitude = models.CharField(max_length=32, null=True, blank=True)
-    locations_albers_northing = models.CharField(max_length=255, null=True, blank=True)
-    locations_albers_easting = models.CharField(max_length=255, null=True, blank=True)
-    locations_segment = models.CharField(max_length=255, null=True, blank=True)
-    locations_lrs_node = models.CharField(max_length=255, null=True, blank=True)
-    locations_dd = models.CharField(max_length=255, null=True, blank=True)
-    locations_map_art_no = models.CharField(max_length=255, null=True, blank=True)
-    locations_thumbnail_map_url = models.CharField(max_length=255, null=True, blank=True)
-    locations_regional_map_url = models.CharField(max_length=255, null=True, blank=True)
-    locations_updated_by = models.CharField(max_length=255, null=True, blank=True)
-    locations_last_updated = models.DateTimeField(null=True, blank=True)
-    locations_weather_station = models.CharField(max_length=255, null=True, blank=True)
-    locations_forecast_id = models.CharField(max_length=255, null=True, blank=True)
-
-    # ============================================================
-    # Maintenance
-    # ============================================================
-
-    maintenance_asset_no = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_camera_make = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_sn = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_local_ip = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_credentials = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_public_ip = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_upload_image = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_uploads_every = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_link_check = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_comm_tech = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_comm_device = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_service_provider = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_modem_ip = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_signal = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_modem_esn = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_msl = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_antennae = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_modem_phone = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_ps_sn = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_baud_rate = models.CharField(max_length=255, null=True, blank=True)
-
-    maintenance_month_implemented = models.CharField(
-        max_length=255, null=True, blank=True
+    # ============================================================ 
+    # Location & Jurisdiction
+    # ============================================================ 
+    road = models.ForeignKey(
+        Road,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+        verbose_name="Road / Highway",
     )
-    maintenance_day_implemented = models.CharField(
-        max_length=255, null=True, blank=True
+    region = models.ForeignKey(
+        Region,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
     )
-    maintenance_year_implemented = models.CharField(
-        max_length=255, null=True, blank=True
+    business_area = models.ForeignKey(
+        BusinessArea,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
     )
 
-    maintenance_month_installed = models.CharField(
-        max_length=50, null=True, blank=True
+    # ============================================================ 
+    # Contractors
+    # ============================================================ 
+    road_maintenance_contractor = models.ForeignKey(
+        RoadMaintenanceContractor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
     )
-    maintenance_day_installed = models.CharField(
-        max_length=50, null=True, blank=True
-    )
-    maintenance_year_installed = models.CharField(
-        max_length=50, null=True, blank=True
-    )
-
-    maintenance_month_modem = models.CharField(
-        max_length=50, null=True, blank=True
-    )
-    maintenance_day_modem = models.CharField(
-        max_length=50, null=True, blank=True
-    )
-    maintenance_year_modem = models.CharField(
-        max_length=50, null=True, blank=True
+    electrical_contractor = models.ForeignKey(
+        ElectricalContractor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
     )
 
-    maintenance_signal_strength = models.CharField(
-        max_length=255, null=True, blank=True
+    # ============================================================ 
+    # Networking & Comms Infrastructure
+    # ============================================================ 
+    connection_type = models.ForeignKey(
+        ConnectionType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
     )
-    maintenance_owner = models.CharField(max_length=255, null=True, blank=True)
-    maintenance_alternate_owner = models.CharField(
-        max_length=255, null=True, blank=True
+    connection_protocol = models.ForeignKey(
+        ConnectionProtocol,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
     )
-    maintenance_maint_notes = models.CharField(
-        max_length=255, null=True, blank=True
+    communication_type = models.ForeignKey(
+        CommunicationType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
     )
-    maintenance_notes = models.TextField(null=True, blank=True)
-    maintenance_hardware_notes = models.TextField(null=True, blank=True)
+    communication_device = models.ForeignKey(
+        CommunicationDevice,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+    )
+    antenna = models.ForeignKey(
+        Antenna,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+    )
+    service_provider = models.ForeignKey(
+        ServiceProvider,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+    )
+
+    # ============================================================ 
+    # Power
+    # ============================================================ 
+    power_source = models.ForeignKey(
+        PowerSource,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+    )
+
+    def __str__(self):
+        return self.ccp_camera_title or f"Camera {self.pk}"
 
 
 class CameraView(models.Model):

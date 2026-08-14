@@ -40,12 +40,16 @@ export default function CameraDetails({ onBack }) {
       ? camera.ccp_camera_highway || ''
       : '',
 
+    road: camera
+      ? camera.road || null
+      : null,
+
     businessArea: camera
       ? camera.business_area || ''
       : '',
 
     region: camera
-      ? camera.locations_region || ''
+      ? camera.ccp_region || ''
       : '',
 
     highway: camera
@@ -100,7 +104,7 @@ export default function CameraDetails({ onBack }) {
       : '',
 
     region: camera
-      ? camera.locations_region || ''
+      ? camera.ccp_region || ''
       : '',
 
     highway: camera
@@ -155,10 +159,12 @@ export default function CameraDetails({ onBack }) {
         ccp_camera_description: formData.ccp_camera_description,
         ccp_camera_highway: formData.ccp_camera_highway,
 
+        road: formData.road ? formData.road.id : null, // Send road ID or null if not selected
+
         // ccp_camera_title: formData.cameraName,
         internet_caption: formData.locationDescription,
         locations_description: formData.locationDescription,
-        locations_region: formData.region,
+        ccp_region: formData.region,
         locations_business_area: formData.businessArea,
         locations_highway: formData.highway,
         // locations_geo_latitude: formData.latitude,
@@ -448,10 +454,14 @@ export default function CameraDetails({ onBack }) {
         ccp_camera_title: data.ccp_camera_title || data.internet_caption || '',
         ccp_camera_description: data.ccp_camera_description || '',
         ccp_camera_highway: data.ccp_camera_highway || '',
+
+        road: data.road || null, // Use the road object from the backend
+
+        
         cameraName: data.ccp_camera_title || '',
         locationDescription: data.locations_description || data.internet_caption || '',
         businessArea: data.business_area || data.locations_business_area || '',
-        region: data.locations_region || '',
+        region: data.ccp_region || '',
         highway: data.locations_highway || '',
         maintenanceContractor: data.maintenance_contractor || '',
         electricalContractor: data.maintenance_electrical_contractor || '',
@@ -560,10 +570,14 @@ export default function CameraDetails({ onBack }) {
     ccp_camera_title: camera.ccp_camera_title || '',
     ccp_camera_description: camera.ccp_camera_description || '',
     ccp_camera_highway: camera.ccp_camera_highway || '',
+
+    road: camera.road || null,
+
+
     cameraName: camera.ccp_camera_title || '',
     locationDescription: camera.locations_description || '',
     businessArea: camera.business_area || '',
-    region: camera.locations_region || '',
+    region: camera.ccp_region || '',
     highway: camera.locations_highway || '',
     maintenanceContractor: camera.maintenance_contractor || '',
     electricalContractor: camera.maintenance_electrical_contractor || '',

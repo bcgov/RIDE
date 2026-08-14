@@ -57,7 +57,7 @@ function getCameraImage(camera) {
  */
 function getCameraName(camera) {
   return (
-    camera.ccp_camera_highway ||
+    camera.road?.name ||
     'Unnamed camera'
   );
 }
@@ -442,7 +442,7 @@ export default function Cameras() {
           .map((camera) =>
             camera.region_name ||
             camera.region ||
-            camera.locations_region ||
+            camera.ccp_region ||
             ''
           )
           .filter(Boolean)
@@ -455,11 +455,7 @@ export default function Cameras() {
     return [
       ...new Set(
         cameras
-          .map((camera) =>
-            camera.highway ||
-            camera.highway_group ||
-            ''
-          )
+          .map((camera) => camera.road?.name)
           .filter(Boolean)
       ),
     ].sort();
@@ -472,13 +468,10 @@ export default function Cameras() {
       const cameraRegion =
         camera.region_name ||
         camera.region ||
-        camera.locations_region ||
+        camera.ccp_region ||
         '';
 
-      const cameraHighway =
-        camera.highway ||
-        camera.highway_group ||
-        '';
+      const cameraHighway = camera.road?.name || '';
 
       /*
       * Search.
@@ -528,24 +521,15 @@ export default function Cameras() {
       /*
       * Status.
       */
-      if (status === 'online' && !camera.is_on) {
-        return false;
-      }
-
-      if (status === 'offline' && camera.is_on) {
-        return false;
-      }
-
       if (
-        status === 'stale' &&
-        !camera.marked_stale
+        status === 'Delayed' &&
+        !camera.marked_delayed
       ) {
         return false;
       }
 
       if (
-        status === 'delayed' &&
-        !camera.marked_delayed
+        status === 'Non-functions'
       ) {
         return false;
       }
@@ -554,14 +538,14 @@ export default function Cameras() {
       * Visibility.
       */
       if (
-        visibility === 'visible' &&
+        visibility === 'Visible on DriveBC' &&
         camera.should_appear === false
       ) {
         return false;
       }
 
       if (
-        visibility === 'hidden' &&
+        visibility === 'Hidden on DriveBC' &&
         camera.should_appear !== false
       ) {
         return false;
@@ -620,7 +604,7 @@ export default function Cameras() {
 
     filteredCameras.forEach((camera) => {
       const groupName =
-        camera.ccp_camera_highway ||
+        camera.road?.name ||
         'Other';
 
       if (!groups[groupName]) {
@@ -733,10 +717,8 @@ export default function Cameras() {
           title="Statuses"
           value={status}
           options={[
-            'online',
-            'offline',
-            'stale',
-            'delayed',
+            'Delayed',
+            'Non-functions',
           ]}
           onChange={setStatus}
         />
@@ -746,8 +728,8 @@ export default function Cameras() {
           title="Visibility"
           value={visibility}
           options={[
-            'visible',
-            'hidden',
+            'Visible on DriveBC',
+            'Hidden on DriveBC',
           ]}
           onChange={setVisibility}
         />

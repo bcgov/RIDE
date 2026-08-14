@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView
+from .models import Camera, CameraView, Road
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -16,8 +16,14 @@ class CameraViewSerializer(serializers.ModelSerializer):
             'is_default',
         ]
 
+class RoadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Road
+        fields = ["id", "name", "code"]
+
 class CameraSerializer(serializers.ModelSerializer):
     views = CameraViewSerializer(many=True, required=False)
+    road = RoadSerializer(read_only=True)
 
     class Meta:
         model = Camera
