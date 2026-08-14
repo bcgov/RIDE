@@ -240,7 +240,10 @@ export const IncidentsList = [
 export const COLUMNS = ['RIDE Event type', 'RIDE Category', 'RIDE Situation', 'id', 'DIT type 1', 'category_id',' Open511 Type', 'subtype_id', 'Open511 Sub-type'];
 
 export const PHRASES = [
-  ['Chain-up', '-', 'Commercial chain-up in effect', 2, 'PHRASE', 2,' CHAIN_UP', 1, 'HAZARD'],
+  // TODO: Confirm unused rows
+  // ['Chain-up', '-', 'Commercial chain-up in effect', 2, 'PHRASE', 2,' CHAIN_UP', 1, 'HAZARD'],
+  // ['Road condition', '-', 'Road condition', 2, 'PHRASE', 2,' CHAIN_UP', 1, 'HAZARD'],
+
   ['Incident', 'Avalanche', 'Avalanche', 84, 'PHRASE', 1,' INCIDENT', 6, 'AVALANCHE_HAZARD'],
   ['Incident', 'Avalanche', 'Avalanche control activities', 279, 'PHRASE', 1,' INCIDENT', 3, 'ALMOST_IMPASSABLE'],
   ['Incident', 'Avalanche', 'Avalanche deposit removal', 283, 'PHRASE', 1,' INCIDENT', 6, 'AVALANCHE_HAZARD'],
@@ -367,7 +370,6 @@ export const PHRASES = [
   ['Planned event', 'Maintenance', 'Utility work', 115, 'PHRASE', 4,' CONSTRUCTION', 8, 'ROAD_MAINTENANCE'],
   ['Planned event', 'Maintenance', 'Vehicle recovery', 116, 'PHRASE', 4,' CONSTRUCTION', 8, 'ROAD_MAINTENANCE'],
   ['Planned event', 'Special event', 'Special event', 7, 'PHRASE', 7,' SPECIAL_EVENT', 5, 'PLANNED_EVENT'],
-  ['Road condition', '-', 'Road condition', 2, 'PHRASE', 2,' CHAIN_UP', 1, 'HAZARD'],
 ];
 
 export const CHANGE_TYPE_FORMS = ['Incident', 'Planned event'];
