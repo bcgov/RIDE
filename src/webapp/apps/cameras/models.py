@@ -28,6 +28,14 @@ class Region(BaseLookupModel):
     """Transportation regions."""
     number = models.PositiveIntegerField(null=True, blank=True)
 
+class CameraType(BaseLookupModel):
+    """Type/category of camera."""
+    pass
+
+class CameraMake(BaseLookupModel):
+    """Camera manufacturer/make."""
+    pass
+
 
 class RoadMaintenanceContractor(BaseLookupModel):
     """Road maintenance service providers / contractors."""
@@ -87,6 +95,28 @@ class Camera(models.Model):
     # ============================================================
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
+
+    # Visible on DriveBC
+    visible = models.BooleanField(
+        default=True,
+        help_text="Whether this camera is visible to DriveBC users.",
+    )
+
+    camera_type = models.ForeignKey(
+        CameraType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+    )
+
+    camera_make = models.ForeignKey(
+        CameraMake,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cameras",
+    )
 
     # ============================================================ 
     # Location & Jurisdiction

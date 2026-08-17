@@ -444,6 +444,16 @@ export default function Cameras() {
   ].sort();
 }, [cameras]);
 
+const cameraTypes = useMemo(() => {
+  return [
+    ...new Set(
+      cameras
+        .map((camera) => camera.camera_type?.name)
+        .filter(Boolean)
+    ),
+  ].sort();
+}, [cameras]);
+
 
   const highways = useMemo(() => {
     return [
@@ -459,121 +469,105 @@ export default function Cameras() {
     const term = search.trim().toLowerCase();
 
     return cameras.filter((camera) => {
-      const cameraRegion =
-        camera.region?.name ||
-        '';
-
+      const cameraRegion = camera.region?.name || '';
       const cameraHighway = camera.road?.name || '';
+      const cameraCameraType = camera.camera_type?.name || '';
 
       /*
-      * Search.
+      * Search
       */
-      if (term) {
-        // Extract and combine all view descriptions and orientations
-        const viewsSearchable = (camera.views || [])
-          .map((view) => `${view.description || ''} ${view.orientation || ''} ${view.direction || ''}`)
-          .join(' ');
+      const viewsSearchable = (camera.views || [])
+        .map(
+          (view) =>
+            `${view.description || ''} ${
+              view.orientation || ''
+            } ${view.direction || ''}`
+        )
+        .join(' ');
 
-        const searchable = [
-          camera.title,
-          camera.description,
-          camera.road?.name,
-          camera.id,
-          viewsSearchable,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-
-        if (!searchable.includes(term)) {
-          return false;
-        }
-      }
+      const searchable = [
+        camera.title,
+        camera.description,
+        camera.road?.name,
+        camera.id,
+        viewsSearchable,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
 
       /*
-      * Region.
+      * Check whether the camera matches each filter.
       */
-      if (
-        region &&
-        cameraRegion !== region
-      ) {
-        return false;
-      }
+      const matchesSearch =
+        !term || searchable.includes(term);
+
+      const matchesRegion =
+        !region || cameraRegion === region;
+
+      const matchesHighway =
+        !highway || cameraHighway === highway;
+
+      const matchesStatus =
+        !status ||
+        (status === 'Delayed' && camera.marked_delayed) ||
+        (status === 'Non-functions' && !camera.is_on);
+
+      const matchesVisibility =
+        !visibility ||
+        (visibility === 'Visible on DriveBC' &&
+          camera.visible !== false) ||
+        (visibility === 'Hidden on DriveBC' &&
+          camera.visible === false);
+
+      // const matchesCameraType =
+      //   !cameraType ||
+      //   camera.camera_type === cameraType;
+
+      // const cameraCameraType = camera.camera_type?.name || '';
+
+      const matchesCameraType =
+        !cameraType || cameraCameraType === cameraType;
+
+      const matchesCommunicationMethod =
+        !communicationMethod ||
+        camera.communication_method === communicationMethod;
+
+      const matchesPowerSource =
+        !powerSource ||
+        camera.power_source === powerSource;
 
       /*
-      * Highway.
+      * OR logic:
+      *
+      * If no filters are selected, show everything.
+      * Otherwise, show the camera if it matches
+      * ANY selected filter.
       */
-      if (
-        highway &&
-        cameraHighway !== highway
-      ) {
-        return false;
+      const hasFilters =
+        term ||
+        region ||
+        highway ||
+        status ||
+        visibility ||
+        cameraType ||
+        communicationMethod ||
+        powerSource;
+
+      if (!hasFilters) {
+        return true;
       }
 
-      /*
-      * Status.
-      */
-      if (
-        status === 'Delayed' &&
-        !camera.marked_delayed
-      ) {
-        return false;
-      }
-
-      if (
-        status === 'Non-functions'
-      ) {
-        return false;
-      }
-
-      /*
-      * Visibility.
-      */
-      if (
-        visibility === 'Visible on DriveBC' &&
-        camera.should_appear === false
-      ) {
-        return false;
-      }
-
-      if (
-        visibility === 'Hidden on DriveBC' &&
-        camera.should_appear !== false
-      ) {
-        return false;
-      }
-
-      /*
-      * Camera type.
-      */
-      if (
-        cameraType &&
-        camera.camera_type !== cameraType
-      ) {
-        return false;
-      }
-
-      /*
-      * Communication method.
-      */
-      if (
-        communicationMethod &&
-        camera.communication_method !== communicationMethod
-      ) {
-        return false;
-      }
-
-      /*
-      * Power source.
-      */
-      if (
-        powerSource &&
-        camera.power_source !== powerSource
-      ) {
-        return false;
-      }
-
-      return true;
+      return (
+        (term && matchesSearch) ||
+        (region && matchesRegion) ||
+        (highway && matchesHighway) ||
+        (status && matchesStatus) ||
+        (visibility && matchesVisibility) ||
+        (cameraType && matchesCameraType) ||
+        (communicationMethod && matchesCommunicationMethod) ||
+        (powerSource && matchesPowerSource)
+      );
     });
   }, [
     cameras,

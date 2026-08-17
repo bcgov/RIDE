@@ -45,6 +45,14 @@ export default function CameraDetails({ onBack }) {
       ? camera.region?.id ?? ''
       : '',
 
+    // camera_type: camera
+    //   ? camera.camera_type?.id ?? ''
+    //   : '',
+
+    // camera_make: camera
+    //   ? camera.camera_make?.id ?? ''
+    //   : '',
+
     road: camera
       ? camera.road?.id ?? null
       : null,
@@ -88,52 +96,9 @@ export default function CameraDetails({ onBack }) {
   const isNewCamera = !camera;
 
   const [setupData, setSetupData] = useState({
-    title: camera
-      ? camera.title || ''
-      : '',
-    description: camera
-      ? camera.description || ''
-      : '',
-
-    region: camera
-      ? camera.region || ''
-      : '',
-
-    road: camera
-      ? camera.road || ''
-      : '',
-
-    maintenanceContractor: camera
-      ? camera.maintenance_contractor || ''
-      : '',
-
-    electricalContractor: camera
-      ? camera.electrical_contractor || ''
-      : '',
-
-    latitude: camera
-      ? camera.locations_geo_latitude || ''
-      : '',
-
-    longitude: camera
-      ? camera.locations_geo_longitude || ''
-      : '',
-
-    elevation: camera
-      ? camera.locations_elevation || ''
-      : '',
-
-    imageWatermark: camera
-      ? camera.image_watermark || ''
-      : '',
-
-    cameraCredit: camera
-      ? camera.cam_internet_credit || ''
-      : '',
-
-    cameraCreditUrl: camera
-      ? camera.cam_internet_website_url || ''
-      : '',
+    cameraId: '',
+    cameraType: '',
+    cameraMake: '',
   });
 
   const handleBasicsChange = (field, value) => {
@@ -152,6 +117,8 @@ export default function CameraDetails({ onBack }) {
         business_area_id: formData.businessArea ? Number(formData.businessArea) : null,
         region_id: formData.region ? Number(formData.region) : null,
         road_id: formData.road ? Number(formData.road) : null,
+        camera_type_id: setupData.cameraType ? Number(setupData.cameraType) : null,
+        camera_make_id: setupData.cameraMake ? Number(setupData.cameraMake) : null,
         road_maintenance_contractor_id: formData.roadMaintenanceContractor ? Number(formData.roadMaintenanceContractor) : null,
         electrical_contractor_id: formData.electricalContractor ? Number(formData.electricalContractor) : null,
         
@@ -437,11 +404,14 @@ export default function CameraDetails({ onBack }) {
 
         // Populate form data immediately from backend response
         setFormData({
+          cameraId: data.id || '',
           cameraName: data.title || '',
           description: data.description || '',
 
           road: data.road?.id ?? null,
           region: data.region?.id ?? '',
+          // camera_type: data.camera_type?.id ?? '',
+          // camera_make: data.camera_make?.id ?? '',
           roadMaintenanceContractor: data.road_maintenance_contractor?.id ?? null,
           electricalContractor: data.electrical_contractor?.id ?? null,
           businessArea: data.business_area?.id ?? null,
@@ -547,27 +517,40 @@ export default function CameraDetails({ onBack }) {
       return;
     }
 
-  setFormData({
-    title: camera.title || '',
-    description: camera.description || '',
-    
-    road: camera.road?.id ?? null,
-    region: camera.region?.id ?? '',
-    roadMaintenanceContractor: camera.road_maintenance_contractor?.id ?? null,
-    electricalContractor: camera.electrical_contractor?.id ?? null,
-    businessArea: camera.business_area?.id ?? null,
+    setFormData({
+      title: camera.title || '',
+      description: camera.description || '',
+      
+      road: camera.road?.id ?? null,
+      region: camera.region?.id ?? '',
+      // camera_type: camera.camera_type?.id ?? '',
+      // camera_make: camera.camera_make?.id ?? '',
+      roadMaintenanceContractor: camera.road_maintenance_contractor?.id ?? null,
+      electricalContractor: camera.electrical_contractor?.id ?? null,
+      businessArea: camera.business_area?.id ?? null,
 
 
-    maintenanceContractor: camera.maintenance_contractor || '',
-    
-    latitude: camera.locations_geo_latitude || '',
-    longitude: camera.locations_geo_longitude || '',
-    elevation: camera.locations_elevation || '',
-    imageWatermark: camera.image_watermark || '',
-    cameraCredit: camera.cam_internet_credit || '',
-    cameraCreditUrl: camera.cam_internet_website_url || '',
-  });
-}, [camera]);
+      maintenanceContractor: camera.maintenance_contractor || '',
+      
+      latitude: camera.locations_geo_latitude || '',
+      longitude: camera.locations_geo_longitude || '',
+      elevation: camera.locations_elevation || '',
+      imageWatermark: camera.image_watermark || '',
+      cameraCredit: camera.cam_internet_credit || '',
+      cameraCreditUrl: camera.cam_internet_website_url || '',
+    });
+  }, [camera]);
+
+  useEffect(() => {
+    if (!camera) return;
+
+    setSetupData((prev) => ({
+      ...prev,
+      cameraId: camera.id || '',
+      cameraType: camera.camera_type?.id ?? '',
+      cameraMake: camera.camera_make?.id ?? '',
+    }));
+  }, [camera]);
 
   return (
     <div className="camera-details-container">

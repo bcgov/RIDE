@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDays,
@@ -8,6 +8,38 @@ import {
 
 export default function SetupTab({ setupData, onChange }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [cameraTypes, setCameraTypes] = useState([]);
+  const [cameraMakes, setCameraMakes] = useState([]);
+
+  useEffect(() => {
+      const loadCameraTypes = async () => {
+        try {
+          const response = await fetch('/api/camera-types/');
+          if (!response.ok) throw new Error('Failed to load camera types');
+          const data = await response.json();
+          setCameraTypes(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadCameraTypes();
+    }, []);
+
+  useEffect(() => {
+      const loadCameraMakes = async () => {
+        try {
+          const response = await fetch('/api/camera-makes/');
+          if (!response.ok) throw new Error('Failed to load camera makes');
+          const data = await response.json();
+          setCameraMakes(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadCameraMakes();
+    }, []);
 
   return (
     <div className="tab-content setup-tab">
@@ -34,13 +66,19 @@ export default function SetupTab({ setupData, onChange }) {
 
         <div className="form-row two-col">
           <div className="form-group">
-            <label htmlFor="cameraType">Camera type</label>
+            <label htmlFor="cameraType">Camera type</label>      
             <select
               id="cameraType"
               value={setupData.cameraType}
               onChange={(e) => onChange('cameraType', e.target.value)}
             >
-              <option value="AXIS">AXIS</option>
+              <option value="">Select camera type...</option>
+
+              {cameraTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -51,7 +89,13 @@ export default function SetupTab({ setupData, onChange }) {
               value={setupData.cameraMake}
               onChange={(e) => onChange('cameraMake', e.target.value)}
             >
-              <option value="P5515">P5515</option>
+              <option value="">Select a camera make</option>
+
+              {cameraMakes.map((make) => (
+                <option key={make.id} value={make.id}>
+                  {make.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>

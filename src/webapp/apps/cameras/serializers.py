@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView, Region, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor
+from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -25,6 +25,17 @@ class RegionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Region
         fields = ["id", "name", "description", "is_active"]
+
+class CameraTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CameraType
+        fields = ['id', 'name']
+
+
+class CameraMakeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CameraMake
+        fields = ['id', 'name']
 
 class RoadMaintenanceContractorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,6 +68,24 @@ class CameraSerializer(serializers.ModelSerializer):
     region_id = serializers.PrimaryKeyRelatedField(
         queryset=Region.objects.all(),
         source='region',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    camera_type = CameraTypeSerializer(read_only=True)
+    camera_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=CameraType.objects.all(),
+        source='camera_type',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    camera_make = CameraMakeSerializer(read_only=True)
+    camera_make_id = serializers.PrimaryKeyRelatedField(
+        queryset=CameraMake.objects.all(),
+        source='camera_make',
         write_only=True,
         required=False,
         allow_null=True,
