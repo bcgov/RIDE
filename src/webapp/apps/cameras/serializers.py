@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol
+from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -40,6 +40,31 @@ class ConnectionTypeSerializer(serializers.ModelSerializer):
 class ConnectionProtocolSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConnectionProtocol
+        fields = ['id', 'name']
+
+class CommunicationTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommunicationType
+        fields = ['id', 'name']
+
+class PowerSourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PowerSource
+        fields = ['id', 'name']
+
+class CommunicationDeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommunicationDevice
+        fields = ['id', 'name']
+
+class AntennaeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Antenna
+        fields = ['id', 'name']
+
+class ServiceProviderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceProvider
         fields = ['id', 'name']
 
 class CameraMakeSerializer(serializers.ModelSerializer):
@@ -109,6 +134,53 @@ class CameraSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+
+    communication_type = CommunicationTypeSerializer(read_only=True)
+    communication_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=CommunicationType.objects.all(),
+        source='communication_type',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    power_source = PowerSourceSerializer(read_only=True)
+    power_source_id = serializers.PrimaryKeyRelatedField(
+        queryset=PowerSource.objects.all(),
+        source='power_source',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    communication_device = CommunicationDeviceSerializer(read_only=True)
+    communication_device_id = serializers.PrimaryKeyRelatedField(
+        queryset=CommunicationDevice.objects.all(),
+        source='communication_device',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    antenna = AntennaeSerializer(read_only=True)
+    antenna_id = serializers.PrimaryKeyRelatedField(
+        queryset=Antenna.objects.all(),
+        source='antenna',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    service_provider = ServiceProviderSerializer(read_only=True)
+    service_provider_id = serializers.PrimaryKeyRelatedField(
+        queryset=ServiceProvider.objects.all(),
+        source='service_provider',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+
 
     connection_protocol = ConnectionProtocolSerializer(read_only=True)
     connection_protocol_id = serializers.PrimaryKeyRelatedField(

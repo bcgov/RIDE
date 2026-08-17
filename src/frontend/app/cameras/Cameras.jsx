@@ -330,7 +330,7 @@ export default function Cameras() {
   const [status, setStatus] = useState('');
   const [visibility, setVisibility] = useState('');
   const [cameraType, setCameraType] = useState('');
-  const [communicationMethod, setCommunicationMethod] = useState('');
+  const [communicationType, setCommunicationType] = useState('');
   const [powerSource, setPowerSource] = useState('');
   const navigate = useNavigate();
 
@@ -454,11 +454,11 @@ const cameraTypes = useMemo(() => {
   ].sort();
 }, [cameras]);
 
-const communicationMethods = useMemo(() => {
+const communicationTypes = useMemo(() => {
   return [
     ...new Set(
       cameras
-        .map((camera) => camera.communication_method)
+        .map((camera) => camera.communication_type?.name)
         .filter(Boolean)
     ),
   ].sort();
@@ -468,7 +468,7 @@ const powerSources = useMemo(() => {
   return [
     ...new Set(
       cameras
-        .map((camera) => camera.power_source)
+        .map((camera) => camera.power_source?.name)
         .filter(Boolean)
     ),
   ].sort();
@@ -540,22 +540,19 @@ const powerSources = useMemo(() => {
         (visibility === 'Hidden on DriveBC' &&
           camera.visible === false);
 
-      // const matchesCameraType =
-      //   !cameraType ||
-      //   camera.camera_type === cameraType;
-
-      // const cameraCameraType = camera.camera_type?.name || '';
-
       const matchesCameraType =
         !cameraType || cameraCameraType === cameraType;
 
-      const matchesCommunicationMethod =
-        !communicationMethod ||
-        camera.communication_method === communicationMethod;
+      const cameraCommunicationType = camera.communication_type?.name || '';
+
+      const matchesCommunicationType =
+        !communicationType || cameraCommunicationType === communicationType;
+
+
+      const cameraPowerSource = camera.power_source?.name || '';
 
       const matchesPowerSource =
-        !powerSource ||
-        camera.power_source === powerSource;
+        !powerSource || cameraPowerSource === powerSource;
 
       /*
       * OR logic:
@@ -571,7 +568,7 @@ const powerSources = useMemo(() => {
         status ||
         visibility ||
         cameraType ||
-        communicationMethod ||
+        communicationType ||
         powerSource;
 
       if (!hasFilters) {
@@ -585,7 +582,7 @@ const powerSources = useMemo(() => {
         (status && matchesStatus) ||
         (visibility && matchesVisibility) ||
         (cameraType && matchesCameraType) ||
-        (communicationMethod && matchesCommunicationMethod) ||
+        (communicationType && matchesCommunicationType) ||
         (powerSource && matchesPowerSource)
       );
     });
@@ -597,7 +594,7 @@ const powerSources = useMemo(() => {
     status,
     visibility,
     cameraType,
-    communicationMethod,
+    communicationType,
     powerSource,
   ]);
 
@@ -630,7 +627,7 @@ const powerSources = useMemo(() => {
     setStatus('');
     setVisibility('');
     setCameraType('');
-    setCommunicationMethod('');
+    setCommunicationType('');
     setPowerSource('');
     setSearch('');
   };
@@ -751,16 +748,16 @@ const powerSources = useMemo(() => {
 
         <CameraFilterSection
           title="Communication methods"
-          value={communicationMethod}
-          options={communicationMethods}
-          onChange={setCommunicationMethod}
+          value={communicationType}
+          options={communicationTypes}
+          onChange={setCommunicationType}
         />
 
 
         <CameraFilterSection
           title="Power sources"
           value={powerSource}
-          options={communicationMethods}
+          options={powerSources}
           onChange={setPowerSource}
         />
 

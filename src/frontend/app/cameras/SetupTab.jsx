@@ -12,6 +12,11 @@ export default function SetupTab({ setupData, onChange }) {
   const [cameraMakes, setCameraMakes] = useState([]);
   const [connectionTypes, setConnectionTypes] = useState([]);
   const [connectionProtocols, setConnectionProtocols] = useState([]);
+  const [communicationTypes, setCommunicationTypes] = useState([]);
+  const [powerSources, setPowerSources] = useState([]);
+  const [communicationDevices, setCommunicationDevices] = useState([]);
+  const [antennaes, setAntennaes] = useState([]);
+  const [serviceProviders, setServiceProviders] = useState([]);
 
   useEffect(() => {
       const loadCameraTypes = async () => {
@@ -71,6 +76,81 @@ export default function SetupTab({ setupData, onChange }) {
       };
   
       loadConnectionProtocols();
+    }, []);
+
+  useEffect(() => {
+      const loadCommunicationTypes = async () => {
+        try {
+          const response = await fetch('/api/communication-types/');
+          if (!response.ok) throw new Error('Failed to load communication types');
+          const data = await response.json();
+          setCommunicationTypes(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadCommunicationTypes();
+    }, []);
+
+  useEffect(() => {
+      const loadPowerSources = async () => {
+        try {
+          const response = await fetch('/api/power-sources/');
+          if (!response.ok) throw new Error('Failed to load power sources');
+          const data = await response.json();
+          setPowerSources(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadPowerSources();
+    }, []);
+
+  useEffect(() => {
+      const loadCommunicationDevices = async () => {
+        try {
+          const response = await fetch('/api/communication-devices/');
+          if (!response.ok) throw new Error('Failed to load communication devices');
+          const data = await response.json();
+          setCommunicationDevices(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadCommunicationDevices();
+    }, []);
+
+  useEffect(() => {
+      const loadAntennaes = async () => {
+        try {
+          const response = await fetch('/api/antennaes/');
+          if (!response.ok) throw new Error('Failed to load antennaes');
+          const data = await response.json();
+          setAntennaes(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadAntennaes();
+    }, []);
+
+  useEffect(() => {
+      const loadServiceProviders = async () => {
+        try {
+          const response = await fetch('/api/service-providers/');
+          if (!response.ok) throw new Error('Failed to load service providers');
+          const data = await response.json();
+          setServiceProviders(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadServiceProviders();
     }, []);
 
   return (
@@ -264,23 +344,34 @@ export default function SetupTab({ setupData, onChange }) {
           <div className="form-group">
             <label htmlFor="commType">Communication type</label>
             <select
-              id="commType"
-              value={setupData.commType}
-              onChange={(e) => onChange('commType', e.target.value)}
+              id="communicationType"
+              value={setupData.communicationType}
+              onChange={(e) => onChange('communicationType', e.target.value)}
             >
-              <option value="Cellular">Cellular</option>
-              <option value="Fiber">Fiber</option>
+              <option value="">Select a communication type</option>
+
+              {communicationTypes.map((communicationType) => (
+                <option key={communicationType.id} value={communicationType.id}>
+                  {communicationType.name}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="form-group">
             <label htmlFor="commDevice">Communication device</label>
             <select
-              id="commDevice"
-              value={setupData.commDevice}
-              onChange={(e) => onChange('commDevice', e.target.value)}
+              id="communicationDevice"
+              value={setupData.communicationDevice}
+              onChange={(e) => onChange('communicationDevice', e.target.value)}
             >
-              <option value="RV50X">RV50X</option>
+              <option value="">Select a communication device</option>
+
+              {communicationDevices.map((communicationDevice) => (
+                <option key={communicationDevice.id} value={communicationDevice.id}>
+                  {communicationDevice.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -289,11 +380,17 @@ export default function SetupTab({ setupData, onChange }) {
           <div className="form-group">
             <label htmlFor="antennae">Antennae</label>
             <select
-              id="antennae"
-              value={setupData.antennae}
-              onChange={(e) => onChange('antennae', e.target.value)}
+              id="antenna"
+              value={setupData.antenna}
+              onChange={(e) => onChange('antenna', e.target.value)}
             >
-              <option value="">Select antennae...</option>
+              <option value="">Select a antenna</option>
+
+              {antennaes.map((antenna) => (
+                <option key={antenna.id} value={antenna.id}>
+                  {antenna.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -304,9 +401,13 @@ export default function SetupTab({ setupData, onChange }) {
               value={setupData.serviceProvider}
               onChange={(e) => onChange('serviceProvider', e.target.value)}
             >
-              <option value="Telus">Telus</option>
-              <option value="Rogers">Rogers</option>
-              <option value="Bell">Bell</option>
+              <option value="">Select a service provider</option>
+
+              {serviceProviders.map((serviceProvider) => (
+                <option key={serviceProvider.id} value={serviceProvider.id}>
+                  {serviceProvider.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -376,8 +477,13 @@ export default function SetupTab({ setupData, onChange }) {
               value={setupData.powerSource}
               onChange={(e) => onChange('powerSource', e.target.value)}
             >
-              <option value="Wired">Wired</option>
-              <option value="Solar">Solar</option>
+              <option value="">Select a power source</option>
+
+              {powerSources.map((powerSource) => (
+                <option key={powerSource.id} value={powerSource.id}>
+                  {powerSource.name}
+                </option>
+              ))}
             </select>
           </div>
 

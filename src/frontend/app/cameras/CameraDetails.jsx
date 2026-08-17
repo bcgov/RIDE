@@ -91,6 +91,11 @@ export default function CameraDetails({ onBack }) {
     cameraMake: '',
     connectionType: '',
     connectionProtocol: '',
+    communicationType: '',
+    powerSource: '',
+    commuincation_device: '',
+    antenna: '',
+    service_provider: '',
   });
 
   const handleBasicsChange = (field, value) => {
@@ -109,10 +114,20 @@ export default function CameraDetails({ onBack }) {
         business_area_id: basicsData.businessArea ? Number(basicsData.businessArea) : null,
         region_id: basicsData.region ? Number(basicsData.region) : null,
         road_id: basicsData.road ? Number(basicsData.road) : null,
+        
+        
         camera_type_id: setupData.cameraType ? Number(setupData.cameraType) : null,
         camera_make_id: setupData.cameraMake ? Number(setupData.cameraMake) : null,
         connection_type_id: setupData.connectionType ? Number(setupData.connectionType) : null,
         connection_protocol_id: setupData.connectionProtocol ? Number(setupData.connectionProtocol) : null,
+        communication_type_id: setupData.communicationType ? Number(setupData.communicationType) : null,
+        power_source_id: setupData.powerSource ? Number(setupData.powerSource) : null,
+        communication_device_id: setupData.communicationDevice ? Number(setupData.communicationDevice) : null,
+        antenna_id: setupData.antenna ? Number(setupData.antenna) : null,
+        service_provider_id: setupData.serviceProvider ? Number(setupData.serviceProvider) : null,
+        
+        
+        
         road_maintenance_contractor_id: basicsData.roadMaintenanceContractor ? Number(basicsData.roadMaintenanceContractor) : null,
         electrical_contractor_id: basicsData.electricalContractor ? Number(basicsData.electricalContractor) : null,
         
@@ -545,6 +560,11 @@ export default function CameraDetails({ onBack }) {
       cameraMake: camera.camera_make?.id ?? '',
       connectionType: camera.connection_type?.id ?? '',
       connectionProtocol: camera.connection_protocol?.id ?? '',
+      communicationType: camera.communication_type?.id ?? '',
+      powerSource: camera.power_source?.id ?? '',
+      communicationDevice: camera.communication_device?.id ?? '',
+      antenna: camera.antenna?.id ?? '',
+      serviceProvider: camera.service_provider?.id ?? '',
     }));
   }, [camera]);
 

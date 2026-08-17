@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from rest_framework import viewsets
 
-from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol
-from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer
+from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider
+from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer, CommunicationTypeSerializer, PowerSourceSerializer, CommunicationDeviceSerializer, AntennaeSerializer, ServiceProviderSerializer
 
 
 class CameraViewSet(viewsets.ModelViewSet):
@@ -30,6 +30,26 @@ class ConnectionTypeViewSet(viewsets.ModelViewSet):
 class ConnectionProtocolViewSet(viewsets.ModelViewSet):
     queryset = ConnectionProtocol.objects.filter(is_active=True)
     serializer_class = ConnectionProtocolSerializer
+
+class CommunicationTypeViewSet(viewsets.ModelViewSet):
+    queryset = CommunicationType.objects.filter(is_active=True)
+    serializer_class = CommunicationTypeSerializer
+
+class PowerSourceViewSet(viewsets.ModelViewSet):
+    queryset = PowerSource.objects.filter(is_active=True)
+    serializer_class = PowerSourceSerializer
+
+class CommunicationDeviceViewSet(viewsets.ModelViewSet):
+    queryset = CommunicationDevice.objects.filter(is_active=True)
+    serializer_class = CommunicationDeviceSerializer
+
+class AntennaeViewSet(viewsets.ModelViewSet):
+    queryset = Antenna.objects.filter(is_active=True)
+    serializer_class = AntennaeSerializer
+
+class ServiceProviderViewSet(viewsets.ModelViewSet):
+    queryset = ServiceProvider.objects.filter(is_active=True)
+    serializer_class = ServiceProviderSerializer
 
 class RoadViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Road.objects.filter(is_active=True)
