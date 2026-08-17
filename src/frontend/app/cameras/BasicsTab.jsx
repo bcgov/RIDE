@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
+import './BasicsTab.scss';
 
 export default function BasicsTab({ basicsData, onChange }) {
   const [regions, setRegions] = useState([]);

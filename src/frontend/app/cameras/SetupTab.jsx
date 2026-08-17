@@ -5,6 +5,7 @@ import {
   faEye,
   faEyeSlash,
 } from '@fortawesome/pro-regular-svg-icons';
+import './SetupTab.scss';
 
 export default function SetupTab({ setupData, onChange }) {
   const [showPassword, setShowPassword] = useState(false);
