@@ -20,7 +20,8 @@ on:
 jobs:
   scale-down-gold:
     if: ${{ github.event.inputs.step == 'Scale down RIDE in Gold' }}
-    runs-on: ubuntu-latest
+    runs-on:
+        group: Larger Runners - OpenShift Static-IP
     name: Scale down RIDE in Gold (${{ github.event.inputs.environment }})
     environment:
       name: ${{ github.event.inputs.environment }}
@@ -46,7 +47,8 @@ jobs:
 
   scale-down-golddr:
     if: ${{ github.event.inputs.step == 'Scale down RIDE in Gold DR' }}
-    runs-on: ubuntu-latest
+    runs-on:
+        group: Larger Runners - OpenShift Static-IP
     name: Scale down RIDE in Gold DR (${{ github.event.inputs.environment }})
     environment:
       name: ${{ github.event.inputs.environment }}
@@ -71,7 +73,8 @@ jobs:
 
   scale-up-gold:
     if: ${{ github.event.inputs.step == 'Scale up RIDE in Gold' }}
-    runs-on: ubuntu-latest
+    runs-on:
+        group: Larger Runners - OpenShift Static-IP
     name: Scale up RIDE in Gold (${{ github.event.inputs.environment }})
     environment:
       name: ${{ github.event.inputs.environment }}
@@ -100,7 +103,8 @@ jobs:
 
   scale-up-golddr:
     if: ${{ github.event.inputs.step == 'Scale up RIDE in Gold DR' }}
-    runs-on: ubuntu-latest
+    runs-on:
+        group: Larger Runners - OpenShift Static-IP
     name: Scale up RIDE in Gold DR (${{ github.event.inputs.environment }})
     environment:
       name: ${{ github.event.inputs.environment }}
