@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor
+from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -31,6 +31,16 @@ class CameraTypeSerializer(serializers.ModelSerializer):
         model = CameraType
         fields = ['id', 'name']
 
+
+class ConnectionTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CameraType
+        fields = ['id', 'name']
+
+class ConnectionProtocolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConnectionProtocol
+        fields = ['id', 'name']
 
 class CameraMakeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -86,6 +96,24 @@ class CameraSerializer(serializers.ModelSerializer):
     camera_make_id = serializers.PrimaryKeyRelatedField(
         queryset=CameraMake.objects.all(),
         source='camera_make',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    connection_type = ConnectionTypeSerializer(read_only=True)
+    connection_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=ConnectionType.objects.all(),
+        source='connection_type',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    connection_protocol = ConnectionProtocolSerializer(read_only=True)
+    connection_protocol_id = serializers.PrimaryKeyRelatedField(
+        queryset=ConnectionProtocol.objects.all(),
+        source='connection_protocol',
         write_only=True,
         required=False,
         allow_null=True,

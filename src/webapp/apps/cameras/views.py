@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from rest_framework import viewsets
 
-from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor
-from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer
+from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol
+from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer
 
 
 class CameraViewSet(viewsets.ModelViewSet):
@@ -22,6 +22,14 @@ class CameraTypeViewSet(viewsets.ModelViewSet):
 class CameraMakeViewSet(viewsets.ModelViewSet):
     queryset = CameraMake.objects.filter(is_active=True)
     serializer_class = CameraMakeSerializer
+
+class ConnectionTypeViewSet(viewsets.ModelViewSet):
+    queryset = ConnectionType.objects.filter(is_active=True)
+    serializer_class = ConnectionTypeSerializer
+
+class ConnectionProtocolViewSet(viewsets.ModelViewSet):
+    queryset = ConnectionProtocol.objects.filter(is_active=True)
+    serializer_class = ConnectionProtocolSerializer
 
 class RoadViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Road.objects.filter(is_active=True)

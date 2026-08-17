@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 
-export default function BasicsTab({ formData, onChange }) {
+export default function BasicsTab({ basicsData, onChange }) {
   const [regions, setRegions] = useState([]);
   const [roads, setRoads] = useState([]);
   const [businessAreas, setBusinessAreas] = useState([]);
@@ -94,7 +94,7 @@ useEffect(() => {
           <textarea
             id="description"
             rows={3}
-            value={formData.description}
+            value={basicsData.description}
             onChange={(e) => onChange('description', e.target.value)}
           />
         </div>
@@ -103,7 +103,7 @@ useEffect(() => {
           <label htmlFor="businessArea">Business area</label>
           <select
               id="businessArea"
-              value={formData.businessArea ?? ''}
+              value={basicsData.businessArea ?? ''}
               onChange={(e) => onChange('businessArea', e.target.value)}
             >
               <option value="" disabled>
@@ -122,7 +122,7 @@ useEffect(() => {
             <label htmlFor="region">Region</label>
             <select
               id="region"
-              value={formData.region ?? ''}
+              value={basicsData.region ?? ''}
               onChange={(e) => onChange('region', e.target.value)}
             >
               <option value="" disabled>
@@ -140,7 +140,7 @@ useEffect(() => {
             <label htmlFor="highway">Road or highway</label>
             <select
               id="road"
-              value={formData.road ?? ''}
+              value={basicsData.road ?? ''}
               onChange={(e) => onChange('road', e.target.value)}
             >
               <option value="" disabled>
@@ -162,7 +162,7 @@ useEffect(() => {
             </label>
             <select
               id="roadMaintenanceContractor"
-              value={formData.roadMaintenanceContractor ?? ''}
+              value={basicsData.roadMaintenanceContractor ?? ''}
               onChange={(e) => onChange('roadMaintenanceContractor', e.target.value)}
             >
               <option value="" disabled>
@@ -182,7 +182,7 @@ useEffect(() => {
             </label>
             <select
               id="electricalContractor"
-              value={formData.electricalContractor ?? ''}
+              value={basicsData.electricalContractor ?? ''}
               onChange={(e) => onChange('electricalContractor', e.target.value)}
             >
               <option value="" disabled>
@@ -203,7 +203,7 @@ useEffect(() => {
             <input
               type="text"
               id="latitude"
-              value={formData.latitude}
+              value={basicsData.latitude}
               onChange={(e) => onChange('latitude', e.target.value)}
             />
           </div>
@@ -213,7 +213,7 @@ useEffect(() => {
             <input
               type="text"
               id="longitude"
-              value={formData.longitude}
+              value={basicsData.longitude}
               onChange={(e) => onChange('longitude', e.target.value)}
             />
           </div>
@@ -223,7 +223,7 @@ useEffect(() => {
             <input
               type="text"
               id="elevation"
-              value={formData.elevation}
+              value={basicsData.elevation}
               onChange={(e) => onChange('elevation', e.target.value)}
             />
           </div>
@@ -239,7 +239,7 @@ useEffect(() => {
           <input
             type="text"
             id="imageWatermark"
-            value={formData.imageWatermark}
+            value={basicsData.imageWatermark}
             onChange={(e) => onChange('imageWatermark', e.target.value)}
           />
         </div>
@@ -249,7 +249,7 @@ useEffect(() => {
           <input
             type="text"
             id="cameraCredit"
-            value={formData.cameraCredit}
+            value={basicsData.cameraCredit}
             onChange={(e) => onChange('cameraCredit', e.target.value)}
           />
         </div>
@@ -259,7 +259,7 @@ useEffect(() => {
           <input
             type="text"
             id="cameraCreditUrl"
-            value={formData.cameraCreditUrl}
+            value={basicsData.cameraCreditUrl}
             onChange={(e) => onChange('cameraCreditUrl', e.target.value)}
           />
         </div>

@@ -29,7 +29,7 @@ export default function CameraDetails({ onBack }) {
   const [camera, setCamera] = useState(null);
   const [activeTab, setActiveTab] = useState('Basics');
 
-  const [formData, setFormData] = useState({
+  const [basicsData, setBasicsData] = useState({
     title: camera
       ? camera.title || ''
       : '',
@@ -45,21 +45,11 @@ export default function CameraDetails({ onBack }) {
       ? camera.region?.id ?? ''
       : '',
 
-    // camera_type: camera
-    //   ? camera.camera_type?.id ?? ''
-    //   : '',
-
-    // camera_make: camera
-    //   ? camera.camera_make?.id ?? ''
-    //   : '',
-
     road: camera
       ? camera.road?.id ?? null
       : null,
 
     
-
-
     roadMaintenanceContractor: camera
       ? camera.road_maintenance_contractor?.id ?? null
       : '',
@@ -99,10 +89,12 @@ export default function CameraDetails({ onBack }) {
     cameraId: '',
     cameraType: '',
     cameraMake: '',
+    connectionType: '',
+    connectionProtocol: '',
   });
 
   const handleBasicsChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setBasicsData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSetupChange = (field, value) => {
@@ -112,20 +104,22 @@ export default function CameraDetails({ onBack }) {
   const handleSave = async () => {
     try {
       const payload = {
-        title: formData.title,
-        description: formData.description,
-        business_area_id: formData.businessArea ? Number(formData.businessArea) : null,
-        region_id: formData.region ? Number(formData.region) : null,
-        road_id: formData.road ? Number(formData.road) : null,
+        title: basicsData.title,
+        description: basicsData.description,
+        business_area_id: basicsData.businessArea ? Number(basicsData.businessArea) : null,
+        region_id: basicsData.region ? Number(basicsData.region) : null,
+        road_id: basicsData.road ? Number(basicsData.road) : null,
         camera_type_id: setupData.cameraType ? Number(setupData.cameraType) : null,
         camera_make_id: setupData.cameraMake ? Number(setupData.cameraMake) : null,
-        road_maintenance_contractor_id: formData.roadMaintenanceContractor ? Number(formData.roadMaintenanceContractor) : null,
-        electrical_contractor_id: formData.electricalContractor ? Number(formData.electricalContractor) : null,
+        connection_type_id: setupData.connectionType ? Number(setupData.connectionType) : null,
+        connection_protocol_id: setupData.connectionProtocol ? Number(setupData.connectionProtocol) : null,
+        road_maintenance_contractor_id: basicsData.roadMaintenanceContractor ? Number(basicsData.roadMaintenanceContractor) : null,
+        electrical_contractor_id: basicsData.electricalContractor ? Number(basicsData.electricalContractor) : null,
         
 
         // Pass null instead of empty string "" for numeric fields
-        locations_geo_latitude: formData.latitude ? Number(formData.latitude) : null,
-        locations_geo_longitude: formData.longitude ? Number(formData.longitude) : null,
+        locations_geo_latitude: basicsData.latitude ? Number(basicsData.latitude) : null,
+        locations_geo_longitude: basicsData.longitude ? Number(basicsData.longitude) : null,
 
         // Pass nested views list to backend
         views: viewsData.map((v, index) => ({
@@ -403,7 +397,7 @@ export default function CameraDetails({ onBack }) {
         setCamera(data);
 
         // Populate form data immediately from backend response
-        setFormData({
+        setBasicsData({
           cameraId: data.id || '',
           cameraName: data.title || '',
           description: data.description || '',
@@ -517,7 +511,7 @@ export default function CameraDetails({ onBack }) {
       return;
     }
 
-    setFormData({
+    setBasicsData({
       title: camera.title || '',
       description: camera.description || '',
       
@@ -549,6 +543,8 @@ export default function CameraDetails({ onBack }) {
       cameraId: camera.id || '',
       cameraType: camera.camera_type?.id ?? '',
       cameraMake: camera.camera_make?.id ?? '',
+      connectionType: camera.connection_type?.id ?? '',
+      connectionProtocol: camera.connection_protocol?.id ?? '',
     }));
   }, [camera]);
 
@@ -562,9 +558,9 @@ export default function CameraDetails({ onBack }) {
         <input
           type="text"
           className="camera-name-input"
-          value={formData.title}
+          value={basicsData.title}
           onChange={(event) =>
-            setFormData((prev) => ({
+            setBasicsData((prev) => ({
               ...prev,
               title: event.target.value,
               cameraName: event.target.value,
@@ -577,7 +573,7 @@ export default function CameraDetails({ onBack }) {
       ) : (
         <>
           <h1>
-            {formData.title || 'New Camera'}
+            {basicsData.title || 'New Camera'}
           </h1>
 
           <button
@@ -697,7 +693,7 @@ export default function CameraDetails({ onBack }) {
 
           {/* Dynamic Tab Render */}
           {activeTab === 'Basics' && (
-            <BasicsTab formData={formData} onChange={handleBasicsChange} />
+            <BasicsTab basicsData={basicsData} onChange={handleBasicsChange} />
           )}
 
           {activeTab === 'Setup' && (

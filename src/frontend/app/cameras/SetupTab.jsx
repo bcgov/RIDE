@@ -10,6 +10,8 @@ export default function SetupTab({ setupData, onChange }) {
   const [showPassword, setShowPassword] = useState(false);
   const [cameraTypes, setCameraTypes] = useState([]);
   const [cameraMakes, setCameraMakes] = useState([]);
+  const [connectionTypes, setConnectionTypes] = useState([]);
+  const [connectionProtocols, setConnectionProtocols] = useState([]);
 
   useEffect(() => {
       const loadCameraTypes = async () => {
@@ -39,6 +41,36 @@ export default function SetupTab({ setupData, onChange }) {
       };
   
       loadCameraMakes();
+    }, []);
+
+  useEffect(() => {
+      const loadConnectionTypes = async () => {
+        try {
+          const response = await fetch('/api/connection-types/');
+          if (!response.ok) throw new Error('Failed to load connection types');
+          const data = await response.json();
+          setConnectionTypes(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadConnectionTypes();
+    }, []);
+
+  useEffect(() => {
+      const loadConnectionProtocols = async () => {
+        try {
+          const response = await fetch('/api/connection-protocols/');
+          if (!response.ok) throw new Error('Failed to load connection protocols');
+          const data = await response.json();
+          setConnectionProtocols(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      loadConnectionProtocols();
     }, []);
 
   return (
@@ -160,25 +192,35 @@ export default function SetupTab({ setupData, onChange }) {
         <div className="form-group">
           <label htmlFor="connectionType">Connection type</label>
           <select
-            id="connectionType"
-            value={setupData.connectionType}
-            onChange={(e) => onChange('connectionType', e.target.value)}
-          >
-            <option value="Images are pulled">Images are pulled</option>
-            <option value="Images are pushed">Images are pushed</option>
-          </select>
+              id="connectionType"
+              value={setupData.connectionType}
+              onChange={(e) => onChange('connectionType', e.target.value)}
+            >
+              <option value="">Select a connection type</option>
+
+              {connectionTypes.map((connectionType) => (
+                <option key={connectionType.id} value={connectionType.id}>
+                  {connectionType.name}
+                </option>
+              ))}
+            </select>
         </div>
 
         <div className="form-group">
           <label htmlFor="connectionProtocol">Connection protocol</label>
           <select
-            id="connectionProtocol"
-            value={setupData.connectionProtocol}
-            onChange={(e) => onChange('connectionProtocol', e.target.value)}
-          >
-            <option value="File share">File share</option>
-            <option value="HTTP/HTTPS">HTTP/HTTPS</option>
-          </select>
+              id="connectionProtocol"
+              value={setupData.connectionProtocol}
+              onChange={(e) => onChange('connectionProtocol', e.target.value)}
+            >
+              <option value="">Select a connection protocol</option>
+
+              {connectionProtocols.map((connectionProtocol) => (
+                <option key={connectionProtocol.id} value={connectionProtocol.id}>
+                  {connectionProtocol.name}
+                </option>
+              ))}
+            </select>
         </div>
 
         <div className="form-row two-col">

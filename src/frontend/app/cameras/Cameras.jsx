@@ -454,6 +454,26 @@ const cameraTypes = useMemo(() => {
   ].sort();
 }, [cameras]);
 
+const communicationMethods = useMemo(() => {
+  return [
+    ...new Set(
+      cameras
+        .map((camera) => camera.communication_method)
+        .filter(Boolean)
+    ),
+  ].sort();
+}, [cameras]);
+
+const powerSources = useMemo(() => {
+  return [
+    ...new Set(
+      cameras
+        .map((camera) => camera.power_source)
+        .filter(Boolean)
+    ),
+  ].sort();
+}, [cameras]);
+
 
   const highways = useMemo(() => {
     return [
@@ -724,7 +744,7 @@ const cameraTypes = useMemo(() => {
         <CameraFilterSection
           title="Camera types"
           value={cameraType}
-          options={[]}
+          options={cameraTypes}
           onChange={setCameraType}
         />
 
@@ -732,7 +752,7 @@ const cameraTypes = useMemo(() => {
         <CameraFilterSection
           title="Communication methods"
           value={communicationMethod}
-          options={[]}
+          options={communicationMethods}
           onChange={setCommunicationMethod}
         />
 
@@ -740,7 +760,7 @@ const cameraTypes = useMemo(() => {
         <CameraFilterSection
           title="Power sources"
           value={powerSource}
-          options={[]}
+          options={communicationMethods}
           onChange={setPowerSource}
         />
 
