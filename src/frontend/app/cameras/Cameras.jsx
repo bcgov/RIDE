@@ -51,6 +51,14 @@ function getCameraImage(camera) {
   return camera.locations_thumbnail_map_url || '';
 }
 
+/*
+ * A camera is considered "on" if any of its views is on.
+ */
+function isCameraOn(camera) {
+  const viewsList = camera.views || camera.cameraview_set || [];
+  return viewsList.some((view) => view.is_on);
+}
+
 
 /*
  * Return a useful display name for the camera highway group.
@@ -89,6 +97,7 @@ function getCameraDirection(camera) {
 function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
   const imageUrl = getCameraImage(camera);
   const direction = getCameraDirection(camera);
+  const cameraOn = isCameraOn(camera);
 
   return (
     <div className="camera-card">
@@ -99,7 +108,7 @@ function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
 
         <span
           className={`camera-switch ${
-            camera.is_on ? 'camera-switch--on' : ''
+            cameraOn ? 'camera-switch--on' : ''
           }`}
         >
           <span />
@@ -332,6 +341,10 @@ export default function Cameras() {
   const [cameraType, setCameraType] = useState('');
   const [communicationType, setCommunicationType] = useState('');
   const [powerSource, setPowerSource] = useState('');
+
+  const [viewMode, setViewMode] = useState('compact');
+
+
   const navigate = useNavigate();
 
   const loadCameras = async () => {
@@ -870,16 +883,22 @@ const powerSources = useMemo(() => {
             )}
           </div>
 
-          <button
-            type="button"
-            className="add-camera-button"
-            onClick={() => {
-              setEditingCamera(null);
-              setShowForm(true);
-            }}
-          >
-            Add Camera
-          </button>
+          <div className="view-mode-toggle">
+            <button
+              type="button"
+              className={viewMode === 'list' ? 'active' : ''}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+            <button
+              type="button"
+              className={viewMode === 'compact' ? 'active' : ''}
+              onClick={() => setViewMode('compact')}
+            >
+              Compact
+            </button>
+          </div>
         </div>
 
 

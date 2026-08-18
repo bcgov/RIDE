@@ -773,3 +773,33 @@ h4 {
     z-index: 100;
   }
 }
+
+.view-mode-toggle {
+  display: flex;
+  border: 1px solid #d6d6d6;
+  border-radius: 6px;
+  overflow: hidden;
+
+  button {
+    padding: 7px 16px;
+    border: none;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    color: #444;
+
+    &:first-child {
+      border-right: 1px solid #d6d6d6;
+    }
+
+    &.active {
+      background: #f1f1f1;
+      font-weight: 600;
+      color: #111;
+    }
+
+    &:hover:not(.active) {
+      background: #f8f8f8;
+    }
+  }
+}

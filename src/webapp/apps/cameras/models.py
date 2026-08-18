@@ -102,6 +102,12 @@ class Camera(models.Model):
         help_text="Whether this camera is visible to DriveBC users.",
     )
 
+    # Is camera marked delayed
+    marked_delayed = models.BooleanField(
+        default=False,
+        help_text="Whether this camera is marked delayed.",
+    )
+
     camera_type = models.ForeignKey(
         CameraType,
         on_delete=models.SET_NULL,
