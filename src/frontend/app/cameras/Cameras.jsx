@@ -84,10 +84,32 @@ function getCameraLocation(camera) {
 /*
  * Return the direction of a camera.
  */
+// function getCameraDirection(camera) {
+//   return (
+//     camera.locations_orientation
+//   );
+// }
+
+/*
+ * Return the orientation to display for a camera.
+ *
+ * Uses the default view's orientation if one is marked as
+ * is_default; otherwise falls back to the first view's orientation.
+ */
 function getCameraDirection(camera) {
-  return (
-    camera.locations_orientation
-  );
+  const viewsList = camera.views || camera.cameraview_set || [];
+
+  const defaultView = viewsList.find((view) => view.is_default);
+  if (defaultView?.orientation) {
+    return defaultView.orientation;
+  }
+
+  return viewsList[0]?.orientation || '';
+}
+
+function orientationLabel(orientation) {
+  if (!orientation) return '';
+  return orientation.charAt(0) + orientation.slice(1).toLowerCase();
 }
 
 
@@ -96,7 +118,7 @@ function getCameraDirection(camera) {
  */
 function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
   const imageUrl = getCameraImage(camera);
-  const direction = getCameraDirection(camera);
+  const direction = orientationLabel(getCameraDirection(camera));
   const cameraOn = isCameraOn(camera);
 
   return (
