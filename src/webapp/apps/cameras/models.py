@@ -219,6 +219,32 @@ class Camera(models.Model):
         related_name="cameras",
     )
 
+    # ============================================================
+    # Location Coordinates
+    # ============================================================
+    locations_geo_latitude = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="Latitude",
+    )
+    locations_geo_longitude = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="Longitude",
+    )
+    locations_elevation = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="Elevation (metres)",
+    )
+
+    # ============================================================
+    # Optional Display Info
+    # ============================================================
+    image_watermark = models.CharField(max_length=255, null=True, blank=True)
+    camera_credit = models.CharField(max_length=255, null=True, blank=True)
+    camera_credit_url = models.URLField(max_length=500, null=True, blank=True)
+
     def __str__(self):
         return self.title or f"Camera {self.pk}"
 

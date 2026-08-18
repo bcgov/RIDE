@@ -75,11 +75,11 @@ export default function CameraDetails({ onBack }) {
       : '',
 
     cameraCredit: camera
-      ? camera.cam_internet_credit || ''
+      ? camera.camera_credit || ''
       : '',
 
     cameraCreditUrl: camera
-      ? camera.cam_internet_website_url || ''
+      ? camera.camera_credit_url || ''
       : '',
   });
 
@@ -126,7 +126,9 @@ export default function CameraDetails({ onBack }) {
         antenna_id: setupData.antenna ? Number(setupData.antenna) : null,
         service_provider_id: setupData.serviceProvider ? Number(setupData.serviceProvider) : null,
         
-        
+        image_watermark: basicsData.imageWatermark,
+        camera_credit: basicsData.cameraCredit,
+        camera_credit_url: basicsData.cameraCreditUrl,
         
         road_maintenance_contractor_id: basicsData.roadMaintenanceContractor ? Number(basicsData.roadMaintenanceContractor) : null,
         electrical_contractor_id: basicsData.electricalContractor ? Number(basicsData.electricalContractor) : null,
@@ -135,6 +137,8 @@ export default function CameraDetails({ onBack }) {
         // Pass null instead of empty string "" for numeric fields
         locations_geo_latitude: basicsData.latitude ? Number(basicsData.latitude) : null,
         locations_geo_longitude: basicsData.longitude ? Number(basicsData.longitude) : null,
+
+        locations_elevation: basicsData.elevation ? Number(basicsData.elevation) : null,
 
         // Pass nested views list to backend
         views: viewsData.map((v, index) => ({
@@ -429,8 +433,8 @@ export default function CameraDetails({ onBack }) {
           longitude: data.locations_geo_longitude ?? '',
           elevation: data.locations_elevation || '',
           imageWatermark: data.image_watermark || '',
-          cameraCredit: data.cam_internet_credit || '',
-          cameraCreditUrl: data.cam_internet_website_url || '',
+          cameraCredit: data.camera_credit || '',
+          cameraCreditUrl: data.camera_credit_url || '',
         });
       } catch (error) {
         console.error("Failed to load camera:", error);
@@ -545,8 +549,8 @@ export default function CameraDetails({ onBack }) {
       longitude: camera.locations_geo_longitude || '',
       elevation: camera.locations_elevation || '',
       imageWatermark: camera.image_watermark || '',
-      cameraCredit: camera.cam_internet_credit || '',
-      cameraCreditUrl: camera.cam_internet_website_url || '',
+      cameraCredit: camera.camera_credit || '',
+      cameraCreditUrl: camera.camera_credit_url || '',
     });
   }, [camera]);
 
