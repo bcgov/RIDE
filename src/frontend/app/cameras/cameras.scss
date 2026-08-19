@@ -180,12 +180,14 @@ main {
 }
 
 
+
 .cameras-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
 
   margin-bottom: 18px;
+  margin-left: 32px;
 }
 
 
@@ -232,6 +234,7 @@ main {
 
   width: 320px;
   margin-bottom: 28px;
+  margin-left: 32px;
 }
 
 
@@ -802,4 +805,43 @@ h4 {
       background: #f8f8f8;
     }
   }
+}
+
+.camera-filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.clear-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: #333;
+  font-size: 16px;
+}
+
+.clear-filters-btn svg {
+  font-size: 15px;
+  color: #555;
+}
+
+.camera-header-divider {
+  border-bottom: 1px solid #d6d6d6;
+  margin-bottom: 20px;
+}
+
+.camera-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.camera-search {
+  margin-bottom: 0; // was 28px, now handled by the row wrapper
 }

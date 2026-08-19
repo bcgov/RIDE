@@ -20,6 +20,10 @@ import {
 import CameraForm from './CameraForm';
 import './Cameras.scss';
 
+// import { faBroomWide } from '@fortawesome/free-solid-svg-icons';
+import { faBroomWide } from '@fortawesome/pro-solid-svg-icons';
+
+
 
 /*
  * Return the camera image URL.
@@ -107,6 +111,17 @@ function getCameraDirection(camera) {
   return viewsList[0]?.orientation || '';
 }
 
+function getCameraIsOn(camera) {
+  const viewsList = camera.views || camera.cameraview_set || [];
+
+  const defaultView = viewsList.find((view) => view.is_default);
+  if (defaultView?.orientation) {
+    return defaultView.orientation;
+  }
+
+  return viewsList[0]?.is_on || '';
+}
+
 function orientationLabel(orientation) {
   if (!orientation) return '';
   return orientation.charAt(0) + orientation.slice(1).toLowerCase();
@@ -166,7 +181,7 @@ function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
         )}
       </div>
 
-      <div className="camera-card-actions">
+      {/* <div className="camera-card-actions">
         <button
           type="button"
           onClick={() => onEdit(camera)}
@@ -180,7 +195,7 @@ function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
         >
           Delete
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -566,7 +581,7 @@ const powerSources = useMemo(() => {
       const matchesStatus =
         !status ||
         (status === 'Delayed' && camera.marked_delayed) ||
-        (status === 'Non-functions' && !camera.is_on);
+        (status === 'Non-functions' && !getCameraIsOn(camera));
 
       const matchesVisibility =
         !visibility ||
@@ -699,7 +714,7 @@ const powerSources = useMemo(() => {
       {/* LEFT FILTER PANEL */}
       <aside className="camera-filters">
 
-        <div className="camera-filters-header">
+        {/* <div className="camera-filters-header">
           <div className="camera-filters-title">
             <FontAwesomeIcon icon={faSliders} />
             <span>Filters</span>
@@ -710,6 +725,38 @@ const powerSources = useMemo(() => {
             onClick={clearFilters}
           >
             Clear all
+          </button>
+        </div> */}
+
+        {/* <div className="camera-filters-header">
+          <div className="camera-filters-title">
+            <FontAwesomeIcon icon={faSliders} />
+            <span>Filters</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="clear-filters-btn"
+          >
+            <FontAwesomeIcon icon={faBroom} />
+            <span>Clear all</span>
+          </button>
+        </div> */}
+
+        <div className="camera-filters-header">
+          <div className="camera-filters-title">
+            <FontAwesomeIcon icon={faSliders} />
+            <span>Filters</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="clear-filters-btn"
+          >
+            <FontAwesomeIcon icon={faBroomWide} />
+            <span>Clear all</span>
           </button>
         </div>
 
@@ -905,7 +952,7 @@ const powerSources = useMemo(() => {
             )}
           </div>
 
-          <div className="view-mode-toggle">
+          {/* <div className="view-mode-toggle">
             <button
               type="button"
               className={viewMode === 'list' ? 'active' : ''}
@@ -920,7 +967,7 @@ const powerSources = useMemo(() => {
             >
               Compact
             </button>
-          </div>
+          </div> */}
         </div>
 
 
@@ -949,9 +996,11 @@ const powerSources = useMemo(() => {
           />
         )}
 
+        <div className="camera-header-divider" />
+
 
         {/* SEARCH */}
-        <div className="camera-search">
+        {/* <div className="camera-search">
           <input
             type="text"
             value={search}
@@ -973,7 +1022,47 @@ const powerSources = useMemo(() => {
               <FontAwesomeIcon icon={faXmark} />
             </button>
           )}
+        </div> */}
+
+
+        {/* SEARCH ROW */}
+        <div className="camera-search-row">
+          <div className="camera-search">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search"
+            />
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+            {search && (
+              <button type="button" onClick={() => setSearch('')}>
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            )}
+          </div>
+
+          <div className="view-mode-toggle">
+            <button
+              type="button"
+              className={viewMode === 'list' ? 'active' : ''}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+            <button
+              type="button"
+              className={viewMode === 'compact' ? 'active' : ''}
+              onClick={() => setViewMode('compact')}
+            >
+              Compact
+            </button>
+          </div>
         </div>
+
+
+
+
 
         {/* MAIN CAMERA CONTENT */}
       <main className="camera-content">
