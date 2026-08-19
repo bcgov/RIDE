@@ -760,7 +760,7 @@ useEffect(() => {
             {activeTab === 'Views' && (
               <ViewsTab views={viewsData} onChange={setViewsData} onSetDefault={handleSetDefaultView}/>
             )}
-            {activeTab === 'Notes' && <NotesTab notes={[]} />}
+            {activeTab === 'Notes' && <NotesTab cameraId={camera.id} />}
             {activeTab === 'Logs' && <LogsTab logs={[]} />}
             {activeTab === 'History' && <HistoryTab history={[]} />}
 

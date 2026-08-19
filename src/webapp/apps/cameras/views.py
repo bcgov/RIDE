@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from rest_framework import viewsets
 
-from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider
-from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer, CommunicationTypeSerializer, PowerSourceSerializer, CommunicationDeviceSerializer, AntennaeSerializer, ServiceProviderSerializer
+from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote
+from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer, CommunicationTypeSerializer, PowerSourceSerializer, CommunicationDeviceSerializer, AntennaeSerializer, ServiceProviderSerializer, CameraNoteSerializer
 
 
 class CameraViewSet(viewsets.ModelViewSet):
@@ -66,3 +66,23 @@ class BusinessAreaViewSet(viewsets.ReadOnlyModelViewSet):
 class ElectricalContractorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ElectricalContractor.objects.filter(is_active=True)
     serializer_class = ElectricalContractorSerializer
+
+# class CameraNoteViewSet(viewsets.ModelViewSet):
+#     serializer_class = CameraNoteSerializer
+
+#     def get_queryset(self):
+#         return CameraNote.objects.filter(id=self.kwargs['id'])
+
+#     def perform_create(self, serializer):
+#         camera = Camera.objects.get(id=self.kwargs['id'])
+#         serializer.save(camera=camera, author=self.request.user)
+
+class CameraNoteViewSet(viewsets.ModelViewSet):
+    serializer_class = CameraNoteSerializer
+
+    def get_queryset(self):
+        return CameraNote.objects.filter(camera_id=self.kwargs['camera_id'])
+
+    def perform_create(self, serializer):
+        camera = Camera.objects.get(id=self.kwargs['camera_id'])
+        serializer.save(camera=camera, author=self.request.user)

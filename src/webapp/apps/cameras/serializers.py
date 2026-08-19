@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider
+from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -261,3 +261,11 @@ class CameraSerializer(serializers.ModelSerializer):
                     CameraView.objects.create(camera=instance, **view_data)
 
         return instance
+
+class CameraNoteSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source='author.get_full_name', read_only=True)
+
+    class Meta:
+        model = CameraNote
+        fields = ['id', 'camera', 'author', 'author_name', 'content', 'created', 'updated']
+        read_only_fields = ['camera', 'author', 'created', 'updated']
