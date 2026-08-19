@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useParams, useNavigate } from "react-router";
 import {
@@ -10,7 +10,9 @@ import {
   faClock,
   faExpand,
   faFloppyDisk,
-  faXmark,
+  faMagnifyingGlass,
+  faChevronDown,
+  faChevronRight,
 } from '@fortawesome/pro-regular-svg-icons';
 import { getCookie } from "../shared/helpers.js";
 
@@ -26,64 +28,44 @@ export default function CameraDetails({ onBack }) {
   const { id } = useParams();
   const navigate = useNavigate();
 
+    // Default template for a brand-new camera
+  const DEFAULT_VIEWS = [
+    { id: 'new-1', orientation: 'NORTH', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-2', orientation: 'SOUTH', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-3', orientation: 'EAST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-4', orientation: 'WEST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-5', orientation: 'NORTHEAST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-6', orientation: 'NORTHWEST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-7', orientation: 'SOUTHEAST', description: '', image_url: '', is_on: false, is_default: false },
+    { id: 'new-8', orientation: 'SOUTHWEST', description: '', image_url: '', is_on: false, is_default: false },
+  ];
+
+
+  // Navigation Panel State
+  const [allCameras, setAllCameras] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedRegions, setExpandedRegions] = useState({});
+  const [expandedHighways, setExpandedHighways] = useState({});
+
+  // Details State
   const [camera, setCamera] = useState(null);
   const [activeTab, setActiveTab] = useState('Basics');
 
   const [basicsData, setBasicsData] = useState({
-    title: camera
-      ? camera.title || ''
-      : '',
-    description: camera
-      ? camera.description || ''
-      : '',
-
-    businessArea: camera
-      ? camera.business_area?.id || ''
-      : '',
-
-    region: camera
-      ? camera.region?.id ?? ''
-      : '',
-
-    road: camera
-      ? camera.road?.id ?? null
-      : null,
-
-    
-    roadMaintenanceContractor: camera
-      ? camera.road_maintenance_contractor?.id ?? null
-      : '',
-
-    electricalContractor: camera
-      ? camera.electrical_contractor || ''
-      : '',
-
-    latitude: camera
-      ? camera.locations_geo_latitude || ''
-      : '',
-
-    longitude: camera
-      ? camera.locations_geo_longitude || ''
-      : '',
-
-    elevation: camera
-      ? camera.locations_elevation || ''
-      : '',
-
-    imageWatermark: camera
-      ? camera.image_watermark || ''
-      : '',
-
-    cameraCredit: camera
-      ? camera.camera_credit || ''
-      : '',
-
-    cameraCreditUrl: camera
-      ? camera.camera_credit_url || ''
-      : '',
+    title: '',
+    description: '',
+    businessArea: '',
+    region: '',
+    road: null,
+    roadMaintenanceContractor: '',
+    electricalContractor: '',
+    latitude: '',
+    longitude: '',
+    elevation: '',
+    imageWatermark: '',
+    cameraCredit: '',
+    cameraCreditUrl: '',
   });
-
-  const isNewCamera = !camera;
 
   const [setupData, setSetupData] = useState({
     cameraId: '',
@@ -93,17 +75,72 @@ export default function CameraDetails({ onBack }) {
     connectionProtocol: '',
     communicationType: '',
     powerSource: '',
-    commuincation_device: '',
+    communicationDevice: '',
     antenna: '',
-    service_provider: '',
+    serviceProvider: '',
   });
 
-  const handleBasicsChange = (field, value) => {
-    setBasicsData((prev) => ({ ...prev, [field]: value }));
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [cameraName, setCameraName] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+
+  const handleSaveCameraName = async () => {
+    const trimmedName = cameraName.trim();
+
+    if (!trimmedName) {
+      return;
+    }
+
+    if (trimmedName === camera?.title) {
+      setIsEditingName(false);
+      return;
+    }
+
+    try {
+      setIsSavingName(true);
+
+      const response = await fetch(`/api/cameras/${camera.id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+          title: trimmedName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+
+        console.error('Failed to update camera name:', errorData);
+
+        throw new Error(
+          `Failed to update camera name: ${response.status}`
+        );
+      }
+
+      const updatedCamera = await response.json();
+
+      setCamera(updatedCamera);
+      setIsEditingName(false);
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setIsSavingName(false);
+    }
   };
 
-  const handleSetupChange = (field, value) => {
-    setSetupData((prev) => ({ ...prev, [field]: value }));
+  const handleCameraNameKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSaveCameraName();
+    }
+
+    if (event.key === 'Escape') {
+      handleCancelCameraName();
+    }
   };
 
   const handleSave = async () => {
@@ -114,8 +151,7 @@ export default function CameraDetails({ onBack }) {
         business_area_id: basicsData.businessArea ? Number(basicsData.businessArea) : null,
         region_id: basicsData.region ? Number(basicsData.region) : null,
         road_id: basicsData.road ? Number(basicsData.road) : null,
-        
-        
+              
         camera_type_id: setupData.cameraType ? Number(setupData.cameraType) : null,
         camera_make_id: setupData.cameraMake ? Number(setupData.cameraMake) : null,
         connection_type_id: setupData.connectionType ? Number(setupData.connectionType) : null,
@@ -133,7 +169,6 @@ export default function CameraDetails({ onBack }) {
         road_maintenance_contractor_id: basicsData.roadMaintenanceContractor ? Number(basicsData.roadMaintenanceContractor) : null,
         electrical_contractor_id: basicsData.electricalContractor ? Number(basicsData.electricalContractor) : null,
         
-
         // Pass null instead of empty string "" for numeric fields
         locations_geo_latitude: basicsData.latitude ? Number(basicsData.latitude) : null,
         locations_geo_longitude: basicsData.longitude ? Number(basicsData.longitude) : null,
@@ -188,7 +223,7 @@ export default function CameraDetails({ onBack }) {
     navigate('/cameras');
   };
 
-  const handleDelete = async () => {
+    const handleDelete = async () => {
     if (!id) {
       return;
     }
@@ -229,40 +264,130 @@ export default function CameraDetails({ onBack }) {
     }
   };
 
-  // Default template for a brand-new camera
-  const DEFAULT_VIEWS = [
-    { id: 'new-1', orientation: 'NORTH', description: '', image_url: '', is_on: false, is_default: false },
-    { id: 'new-2', orientation: 'SOUTH', description: '', image_url: '', is_on: false, is_default: false },
-    { id: 'new-3', orientation: 'EAST', description: '', image_url: '', is_on: false, is_default: false },
-    { id: 'new-4', orientation: 'WEST', description: '', image_url: '', is_on: false, is_default: false },
-    { id: 'new-5', orientation: 'NORTHEAST', description: '', image_url: '', is_on: false, is_default: false },
-    { id: 'new-6', orientation: 'NORTHWEST', description: '', image_url: '', is_on: false, is_default: false },
-    { id: 'new-7', orientation: 'SOUTHEAST', description: '', image_url: '', is_on: false, is_default: false },
-    { id: 'new-8', orientation: 'SOUTHWEST', description: '', image_url: '', is_on: false, is_default: false },
-  ];
+  // Fetch all cameras for sidebar navigation
+  useEffect(() => {
+    const fetchAllCameras = async () => {
+      try {
+        const res = await fetch('/api/cameras/');
+        if (res.ok) {
+          const data = await res.json();
+          setAllCameras(data);
+        }
+      } catch (err) {
+        console.error("Failed to load camera hierarchy:", err);
+      }
+    };
+    fetchAllCameras();
+  }, []);
 
-  const viewsList = [...(camera?.views || [])].sort(
-      (a, b) => a.display_order - b.display_order
-  );
+// Fetch individual camera details when URL parameter changes
+useEffect(() => {
+  const loadCamera = async () => {
+    try {
+      const response = await fetch(`/api/cameras/${id}/`);
+      if (!response.ok) {
+        throw new Error(`Failed to load camera: ${response.status}`);
+      }
+      const data = await response.json();
+      setCamera(data);
 
-  const [viewsData, setViewsData] = useState(() => {
-    if (!camera?.views?.length) {
-      return DEFAULT_VIEWS;
+      // Auto-expand the active region and highway in the left panel
+      const regName = data.region?.name || 'Other';
+      const roadName = data.road?.name || 'Other';
+      
+      setExpandedRegions((prev) => ({ ...prev, [regName]: true }));
+      setExpandedHighways((prev) => ({ ...prev, [`${regName}-${roadName}`]: true }));
+
+      // Update Basics form state
+      setBasicsData({
+        title: data.title || '',
+        description: data.description || '',
+        road: data.road?.id ?? null,
+        region: data.region?.id ?? '',
+        roadMaintenanceContractor: data.road_maintenance_contractor?.id ?? null,
+        electricalContractor: data.electrical_contractor?.id ?? null,
+        businessArea: data.business_area?.id ?? null,
+        latitude: data.locations_geo_latitude ?? '',
+        longitude: data.locations_geo_longitude ?? '',
+        elevation: data.locations_elevation || '',
+        imageWatermark: data.image_watermark || '',
+        cameraCredit: data.camera_credit || '',
+        cameraCreditUrl: data.camera_credit_url || '',
+      });
+
+      // Update Setup form state
+      setSetupData({
+        cameraId: data.id ?? '',
+        cameraType: data.camera_type?.id ?? data.camera_type_id ?? '',
+        cameraMake: data.camera_make?.id ?? data.camera_make_id ?? '',
+        connectionType: data.connection_type?.id ?? data.connection_type_id ?? '',
+        connectionProtocol: data.connection_protocol?.id ?? data.connection_protocol_id ?? '',
+        communicationType: data.communication_type?.id ?? data.communication_type_id ?? '',
+        powerSource: data.power_source?.id ?? data.power_source_id ?? '',
+        communicationDevice: data.communication_device?.id ?? data.communication_device_id ?? '',
+        antenna: data.antenna?.id ?? data.antenna_id ?? '',
+        serviceProvider: data.service_provider?.id ?? data.service_provider_id ?? '',
+      });
+
+    } catch (error) {
+      console.error("Failed to load camera details:", error);
     }
-    const viewsList = [...(camera?.views || [])].sort(
-      (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
-    );
+  };
 
-    return viewsList.map((view) => ({
-      id: String(view.id),
-      orientation: view.orientation || '',
-      image_url: view.image_url || '',
-      description: view.description || '',
-      is_on: view.is_on ?? true,
-      is_default: view.is_default ?? false,
+  if (id) {
+    loadCamera();
+  }
+}, [id]);
+
+  // Group all cameras by Region -> Highway
+  const cameraHierarchy = useMemo(() => {
+    const hierarchy = {};
+
+    allCameras.forEach((cam) => {
+      const regName = cam.region?.name || 'Unassigned';
+      const hwyName = cam.road?.name || 'Other';
+
+      if (!hierarchy[regName]) {
+        hierarchy[regName] = {};
+      }
+      if (!hierarchy[regName][hwyName]) {
+        hierarchy[regName][hwyName] = [];
+      }
+
+      if (
+        !searchQuery ||
+        cam.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        hwyName.toLowerCase().includes(searchQuery.toLowerCase())
+      ) {
+        hierarchy[regName][hwyName].push(cam);
+      }
+    });
+
+    return hierarchy;
+  }, [allCameras, searchQuery]);
+
+  const toggleRegion = (regionName) => {
+    setExpandedRegions((prev) => ({
+      ...prev,
+      [regionName]: !prev[regionName],
     }));
-  });
+  };
 
+  const toggleHighway = (key) => {
+    setExpandedHighways((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handleBasicsChange = (field, value) => {
+    setBasicsData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSetupChange = (field, value) => {
+    setSetupData((prev) => ({ ...prev, [field]: value }));
+  };
+ 
   const handleSetDefaultView = (selectedId) => {
     setViewsData((prev) =>
       prev.map((view) => ({
@@ -373,86 +498,43 @@ export default function CameraDetails({ onBack }) {
     },
   ]);
 
-  // const mainImageUrl = camera?.locations_thumbnail_map_url || camera?.url || '';
-  const getMainImageUrl = (camera) => {
-    const views = camera?.views;
-    if (!views || views.length === 0) return '';
 
-    // 1. Look for the view marked as default
+  const getMainImageUrl = (cam) => {
+    const views = cam?.views;
+    if (!views || views.length === 0) return '';
     const defaultView = views.find((v) => v.is_default);
     if (defaultView?.image_url) return defaultView.image_url;
-
-    // 2. Fallback to the first active (is_on) view
     const activeView = views.find((v) => v.is_on);
     if (activeView?.image_url) return activeView.image_url;
-
-    // 3. Fallback to the first view in the array
     return views[0]?.image_url || '';
   };
 
-  // Usage:
   const mainImageUrl = getMainImageUrl(camera);
 
-  const getViewImageUrl = (view) => {
-    return view?.image_url || '';
-  };
+  const viewsList = [...(camera?.views || [])].sort(
+    (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+  );
 
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [cameraName, setCameraName] = useState('');
-  const [isSavingName, setIsSavingName] = useState(false);
-
-  useEffect(() => {
-    const loadCamera = async () => {
-      try {
-        const response = await fetch(`/api/cameras/${id}/`);
-
-        if (!response.ok) {
-          throw new Error(`Failed to load camera: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Camera loaded:", data);
-
-        setCamera(data);
-
-        // Populate form data immediately from backend response
-        setBasicsData({
-          cameraId: data.id || '',
-          cameraName: data.title || '',
-          description: data.description || '',
-
-          road: data.road?.id ?? null,
-          region: data.region?.id ?? '',
-          // camera_type: data.camera_type?.id ?? '',
-          // camera_make: data.camera_make?.id ?? '',
-          roadMaintenanceContractor: data.road_maintenance_contractor?.id ?? null,
-          electricalContractor: data.electrical_contractor?.id ?? null,
-          businessArea: data.business_area?.id ?? null,
-          
-          latitude: data.locations_geo_latitude ?? '',
-          longitude: data.locations_geo_longitude ?? '',
-          elevation: data.locations_elevation || '',
-          imageWatermark: data.image_watermark || '',
-          cameraCredit: data.camera_credit || '',
-          cameraCreditUrl: data.camera_credit_url || '',
-        });
-      } catch (error) {
-        console.error("Failed to load camera:", error);
-      }
-    };
-
-    if (id) {
-      loadCamera();
+  const [viewsData, setViewsData] = useState(() => {
+    if (!camera?.views?.length) {
+      return DEFAULT_VIEWS;
     }
-  }, [id]);
+    const viewsList = [...(camera?.views || [])].sort(
+      (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+    );
 
-  // Update viewsData whenever camera.views arrives or updates
+    return viewsList.map((view) => ({
+      id: String(view.id),
+      orientation: view.orientation || '',
+      image_url: view.image_url || '',
+      description: view.description || '',
+      is_on: view.is_on ?? true,
+      is_default: view.is_default ?? false,
+    }));
+  });
+
   useEffect(() => {
     if (camera?.views?.length) {
-      const viewsList = [...camera.views].sort(
-        (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
-      );
-
       const formattedViews = viewsList.map((view) => ({
         id: String(view.id),
         orientation: view.orientation || '',
@@ -461,296 +543,234 @@ export default function CameraDetails({ onBack }) {
         is_on: view.is_on ?? true,
         is_default: view.is_default ?? false,
       }));
-
       setViewsData(formattedViews);
     }
   }, [camera?.views]);
 
-  const handleSaveCameraName = async () => {
-    const trimmedName = cameraName.trim();
-
-    if (!trimmedName) {
-      return;
-    }
-
-    if (trimmedName === camera?.title) {
-      setIsEditingName(false);
-      return;
-    }
-
-    try {
-      setIsSavingName(true);
-
-      const response = await fetch(`/api/cameras/${camera.id}/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken'),
-        },
-        body: JSON.stringify({
-          title: trimmedName,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-
-        console.error('Failed to update camera name:', errorData);
-
-        throw new Error(
-          `Failed to update camera name: ${response.status}`
-        );
-      }
-
-      const updatedCamera = await response.json();
-
-      setCamera(updatedCamera);
-      setIsEditingName(false);
-
-    } catch (error) {
-      console.error(error);
-      alert(error.message);
-    } finally {
-      setIsSavingName(false);
-    }
-  };
-
-  const handleCameraNameKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      handleSaveCameraName();
-    }
-
-    if (event.key === 'Escape') {
-      handleCancelCameraName();
-    }
-  };
-
-  useEffect(() => {
-    if (!camera) {
-      return;
-    }
-
-    setBasicsData({
-      title: camera.title || '',
-      description: camera.description || '',
-      
-      road: camera.road?.id ?? null,
-      region: camera.region?.id ?? '',
-      // camera_type: camera.camera_type?.id ?? '',
-      // camera_make: camera.camera_make?.id ?? '',
-      roadMaintenanceContractor: camera.road_maintenance_contractor?.id ?? null,
-      electricalContractor: camera.electrical_contractor?.id ?? null,
-      businessArea: camera.business_area?.id ?? null,
-
-
-      maintenanceContractor: camera.maintenance_contractor || '',
-      
-      latitude: camera.locations_geo_latitude || '',
-      longitude: camera.locations_geo_longitude || '',
-      elevation: camera.locations_elevation || '',
-      imageWatermark: camera.image_watermark || '',
-      cameraCredit: camera.camera_credit || '',
-      cameraCreditUrl: camera.camera_credit_url || '',
-    });
-  }, [camera]);
-
-  useEffect(() => {
-    if (!camera) return;
-
-    setSetupData((prev) => ({
-      ...prev,
-      cameraId: camera.id || '',
-      cameraType: camera.camera_type?.id ?? '',
-      cameraMake: camera.camera_make?.id ?? '',
-      connectionType: camera.connection_type?.id ?? '',
-      connectionProtocol: camera.connection_protocol?.id ?? '',
-      communicationType: camera.communication_type?.id ?? '',
-      powerSource: camera.power_source?.id ?? '',
-      communicationDevice: camera.communication_device?.id ?? '',
-      antenna: camera.antenna?.id ?? '',
-      serviceProvider: camera.service_provider?.id ?? '',
-    }));
-  }, [camera]);
-
   return (
-    <div className="camera-details-container">
-      {/* Header Bar */}
-      <header className="details-header">
+    <div className="camera-details-layout">
+      {/* LEFT SIDE NAVIGATION PANEL */}
+      <aside className="camera-nav-panel">
+        <div className="search-box">
+          <FontAwesomeIcon icon={faMagnifyingGlass} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-    <div className="title-section">
-      {isEditingName ? (
-        <input
-          type="text"
-          className="camera-name-input"
-          value={basicsData.title}
-          onChange={(event) =>
-            setBasicsData((prev) => ({
-              ...prev,
-              title: event.target.value,
-              cameraName: event.target.value,
-            }))
-          }
-          onKeyDown={handleCameraNameKeyDown}
-          onBlur={() => setIsEditingName(false)}
-          autoFocus
-        />
-      ) : (
-        <>
-          <h1>
-            {basicsData.title || 'New Camera'}
-          </h1>
+        <div className="hierarchy-tree">
+          {Object.entries(cameraHierarchy).map(([regionName, highways]) => {
+            const isRegionExpanded = expandedRegions[regionName] ?? true;
 
-          <button
-            type="button"
-            className="icon-edit-btn"
-            aria-label="Edit title"
-            onClick={() => setIsEditingName(true)}
-          >
-            <FontAwesomeIcon icon={faPenToSquare} />
-          </button>
-        </>
-      )}
-    </div>
+            return (
+              <div key={regionName} className="region-group">
+                <div
+                  className="region-header"
+                  onClick={() => toggleRegion(regionName)}
+                >
+                  <span>{regionName}</span>
+                  <FontAwesomeIcon
+                    icon={isRegionExpanded ? faChevronDown : faChevronRight}
+                  />
+                </div>
 
-        <div className="actions-toolbar">
-          <button type="button" className="btn-secondary btn-service">
-            <FontAwesomeIcon icon={faWrench} />
-            <span>Request service</span>
-          </button>
-          <button type="button" className="circle-action-btn" aria-label="View link">
-            <FontAwesomeIcon icon={faInfoCircle} />
-          </button>
-            <button
-              type="button"
-              className="circle-action-btn danger"
-              aria-label="Delete camera"
-              onClick={handleDelete}
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </button>
+                {isRegionExpanded && (
+                  <div className="region-content">
+                    {Object.entries(highways).map(([highwayName, cameras]) => {
+                      if (cameras.length === 0) return null;
+                      const hwyKey = `${regionName}-${highwayName}`;
+                      const isHighwayExpanded = expandedHighways[hwyKey] ?? true;
+
+                      return (
+                        <div key={hwyKey} className="highway-group">
+                          <div
+                            className="highway-header"
+                            onClick={() => toggleHighway(hwyKey)}
+                          >
+                            <span>{highwayName}</span>
+                            <FontAwesomeIcon
+                              icon={isHighwayExpanded ? faChevronDown : faChevronRight}
+                            />
+                          </div>
+
+                          {isHighwayExpanded && (
+                            <ul className="camera-list">
+                              {cameras.map((item) => {
+                                const isSelected = String(item.id) === String(id);
+                                return (
+                                  <li
+                                    key={item.id}
+                                    className={`camera-item ${isSelected ? 'selected' : ''}`}
+                                    onClick={() => navigate(`/cameras/${item.id}`)}
+                                  >
+                                    {item.title}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </aside>
+
+      {/* RIGHT MAIN DETAILS CONTAINER */}
+      <div className="camera-details-container">
+        <header className="details-header">
+          <div className="title-section">
+          {isEditingName ? (
+            <input
+              type="text"
+              className="camera-name-input"
+              value={basicsData.title}
+              onChange={(event) =>
+                setBasicsData((prev) => ({
+                  ...prev,
+                  title: event.target.value,
+                  cameraName: event.target.value,
+                }))
+              }
+              onKeyDown={handleCameraNameKeyDown}
+              onBlur={() => setIsEditingName(false)}
+              autoFocus
+            />
+          ) : (
+            <>
+              <h1>
+                {basicsData.title || 'New Camera'}
+              </h1>
+
+              <button
+                type="button"
+                className="icon-edit-btn"
+                aria-label="Edit title"
+                onClick={() => setIsEditingName(true)}
+              >
+                <FontAwesomeIcon icon={faPenToSquare} />
+              </button>
+            </>
+          )}
+        </div>
+
+         <div className="actions-toolbar">
+           <button type="button" className="btn-secondary btn-service">
+             <FontAwesomeIcon icon={faWrench} />
+             <span>Request service</span>
+           </button>
+           <button type="button" className="circle-action-btn" aria-label="View link">
+             <FontAwesomeIcon icon={faInfoCircle} />
+           </button>
+             <button
+               type="button"
+               className="circle-action-btn danger"
+               aria-label="Delete camera"
+               onClick={handleDelete}
+             >
+               <FontAwesomeIcon icon={faTrash} />
+             </button>
             
           
-          <button type="button" className="circle-action-btn" aria-label="More options">
-            <FontAwesomeIcon icon={faEllipsisVertical} />
-          </button>
-        </div>
-      </header>
+           <button type="button" className="circle-action-btn" aria-label="More options">
+             <FontAwesomeIcon icon={faEllipsisVertical} />
+           </button>
+         </div>
+        </header>
 
-      {/* Main Grid Pane */}
-      <div className="details-grid">
-        {/* Left Side: Media & Views */}
-        <div className="media-pane">
-          <div className="main-preview-card">
-            <div className="preview-toolbar">
-              <span className="badge-ondemand">
-                <FontAwesomeIcon icon={faInfoCircle} /> On-demand
-              </span>
-              <button type="button" className="btn-timelapse">
-                <FontAwesomeIcon icon={faClock} /> View timelapse
-              </button>
+        <div className="details-grid">
+          {/* Left Media Preview Pane */}
+          <div className="media-pane">
+            <div className="main-preview-card">
+              <div className="preview-toolbar">
+                <span className="badge-ondemand">
+                  <FontAwesomeIcon icon={faInfoCircle} /> On-demand
+                </span>
+                <button type="button" className="btn-timelapse">
+                  <FontAwesomeIcon icon={faClock} /> View timelapse
+                </button>
+              </div>
+
+              <div className="main-image-wrapper">
+                {mainImageUrl ? (
+                  <img src={mainImageUrl} alt={camera?.title} />
+                ) : (
+                  <div className="image-placeholder">No image preview available</div>
+                )}
+              </div>
             </div>
 
-            <div className="main-image-wrapper">
-              {mainImageUrl ? (
-                <img src={mainImageUrl} alt={camera?.title} />
-              ) : (
-                <div className="image-placeholder">No image preview available</div>
-              )}
+            <div className="views-section">
+              <div className="views-header">
+                <h2>Views</h2>
+                <button type="button" className="btn-expand">
+                  <FontAwesomeIcon icon={faExpand} /> Expand all
+                </button>
+              </div>
+
+              <div className="views-grid">
+                {viewsList
+                  .filter((view) => view.is_on ?? true)
+                  .map((view) => (
+                    <div key={view.id} className="view-card">
+                      <div className="view-card-top">
+                        <span className="direction-label">{view.orientation}</span>
+                      </div>
+                      <div className="view-card-image">
+                        {view.image_url ? (
+                          <img src={view.image_url} alt={view.orientation} />
+                        ) : (
+                          <div className="placeholder-thumb" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
 
-          <div className="views-section">
-            <div className="views-header">
-              <h2>Views</h2>
-              <button type="button" className="btn-expand">
-                <FontAwesomeIcon icon={faExpand} /> Expand all
+          {/* Right Form Tabs Pane */}
+          <div className="form-pane">
+            <nav className="details-tabs">
+              {['Basics', 'Setup', 'Views', 'Notes', 'Logs', 'History'].map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </nav>
+
+            {activeTab === 'Basics' && (
+              <BasicsTab basicsData={basicsData} onChange={handleBasicsChange} />
+            )}
+            {activeTab === 'Setup' && (
+              <SetupTab setupData={setupData} onChange={handleSetupChange} />
+            )}
+            {activeTab === 'Views' && (
+              <ViewsTab views={viewsData} onChange={setViewsData} onSetDefault={handleSetDefaultView}/>
+            )}
+            {activeTab === 'Notes' && <NotesTab notes={[]} />}
+            {activeTab === 'Logs' && <LogsTab logs={[]} />}
+            {activeTab === 'History' && <HistoryTab history={[]} />}
+
+            <footer className="form-footer">
+              <button type="button" className="btn-save" onClick={handleSave}>
+                <FontAwesomeIcon icon={faFloppyDisk} />
+                <span>Save all changes</span>
               </button>
-            </div>
-
-            <div className="views-grid">
-              {viewsList
-                .filter((view) => view.is_on ?? true)
-                .map((view) => (
-                  <div key={view.id} className={`view-card ${view.active ? 'selected' : ''}`}>
-                    <div className="view-card-top">
-                      <span className="direction-label">{view.orientation}</span>
-                      <label className="toggle-switch">
-                        <input type="checkbox" defaultChecked={view.is_on ?? true} />
-                        <span className="slider round" />
-                      </label>
-                    </div>
-                    <div className="view-card-image">
-                      {mainImageUrl ? (
-                        <img src={getViewImageUrl(view)} alt={view.orientation} />
-                      ) : (
-                        <div className="placeholder-thumb" />
-                      )}
-                    </div>
-                    <div className="view-card-footer">
-                      <FontAwesomeIcon icon={faClock} />
-                      <span>{view.time || '1:00 pm PST'}</span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-
-
-
-
+            </footer>
           </div>
-        </div>
-
-        {/* Right Side: Tabbed Form Panels */}
-        <div className="form-pane">
-          <nav className="details-tabs">
-            {['Basics', 'Setup', 'Views', 'Notes', 'Logs', 'History'].map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </nav>
-
-          {/* Dynamic Tab Render */}
-          {activeTab === 'Basics' && (
-            <BasicsTab basicsData={basicsData} onChange={handleBasicsChange} />
-          )}
-
-          {activeTab === 'Setup' && (
-            <SetupTab setupData={setupData} onChange={handleSetupChange} />
-          )}
-
-          {activeTab === 'Views' && (
-          <ViewsTab
-            views={viewsData}
-            onChange={setViewsData}
-            onSetDefault={handleSetDefaultView}
-          />
-        )}
-
-        {activeTab === 'Notes' && (
-          <NotesTab
-            notes={notesData}
-            onAddNote={handleAddNote}
-            onUpdateNote={handleUpdateNote}
-          />
-        )}
-
-        {activeTab === 'Logs' && <LogsTab logs={logsData} />}
-
-        {activeTab === 'History' && <HistoryTab history={historyData} />}
-
-          {/* Save Button Footer */}
-          <footer className="form-footer">
-            <button type="button" className="btn-save" onClick={handleSave}>
-              <FontAwesomeIcon icon={faFloppyDisk} />
-              <span>Save all changes</span>
-            </button>
-          </footer>
         </div>
       </div>
     </div>
