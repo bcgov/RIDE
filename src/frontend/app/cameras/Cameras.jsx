@@ -17,13 +17,8 @@ import {
   faFire,
   faUpRightFromSquare,
 } from '@fortawesome/pro-regular-svg-icons';
-import CameraForm from './CameraForm';
-import './Cameras.scss';
-
-// import { faBroomWide } from '@fortawesome/free-solid-svg-icons';
 import { faBroomWide } from '@fortawesome/pro-solid-svg-icons';
-
-
+import './Cameras.scss';
 
 /*
  * Return the camera image URL.
@@ -366,8 +361,6 @@ export default function Cameras() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [editingCamera, setEditingCamera] = useState(null);
-  const [showForm, setShowForm] = useState(false);
 
   const [search, setSearch] = useState('');
 
@@ -951,23 +944,6 @@ const powerSources = useMemo(() => {
               </div>
             )}
           </div>
-
-          {/* <div className="view-mode-toggle">
-            <button
-              type="button"
-              className={viewMode === 'list' ? 'active' : ''}
-              onClick={() => setViewMode('list')}
-            >
-              List
-            </button>
-            <button
-              type="button"
-              className={viewMode === 'compact' ? 'active' : ''}
-              onClick={() => setViewMode('compact')}
-            >
-              Compact
-            </button>
-          </div> */}
         </div>
 
 
@@ -977,53 +953,7 @@ const powerSources = useMemo(() => {
           </div>
         )}
 
-
-        {showForm && (
-          <CameraForm
-            onSubmit={createCamera}
-            onCancel={() => setShowForm(false)}
-          />
-        )}
-
-
-        {editingCamera && (
-          <CameraForm
-            camera={editingCamera}
-            onSubmit={updateCamera}
-            onCancel={() =>
-              setEditingCamera(null)
-            }
-          />
-        )}
-
         <div className="camera-header-divider" />
-
-
-        {/* SEARCH */}
-        {/* <div className="camera-search">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            placeholder="Search"
-          />
-
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-          />
-
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-            >
-              <FontAwesomeIcon icon={faXmark} />
-            </button>
-          )}
-        </div> */}
-
 
         {/* SEARCH ROW */}
         <div className="camera-search-row">
