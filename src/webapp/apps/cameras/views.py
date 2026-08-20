@@ -9,13 +9,9 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-class CameraViewSet(viewsets.ModelViewSet):
-    queryset = Camera.objects.all()
-    serializer_class = CameraSerializer
+class BulkUpdateViewSet(viewsets.ReadOnlyModelViewSet):
 
-class RegionViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Region.objects.filter(is_active=True)
-    serializer_class = RegionSerializer
+    model = None
 
     @action(
         detail=False,
@@ -37,7 +33,6 @@ class RegionViewSet(viewsets.ReadOnlyModelViewSet):
         for index, item in enumerate(items):
             item_id = item.get("id")
             name = (item.get("name") or "").strip()
-            display_order = item.get("display_order", index)
 
             if not name:
                 return Response(
@@ -45,35 +40,54 @@ class RegionViewSet(viewsets.ReadOnlyModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            display_order = item.get(
+                "display_order",
+                index,
+            )
+
             if item_id:
                 try:
-                    region = Region.objects.get(
+                    obj = self.model.objects.get(
                         id=item_id,
                         is_active=True,
                     )
-                except Region.DoesNotExist:
+                except self.model.DoesNotExist:
                     return Response(
                         {
-                            "error": f"Region {item_id} does not exist."
+                            "error": (
+                                f"{self.model.__name__} "
+                                f"{item_id} does not exist."
+                            )
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-                region.name = name
-                region.display_order = display_order
-                region.save()
+                obj.name = name
+                obj.display_order = display_order
+                obj.save()
 
             else:
-                region = Region.objects.create(
-                    name=name,
-                    display_order=display_order,
-                    is_active=True,
-                )
+                existing = self.model.objects.filter(
+                    name=name
+                ).first()
 
-            submitted_ids.add(region.id)
+                if existing:
+                    existing.display_order = display_order
+                    existing.is_active = True
+                    existing.save()
 
-        # Only do this if the frontend submits the complete list.
-        Region.objects.filter(
+                    obj = existing
+
+                else:
+                    obj = self.model.objects.create(
+                        name=name,
+                        display_order=display_order,
+                        is_active=True,
+                    )
+
+            submitted_ids.add(obj.id)
+
+        self.model.objects.filter(
             is_active=True
         ).exclude(
             id__in=submitted_ids
@@ -81,9 +95,12 @@ class RegionViewSet(viewsets.ReadOnlyModelViewSet):
             is_active=False
         )
 
-        queryset = Region.objects.filter(
+        queryset = self.model.objects.filter(
             is_active=True
-        ).order_by("display_order", "id")
+        ).order_by(
+            "display_order",
+            "id",
+        )
 
         serializer = self.get_serializer(
             queryset,
@@ -92,56 +109,78 @@ class RegionViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(serializer.data)
 
-class CameraTypeViewSet(viewsets.ModelViewSet):
+class CameraViewSet(viewsets.ModelViewSet):
+    queryset = Camera.objects.all()
+    serializer_class = CameraSerializer
+
+class RegionViewSet(BulkUpdateViewSet):
+    model = Region
+    queryset = Region.objects.filter(is_active=True)
+    serializer_class = RegionSerializer
+
+class CameraTypeViewSet(BulkUpdateViewSet):
+    model = CameraType
     queryset = CameraType.objects.filter(is_active=True)
     serializer_class = CameraTypeSerializer
 
 
-class CameraMakeViewSet(viewsets.ModelViewSet):
+class CameraMakeViewSet(BulkUpdateViewSet):
+    model = CameraMake
     queryset = CameraMake.objects.filter(is_active=True)
     serializer_class = CameraMakeSerializer
 
-class ConnectionTypeViewSet(viewsets.ModelViewSet):
+class ConnectionTypeViewSet(BulkUpdateViewSet):
+    model = ConnectionType
     queryset = ConnectionType.objects.filter(is_active=True)
     serializer_class = ConnectionTypeSerializer
 
-class ConnectionProtocolViewSet(viewsets.ModelViewSet):
+class ConnectionProtocolViewSet(BulkUpdateViewSet):
+    model = ConnectionProtocol
     queryset = ConnectionProtocol.objects.filter(is_active=True)
     serializer_class = ConnectionProtocolSerializer
 
-class CommunicationTypeViewSet(viewsets.ModelViewSet):
+class CommunicationTypeViewSet(BulkUpdateViewSet):
+    model = CommunicationType
     queryset = CommunicationType.objects.filter(is_active=True)
     serializer_class = CommunicationTypeSerializer
 
-class PowerSourceViewSet(viewsets.ModelViewSet):
+class PowerSourceViewSet(BulkUpdateViewSet):
+    model = PowerSource
     queryset = PowerSource.objects.filter(is_active=True)
     serializer_class = PowerSourceSerializer
 
-class CommunicationDeviceViewSet(viewsets.ModelViewSet):
+class CommunicationDeviceViewSet(BulkUpdateViewSet):
+    model = CommunicationDevice
     queryset = CommunicationDevice.objects.filter(is_active=True)
     serializer_class = CommunicationDeviceSerializer
 
-class AntennaeViewSet(viewsets.ModelViewSet):
+class AntennaeViewSet(BulkUpdateViewSet):
+    model = Antenna
     queryset = Antenna.objects.filter(is_active=True)
     serializer_class = AntennaeSerializer
 
-class ServiceProviderViewSet(viewsets.ModelViewSet):
+class ServiceProviderViewSet(BulkUpdateViewSet):
+    model = ServiceProvider
     queryset = ServiceProvider.objects.filter(is_active=True)
     serializer_class = ServiceProviderSerializer
 
-class RoadViewSet(viewsets.ReadOnlyModelViewSet):
+class RoadViewSet(BulkUpdateViewSet):
+    model = Road
     queryset = Road.objects.filter(is_active=True)
     serializer_class = RoadSerializer
 
-class RoadMaintenanceContractorViewSet(viewsets.ReadOnlyModelViewSet):
+class RoadMaintenanceContractorViewSet(BulkUpdateViewSet):
+    model = RoadMaintenanceContractor
     queryset = RoadMaintenanceContractor.objects.all()
     serializer_class = RoadMaintenanceContractorSerializer
 
-class BusinessAreaViewSet(viewsets.ReadOnlyModelViewSet):
+class BusinessAreaViewSet(BulkUpdateViewSet):
+    model = BusinessArea
     queryset = BusinessArea.objects.filter(is_active=True)
     serializer_class = BusinessAreaSerializer
 
-class ElectricalContractorViewSet(viewsets.ReadOnlyModelViewSet):
+class ElectricalContractorViewSet(BulkUpdateViewSet):
+    model = ElectricalContractor
     queryset = ElectricalContractor.objects.filter(is_active=True)
     serializer_class = ElectricalContractorSerializer
 

@@ -20,6 +20,7 @@ class BaseLookupModel(models.Model):
 class Road(BaseLookupModel):
     """MOTT managed roads and highways."""
     code = models.CharField(max_length=50, null=True, blank=True, help_text="e.g. Hwy 1, Hwy 99")
+    display_order = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Road / Highway"
@@ -33,63 +34,69 @@ class Region(BaseLookupModel):
 
 class CameraType(BaseLookupModel):
     """Type/category of camera."""
-    pass
+    display_order = models.PositiveIntegerField(default=0)
 
 class CameraMake(BaseLookupModel):
     """Camera manufacturer/make."""
-    pass
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class RoadMaintenanceContractor(BaseLookupModel):
     """Road maintenance service providers / contractors."""
     contact_email = models.EmailField(null=True, blank=True)
     contact_phone = models.CharField(max_length=30, null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class ElectricalContractor(BaseLookupModel):
     """Electrical service contractors."""
     contact_email = models.EmailField(null=True, blank=True)
     contact_phone = models.CharField(max_length=30, null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class BusinessArea(BaseLookupModel):
     """Business areas or operational districts."""
     code = models.CharField(max_length=50, null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class ConnectionType(BaseLookupModel):
     """Type of network/data connection (e.g., Cellular, Fiber, Satellite)."""
-    pass
+    display_order = models.IntegerField(default=0)
 
 
 class ConnectionProtocol(BaseLookupModel):
     """Protocol used for connection (e.g., HTTP, HTTPS, RTSP, SNMP)."""
-    pass
+    display_order = models.IntegerField(default=0)
 
 
 class CommunicationType(BaseLookupModel):
     """Type of communication method (e.g., Serial, IP, Wireless)."""
-    pass
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class CommunicationDevice(BaseLookupModel):
     """Hardware device for comms (e.g., Modem model, Router model)."""
     model_number = models.CharField(max_length=100, null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class Antenna(BaseLookupModel):
     """Antenna type/hardware used for wireless links."""
     gain_dbi = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class ServiceProvider(BaseLookupModel):
     """Telecom / ISP service providers (e.g., Telus, Rogers)."""
     account_number = models.CharField(max_length=100, null=True, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
 
 
 class PowerSource(BaseLookupModel):
     """Power grid / generation source (e.g., Solar, AC Grid, Battery)."""
-    pass
+    display_order = models.IntegerField(default=0)
 
 class Camera(models.Model):
 

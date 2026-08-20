@@ -43,6 +43,16 @@ const SETTINGS = [
     endpoint: 'communication-devices',
   },
   {
+    key: 'connection-type',
+    label: 'Connection type',
+    endpoint: 'connection-types',
+  },
+  {
+    key: 'connection-protocols',
+    label: 'Connection protocols',
+    endpoint: 'connection-protocols',
+  },
+  {
     key: 'electrical-contractors',
     label: 'Electrical contractors',
     endpoint: 'electrical-contractors',
@@ -66,6 +76,11 @@ const SETTINGS = [
     key: 'service-providers',
     label: 'Service providers',
     endpoint: 'service-providers',
+  },
+  {
+    key: 'power-sources',
+    label: 'Power sources',
+    endpoint: 'power-sources',
   },
   {
     key: 'service-request-ccs',
