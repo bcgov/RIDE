@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from "react-router";
@@ -21,45 +20,6 @@ import { faBroomWide } from '@fortawesome/pro-solid-svg-icons';
 import './Cameras.scss';
 
 /*
- * Return the camera image URL.
- *
- * Change this function if your API uses a different field for
- * the current camera image.
- */
-function getCameraImage(camera) {
-  if (!camera) return '';
-
-  // Safely check `views` or fallback to Django's default `cameraview_set`
-  const viewsList = camera.views || camera.cameraview_set || [];
-
-  // Find the view where is_default is true
-  const defaultView = viewsList.find((view) => view.is_default);
-
-  // Return default view image if available
-  if (defaultView?.image_url) {
-    return defaultView.image_url;
-  }
-
-  // Fallback to first available view image if no default is marked
-  const activeView = viewsList.find((view) => view.image_url);
-  if (activeView?.image_url) {
-    return activeView.image_url;
-  }
-
-  // Final fallback to camera thumbnail map URL
-  return camera.locations_thumbnail_map_url || '';
-}
-
-/*
- * A camera is considered "on" if any of its views is on.
- */
-function isCameraOn(camera) {
-  const viewsList = camera.views || camera.cameraview_set || [];
-  return viewsList.some((view) => view.is_on);
-}
-
-
-/*
  * Return a useful display name for the camera highway group.
  */
 function getCameraName(camera) {
@@ -69,54 +29,6 @@ function getCameraName(camera) {
   );
 }
 
-
-/*
- * Return the location name shown under a highway group.
- */
-function getCameraLocation(camera) {
-  return (
-    getCameraName(camera)
-  );
-}
-
-
-/*
- * Return the direction of a camera.
- */
-// function getCameraDirection(camera) {
-//   return (
-//     camera.locations_orientation
-//   );
-// }
-
-/*
- * Return the orientation to display for a camera.
- *
- * Uses the default view's orientation if one is marked as
- * is_default; otherwise falls back to the first view's orientation.
- */
-function getCameraDirection(camera) {
-  const viewsList = camera.views || camera.cameraview_set || [];
-
-  const defaultView = viewsList.find((view) => view.is_default);
-  if (defaultView?.orientation) {
-    return defaultView.orientation;
-  }
-
-  return viewsList[0]?.orientation || '';
-}
-
-function getCameraIsOn(camera) {
-  const viewsList = camera.views || camera.cameraview_set || [];
-
-  const defaultView = viewsList.find((view) => view.is_default);
-  if (defaultView?.orientation) {
-    return defaultView.orientation;
-  }
-
-  return viewsList[0]?.is_on || '';
-}
-
 function orientationLabel(orientation) {
   if (!orientation) return '';
   return orientation.charAt(0) + orientation.slice(1).toLowerCase();
@@ -124,12 +36,17 @@ function orientationLabel(orientation) {
 
 
 /*
- * Camera card.
+ * Single view thumbnail (North/East/South/etc.) within a camera row.
  */
-function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
-  const imageUrl = getCameraImage(camera);
-  const direction = orientationLabel(getCameraDirection(camera));
-  const cameraOn = isCameraOn(camera);
+function CameraViewCard({ view, camera, onSelectCamera }) {
+  const direction = orientationLabel(view.orientation);
+  const imageUrl = view.image_url || camera.locations_thumbnail_map_url || '';
+  const isOn = !!view.is_on;
+
+  // NOTE: assuming stale/delayed can be per-view. If your API only has
+  // these on the camera (not the view), swap back to camera.marked_stale.
+  const isStale = view.marked_stale ?? camera.marked_stale;
+  const isDelayed = view.marked_delayed ?? camera.marked_delayed;
 
   return (
     <div className="camera-card">
@@ -139,9 +56,7 @@ function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
         </span>
 
         <span
-          className={`camera-switch ${
-            cameraOn ? 'camera-switch--on' : ''
-          }`}
+          className={`camera-switch ${isOn ? 'camera-switch--on' : ''}`}
         >
           <span />
         </span>
@@ -149,61 +64,33 @@ function CameraCard({ camera, onEdit, onDelete, onSelectCamera }) {
 
       <div
         className="camera-image"
-        onClick={() => onSelectCamera?.(camera)}
+        onClick={() => onSelectCamera?.(camera, view)}
         style={{ cursor: 'pointer' }}
       >
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={getCameraName(camera)}
-          />
+          <img src={imageUrl} alt={`${getCameraName(camera)} ${direction}`} />
         ) : (
-          <div className="camera-image-placeholder">
-            No image
-          </div>
+          <div className="camera-image-placeholder">No image</div>
         )}
 
-        {camera.marked_stale && (
-          <span className="camera-status camera-status--stale">
-            Stale
-          </span>
+        {isStale && (
+          <span className="camera-status camera-status--stale">Stale</span>
         )}
 
-        {camera.marked_delayed && (
-          <span className="camera-status camera-status--delayed">
-            Delayed
-          </span>
+        {isDelayed && (
+          <span className="camera-status camera-status--delayed">Delayed</span>
         )}
       </div>
-
-      {/* <div className="camera-card-actions">
-        <button
-          type="button"
-          onClick={() => onEdit(camera)}
-        >
-          Edit
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onDelete(camera.id)}
-        >
-          Delete
-        </button>
-      </div> */}
     </div>
   );
 }
 
 
 /*
- * A group of cameras belonging to one location.
+ * One row = one camera, with all of its views shown as thumbnails.
  */
-function CameraLocation({
-  cameras,
-  locationName,
-  onEdit,
-  onDelete,
+function CameraRow({
+  camera,
   onViewOnDriveBC,
   onServiceRequest,
   onClone,
@@ -225,13 +112,17 @@ function CameraLocation({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
+  // const viewsList = camera.views || camera.cameraview_set || [];
+  const viewsList = (camera.views || camera.cameraview_set || []).filter(
+  (view) => !!view.image_url
+);
+
   return (
     <section className="camera-location">
       <div className="camera-location-header">
-        {/* Title and metadata container */}
         <div className="camera-location-title-group">
           <div className="camera-location-meta">
-            <h4 className="camera-landmark">{cameras[0]?.title}</h4>
+            <h4 className="camera-landmark">{camera.title}</h4>
             <div className="camera-update-time">
               <FontAwesomeIcon icon={faRotate} />
               <span>5 minutes</span>
@@ -239,7 +130,6 @@ function CameraLocation({
           </div>
         </div>
 
-        {/* Menu button aligned to the far right */}
         <div className="camera-header-menu" ref={menuRef}>
           <button
             type="button"
@@ -258,7 +148,7 @@ function CameraLocation({
                   className="flyout-item"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onViewOnDriveBC?.(locationName, cameras);
+                    onViewOnDriveBC?.(camera);
                   }}
                 >
                   <FontAwesomeIcon icon={faUpRightFromSquare} className="item-icon" />
@@ -270,7 +160,7 @@ function CameraLocation({
                   className="flyout-item"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onServiceRequest?.(locationName, cameras);
+                    onServiceRequest?.(camera);
                   }}
                 >
                   <FontAwesomeIcon icon={faWrench} className="item-icon" />
@@ -282,7 +172,7 @@ function CameraLocation({
                   className="flyout-item"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onClone?.(locationName, cameras);
+                    onClone?.(camera);
                   }}
                 >
                   <FontAwesomeIcon icon={faPlus} className="item-icon" />
@@ -295,12 +185,11 @@ function CameraLocation({
       </div>
 
       <div className="camera-cards">
-        {cameras.map((camera) => (
-          <CameraCard
-            key={camera.id}
+        {viewsList.map((view) => (
+          <CameraViewCard
+            key={view.id}
+            view={view}
             camera={camera}
-            onEdit={onEdit}
-            onDelete={onDelete}
             onSelectCamera={onSelectCamera}
           />
         ))}
@@ -310,49 +199,32 @@ function CameraLocation({
 }
 
 /*
- * Highway group.
+ * Highway group — maps each camera straight to a CameraRow.
+ * No re-grouping by road/location name (that was the bug).
  */
 function CameraHighwayGroup({
   highwayName,
   cameras,
-  onEdit,
-  onDelete,
   onSelectCamera,
+  onViewOnDriveBC,
+  onServiceRequest,
+  onClone,
 }) {
-  const locations = useMemo(() => {
-    const grouped = {};
-
-    cameras.forEach((camera) => {
-      const location = getCameraLocation(camera);
-
-      if (!grouped[location]) {
-        grouped[location] = [];
-      }
-
-      grouped[location].push(camera);
-    });
-
-    return grouped;
-  }, [cameras]);
-
   return (
     <section className="camera-highway-group">
       <h2>{highwayName}</h2>
 
-      {Object.entries(locations).map(
-        ([locationName, locationCameras]) => (
-          <CameraLocation
-            key={locationName}
-            locationName={locationName}
-            cameras={locationCameras}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onSelectCamera={onSelectCamera}
-          />
-        )
-      )}
+      {cameras.map((camera) => (
+        <CameraRow
+          key={camera.id}
+          camera={camera}
+          onSelectCamera={onSelectCamera}
+          onViewOnDriveBC={onViewOnDriveBC}
+          onServiceRequest={onServiceRequest}
+          onClone={onClone}
+        />
+      ))}
     </section>
-
   );
 }
 
@@ -406,49 +278,6 @@ export default function Cameras() {
   }, []);
 
 
-  const createCamera = async (camera) => {
-    const response = await fetch('/api/cameras/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(camera),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to create camera: ${response.status}`
-      );
-    }
-
-    await loadCameras();
-    setShowForm(false);
-  };
-
-
-  const updateCamera = async (camera) => {
-    const response = await fetch(
-      `/api/cameras/${camera.id}/`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(camera),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to update camera: ${response.status}`
-      );
-    }
-
-    await loadCameras();
-    setEditingCamera(null);
-  };
-
-
   const deleteCamera = async (id) => {
     if (
       !window.confirm(
@@ -475,47 +304,47 @@ export default function Cameras() {
   };
 
   const regions = useMemo(() => {
-  return [
-    ...new Set(
-      cameras
-        .map((camera) =>
-          camera.region?.name ||
-          ''
-        )
-        .filter(Boolean)
-    ),
-  ].sort();
-}, [cameras]);
+    return [
+      ...new Set(
+        cameras
+          .map((camera) =>
+            camera.region?.name ||
+            ''
+          )
+          .filter(Boolean)
+      ),
+    ].sort();
+  }, [cameras]);
 
-const cameraTypes = useMemo(() => {
-  return [
-    ...new Set(
-      cameras
-        .map((camera) => camera.camera_type?.name)
-        .filter(Boolean)
-    ),
-  ].sort();
-}, [cameras]);
+  const cameraTypes = useMemo(() => {
+    return [
+      ...new Set(
+        cameras
+          .map((camera) => camera.camera_type?.name)
+          .filter(Boolean)
+      ),
+    ].sort();
+  }, [cameras]);
 
-const communicationTypes = useMemo(() => {
-  return [
-    ...new Set(
-      cameras
-        .map((camera) => camera.communication_type?.name)
-        .filter(Boolean)
-    ),
-  ].sort();
-}, [cameras]);
+  const communicationTypes = useMemo(() => {
+    return [
+      ...new Set(
+        cameras
+          .map((camera) => camera.communication_type?.name)
+          .filter(Boolean)
+      ),
+    ].sort();
+  }, [cameras]);
 
-const powerSources = useMemo(() => {
-  return [
-    ...new Set(
-      cameras
-        .map((camera) => camera.power_source?.name)
-        .filter(Boolean)
-    ),
-  ].sort();
-}, [cameras]);
+  const powerSources = useMemo(() => {
+    return [
+      ...new Set(
+        cameras
+          .map((camera) => camera.power_source?.name)
+          .filter(Boolean)
+      ),
+    ].sort();
+  }, [cameras]);
 
 
   const highways = useMemo(() => {
@@ -571,10 +400,14 @@ const powerSources = useMemo(() => {
       const matchesHighway =
         !highway || cameraHighway === highway;
 
+      const camIsOn = (camera.views || camera.cameraview_set || []).some(
+        (view) => view.is_on
+      );
+
       const matchesStatus =
         !status ||
         (status === 'Delayed' && camera.marked_delayed) ||
-        (status === 'Non-functions' && !getCameraIsOn(camera));
+        (status === 'Non-functions' && !camIsOn);
 
       const matchesVisibility =
         !visibility ||
@@ -643,7 +476,9 @@ const powerSources = useMemo(() => {
 
 
   /*
-   * Group cameras by highway.
+   * Group cameras by highway. Each entry stays a *list of cameras*
+   * (not re-grouped by location) — CameraHighwayGroup renders one
+   * row per camera.
    */
   const cameraGroups = useMemo(() => {
     const groups = {};
@@ -706,36 +541,6 @@ const powerSources = useMemo(() => {
 
       {/* LEFT FILTER PANEL */}
       <aside className="camera-filters">
-
-        {/* <div className="camera-filters-header">
-          <div className="camera-filters-title">
-            <FontAwesomeIcon icon={faSliders} />
-            <span>Filters</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={clearFilters}
-          >
-            Clear all
-          </button>
-        </div> */}
-
-        {/* <div className="camera-filters-header">
-          <div className="camera-filters-title">
-            <FontAwesomeIcon icon={faSliders} />
-            <span>Filters</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="clear-filters-btn"
-          >
-            <FontAwesomeIcon icon={faBroom} />
-            <span>Clear all</span>
-          </button>
-        </div> */}
 
         <div className="camera-filters-header">
           <div className="camera-filters-title">
@@ -990,51 +795,48 @@ const powerSources = useMemo(() => {
           </div>
         </div>
 
-
-
-
-
         {/* MAIN CAMERA CONTENT */}
-      <main className="camera-content">
+        <main className="camera-content">
+
+          {/* CAMERA GROUPS */}
+          <div className="camera-groups">
+
+            {Object.entries(cameraGroups).map(
+              ([groupName, groupCameras]) => (
+                <CameraHighwayGroup
+                  key={groupName}
+                  highwayName={groupName}
+                  cameras={groupCameras}
+                  onSelectCamera={(camera) => {
+                    navigate(`/cameras/${camera.id}`, {
+                      state: { camera },
+                    });
+                  }}
+                  onViewOnDriveBC={(camera) => {
+                    // TODO: wire up "View on DriveBC" action
+                  }}
+                  onServiceRequest={(camera) => {
+                    // TODO: wire up service request action
+                  }}
+                  onClone={(camera) => {
+                    // TODO: wire up clone action
+                  }}
+                />
+              )
+            )}
+
+          </div>
 
 
-
-
-        {/* CAMERA GROUPS */}
-        <div className="camera-groups">
-
-          {Object.entries(cameraGroups).map(
-            ([groupName, groupCameras]) => (
-              <CameraHighwayGroup
-                key={groupName}
-                highwayName={groupName}
-                cameras={groupCameras}
-                onEdit={(camera) => {
-                  setShowForm(false);
-                  setEditingCamera(camera);
-                }}
-                onDelete={deleteCamera}
-                onSelectCamera={(camera) => {
-                  navigate(`/cameras/${camera.id}`, {
-                    state: { camera },
-                  });
-                }}
-              />
-            )
+          {filteredCameras.length === 0 && (
+            <div className="camera-no-results">
+              No cameras match the search and
+              filtering criteria selected.
+            </div>
           )}
 
-        </div>
+        </main>
 
-
-        {filteredCameras.length === 0 && (
-          <div className="camera-no-results">
-            No cameras match the search and
-            filtering criteria selected.
-          </div>
-        )}
-
-      </main>
-        
       </div>
     </div>
   );
