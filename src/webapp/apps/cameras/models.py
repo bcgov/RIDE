@@ -308,3 +308,20 @@ class CameraNote(models.Model):
 
     def __str__(self):
         return f"Note by {self.author} on {self.camera}"
+
+
+class CameraLog(models.Model):
+    camera = models.ForeignKey(
+            Camera,
+            on_delete=models.CASCADE,
+            related_name='logs',
+        )
+    timestamp = models.DateTimeField(auto_now_add=True)
+    message = models.TextField()
+    is_error = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-timestamp"]
+
+    def __str__(self):
+        return f"{self.camera} - {self.timestamp} - {self.message}"

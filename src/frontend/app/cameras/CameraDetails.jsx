@@ -1444,7 +1444,7 @@ export default function CameraDetails({ onBack }) {
 
             {activeTab === 'Logs' && (
               <LogsTab
-                logs={logsData}
+                cameraId={camera?.id}
               />
             )}
 
