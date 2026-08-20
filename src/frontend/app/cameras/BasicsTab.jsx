@@ -27,7 +27,7 @@ export default function BasicsTab({ basicsData, onChange }) {
 useEffect(() => {
   const loadRoads = async () => {
     try {
-      const response = await fetch('/api/roads/');
+      const response = await fetch('/api/roads-and-highways/');
       if (!response.ok) throw new Error('Failed to load roads');
       const data = await response.json();
       setRoads(data);

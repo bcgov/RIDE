@@ -25,6 +25,10 @@ export default [
         id: "cameras/new",
       }),
 
+      route("settings", "./cameras/CameraSettings.jsx", {
+        id: "cameras/settings",
+      }),
+
       route(":id", "./cameras/CameraDetails.jsx", {
         id: "cameras/details",
       }),

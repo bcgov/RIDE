@@ -700,7 +700,7 @@ export default function Cameras() {
                     type="button"
                     className="flyout-item"
                     onClick={() => {
-                      // Handle manage settings logic
+                      navigate('/cameras/settings?setting=service-providers');
                       setIsMenuOpen(false);
                     }}
                   >
@@ -807,11 +807,6 @@ export default function Cameras() {
                   key={groupName}
                   highwayName={groupName}
                   cameras={groupCameras}
-                  // onSelectCamera={(camera) => {
-                  //   navigate(`/cameras/${camera.id}`, {
-                  //     state: { camera },
-                  //   });
-                  // }}
                   onSelectCamera={(camera, view) => {
                     navigate(
                       `/cameras/${camera.id}${view?.id ? `?view=${view.id}` : ''}`,
