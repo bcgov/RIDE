@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronUp,
@@ -10,9 +10,11 @@ import {
   faUser,
 } from '@fortawesome/pro-regular-svg-icons';
 
-export default function HistoryTab({ history = [] }) {
-  // Store collapsed card IDs
+export default function HistoryTab({ cameraId }) {
+  const [history, setHistory] = useState([]);
   const [collapsedIds, setCollapsedIds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const toggleCollapse = (id) => {
     setCollapsedIds((prev) =>
@@ -36,9 +38,52 @@ export default function HistoryTab({ history = [] }) {
     }
   };
 
+  useEffect(() => {
+    if (!cameraId) {
+      return;
+    }
+
+    const loadHistory = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(
+          `/api/cameras/${cameraId}/history/`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load history: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        setHistory(
+          Array.isArray(data) ? data : []
+        );
+
+      } catch (err) {
+        console.error(
+          'Failed to load camera history:',
+          err
+        );
+
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHistory();
+  }, [cameraId]);
+
   return (
     <div className="tab-content history-tab">
-      {history.map((entry) => {
+      {/* {history.map((entry) => { */}
+      {Array.isArray(history) &&
+        history.map((entry) => {
         const isCollapsed = collapsedIds.includes(entry.id);
 
         return (

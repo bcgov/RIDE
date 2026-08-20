@@ -1450,7 +1450,7 @@ export default function CameraDetails({ onBack }) {
 
             {activeTab === 'History' && (
               <HistoryTab
-                history={historyData}
+                cameraId={camera?.id}
               />
             )}
 

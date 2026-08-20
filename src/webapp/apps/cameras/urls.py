@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 
-from .views import CameraViewSet, RegionViewSet, RoadMaintenanceContractorViewSet, RoadViewSet, BusinessAreaViewSet, ElectricalContractorViewSet, CameraTypeViewSet, CameraMakeViewSet, ConnectionTypeViewSet, ConnectionProtocolViewSet, CommunicationTypeViewSet, PowerSourceViewSet, CommunicationDeviceViewSet, AntennaeViewSet, ServiceProviderViewSet, CameraNoteViewSet, CameraLogViewSet
+from .views import CameraViewSet, RegionViewSet, RoadMaintenanceContractorViewSet, RoadViewSet, BusinessAreaViewSet, ElectricalContractorViewSet, CameraTypeViewSet, CameraMakeViewSet, ConnectionTypeViewSet, ConnectionProtocolViewSet, CommunicationTypeViewSet, PowerSourceViewSet, CommunicationDeviceViewSet, AntennaeViewSet, ServiceProviderViewSet, CameraNoteViewSet, CameraLogViewSet, CameraHistoryViewSet
 
 router = DefaultRouter()
 router.register(r"cameras", CameraViewSet, basename="camera")
@@ -20,4 +20,5 @@ router.register(r'antennaes', AntennaeViewSet)
 router.register(r'service-providers', ServiceProviderViewSet)
 router.register(r'cameras/(?P<camera_id>[^/.]+)/notes', CameraNoteViewSet, basename='camera-notes')
 router.register(r'cameras/(?P<camera_id>[^/.]+)/logs', CameraLogViewSet, basename='camera-logs')
+router.register(r"cameras/(?P<camera_id>[^/.]+)/history", CameraHistoryViewSet, basename="camera-history")
 urlpatterns = router.urls

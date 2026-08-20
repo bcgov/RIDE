@@ -333,3 +333,55 @@ class CameraLog(models.Model):
 
     def __str__(self):
         return f"{self.camera} - {self.timestamp} - {self.message}"
+
+class CameraHistory(models.Model):
+    ACTION_TYPES = [
+        ("create", "Create"),
+        ("update", "Update"),
+        ("visibility-off", "Visibility Off"),
+        ("visibility-on", "Visibility On"),
+        ("add", "Add"),
+        ("remove", "Remove"),
+    ]
+
+    camera = models.ForeignKey(
+        Camera,
+        on_delete=models.CASCADE,
+        related_name="history",
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="camera_history",
+    )
+
+    action_type = models.CharField(
+        max_length=50,
+        choices=ACTION_TYPES,
+    )
+
+    category = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    description = models.TextField()
+
+    # Store before/after values when useful
+    changes = models.JSONField(
+        default=dict,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.camera} - {self.action_type} - {self.created_at}"

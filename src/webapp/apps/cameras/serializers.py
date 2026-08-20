@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote, CameraLog
+from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote, CameraLog, CameraHistory
 
 class CameraViewSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False, allow_null=True)
@@ -278,4 +278,55 @@ class CameraLogSerializer(serializers.ModelSerializer):
             "timestamp",
             "message",
             "is_error",
+        ]
+
+class CameraHistorySerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    timestamp = serializers.DateTimeField(
+        source="created_at"
+    )
+    sections = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CameraHistory
+        fields = [
+            "id",
+            "timestamp",
+            "user",
+            "sections",
+        ]
+
+    def get_user(self, obj):
+        if obj.user:
+            return obj.user.get_full_name() or obj.user.username
+
+        return "Unknown user"
+
+    def get_sections(self, obj):
+        actions = []
+
+        changes = obj.changes or {}
+
+        if changes:
+            for field, change in changes.items():
+                actions.append({
+                    "type": obj.action_type,
+                    "text": obj.description,
+                    "subtext": (
+                        f"{change.get('old')} → "
+                        f"{change.get('new')}"
+                    ),
+                })
+        else:
+            actions.append({
+                "type": obj.action_type,
+                "text": obj.description,
+                "subtext": "",
+            })
+
+        return [
+            {
+                "category": obj.category,
+                "actions": actions,
+            }
         ]

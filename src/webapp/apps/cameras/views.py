@@ -1,13 +1,12 @@
 from django.shortcuts import render
-
 from rest_framework import viewsets
-
-from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote, CameraLog
-from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer, CommunicationTypeSerializer, PowerSourceSerializer, CommunicationDeviceSerializer, AntennaeSerializer, ServiceProviderSerializer, CameraNoteSerializer, CameraLogSerializer
+from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote, CameraLog, CameraHistory
+from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer, CommunicationTypeSerializer, PowerSourceSerializer, CommunicationDeviceSerializer, AntennaeSerializer, ServiceProviderSerializer, CameraNoteSerializer, CameraLogSerializer, CameraHistorySerializer
 from django.db import transaction
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from .helper import create_camera_history
 
 class BulkUpdateViewSet(viewsets.ReadOnlyModelViewSet):
 
@@ -112,6 +111,104 @@ class BulkUpdateViewSet(viewsets.ReadOnlyModelViewSet):
 class CameraViewSet(viewsets.ModelViewSet):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        camera = serializer.save()
+
+        create_camera_history(
+            camera=camera,
+            user=self.request.user,
+            action_type="create",
+            category="Camera",
+            description="Created camera",
+        )
+
+        camera = self.get_object()
+
+        # Capture values BEFORE saving
+        old_values = {
+            "title": camera.title,
+            "description": camera.description,
+        }
+
+        camera = serializer.save()
+
+        changes = {}
+
+        if old_values["title"] != camera.title:
+            changes["title"] = {
+                "old": old_values["title"],
+                "new": camera.title,
+            }
+
+        if old_values["description"] != camera.description:
+            changes["description"] = {
+                "old": old_values["description"],
+                "new": camera.description,
+            }
+
+        if changes:
+            create_camera_history(
+                camera=camera,
+                user=self.request.user,
+                action_type="update",
+                category="Camera",
+                description="Updated camera information",
+                changes=changes,
+            )
+
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        try:
+            camera = self.get_object()
+
+            old_values = {
+                "title": camera.title,
+                "description": camera.description,
+                
+            }
+
+            camera = serializer.save()
+
+            changes = {}
+
+            if old_values["title"] != camera.title:
+                changes["title"] = {
+                    "old": old_values["title"],
+                    "new": camera.title,
+                }
+
+            if old_values["description"] != camera.description:
+                changes["description"] = {
+                    "old": old_values["description"],
+                    "new": camera.description,
+                }
+
+
+            if changes:
+
+                create_camera_history(
+                    camera=camera,
+                    user=self.request.user,
+                    action_type="update",
+                    category="Camera",
+                    description="Updated camera information",
+                    changes=changes,
+                )
+
+        except Exception as e:
+            raise
+class CameraHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = CameraHistorySerializer
+
+    def get_queryset(self):
+        return CameraHistory.objects.filter(
+            camera_id=self.kwargs["camera_id"]
+        ).select_related(
+            "user"
+        )
 
 class RegionViewSet(BulkUpdateViewSet):
     model = Region
