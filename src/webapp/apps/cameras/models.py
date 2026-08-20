@@ -29,6 +29,7 @@ class Road(BaseLookupModel):
 class Region(BaseLookupModel):
     """Transportation regions."""
     number = models.PositiveIntegerField(null=True, blank=True)
+    display_order = models.IntegerField(default=0)
 
 class CameraType(BaseLookupModel):
     """Type/category of camera."""

@@ -13,9 +13,9 @@ import './CameraSettings.scss';
 
 const SETTINGS = [
   {
-    key: 'antennae',
-    label: 'Antennae',
-    endpoint: 'antennae',
+    key: 'antennaes',
+    label: 'Antennaes',
+    endpoint: 'antennaes',
   },
   {
     key: 'business-areas',
@@ -364,7 +364,7 @@ export default function CameraSettings() {
       };
 
       const response = await fetch(
-        `/api/camera-settings/${selectedSetting.endpoint}/`,
+        `/api/${selectedSetting.endpoint}/bulk-update/`,
         {
           method: 'PUT',
           headers: {
@@ -583,8 +583,9 @@ export default function CameraSettings() {
 
                 <div className="settings-name">
 
-                  {editingId ===
-                  item.id ? (
+                  {/* {editingId ===
+                  item.id ? ( */}
+                  {editingId !== null && editingId === item.id ? (
 
                     <input
                       type="text"
@@ -620,8 +621,10 @@ export default function CameraSettings() {
 
                 <div className="settings-actions">
 
-                  {editingId ===
-                  item.id ? (
+                  {/* {editingId ===
+                  item.id ? ( */}
+
+                  {editingId !== null && editingId === item.id ? (
 
                     <button
                       type="button"
