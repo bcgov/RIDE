@@ -807,10 +807,16 @@ export default function Cameras() {
                   key={groupName}
                   highwayName={groupName}
                   cameras={groupCameras}
-                  onSelectCamera={(camera) => {
-                    navigate(`/cameras/${camera.id}`, {
-                      state: { camera },
-                    });
+                  // onSelectCamera={(camera) => {
+                  //   navigate(`/cameras/${camera.id}`, {
+                  //     state: { camera },
+                  //   });
+                  // }}
+                  onSelectCamera={(camera, view) => {
+                    navigate(
+                      `/cameras/${camera.id}${view?.id ? `?view=${view.id}` : ''}`,
+                      { state: { camera, selectedViewId: view?.id } }
+                    );
                   }}
                   onViewOnDriveBC={(camera) => {
                     // TODO: wire up "View on DriveBC" action
