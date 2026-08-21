@@ -14,4 +14,5 @@ export {
 } from './districtBoundaries';
 export { default as situations, refreshSituations } from './situations';
 export { default as trafficImpacts, refreshTrafficImpacts } from './trafficImpacts';
+export { default as users, refreshUsers } from './users';
 export { default as visibleLayers, set } from './visibleLayers';

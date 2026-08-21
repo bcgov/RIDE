@@ -1,10 +1,10 @@
 // React
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 // Internal imports
 import { AlertContext } from "../../contexts.js";
-import { createOrganization, deleteOrganization, updateOrganization } from "../../shared/data/organizations.js";
-import { UniqueNameError } from "../../shared/helpers.js";
+import { addOrUpdateOrganization, deleteOrganization } from '../../slices/organizations.js';
 
 // Styling
 import './orgForm.scss';
@@ -14,7 +14,7 @@ import RIDECheckBoxes from "../../components/shared/checkboxes.jsx";
 export default function OrgForm(props) {
   /* Setup */
   // Props
-  const { initialOrg, areas, submitting, setSubmitting, setOpen, setOrgs } = props;
+  const { initialOrg, areas, submitting, setSubmitting, setOpen } = props;
 
   // Context
   const { setAlertContext } = useContext(AlertContext);
@@ -25,6 +25,8 @@ export default function OrgForm(props) {
   const [ serviceAreas, setServiceAreas ] = useState([]);
   const [ contactName, setContactName ] = useState('');
   const [ contactId, setContactId ] = useState('');
+
+  const dispatch = useDispatch();
 
   // Effects
   useEffect(() => {
@@ -42,21 +44,18 @@ export default function OrgForm(props) {
 
   /* Helpers */
   const validateForm = () => {
-    let msg = '';
+    let message = '';
 
     if (!name) {
-      msg += 'Organization name is required.';
+      message += 'Organization name is required.';
     }
 
     if (serviceAreas.length === 0) {
-      msg += (msg ? '\n' : '') + 'An Organization must have access to at least one Service Area. Select at least one.';
+      message += (message ? '\n' : '') + 'An Organization must have access to at least one Service Area. Select at least one.';
     }
 
-    if (msg) {
-      setAlertContext({
-        message: msg
-      });
-
+    if (message) {
+      setAlertContext({ message });
       setSubmitting(false);
       return false;
     }
@@ -65,69 +64,62 @@ export default function OrgForm(props) {
   }
 
   const submitForm = () => {
-    const validated = validateForm();
-    if (!validated) {
+    if (!validateForm()) {
       return;
     }
 
     const payload = {
+      id: initialOrg?.id,
       name: name,
       service_areas: serviceAreas,
       contact_name: contactName,
       contact_id: contactId
     };
-    const orgFunc = initialOrg ? updateOrganization : createOrganization;
-    const orgArgs = initialOrg ? [initialOrg.id, payload] : [payload];
 
-    orgFunc(...orgArgs).then(res => {
+    dispatch(addOrUpdateOrganization(payload)).then((result) => {
+      if (result.error) {
+        throw result;
+      }
+
       setAlertContext({
         type: 'success',
         message: `Organization successfully ${initialOrg ? 'updated' : 'added'}`,
-        undoHandler: () => initialOrg ? undoUpdateSubmit() : undoAddSubmit(res.id)
-      });
-
-      setOrgs(prevOrgs => {
-        // Edit org, update existing list
-        if (initialOrg) {
-          return prevOrgs.map(org => org.id === res.id ? res : org);
-        }
-
-        // Add org, append to existing list
-        const newOrgs = [...prevOrgs, res];
-        newOrgs.sort((a, b) => a.name.localeCompare(b.name));
-        return newOrgs;
+        undoHandler: () => initialOrg ? undoUpdateSubmit() : undoAddSubmit(result.payload.id)
       });
 
       setOpen(false);
-      setSubmitting(false);
 
     }).catch(error => {
-      if (error instanceof UniqueNameError) {
+      if (error?.payload?.data?.error === 'unique_name') {
         setAlertContext({
           message: 'Organization name already exists. Can not add again.'
         });
-        setSubmitting(false);
+
+      } else {
+        console.log(error);
       }
+
+    }).finally(() => {
+      setSubmitting(false);
     });
   }
 
   const undoAddSubmit = (id) => {
-    deleteOrganization(id).then(() => {
-      setOrgs(prevOrgs => prevOrgs.filter(org => org.id !== id));
+    dispatch(deleteOrganization(id)).then(() => {
       setOpen(false);
       setSubmitting(false);
     });
   }
 
   const undoUpdateSubmit = () => {
-    updateOrganization(initialOrg.id, {
+    dispatch(addOrUpdateOrganization({
+      id: initialOrg.id,
       name: initialOrg.name,
       service_areas: initialOrg.service_areas,
       contact_name: initialOrg.contact_name,
       contact_id: initialOrg.contact_id
 
-    }).then((res) => {
-      setOrgs(prevOrgs => prevOrgs.map(org => org.id === res.id ? res : org));
+    })).then(() => {
       setOpen(false);
       setSubmitting(false);
     });
