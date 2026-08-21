@@ -17,6 +17,7 @@ import {
   refreshDistricts,
   refreshDistrictBoundaries,
   refreshDms,
+  refreshOrganizations,
   refreshRoutes,
   refreshSegments,
   refreshServiceAreas,
@@ -49,17 +50,21 @@ export function HydrateFallback() {
   return <p>Loading RIDE...</p>;
 }
 
-store.dispatch(refreshConditions());
-store.dispatch(refreshDistricts());
-store.dispatch(refreshDms());
-store.dispatch(refreshRoutes());
-store.dispatch(refreshServiceAreas());
-store.dispatch(refreshSegments());
-store.dispatch(refreshTrafficImpacts());
-// store.dispatch(refreshSituations());
-store.dispatch(refreshServiceAreaBoundaries());
-store.dispatch(refreshDistrictBoundaries());
-store.dispatch(refreshDms());
+// only do client side
+if (typeof window !== 'undefined') {
+  store.dispatch(refreshConditions());
+  store.dispatch(refreshDistricts());
+  store.dispatch(refreshDms());
+  store.dispatch(refreshOrganizations());
+  store.dispatch(refreshRoutes());
+  store.dispatch(refreshServiceAreas());
+  store.dispatch(refreshSegments());
+  store.dispatch(refreshTrafficImpacts());
+  // store.dispatch(refreshSituations());
+  store.dispatch(refreshServiceAreaBoundaries());
+  store.dispatch(refreshDistrictBoundaries());
+  store.dispatch(refreshDms());
+}
 
 export default function App() {
   return (

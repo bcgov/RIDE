@@ -33,7 +33,7 @@ export const slice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(refreshThunk.pending, (state, action) => {
+      .addCase(refreshThunk.pending, (state) => {
         state.status = 'pending';
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {

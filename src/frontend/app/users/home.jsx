@@ -1,20 +1,24 @@
 // React
 import { useContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 // Navigation
 import { useNavigate } from "react-router";
 
 // Internal imports
 import { AlertContext, AuthContext } from "../contexts.js";
-import { getUsers, updateUser } from "../shared/data/users";
-import { getOrganizations, getServiceAreas, deleteOrganization, createOrganization } from "../shared/data/organizations";
-import { HasUserError } from "../shared/helpers.js";
 import RIDEDropdown from '../components/shared/dropdown';
 import RIDETextInput from '../components/shared/textinput';
 import RIDEModal from "../components/shared/modal";
 import EditUserForm from "./forms/editUser";
 import OrgForm from "./forms/orgForm";
 import Spinner from "../components/shared/spinner.jsx";
+
+import {
+  addOrUpdateOrganization, deleteOrganization, selectAllOrganizations,
+} from '../slices/organizations';
+import { updateUser, refreshUsers, selectAllUsers } from '../slices/users';
+import { selectAllServiceAreas } from '../slices/serviceAreas';
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -41,13 +45,17 @@ export default function Home() {
   const { authContext } = useContext(AuthContext);
 
   // States
-  const [ users, setUsers ] = useState();
   const [ processedUsers, setProcessedUsers ] = useState();
-  const [ serviceAreas, setServiceAreas ] = useState([]);
-  const [ orgs, setOrgs ] = useState([]);
   const [ sortKey, setSortKey ] = useState('Name');
   const [ selectedOrg, setSelectedOrg ] = useState('All organizations');
   const [ searchText, setSearchText ] = useState('');
+
+  // Selectors
+  const serviceAreas = useSelector(selectAllServiceAreas);
+  const orgs = useSelector(selectAllOrganizations);
+  const users = useSelector(selectAllUsers);
+
+  const dispatch = useDispatch();
 
   // Effects
   useEffect(() => {
@@ -63,9 +71,7 @@ export default function Home() {
   }, [authContext]);
 
   useEffect(() => {
-    getUsers().then(data => setUsers(data));
-    getOrganizations().then(data => setOrgs(data));
-    getServiceAreas().then(data => setServiceAreas(data));
+    dispatch(refreshUsers());
   }, []);
 
   useEffect(() => {
@@ -166,12 +172,12 @@ export default function Home() {
 
   const filterAndSortUsers = () => {
     // Filter users based on selected organization
-    let filteredUsers = users;
-    if (!filteredUsers) return;  // Data not ready, do nothing
+    let filteredUsers = [...users];
+    // if (!filteredUsers) return;  // Data not ready, do nothing
 
     // Apply organization filter
     if (selectedOrg !== 'All organizations') {
-      filteredUsers = users.filter(user => (user.organizations?.length ? user.organizations[0] : null) === selectedOrg.id);
+      filteredUsers = users.filter(user => user.organizations?.[0] === selectedOrg.id);
     }
 
     // Apply search text filter
@@ -193,38 +199,39 @@ export default function Home() {
   }
 
   /* Handlers */
-  const disableUserHandler = (user, undoing=false) => {
-    updateUser(user.id, {
-      is_active: undoing
-
-    }).then(user => {
-      if (user) {
-        setUsers((prevUsers) => {
-          return prevUsers.map(u => {
-            if (u.id === user.id) {
-              return user;
-            }
-
-            return u;
-          });
-        });
-
-        if (!undoing) {
-          setAlertContext({
-            type: 'success',
-            message: `User successfully disabled`,
-            undoHandler: () => disableUserHandler(user, true)
-          });
-        }
-
-      } else {
-        // Handle error (not implemented here)
+  const disableUserHandler = (user) => {
+    dispatch(
+      updateUser({ id: user.id, is_active: false })
+    ).then(result => {
+      if (result.error) {
+        throw result;
       }
+
+      setAlertContext({
+        type: 'success',
+        message: `User successfully disabled`,
+        undoHandler: () => undoDisableUser(result, user.organizations)
+      });
+
+    }).catch(error => {
+      console.error(error);
     });
   }
 
+  const undoDisableUser = (action, organizations) => {
+    dispatch(updateUser({
+      id: action.payload.id,
+      is_active: true,
+      organizations
+    }));
+  }
+
   const removeOrgHandler = () => {
-    deleteOrganization(selectedOrg.id).then(() => {
+    dispatch(deleteOrganization(selectedOrg.id)).then((result) => {
+      if (result.error) {
+        throw result;
+      }
+
       setAlertContext({
         type: 'success',
         message: `Organization successfully deleted`,
@@ -232,15 +239,14 @@ export default function Home() {
       });
 
       setSelectedOrg('All organizations');
-      setOrgs(prevOrgs => {
-        return prevOrgs.filter(org => org.id !== selectedOrg.id);
-      });
 
     }).catch(error => {
-      if (error instanceof HasUserError) {
+      if (error.payload?.data?.error === 'has_users') {
         setAlertContext({
           message: 'Organization delete unsuccessful. Organization must be empty to be deleted.'
         });
+      } else {
+        console.error(error);
       }
     });
   }
@@ -254,14 +260,8 @@ export default function Home() {
       contact_id: org.contact_id
     };
 
-    createOrganization(payload).then(res => {
-      setSelectedOrg(res);
-      setOrgs(prevOrgs => {
-        // Add org, append to existing list
-        const newOrgs = [...prevOrgs, res];
-        newOrgs.sort((a, b) => a.name.localeCompare(b.name));
-        return newOrgs;
-      });
+    dispatch(addOrUpdateOrganization(payload)).then((result) => {
+      setSelectedOrg(result.payload);
     });
   }
 
@@ -306,7 +306,7 @@ export default function Home() {
               <div className={'toolbar-btn'}><FontAwesomeIcon icon={faPlus} /> <span>Add organization</span></div>
             }>
 
-            <OrgForm areas={serviceAreas} setOrgs={setOrgs} />
+            <OrgForm areas={serviceAreas} />
           </RIDEModal>
 
           {selectedOrg && selectedOrg !== 'All organizations' &&
@@ -317,7 +317,7 @@ export default function Home() {
               <div className={'toolbar-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit organization</span></div>
               }>
 
-              <OrgForm initialOrg={selectedOrg} areas={serviceAreas} setOrgs={setOrgs} />
+              <OrgForm initialOrg={selectedOrg} areas={serviceAreas} />
             </RIDEModal>
           }
 
@@ -373,7 +373,7 @@ export default function Home() {
                     <div className={'user-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit</span></div>
                   }>
 
-                  <EditUserForm user={user} orgs={orgs} setUsers={setUsers} />
+                  <EditUserForm user={user} orgs={orgs} />
                 </RIDEModal>
 
                 <div

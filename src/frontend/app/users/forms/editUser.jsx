@@ -1,9 +1,10 @@
 // React
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 // Internal imports
-import { AlertContext } from "../../contexts.js";
-import { updateUser } from "../../shared/data/users.js";
+import { AlertContext } from "../../contexts";
+import { updateUser } from "../../slices/users";
 
 // Styling
 import './editUser.scss';
@@ -12,7 +13,7 @@ import RIDEDropdown from "../../components/shared/dropdown.jsx";
 export default function EditUserForm(props) {
   /* Setup */
   // Props
-  const { user, orgs, submitting, setSubmitting, setOpen, setUsers } = props
+  const { user, orgs, submitting, setSubmitting, setOpen } = props
 
   // Context
   const { setAlertContext } = useContext(AlertContext);
@@ -24,46 +25,45 @@ export default function EditUserForm(props) {
   const [ selectedRole, setSelectedRole ] = useState(user.is_approver);
   const [ isSuperuser, setIsSuperuser ] = useState(user.is_superuser);
 
+  const dispatch = useDispatch();
+
   // Effects
   useEffect(() => {
     submitting && submitForm();
   }, [submitting]);
 
   /* Helpers */
-  const submitForm = (undoing=false) => {
-    updateUser(user.id, {
-      organizations: undoing ?
-        (hasOrg ? [user.organizations[0]] : []) :
-        (selectedOrgId ? [selectedOrgId] : []),
-      is_approver: undoing ? user.is_approver : selectedRole,
-      is_superuser: undoing? user.is_superuser : isSuperuser
+  const submitForm = () => {
+    dispatch(updateUser({
+      id: user.id,
+      organizations: selectedOrgId ? [selectedOrgId] : [],
+      is_approver: selectedRole,
+      is_superuser: isSuperuser
 
-    }).then(user => {
-      if (user) {
-        if (!undoing) {
-          setAlertContext({
-            type: 'success',
-            message: `User successfully updated`,
-            undoHandler: () => submitForm(true)
-          });
-        }
+    })).then((result) => {
+      if (result.error) { throw result; }
 
-        setUsers(prevUsers => {
-          return prevUsers.map(u => {
-            if (u.id === user.id) {
-              return user;
-            }
-            return u;
-          });
-        });
+      setAlertContext({
+        type: 'success',
+        message: `User successfully updated`,
+        undoHandler: () => undoSubmit({
+          id: user.id,
+          organizations: user.organizations,
+          is_approver: user.is_approver,
+          is_superuser: user.is_superuser,
+        })
+      });
 
-        setOpen(false);
-        setSubmitting(false);
-
-      } else {
-        // Handle error (not implemented here)
-      }
+      setOpen(false);
+    }).catch((error) => {
+      console.error(error);
+    }).finally(() => {
+      setSubmitting(false);
     });
+  }
+
+  const undoSubmit = (payload) => {
+    dispatch(updateUser(payload));
   }
 
   /* Rendering */
