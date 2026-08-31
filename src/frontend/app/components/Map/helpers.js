@@ -590,16 +590,6 @@ export function getSnapped(coordinate, pixel, map) {
   return closest ? ll2g(closest.snapped.geometry.coordinates) : coordinate;
 }
 
-function unflatten(l) {
-  const paired = [];
-  for (let ii = 0; ii < l.length; ii += 2) {
-    paired.push(g2ll([l[ii], l[ii + 1]]));
-  }
-  return paired;
-}
-
-const fun = (a) => a;
-
 /* Takes a renderfeatures flat coordinates and returns a nested array of
  * coordinate pairs with func applied to the pair (e.g., for transforming the
  * pair from one projection to another).

@@ -1,6 +1,7 @@
+from django.urls import path
 from rest_framework import routers
 
-from .views import Events, Pending, Notes, TrafficImpacts, RoadConditions, Conditions, ChainUps
+from .views import Events, Pending, Notes, TrafficImpacts, RoadConditions, Conditions, ChainUps, Closures
 
 router = routers.SimpleRouter(trailing_slash=False)
 router.register('events/pending', Pending, basename='pending')
@@ -11,4 +12,6 @@ router.register('notes', Notes)
 router.register('traffic-impacts', TrafficImpacts)
 router.register('conditions', Conditions)
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('events/closures', Closures.as_view())
+] + router.urls

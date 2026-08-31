@@ -4,6 +4,7 @@ const getEnv = (key, fallback = '') => runtimeEnv[key] ?? import.meta.env?.[`VIT
 export const API_HOST = `${getEnv('API_HOST')}`;
 export const GEOCODER_HOST = `${getEnv('GEOCODER_HOST')}`;
 export const GEOCODER_CLIENT_ID = `${getEnv('GEOCODER_CLIENT_ID')}`;
+export const ROUTER_URL = `${getEnv('ROUTER_URL', 'https://router.api.gov.bc.ca/route.json')}`;
 export const ROUTER_CLIENT_ID = `${getEnv('ROUTER_CLIENT_ID')}`;
 export const DEBUG = `${getEnv('DEBUG')}`;
 export const BASE_MAP_URL = `${getEnv('BASE_MAP_URL')}`;

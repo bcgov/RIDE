@@ -194,12 +194,15 @@ export class EventForm extends Component {
       (form.type === 'ROAD_CONDITION' || form.type === 'Road condition');
 
     if (!isBulkRoadCondition) {
+      form.tlids = new Set();
+
       const geometries = [{
         type: "Point",
         coordinates: form.location.start.coords,
       }];
 
       if (form.location.end?.name) {
+
         geometries.push({
           type: "Point",
           coordinates: form.location.end.coords,
@@ -210,6 +213,7 @@ export class EventForm extends Component {
         } else {
           route = route.map((pair) => g2ll(pair));
         }
+        form.tlids = new Set((map.route.get('tlids') || []));
 
         geometries.push({
           type: "Linestring",
@@ -224,6 +228,14 @@ export class EventForm extends Component {
         type: "GeometryCollection",
         geometries,
       };
+
+      if (form.location.start.DIGITAL_ROAD_ATLAS_LINE_ID) {
+        form.tlids.add(form.location.start.DIGITAL_ROAD_ATLAS_LINE_ID);
+      }
+      if (form.location.end?.DIGITAL_ROAD_ATLAS_LINE_ID) {
+        form.tlids.add(form.location.end.DIGITAL_ROAD_ATLAS_LINE_ID);
+      }
+      form.tlids = [...form.tlids];
     }
 
     if (form.location.start?.candidates) {

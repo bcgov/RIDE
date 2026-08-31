@@ -1,15 +1,19 @@
 from datetime import datetime, timedelta, timezone
+import logging
 import os
 import sys
 from time import strftime, strptime
 
 from django.contrib.gis.db import models as gis
 from django.contrib.gis.geos import GeometryCollection
+from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import ForeignKey, Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+
+import requests
 
 from apps.events.enums import EventType
 from apps.events.helpers import get_route_projection
@@ -18,6 +22,8 @@ from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp, Route
 from apps.shared.models import BaseModel, LocationField, OrderedListField, VersionedModel
 
+
+logger = logging.getLogger(__name__)
 
 class EverythingManager(models.Manager):
 
@@ -187,6 +193,7 @@ class Event(VersionedModel):
     start = LocationField(default=dict)
     end = LocationField(default=dict, null=True)
     geometry = gis.GeometryCollectionField(blank=True, null=True)
+    tlids = ArrayField(models.IntegerField(), default=list)
 
     # detail
     direction = models.CharField(blank=True, null=True)
@@ -293,8 +300,12 @@ class Event(VersionedModel):
 
             super().save(*args, **kwargs)
 
-            # Do not sync if chain-up or disabled
-            if not _is_sync_disabled() and self.event_type != EventType.CHAIN_UP:
+            # Do not sync if chain-up or sync disabled or forced update
+            skip_sync = (_is_sync_disabled()
+                         or self.event_type == EventType.CHAIN_UP
+                         or kwargs.get('force_update'))
+
+            if not skip_sync:
                 sync_open511_data(self)
 
     def _build_polygon(self):
@@ -312,6 +323,39 @@ class Event(VersionedModel):
 
     def __str__(self):
         return f'{self.id} v{self.version}'
+
+    def _update_tlids(self):
+        # if the model has no TLIDs, populate the tlids field with the start
+        # TLID, and if there's an end location, the end TLID and the route TLIDs
+        tlids = set()
+        tlids.add(self.start['DIGITAL_ROAD_ATLAS_LINE_ID'])
+
+        if self.end is not None:
+            tlids.add(self.end['DIGITAL_ROAD_ATLAS_LINE_ID'])
+            points = self.start['coords'] + self.end['coords']
+
+            payload = {
+                'points': ','.join(str(point) for point in points),
+                'criteria': 'fastest',
+                'distanceUnit': 'km',
+                'gdf': 'resource:2.0,',
+                'enable': 'tl',
+            }
+            try:
+                response = requests.get(
+                    settings.ROUTE_PLANNER_API_URL + '/route.json',
+                    params=payload,
+                    headers={'apiKey': settings.ROUTE_PLANNER_API_KEY })
+                if response.ok:
+                    tlids |= set(response.json()['tlids'])
+                else:
+                    response.raise_for_status()
+            except Exception as e:
+                logger.error(f'Failed to get route for {self}')
+                logger.error(e)
+
+        self.tlids = list(tlids)
+        self.save(force_update=True)
 
 
 class Note(VersionedModel):
