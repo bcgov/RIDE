@@ -458,9 +458,9 @@ def build_event_payload(target_event):
                 matched_subtypes.append(subtype)
                 break
 
-        # Append 'Planned event' for all planned events
+        # Append planned event subtype for all planned events
         if target_event.event_type == "Planned event":
-            matched_subtypes.append(EventSubtype.PLANNED_EVENT.value)
+            matched_subtypes.append(EventSubtype.PLANNED_EVENT)
 
         # Default to HAZARD if nothing matched, must use .value for capitalized text
         return [s.value for s in matched_subtypes] or [EventSubtype.HAZARD.value]
