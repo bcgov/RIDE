@@ -188,15 +188,18 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
  * route
  */
 export const updateRoute = async (map) => {
-  let route = [];
+  let route = [], tlids = [];
   if (map.start && map.end) {
     const startCoordinates = g2ll(map.start.getGeometry().getCoordinates());
     const endCoordinates = g2ll(map.end.getGeometry().getCoordinates());
     const results = await getRoute(startCoordinates, endCoordinates);
+
     if (results.route) {
       route = results.route.map((pair) => ll2g(pair));
+      tlids = results.tlids;
     }
   }
+  map.route.set('tlids', tlids);
   map.route.getGeometry().setCoordinates(route);
 }
 
@@ -311,7 +314,7 @@ export default function PinsLayer({ event, dispatch }) {
     }
 
     if (!event.showForm) {
-        map.route.getGeometry().setCoordinates([])
+        map.route.getGeometry().setCoordinates([]);
     }
 
     updateRoute(map);

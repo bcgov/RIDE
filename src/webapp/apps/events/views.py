@@ -7,6 +7,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -442,3 +443,18 @@ class TrafficImpacts(viewsets.ModelViewSet):
 class Conditions(viewsets.ModelViewSet):
     queryset = Condition.objects.all()
     serializer_class = ConditionSerializer
+
+
+class Closures(APIView):
+    ''' View for returning the On Route API equivalent for closed segments. '''
+
+    def get(self, request):
+
+        tlids = set()
+        for event in Event.current.filter(impacts__contains=[{"closed": True}]):
+            tlids |= set(event.tlids)
+        closures = [{"RESTRICTION_TYPE": "ROAD_CLOSURE",
+                     "NETWORK_SEGMENT_ID": tlid,
+                     "RESTRICTION_AZIMUTH": -1,
+                    } for tlid in tlids]
+        return Response(closures)

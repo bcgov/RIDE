@@ -1,4 +1,4 @@
-import { ROUTER_CLIENT_ID } from '../env.js';
+import { ROUTER_URL, ROUTER_CLIENT_ID } from '../env.js';
 import { get } from "./helpers";
 
 export const ONE_SECOND_MS = 1000;
@@ -50,16 +50,16 @@ export function getCardinalDirection(pointA, pointB, longform=false) {
 
 export async function getRoute(pointA, pointB) {
   const pointString = `${pointA[0]},${pointA[1]},${pointB[0]},${pointB[1]}`;
-  const baseUrl = "https://router.api.gov.bc.ca/directions.json";
 
   const payload = {
     points: pointString,
     criteria: 'fastest',
     distanceUnit: 'km',
     gdf: 'resource:2.0,',
+    enable: 'tl',
   }
 
-  return get(baseUrl, payload, {
+  return get(ROUTER_URL, payload, {
     'apiKey': ROUTER_CLIENT_ID
   }).then((data) => data);
 }
