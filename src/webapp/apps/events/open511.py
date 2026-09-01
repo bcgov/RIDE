@@ -459,7 +459,7 @@ def build_event_payload(target_event):
                 break
 
         # Append planned event subtype for all planned events
-        if target_event.event_type == "Planned event":
+        if target_event.event_type == "Planned event" and EventSubtype.PLANNED_EVENT not in matched_subtypes:
             matched_subtypes.append(EventSubtype.PLANNED_EVENT)
 
         # Default to HAZARD if nothing matched, must use .value for capitalized text
