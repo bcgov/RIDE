@@ -343,7 +343,7 @@ class Event(VersionedModel):
             }
             try:
                 response = requests.get(
-                    settings.ROUTE_PLANNER_API_URL + '/route.json',
+                    settings.ROUTE_PLANNER_API_URL + 'route.json',
                     params=payload,
                     headers={'apiKey': settings.ROUTE_PLANNER_API_KEY })
                 if response.ok:
