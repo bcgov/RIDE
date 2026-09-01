@@ -6,6 +6,7 @@ from django.utils import timezone
 from .enums import EventType
 from .models import Event
 from .serializers import EventSerializer
+from ..users.models import RIDEUser
 
 
 class YesNoFilter(admin.SimpleListFilter):
@@ -94,13 +95,13 @@ def create_dummy_inactive_event(modeladmin, request, queryset):
     Event.objects.bulk_create([
         Event(
             id=event_id,
-            event_type=EventType.INCIDENT.value,
+            event_type=EventType.INCIDENT.label,
             status='Inactive',
             approved=True,
             latest=True,
             latest_approved=True,
             version=0,
-            user=request.user,
+            user=RIDEUser.objects.get(username='taskuser'),
             additional='Dummy placeholder for event ID sequence',
             last_inactivated=now - timedelta(days=30),
             created=now,
