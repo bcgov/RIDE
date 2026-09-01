@@ -48,12 +48,12 @@ export const slice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(updateThunk.pending, (state) => { state.postStatus = 'pending'; })
+      .addCase(updateThunk.pending, (state) => { state.writeStatus = 'pending'; })
       .addCase(updateThunk.fulfilled, (state, action) => {
-        state.postStatus = 'idle';
+        state.writeStatus = 'idle';
         adapter.setOne(state, action.payload);
       })
-      .addCase(updateThunk.rejected, (state) => { state.postStatus = 'idle'; })
+      .addCase(updateThunk.rejected, (state) => { state.writeStatus = 'idle'; })
 
       .addCase(refreshThunk.pending, (state) => { state.status = 'pending'; })
       .addCase(refreshThunk.fulfilled, (state, action) => {

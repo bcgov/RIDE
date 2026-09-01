@@ -173,7 +173,6 @@ export default function Home() {
   const filterAndSortUsers = () => {
     // Filter users based on selected organization
     let filteredUsers = [...users];
-    // if (!filteredUsers) return;  // Data not ready, do nothing
 
     // Apply organization filter
     if (selectedOrg !== 'All organizations') {
@@ -340,7 +339,7 @@ export default function Home() {
         </div>
       </div>
 
-      {processedUsers ?
+      {processedUsers.length > 0 ?
         <div className={'users-table'}>
           {/* Header row */}
           <div className='header-row'>
