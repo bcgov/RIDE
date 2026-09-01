@@ -1,7 +1,11 @@
-from django.contrib import admin
+from datetime import timedelta
+
+from django.contrib import admin, messages
+from django.utils import timezone
 
 from .enums import EventType
 from .models import Event
+from .serializers import EventSerializer
 
 
 class YesNoFilter(admin.SimpleListFilter):
@@ -81,6 +85,37 @@ class LatestApprovedFilter(YesNoFilter):
         return queryset.filter(latest_approved=False)
 
 
+@admin.action(description='Create dummy inactive event (advance ID sequence)')
+def create_dummy_inactive_event(modeladmin, request, queryset):
+    # Ignore selection; Django still requires at least one row checked.
+    event_id = EventSerializer().get_id()
+    now = timezone.now()
+    # bulk_create bypasses Model.save(), so Open511 sync never runs.
+    Event.objects.bulk_create([
+        Event(
+            id=event_id,
+            event_type=EventType.INCIDENT.value,
+            status='Inactive',
+            approved=True,
+            latest=True,
+            latest_approved=True,
+            version=0,
+            user=request.user,
+            additional='Dummy placeholder for event ID sequence',
+            last_inactivated=now - timedelta(days=30),
+            created=now,
+            last_updated=now,
+        )
+    ])
+    prefix, number = event_id.rsplit('-', 1)
+    modeladmin.message_user(
+        request,
+        f'Created dummy inactive event {event_id}. '
+        f'Next event will be {prefix}-{int(number) + 1}.',
+        level=messages.SUCCESS,
+    )
+
+
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_filter = (
@@ -91,3 +126,4 @@ class EventAdmin(admin.ModelAdmin):
     )
     list_display = ('id', 'event_type', 'status', 'user', 'latest', 'approved', 'latest_approved')
     search_fields = ['id']
+    actions = [create_dummy_inactive_event]
