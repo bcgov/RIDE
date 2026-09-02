@@ -40,6 +40,15 @@
     }
   }
 
+  .error {
+    margin: 1in auto;
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+  }
+
   .users-table {
     display: flex;
     flex-direction: column;

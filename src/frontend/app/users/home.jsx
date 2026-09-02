@@ -17,7 +17,7 @@ import Spinner from "../components/shared/spinner.jsx";
 import {
   addOrUpdateOrganization, deleteOrganization, selectAllOrganizations,
 } from '../slices/organizations';
-import { updateUser, refreshUsers, selectAllUsers } from '../slices/users';
+import { updateUser, refreshUsers, selectAllUsers, userStatus, userError } from '../slices/users';
 import { selectAllServiceAreas } from '../slices/serviceAreas';
 
 // External imports
@@ -54,6 +54,8 @@ export default function Home() {
   const serviceAreas = useSelector(selectAllServiceAreas);
   const orgs = useSelector(selectAllOrganizations);
   const users = useSelector(selectAllUsers);
+  const status = useSelector(userStatus);
+  const err = useSelector(userError);
 
   const dispatch = useDispatch();
 
@@ -339,7 +341,9 @@ export default function Home() {
         </div>
       </div>
 
-      {processedUsers.length > 0 ?
+      { status === 'pending' && <Spinner /> }
+
+      { status === 'fulfilled' &&
         <div className={'users-table'}>
           {/* Header row */}
           <div className='header-row'>
@@ -394,7 +398,13 @@ export default function Home() {
               <div className='empty-search'>No users found using current search and filters.</div>
             }
           </div>
-        </div> : <Spinner />
+        </div>
+      }
+
+      { status === 'error' && <div className='error'>
+          <p>There was a problem retrieving the list of users: {err}</p>
+          <p>Please refresh the page to try again.</p>
+        </div>
       }
     </div>
   );
