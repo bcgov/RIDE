@@ -1,18 +1,21 @@
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 
-import { API_HOST } from '../env.js';
+import { API_HOST } from '../env';
+import { statusCode } from '../shared';
 
-import client from './client.js';
+import client from './client';
 
-const adapter = createEntityAdapter({
-  // sortComparer: (a, b) => { return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1; }
-})
+const adapter = createEntityAdapter({});
 
 const refreshThunk = createAsyncThunk(
   'users/refresh',
-  async () => {
-    const response = await client.get(`${API_HOST}/api/users`);
-    return response.data;
+  async (_, thunkApi) => {
+    try {
+      const response = await client.get(`${API_HOST}/api/users`);
+      return response.data;
+    } catch (err) {
+      return thunkApi.rejectWithValue(statusCode(err.status));
+    }
   },
   {
     condition(arg, thunkApi) { return selectStatus(thunkApi.getState()) === 'idle'; }
@@ -35,6 +38,7 @@ const updateThunk = createAsyncThunk(
 );
 
 const selectStatus = (state) => state.users.status;
+const selectError = (state) => state.users.error;
 const writeStatus = (state) => state.users.writeStatus;
 
 export const slice = createSlice({
@@ -57,12 +61,12 @@ export const slice = createSlice({
 
       .addCase(refreshThunk.pending, (state) => { state.status = 'pending'; })
       .addCase(refreshThunk.fulfilled, (state, action) => {
-        state.status = 'idle';
+        state.status = 'fulfilled';
         adapter.setAll(state, action.payload);
       })
       .addCase(refreshThunk.rejected, (state, action) => {
-        state.status = 'idle';
-        state.error = action.error.message ?? 'Unknown Error';
+        state.status = 'error';
+        state.error = action.payload ?? 'Unknown Error';
       });
   }
 });
@@ -75,6 +79,8 @@ export const {
 export {
   refreshThunk as refreshUsers,
   updateThunk as updateUser,
+  selectStatus as userStatus,
+  selectError as userError,
 };
 
 export default slice.reducer;
