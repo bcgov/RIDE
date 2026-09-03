@@ -22,7 +22,7 @@ import { selectAllServiceAreas } from '../slices/serviceAreas';
 
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashCan, faBan, faPlus } from '@fortawesome/pro-regular-svg-icons';
+import { faCheck, faEdit, faTrashCan, faBan, faPlus } from '@fortawesome/pro-regular-svg-icons';
 import { faArrowUpLong } from '@fortawesome/pro-solid-svg-icons';
 
 // Styling
@@ -45,7 +45,7 @@ export default function Home() {
   const { authContext } = useContext(AuthContext);
 
   // States
-  const [ processedUsers, setProcessedUsers ] = useState();
+  const [ processedUsers, setProcessedUsers ] = useState([]);
   const [ sortKey, setSortKey ] = useState('Name');
   const [ selectedOrg, setSelectedOrg ] = useState('All organizations');
   const [ searchText, setSearchText ] = useState('');
@@ -200,6 +200,25 @@ export default function Home() {
   }
 
   /* Handlers */
+  const enableUserHandler = (user) => {
+    setAlertContext();
+    return dispatch(
+      updateUser({ id: user.id, is_active: true })
+    ).then(result => {
+      if (result.error) {
+        throw result;
+      }
+
+      setAlertContext({
+        type: 'success',
+        message: 'User successfully enabled',
+      })
+
+    }).catch(error => {
+      console.error(error);
+    });
+  }
+
   const disableUserHandler = (user) => {
     dispatch(
       updateUser({ id: user.id, is_active: false })
@@ -359,7 +378,7 @@ export default function Home() {
 
           {/* Data columns */}
           <div className={'users-rows'}>
-            {!!processedUsers.length && processedUsers.map((user) => user.is_active && (
+            {!!processedUsers.length && processedUsers.map((user) => (
               <div key={user.id} className='user-row'>
                 <p>{`${user.first_name} ${user.last_name}`}</p>
                 <p>{user.social_username || user.username}</p>
@@ -379,18 +398,35 @@ export default function Home() {
                   <EditUserForm user={user} orgs={orgs} />
                 </RIDEModal>
 
-                <div
-                  className={'user-btn'}
-                  tabIndex={0}
-                  onClick={() => disableUserHandler(user)}
-                  onKeyDown={(keyEvent) => {
-                    if (['Enter', 'NumpadEnter'].includes(keyEvent.key)) {
-                      disableUserHandler(user);
-                    }
-                  }}>
+                { user.is_active &&
+                  <div
+                    className={'user-btn'}
+                    tabIndex={0}
+                    onClick={() => disableUserHandler(user)}
+                    onKeyDown={(keyEvent) => {
+                      if (['Enter', 'NumpadEnter'].includes(keyEvent.key)) {
+                        disableUserHandler(user);
+                      }
+                    }}>
 
-                  <FontAwesomeIcon icon={faBan} /> <span>Remove</span>
-                </div>
+                    <FontAwesomeIcon icon={faBan} /> <span>Disable</span>
+                  </div>
+                }
+
+                <RIDEModal
+                  title={'Edit RIDE User'}
+                  confirmBtnText={'Update user'}
+                  onClick={() => enableUserHandler(user)}
+                  hide={user.is_active}
+                  openButton={
+                    <div className={'user-btn'}>
+                      <FontAwesomeIcon icon={faCheck} /> <span>Enable</span>
+                    </div>
+                  }>
+
+                  <EditUserForm user={user} orgs={orgs} />
+                </RIDEModal>
+
               </div>
             ))}
 

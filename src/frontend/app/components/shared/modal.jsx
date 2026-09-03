@@ -11,7 +11,7 @@ import './modal.scss';
 export default function RIDEModal(props) {
   /* Setup */
   // Props
-  const { title, confirmBtnText, children, openButton } = props
+  const { title, confirmBtnText, children, openButton, onClick, hide } = props
 
   /* Hooks */
   // States
@@ -23,13 +23,20 @@ export default function RIDEModal(props) {
     setSubmitting(true);
   };
 
+  let clickHandler = () => setOpen(true);
+  if (onClick) {
+    clickHandler = () => {
+      onClick().then(() => { console.log('then'); setOpen(true) })
+    }
+  }
+
   /* Rendering */
   // Main component
   return (
     <div className="modal-root">
-      {openButton &&
+      {openButton && !hide &&
         React.cloneElement(openButton, {
-          onClick: () => setOpen(true),
+          onClick: clickHandler,
           className: [
             openButton.props.className,
             'modal-open-btn'
