@@ -166,7 +166,6 @@ export default function EventsLayer({ event, dispatch }) {
   const { authContext } = useContext(AuthContext);
   const { map } = useContext(MapContext);
   const [ contextMenu, setContextMenu ] = useState([]);
-  const [ fetchInterval, setFetchInterval ] = useState();
   const menuRef = useRef();
   const eventRef = useRef(); // necessary for early-bound handler to read current prop
   eventRef.current = event;
@@ -406,19 +405,25 @@ export default function EventsLayer({ event, dispatch }) {
   };
 
   const updateEventsOnMap = () => {
-    const state = store.getState()
+    const eventsLayer = map?.get('events');
+    if (!eventsLayer) { return; }
+
+    const state = store.getState();
     const eventIds = {};
+
+    // Read fresh layers from the store
+    const layers = state.visibleLayers;
 
     state.events.ids.forEach((id) => {
       const event = state.events.entities[id];
-      addEvent(event, map, dispatch, visibleLayers);
-      eventIds[id] = true;
-    })
+      addEvent(event, map, dispatch, layers);
+      eventIds[event.id] = true;
+    });
 
     // remove events no longer in the list of events
-    const source = map.get('events').getSource();
+    const source = eventsLayer.getSource();
     source.getKeys().forEach((key) => {
-      if (!key.startsWith('RIDE') || !key.startsWith('DBC')) { return; }
+      if (!key.startsWith('RIDE') && !key.startsWith('DBC')) { return; }
       if (!eventIds[key]) {
         const existing = source.get(key);
         source.unset(key, true);
@@ -437,11 +442,24 @@ export default function EventsLayer({ event, dispatch }) {
     if (!map) { return; }
     map.on('contextmenu', contextHandler);
     addEventsLayer(map);
-    store.subscribe(updateEventsOnMap);
+
+    // Sync from current store immediately once before subscription kicks in
+    updateEventsOnMap();
+
+    const unsubscribe = store.subscribe(updateEventsOnMap);
+
     storeDispatch(refreshEvents());
-    if (!fetchInterval) {
-      setFetchInterval(setInterval(() => storeDispatch(refreshEvents()), EVENT_POLLING_REFRESH || 10000));
-    }
+    const interval = setInterval(
+      () => storeDispatch(refreshEvents()),
+      Number(EVENT_POLLING_REFRESH) || 10000,
+    );
+
+    // Cleanup
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+      map.un('contextmenu', contextHandler);
+    };
   }, [map]);
 
   const needsApproval = (clearing?.is_closure || clearing?.details.severity === 'Major') && !authContext.is_approver;
