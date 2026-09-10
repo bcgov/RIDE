@@ -4,11 +4,11 @@
 .user-nav {
   display: flex;
   flex-direction: row;
-  margin-left: 1rem;
+  margin-left: auto;
 
   @media (min-width: 1200px) {
     order: 2;
-    margin-left: 0;
+    margin-left: auto;
   }
 
   &-btn {

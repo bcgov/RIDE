@@ -1,5 +1,9 @@
 const runtimeEnv = (typeof globalThis !== 'undefined' && globalThis.__ENV__) || {};
 const getEnv = (key, fallback = '') => runtimeEnv[key] ?? import.meta.env?.[`VITE_${key}`] ?? fallback;
+const getBooleanEnv = (key, fallback = false) => {
+	const value = getEnv(key);
+	return value === '' ? fallback : String(value).toLowerCase() === 'true';
+};
 
 export const API_HOST = `${getEnv('API_HOST')}`;
 export const GEOCODER_HOST = `${getEnv('GEOCODER_HOST')}`;
@@ -12,6 +16,7 @@ export const MAP_STYLE_URL = `${getEnv('MAP_STYLE_URL')}`;
 export const DEPLOYMENT_TAG = `${getEnv('DEPLOYMENT_TAG')}`;
 export const BRANCH = `${getEnv('BRANCH')}`;
 export const RELEASE = `${getEnv('RELEASE')}`;
+export const SHOW_DEBUG_CONTROL = getBooleanEnv('SHOW_DEBUG_CONTROL');
 export const ALLOW_LOCAL_ACCOUNTS = `${getEnv('ALLOW_LOCAL_ACCOUNTS')}`;
 export const EVENT_POLLING_REFRESH = `${getEnv('EVENT_POLLING_REFRESH')}`;
 export const DMS_API_URL = `${getEnv('DMS_API_URL')}`;
