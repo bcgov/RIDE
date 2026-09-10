@@ -6,7 +6,7 @@ import { NavLink, Outlet, useSearchParams } from 'react-router';
 
 // Internal imports
 import { AlertContext, AuthContext, DebuggingContext } from './contexts';
-import { API_HOST } from './env.js';
+import { API_HOST, SHOW_DEBUG_CONTROL } from './env.js';
 import Alert from "./components/shared/Alert";
 import UserNavigation from "./components/shared/UserNavigation";
 
@@ -14,7 +14,7 @@ import UserNavigation from "./components/shared/UserNavigation";
 import './layout.scss';
 
 function getInitialDebuggingContext() {
-  if (import.meta.env.PROD) return false;
+  if (!SHOW_DEBUG_CONTROL) return false;
 
   return JSON.parse(localStorage.getItem('debugging')) || false;
 }
@@ -126,6 +126,7 @@ export default function Layout() {
           </>
         }
 
+        {SHOW_DEBUG_CONTROL &&
           <div className='right debug-toggle'>
             <button
               className={debuggingIsOn ? 'debugging' : ''}
@@ -137,7 +138,6 @@ export default function Layout() {
               </svg>
             </button>
           </div>
-        {!import.meta.env.PROD && null
         }
 
         <UserNavigation authContext={authContext} />
