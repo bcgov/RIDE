@@ -126,7 +126,6 @@ export default function Layout() {
           </>
         }
 
-        {!import.meta.env.PROD &&
           <div className='right debug-toggle'>
             <button
               className={debuggingIsOn ? 'debugging' : ''}
@@ -138,6 +137,7 @@ export default function Layout() {
               </svg>
             </button>
           </div>
+        {!import.meta.env.PROD && null
         }
 
         <UserNavigation authContext={authContext} />
