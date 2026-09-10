@@ -64,6 +64,39 @@ export async function getRoute(pointA, pointB) {
   }).then((data) => data);
 }
 
+export async function getRouteWithoutClosures(pointA, pointB) {
+  const pointString = `${pointA[0]},${pointA[1]},${pointB[0]},${pointB[1]}`;
+
+  const payload = {
+    points: pointString,
+    criteria: 'fastest',
+    distanceUnit: 'km',
+    gdf: 'resource:2.0,',
+    enable: 'tl,rc',
+  }
+
+  return get(ROUTER_URL, payload, {
+    'apiKey': ROUTER_CLIENT_ID
+  }).then((data) => data);
+}
+
+export async function getRouteWithoutClosuresOrFSRs(pointA, pointB) {
+  const pointString = `${pointA[0]},${pointA[1]},${pointB[0]},${pointB[1]}`;
+
+  const payload = {
+    points: pointString,
+    criteria: 'fastest',
+    distanceUnit: 'km',
+    gdf: 'resource:2.0,',
+    enable: 'tl,rc',
+    excludedRoadClasses: 'local,resource,ferry',
+  }
+
+  return get(ROUTER_URL, payload, {
+    'apiKey': ROUTER_CLIENT_ID
+  }).then((data) => data);
+}
+
 /* Get the shortest road distance by getting routes in each direction and
  * returning the route with the shorter distance.
  */

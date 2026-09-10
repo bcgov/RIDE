@@ -8,7 +8,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
 import { AlertContext, AuthContext, MapContext } from '../../../contexts';
-import { getRoute } from '../../../shared';
+import { getRoute, getRouteWithoutClosures, getRouteWithoutClosuresOrFSRs } from '../../../shared';
 import { getNearby } from '../../../events/forms/Location/helpers';
 import { Drag, g2ll, getDRA, getSnapped, ll2g, selectFeature } from '../helpers';
 import { PinFeature } from '../feature';
@@ -188,19 +188,31 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
  * route
  */
 export const updateRoute = async (map) => {
-  let route = [], tlids = [];
+  let route = [], tlids = [], route2 = [], route3 = [];
   if (map.start && map.end) {
     const startCoordinates = g2ll(map.start.getGeometry().getCoordinates());
     const endCoordinates = g2ll(map.end.getGeometry().getCoordinates());
     const results = await getRoute(startCoordinates, endCoordinates);
+    const results2 = await getRouteWithoutClosures(startCoordinates, endCoordinates);
+    const results3 = await getRouteWithoutClosuresOrFSRs(startCoordinates, endCoordinates);
 
     if (results.route) {
       route = results.route.map((pair) => ll2g(pair));
       tlids = results.tlids;
     }
+
+    if (results2.route) {
+      route2 = results2.route.map((pair) => ll2g(pair));
+    }
+
+    if (results3.route) {
+      route3 = results3.route.map((pair) => ll2g(pair));
+    }
   }
   map.route.set('tlids', tlids);
   map.route.getGeometry().setCoordinates(route);
+  map.route2.getGeometry().setCoordinates(route2);
+  map.route3.getGeometry().setCoordinates(route3);
 }
 
 
@@ -246,6 +258,21 @@ export default function PinsLayer({ event, dispatch }) {
         noSelect: true
       });
       layer.getSource().addFeature(map.route);
+      map.route2 = new PinFeature({
+        style: 'route2',
+        geometry: new LineString([]),
+        isVisible: true,
+        noSelect: true
+      });
+      map.get('debug').getSource().addFeature(map.route2);
+
+      map.route3 = new PinFeature({
+        style: 'route3',
+        geometry: new LineString([]),
+        isVisible: true,
+        noSelect: true
+      });
+      map.get('debug').getSource().addFeature(map.route3);
 
       // pin for search result
       map.location = new PinFeature({
