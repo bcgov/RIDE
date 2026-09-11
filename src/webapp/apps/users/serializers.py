@@ -9,6 +9,8 @@ class RIDEUserSerializer(serializers.ModelSerializer):
     social_username = serializers.SerializerMethodField()
     social_provider = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
+    is_camera_role = serializers.SerializerMethodField()
+    is_camera_admin = serializers.SerializerMethodField()
     service_areas = serializers.SerializerMethodField()
 
     class Meta:
@@ -39,6 +41,12 @@ class RIDEUserSerializer(serializers.ModelSerializer):
 
     def get_is_approver(self, obj):
         return obj.is_approver
+
+    def get_is_camera_role(self, obj):
+        return obj.is_camera_role
+
+    def get_is_camera_admin(self, obj):
+        return obj.is_camera_admin
 
     def get_service_areas(self, obj):
         user_orgs = obj.organizations.all()
