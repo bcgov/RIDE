@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { Point, LineString } from 'ol/geom';
 import { linear } from 'ol/easing';
@@ -224,6 +225,8 @@ export default function PinsLayer({ event, dispatch }) {
   const menuRef = useRef();
   const eventRef = useRef();
   const authContextRef = useRef(authContext);
+  const debugOptions = useSelector(state => state.debugging);
+
   eventRef.current = event;
   authContextRef.current = authContext;
 
@@ -261,7 +264,7 @@ export default function PinsLayer({ event, dispatch }) {
       map.route2 = new PinFeature({
         style: 'route2',
         geometry: new LineString([]),
-        isVisible: true,
+        isVisible: debugOptions.alternateRoutes,
         noSelect: true
       });
       map.get('debug').getSource().addFeature(map.route2);
@@ -269,7 +272,7 @@ export default function PinsLayer({ event, dispatch }) {
       map.route3 = new PinFeature({
         style: 'route3',
         geometry: new LineString([]),
-        isVisible: true,
+        isVisible: debugOptions.alternateRoutes,
         noSelect: true
       });
       map.get('debug').getSource().addFeature(map.route3);
@@ -285,6 +288,11 @@ export default function PinsLayer({ event, dispatch }) {
       layer.getSource().addFeature(map.location);
     }
   });
+
+  useEffect(() => {
+    map?.route2.set('visible', debugOptions.alternateRoutes);
+    map?.route3.set('visible', debugOptions.alternateRoutes);
+  }, [debugOptions])
 
   // co-ordinate visible pins with current event
   useEffect(() => {

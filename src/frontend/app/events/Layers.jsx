@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faDiamond, faLayer, faLayerGroup, faLink, faTriangle, faXmark,
 } from '@fortawesome/pro-regular-svg-icons';
-import { faDoNotEnter, faCalendarDays, faClockRotateLeft,
+import { faBug, faDoNotEnter, faCalendarDays, faClockRotateLeft,
   faGameBoardSimple, faSignPosts
 } from '@fortawesome/pro-solid-svg-icons';
 
@@ -20,7 +20,8 @@ import chainupActiveStatic from './icons/chainup-default-static.svg';
 import roadconditionActiveStatic from './icons/roadcondition-default-static.svg';
 import dmsStatic from './icons/dms-static.svg';
 
-import { set } from '../slices';
+import { set, setDebugging } from '../slices';
+import { DebuggingContext } from '../contexts';
 
 import './Layers.scss';
 
@@ -51,6 +52,26 @@ export const defaultLayers = Object.values(BUTTONS)
     acc[curr] = !['cleared7', 'dms', 'serviceAreas', 'districts'].includes(curr);
     return acc;
   }, {});
+
+function Debugging() {
+  const options = useSelector(state => state.debugging);
+  const dispatch = useDispatch();
+
+  return (
+    <div className='debugging'>
+      <div className="options-group">
+        <button
+          key='alternateRouting'
+          className={options.alternateRoutes ? 'enabled' : ''}
+          onClick={() => dispatch(setDebugging({alternateRoutes: !options.alternateRoutes}))}
+        >
+          <FontAwesomeIcon icon={faBug}/>
+          Show alternate routes
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function Legend() {
   return (
@@ -130,6 +151,13 @@ export default function Layers () {
   const [tab, setTab] = useState(localStorage.getItem('tab open'));
   const dispatch = useDispatch();
   const visibleLayers = useSelector(state => state.visibleLayers);
+  const debuggingIsOn = useContext(DebuggingContext);
+
+  useEffect(() => {
+    if (!debuggingIsOn && tab === 'debugging') {
+      changeTab('layers')
+    }
+  }, [debuggingIsOn]);
 
   const changeTab = (tab) => {
     if (tab) {
@@ -172,6 +200,14 @@ export default function Layers () {
           onClick={() => changeTab('legend')}
         >Legend</button>
 
+        { debuggingIsOn &&
+          <button
+            type="button"
+            className={tab === 'debugging' ? 'active' : ''}
+            onClick={() => changeTab('debugging')}
+          ><FontAwesomeIcon icon={faBug} /></button>
+        }
+
         <button
           type="button"
           className='close'
@@ -209,6 +245,8 @@ export default function Layers () {
         )}
 
         { tab === 'legend' && <Legend /> }
+
+        { tab === 'debugging' && <Debugging /> }
       </div>
     </div>
   )

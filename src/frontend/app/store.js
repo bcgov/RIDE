@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import {
   conditions,
+  debugging,
   districts,
   districtBoundaries,
   dms,
@@ -20,6 +21,7 @@ import {
 export default configureStore({
   reducer: {
     conditions,
+    debugging,
     districts,
     districtBoundaries,
     dms,

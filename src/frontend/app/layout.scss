@@ -2,4 +2,12 @@
 
 .debug-toggle {
   margin-right: 1rem;
+
+
+  button {
+    color: $Grey50;
+    &.debugging {
+      color: $Grey110;
+    }
+  }
 }
