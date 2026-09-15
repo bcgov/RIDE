@@ -1,6 +1,5 @@
 // React
 import { useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { createSelector } from '@reduxjs/toolkit';
 
 // Navigation
 import { useNavigate } from 'react-router';
@@ -20,6 +19,7 @@ import { AlertContext, AuthContext, MapContext } from '../contexts';
 import { ll2g, selectFeature } from '../components/Map/helpers.js';
 import Tabs from '../shared/Tabs';
 import Bubble from '../shared/Bubble';
+import RequestOrgForm from '../users/forms/requestOrg';
 
 import EventForm, { getInitialEvent } from './forms';
 import reducer from './forms/reducer';
@@ -52,6 +52,7 @@ export default function Home() {
 
   // Refs
   const mapRef = useRef();
+  const modalRef = useRef();
 
   // States
   const [ map, setMap ] = useState(null);
@@ -59,6 +60,8 @@ export default function Home() {
   const [ event, dispatch ] = useReducer(reducer, getInitialEvent());
   const [ sign, setSign ] = useState(null);
   const [ computed, setComputed ] = useState(null);
+
+  const [ requestingOrg, setRequestingOrg ] = useState(false);
 
   // Selectors
   const visibleLayers = useSelector(state => state.visibleLayers);
@@ -68,10 +71,15 @@ export default function Home() {
   useEffect(() => {
     if (!authContext) { return; }
 
-    if (authContext.loginStateKnown && !authContext.username) {
-      // Redirect to landing page if not logged in
-      // TODO: redirect back to this page after login, not required since this is the only page
-      navigate('/');
+    if (authContext.loginStateKnown) {
+      if (!authContext.username) {
+        // Redirect to landing page if not logged in
+        // TODO: redirect back to this page after login, not required since this is the only page
+        navigate('/');
+
+      } else if (authContext.request_organization) {
+        setRequestingOrg(true);
+      }
     }
   }, [authContext]);
 
@@ -130,6 +138,11 @@ export default function Home() {
 
   const showPreview = event.showPreview && (event.location.start.name || event.type === 'CHAIN_UP');
   const showLayers = !showPreview && !sign;
+  if (requestingOrg) {
+    modalRef.current?.showModal();
+  } else {
+    modalRef.current?.close();
+  }
 
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
@@ -189,6 +202,10 @@ export default function Home() {
       { !showPreview && sign &&
         <Dms sign={sign} close={() => { selectFeature(map); setSign(null) }} />
       }
+
+      <dialog className="modal" ref={modalRef}>
+        <RequestOrgForm setRequestingOrg={setRequestingOrg} />
+      </dialog>
     </div>
   );
 }

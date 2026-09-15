@@ -12,6 +12,7 @@ last login: {last_login}
      staff: {is_staff}
  superuser: {is_superuser}
     groups: {groups}
+      orgs: {orgs}
 '''
 
 INCOMPATIBLE = 'Mutually incompatible options specified: --{arg} and --not-{arg}'
@@ -22,7 +23,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('email', )
         parser.add_argument('-d', '--details', action='store_true',
-                            help='Show user info')
+                            help='Show user info', default=True)
         parser.add_argument('-a', '--active', action='store_true',
                             help='Set active flag to true')
         parser.add_argument('-na', '--not-active', action='store_true',
@@ -35,14 +36,26 @@ class Command(BaseCommand):
                             help='Set superuser flag to true')
         parser.add_argument('-nsu', '--not-superuser', action='store_true',
                             help='Set superuser flag to false')
+        parser.add_argument('-c', '--clear-requests', action='store_true',
+                            help='Remove user requests')
 
     def handle(self, *args, **options):
 
+        user_model = get_user_model()
+        user = None
+
         try:
-            user_model = get_user_model()
             user = user_model.objects.get(email=options['email'])
         except user_model.DoesNotExist:
-            raise CommandError('User not found with that email address')
+            pass
+
+        try:
+            user = user_model.objects.get(username=options['email'])
+        except user_model.DoesNotExist:
+            pass
+
+        if user is None:
+            raise CommandError('User not found with that email address or username')
 
         if options['active'] and options['not_active']:
             raise CommandError(INCOMPATIBLE.format(arg='active'))
@@ -66,8 +79,13 @@ class Command(BaseCommand):
         elif options['not_superuser']:
             user.is_superuser = False
 
+        if options['clear_requests']:
+            num, _ = user.request_set.all().delete()
+            print(f'{num} requests deleted')
+
         if options['details']:
             groups = [group.name for group in user.groups.all()]
-            print(DETAILS.format(**vars(user), groups=groups))
+            orgs = [org.name for org in user.organizations.all()]
+            print(DETAILS.format(**vars(user), groups=groups, orgs=orgs))
 
         user.save()
