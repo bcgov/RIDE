@@ -5,12 +5,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from ..shared.serializers import ReadOnly
 from .models import Organization, ServiceArea
 from .serializers import (
     OrganizationSerializer,
     ServiceAreaSerializer,
     ServiceAreaBoundariesSerializer,
 )
+
 
 class OrganizationAPIView(ModelViewSet):
     # prevent loading service area geometries into memory
@@ -20,7 +22,7 @@ class OrganizationAPIView(ModelViewSet):
     ).order_by('name')
 
     serializer_class = OrganizationSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser | (permissions.IsAuthenticated & ReadOnly)]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

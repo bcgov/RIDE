@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.organizations.models import ServiceArea
-from apps.users.models import RIDEUser
+from apps.users.models import RIDEUser, Request
 from django.contrib.auth.models import Group
 
 
@@ -10,6 +10,7 @@ class RIDEUserSerializer(serializers.ModelSerializer):
     social_provider = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
     service_areas = serializers.SerializerMethodField()
+    request_organization = serializers.SerializerMethodField()
 
     class Meta:
         model = RIDEUser
@@ -49,6 +50,19 @@ class RIDEUserSerializer(serializers.ModelSerializer):
         )
 
         return list(user_areas.values_list('id', flat=True))
+
+    def get_request_organization(self, obj):
+        '''
+        Return true if the user has no organizations and no requests to be
+        added to an organization (thus prompting the user on the frontend)
+        '''
+
+        return (
+            obj.organizations.count() == 0 and
+            obj.request_set.filter(
+                request_type=Request.RequestTypes.ADD_TO_ORG
+            ).count() == 0
+        )
 
 
 class RIDEGroupSerializer(serializers.ModelSerializer):

@@ -1,14 +1,21 @@
+from django.conf import settings
 from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import EmailMultiAlternatives
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
+
 from rest_framework import permissions, status
+from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
-from apps.users.models import RIDEUser
-from apps.users.serializers import RIDEUserSerializer, RIDEGroupSerializer
+from apps.organizations.models import Organization
+
+from .models import RIDEUser, Request
+from .serializers import RIDEUserSerializer, RIDEGroupSerializer
 
 
 class RIDEUserAPIView(ModelViewSet):
@@ -51,7 +58,7 @@ class RIDEUserAPIView(ModelViewSet):
     queryset = RIDEUser.objects.prefetch_related(
         'socialaccount_set',
         'organizations',
-        'user_permissions__content_type', 
+        'user_permissions__content_type',
         'groups__permissions__content_type',
     ).all()
     serializer_class = RIDEUserSerializer
@@ -148,3 +155,45 @@ class session(APIView):
 
         response.set_cookie('csrftoken', get_token(request, ))
         return response
+
+@api_view(http_method_names=['POST'])
+def make_request(request):
+
+    if not request.user.is_authenticated:
+        return Response(status=401)
+
+    try:
+        request_type = Request.RequestTypes(request.data.get('type'))
+    except ValueError:
+        return Response(status=400, data={ 'detail': 'Unsupported request type' })
+
+    try:
+        organization = Organization.objects.get(id=request.data.get('organization'))
+    except (ValueError, Organization.DoesNotExist):
+        return Response(status=400, data={ 'detail': 'Organization not found' })
+
+    if Request.objects.filter(user=request.user, request_type=request_type).count() > 0:
+        return Response(status=400, data={ 'detail': 'Request already sent' })
+
+    Request.objects.create(user=request.user, request_type=request_type,
+                           details={ 'organization': organization.id })
+
+    name = f'{request.user.first_name} {request.user.last_name}'
+    context = {
+        'name': name,
+        'email': request.user.email,
+        'organization': organization.name,
+        'url': f'{settings.FRONTEND_BASE_URL}admin/users/rideuser/{request.user.id}/change'
+    }
+    text = render_to_string('email/request_add_to_organization.txt', context)
+    html = render_to_string('email/request_add_to_organization.html', context)
+    msg = EmailMultiAlternatives(
+        f'{{ name }} New user registered',
+        text,
+        settings.RIDE_FROM_EMAIL_DEFAULT,
+        settings.ACCESS_REQUEST_RECEIVERS,
+    )
+    msg.attach_alternative(html, 'text/html')
+    msg.send()
+
+    return Response(status=201)

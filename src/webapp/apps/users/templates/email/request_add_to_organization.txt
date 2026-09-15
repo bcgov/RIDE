@@ -1,0 +1,9 @@
+A new user has registered in RIDE:
+
+Name: {{ name }}
+Email: {{ email }}
+Self-selected organization: {{ organization }}
+
+If this is a valid RIDE user, please add this use to the correct organization to allow them to use RIDE.
+
+{{ url }}
