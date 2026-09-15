@@ -1,15 +1,20 @@
 import copy
 
 from django.contrib.auth import get_user_model
-from rest_framework import fields, serializers
+from rest_framework import fields, serializers, permissions
 from rest_framework.serializers import ModelSerializer
+
+
+class ReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS
 
 
 class UserSerializer(ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'first_name', 'last_name', 'email', 'username']
+        fields = ['id', 'first_name', 'last_name', 'email']
 
 
 class VersionSerializer(ModelSerializer):

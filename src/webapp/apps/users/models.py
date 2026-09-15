@@ -1,7 +1,10 @@
+import logging
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-import logging
+from ..shared.models import BaseModel
 
 log = logging.getLogger()
 
@@ -23,3 +26,14 @@ def get_task_user():
     except RIDEUser.DoesNotExist as e:
         log.error("Task user does not exist; check migrations in users")
         raise e
+
+
+class Request(BaseModel):
+
+    class RequestTypes(models.TextChoices):
+        ADD_TO_ORG = 'ADD_TO_ORGANIZATION', 'Add user to organization'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    user = models.ForeignKey(RIDEUser, on_delete=models.CASCADE)
+    request_type = models.CharField(choices=RequestTypes, default=RequestTypes.ADD_TO_ORG)
+    details = models.JSONField(default=dict)
