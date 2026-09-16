@@ -1,18 +1,14 @@
-import json
 import os
 from pprint import pprint
 from django.core.management.base import BaseCommand, CommandError
-from rest_framework.test import APIRequestFactory
-from timezonefinder import TimezoneFinder
 from zoneinfo import ZoneInfo
 
 from apps.events.models import Event
 from apps.events.serializers import EventSerializer
+from apps.shared import tz_finder
 from apps.users.models import RIDEUser
 from config.adapter import get_oidc_claims
 
-
-tz_finder = TimezoneFinder(in_memory=True)
 
 def format_timestamp(dt, zone):
     suffix = get_day_suffix(dt.astimezone(zone).day)

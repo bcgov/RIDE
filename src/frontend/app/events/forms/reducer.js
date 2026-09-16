@@ -1,14 +1,20 @@
+import { TZDate } from '@date-fns/tz';
+
 import { LOCATION_BLANK, SCHEDULE_BLANK, getInitialEvent, getLater, days_of_the_week } from './index';
 import { FORM_PHRASE_CATEGORY } from '../references';
 import { getNextUpdate } from '../../shared/helpers';
-import {
-  convertToDateTimeLocalString as convert,
-} from "../../components/Map/helpers";
 
 function ensurePendingSet(point) {
   if (!(point.pending instanceof Set)) {
     point.pending = new Set();
   }
+}
+
+function convertToTimezone(time, timezone) {
+  return new TZDate(
+    time.getFullYear(), time.getMonth(), time.getDate(), time.getHours(), time.getMinutes(),
+    timezone
+  );
 }
 
 // SonarQube exemption from javascript:S2245 (weak encryption) because random()
@@ -61,9 +67,21 @@ export default function eventReducer(event, action) {
     }
 
     case 'set start': {
+      const timing = { ...event.timing };
+      if (timing.nextUpdate && !timing.nextUpdateIsDefault) {
+        // only shift times when the user has entered a time explicitly
+        timing.nextUpdate = convertToTimezone(timing.nextUpdate, action.value.timezone)
+      }
+      if (timing.startTime) {
+        timing.startTime = convertToTimezone(timing.startTime, action.value.timezone)
+      }
+      if (timing.endTime) {
+        timing.endTime = convertToTimezone(timing.endTime, action.value.timezone)
+      }
       event.location.start = { ...event.location.start, ...action.value };
-      return {...event};
+      return {...event, timing };
     }
+
     case 'set end': {
       event.location.end = { ...LOCATION_BLANK, ...event.location.end, ...action.value };
       return {...event};
@@ -235,7 +253,7 @@ export default function eventReducer(event, action) {
     case 'set severity': {
       event.details.severity = action.value;
       if (event.timing.nextUpdateIsDefault) {
-        event.timing.nextUpdate = convert(getLater(action.value));
+        event.timing.nextUpdate = getLater(action.value);
       }
       return {...event};
     }

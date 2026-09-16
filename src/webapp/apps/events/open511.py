@@ -6,14 +6,13 @@ from zoneinfo import ZoneInfo
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 import requests
+from config.adapter import get_oidc_claims
 from prometheus_client import Counter
 from rest_framework.exceptions import ValidationError
-from timezonefinder import TimezoneFinder
-tz_finder = TimezoneFinder(in_memory=True)
-from config.adapter import get_oidc_claims
 
 from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType, SITUATION_LOOKUP, EventSubtype
 from apps.events.roads import roads
+from apps.shared import tz_finder
 
 logger = logging.getLogger(__name__)
 OPEN511_SYNC_FAILURES = Counter(

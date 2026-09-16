@@ -27,9 +27,7 @@ import {
   TIMING_FORMS,
 } from '../references';
 
-import {
-  convertToDateTimeLocalString as convert, g2ll,
-} from "../../components/Map/helpers";
+import { g2ll } from "../../components/Map/helpers";
 import { addEvent, getVisibility } from '../../components/Map/layers/Events';
 import { clearPins } from '../../components/Map/layers/Pins';
 import { getCookie } from '../shared';
@@ -114,7 +112,7 @@ export function getInitialEvent(eventType = 'Incident') {
     restrictions: [],
     conditions: [],
     timing: {
-      nextUpdate: convert(getLater('Minor')),
+      nextUpdate: getLater('Minor'),
       nextUpdateTZ: 'PST',
       nextUpdateIsDefault: true,
       endTime: null,
@@ -298,10 +296,10 @@ export class EventForm extends Component {
       }
 
       if (form.timing.startTime) {
-        form.timing.startTime = new Date(form.timing.startTime).toISOString();
+        form.timing.startTime = form.timing.startTime.toISOString();
       }
       if (!form.timing.ongoing && form.timing.endTime) {
-        form.timing.endTime = new Date(form.timing.endTime).toISOString();
+        form.timing.endTime = form.timing.endTime.toISOString();
       } else {
         form.timing.endTime = null;
       }

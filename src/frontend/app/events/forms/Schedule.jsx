@@ -1,21 +1,12 @@
+import { useEffect, useState } from 'react';
+
 import { format } from 'date-fns';
 
 import Tooltip from '../Tooltip';
 import { DraggableRows } from '../shared';
 
-function getTz(datetime) {
-  if (!datetime) { return undefined; }
-  datetime = new Date(datetime);
-  if (isNaN(datetime.valueOf())) { return undefined; }
-  return datetime.toLocaleString(['en-CA'], { timeZoneName: 'short' }).slice(-3);
-}
+import { getTz, tzAware, tzUnaware } from './shared';
 
-function normalized(datestring) {
-  if (!datestring) { return ''; }
-  const a = new Date(datestring)
-  if (Number(a) === 0) { return ''; }
-  return format(a, "yyyy-MM-dd'T'HH:mm");
-}
 
 const days_of_the_week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAY_NAMES = {
@@ -27,6 +18,7 @@ const DAY_NAMES = {
   sat: 'Saturday',
   sun: 'Sunday',
 };
+
 const SHORT_DAY_NAMES = {
   mon: 'Mon',
   tue: 'Tue',
@@ -49,12 +41,6 @@ function getDate(time) {
 function printTime(time) {
   if (!time) { return; }
   return format(time, 'h:mm b');
-}
-
-function printDate(date) {
-  if (!date) { return; }
-  date = new Date(date);
-  return format(date, 'y-MM-dd');
 }
 
 export function desc(schedule, short=false) {
@@ -202,7 +188,17 @@ function Schedule({ id, item, dispatch, index, errors }) {
 
 export default function Scheduled({ errors, event, dispatch }) {
 
+  const timezone = event.location.start.timezone;
+
+  const [ start, setStart ] = useState(tzUnaware(event.timing.startTime, timezone));
+  const [ end, setEnd ] = useState(tzUnaware(event.timing.endTime, timezone));
+
   const hasErrors = errors.inEffect || errors.startTime || errors.endTime;
+
+  useEffect(() => {
+    setStart(tzUnaware(event.timing.startTime, timezone));
+    setEnd(tzUnaware(event.timing.endTime, timezone));
+  }, [event])
 
   return <div>
     <div className={`subtitle ${hasErrors && 'error'}`}>
@@ -212,37 +208,56 @@ export default function Scheduled({ errors, event, dispatch }) {
       </p>
     </div>
 
-      <div className="">
+    <div className="">
+      <input
+        type="checkbox"
+        defaultChecked={event.timing.ongoing}
+        onChange={(e) => dispatch({ type: 'set', value: [{ section: 'timing', ongoing: e.target.checked }] })}
+      /> Ongoing
+    </div>
+
+    <div className="row">
+      <div className="input" style={{width: 'calc(50% - 0.25rem)'}}>
+        <label className={errors?.startTime ? 'error' : undefined}>
+          Start Date
+          <span className="error-message">{errors.startTime}</span>
+        </label>
+
         <input
-          type="checkbox"
-          defaultChecked={event.timing.ongoing}
-          onChange={(e) => dispatch({ type: 'set', value: [{ section: 'timing', ongoing: e.target.checked }] })}
-        /> Ongoing
+          type="datetime-local"
+          className='with-timezone'
+          data-tz={getTz(event.timing.startTime, timezone)}
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
+          onBlur={(e) => dispatch({
+            type: 'set',
+            value: [{
+              startTime: tzAware(e.target.value, timezone),
+              section: 'timing'
+            }]
+          })}
+        />
       </div>
 
-      <div className="row">
-        <div className="input" style={{width: 'calc(50% - 0.25rem)'}}>
-          <label className={errors?.startTime ? 'error' : undefined}>
-            Start Date
-            <span className="error-message">{errors.startTime}</span>
-          </label>
-          <input type="datetime-local"
-            defaultValue={normalized(event.timing.startTime)}
-            onBlur={(e) => dispatch({ type: 'set', value: [{ startTime: e.target.value, section: 'timing' }]})}
-          />
-        </div>
+      <div className="input" style={{ visibility: event.timing.ongoing ? 'hidden' : 'visible', width: 'calc(50% - 0.25rem)' }}>
+        <label className={errors?.endTime ? 'error' : undefined}>
+          End Date
+          <span className="error-message">{errors.endTime}</span>
+        </label>
 
-        <div className="input" style={{ visibility: event.timing.ongoing ? 'hidden' : 'visible', width: 'calc(50% - 0.25rem)' }}>
-          <label className={errors?.endTime ? 'error' : undefined}>
-            End Date
-            <span className="error-message">{errors.endTime}</span>
-          </label>
-          <input type="datetime-local"
-            defaultValue={normalized(event.timing.endTime)}
-            onBlur={(e) => dispatch({ type: 'set', value: [{ endTime: e.target.value, section: 'timing' }]})}
-          />
-        </div>
+        <input
+          type="datetime-local"
+          className='with-timezone'
+          data-tz={getTz(event.timing.endTime, timezone)}
+          value={end}
+          onChange={(e) => setEnd(e.target.value)}
+          onBlur={(e) => dispatch({
+            type: 'set',
+            value: [{ endTime: tzAware(e.target.value, timezone), section: 'timing' }]
+          })}
+        />
       </div>
+    </div>
 
     <DraggableRows
       label="Schedules"
@@ -259,11 +274,11 @@ export default function Scheduled({ errors, event, dispatch }) {
     { event.timing.schedules.length < 7 &&
       <button
         type="button"
-        onClick={(e) => {
+        onClick={() => {
           dispatch({ type: 'add schedule', currentLength: event.timing.schedules.length });
         }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" style={{ cursor: 'pointer', verticalAlign: 'middle', marginBottom: '3px' }}viewBox="0 0 640 640" width="16" height="16" fill="currentColor"><path d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" style={{ cursor: 'pointer', verticalAlign: 'middle', marginBottom: '3px' }} viewBox="0 0 640 640" width="16" height="16" fill="currentColor"><path d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z"/></svg>
         &nbsp;Add schedule
       </button>
     }
