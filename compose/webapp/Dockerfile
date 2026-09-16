@@ -28,6 +28,9 @@ RUN sed -i 's/\r$//g' /leader-election.py && chmod +x /leader-election.py
 COPY ./compose/webapp/start.sh /
 RUN sed -i 's/\r$//g' /start.sh && chmod +x /start.sh
 
+COPY ./compose/webapp/start_openshift.sh /
+RUN sed -i 's/\r$//g' /start_openshift.sh && chmod +x /start_openshift.sh
+
 COPY ./compose/webapp/start_tasks.sh /
 RUN sed -i 's/\r$//g' /start_tasks.sh && chmod +x /start_tasks.sh
 

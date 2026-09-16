@@ -54,7 +54,7 @@ spec:
             - sh
             - '-c'
           args:
-            - . /vault/secrets/secrets.env && /start.sh
+            - . /vault/secrets/secrets.env && /start_openshift.sh
           env:
             - name: DEPLOYMENT_TAG
               value: {{ $deploymentTag | quote }}
