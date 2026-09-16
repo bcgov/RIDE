@@ -1,4 +1,5 @@
 import { createAsyncThunk, createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+import { TZDate } from '@date-fns/tz';
 
 import { API_HOST } from '../env.js';
 
@@ -13,7 +14,19 @@ export const refreshThunk = createAsyncThunk(
   'events/refresh',
   async () => {
     const response = await client.get(`${API_HOST}/api/events/relevant`);
-    return response.data;
+    return response.data.map((event) => {
+      const timezone = event.location.start.timezone || 'America/Vancouver';
+      if (event.timing.nextUpdate) {
+        event.timing.nextUpdate = new TZDate(event.timing.nextUpdate, timezone);
+      }
+      if (event.timing.startTime) {
+        event.timing.startTime = new TZDate(event.timing.startTime, timezone);
+      }
+      if (event.timing.endTime) {
+        event.timing.endTime = new TZDate(event.timing.endTime, timezone);
+      }
+      return event;
+    });
   },
   {
     condition(arg, thunkApi) {
