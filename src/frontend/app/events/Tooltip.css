@@ -28,4 +28,8 @@
       white-space: pre-line;
     }
   }
+
+  .svg-inline--fa {
+    margin-top: 4px;
+  }
 }
