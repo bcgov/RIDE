@@ -188,7 +188,7 @@ def make_request(request):
     text = render_to_string('email/request_add_to_organization.txt', context)
     html = render_to_string('email/request_add_to_organization.html', context)
     msg = EmailMultiAlternatives(
-        f'{{ name }} New user registered',
+        f'{ name } New user registered',
         text,
         settings.RIDE_FROM_EMAIL_DEFAULT,
         settings.ACCESS_REQUEST_RECEIVERS,
