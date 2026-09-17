@@ -1,0 +1,51 @@
+@use './Modal.scss';
+
+.delete-camera-modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 520px;
+  padding: 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+  .modal-header svg {
+    color: #b91c1c; // red, matching delete/danger context — overrides the default blue
+  }
+
+  .modal-question {
+    margin: 0 0 8px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #1e293b;
+  }
+
+  .modal-body-text {
+    margin: 0 0 24px;
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.5;
+  }
+}
+
+.modal-actions .btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #b91c1c;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

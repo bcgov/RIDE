@@ -12,9 +12,36 @@ export default defineConfig({
     devtoolsJson(),
     svgr(),
   ],
+  
   server: {
-    allowedHosts: ['localhost', '.apps.gold.devops.gov.bc.ca', '.th.gov.bc.ca', 'dev-ride.th.gov.bc.ca'],
+    allowedHosts: [
+      'localhost',
+      '.apps.gold.devops.gov.bc.ca',
+      '.th.gov.bc.ca',
+      'dev-ride.th.gov.bc.ca',
+    ],
+
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      '/images': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+
+      '/drivebc-api': {
+        target: 'https://www.drivebc.ca',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) =>
+          path.replace(/^\/drivebc-api/, ''),
+      },
+    },
   },
+
   optimizeDeps: { exclude: ['node_modules/.cache'] },
   build: {
     sourcemap: process.env.SOURCEMAP === 'true',
