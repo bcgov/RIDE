@@ -386,10 +386,9 @@ class CameraViewSet(viewsets.ModelViewSet):
 
         webcam_id = matching_view.drivebc_webcam_id
         api_key = getattr(settings, "DRIVEBC_TIMELAPSE_API_KEY", None)
-        client_id = getattr(settings, "DRIVEBC_TIMELAPSE_CLIENT_ID", None)
         drivebc_timelapse_api_root = getattr(settings, "DRIVEBC_TIMELAPSE_API_ROOT", None)
 
-        if not api_key or not client_id:
+        if not api_key:
             logger.error(
                 "DriveBC API credentials are not configured."
             )
@@ -404,7 +403,6 @@ class CameraViewSet(viewsets.ModelViewSet):
         headers = {
             "Accept": "application/json",
             "X-API-Key": api_key,
-            "X-Client-ID": client_id,
         }
 
         try:
@@ -510,10 +508,9 @@ class CameraViewSet(viewsets.ModelViewSet):
         webcam_id = matching_view.drivebc_webcam_id
 
         api_key = getattr(settings, "DRIVEBC_TIMELAPSE_API_KEY", None)
-        client_id = getattr(settings, "DRIVEBC_TIMELAPSE_CLIENT_ID", None)
         drivebc_timelapse_api_root = getattr(settings, "DRIVEBC_TIMELAPSE_API_ROOT", None)
 
-        if not api_key or not client_id:
+        if not api_key:
             logger.error(
                 "DriveBC API credentials are not configured."
             )
@@ -528,7 +525,6 @@ class CameraViewSet(viewsets.ModelViewSet):
         headers = {
             "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
             "X-API-Key": api_key,
-            "X-Client-ID": client_id,
         }
 
         try:
