@@ -62,6 +62,9 @@ fi
 echo "Setting the Environment for connecting to the backend to '$ENVIRONMENT'"
 sed -i "s~{ENVIRONMENT}~$ENVIRONMENT~g" "${SHARED_CONFIG}/default.conf"
 
+echo "Setting the DMS Proxy URL for connecting nginx to '$DMS_PROXY_URL'"
+sed -i "s~{DMS_PROXY_URL}~$DMS_PROXY_URL~g" "${SHARED_CONFIG}/default.conf"
+
 echo "Setting CSP nonce"
 sed -i "s~{CSP_NONCE}~$CSP_NONCE~g" "${SHARED_CONFIG}/security_headers.conf"
 
