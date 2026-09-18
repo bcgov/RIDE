@@ -19,12 +19,33 @@ class RideAdapter(DefaultAccountAdapter):
         return HttpResponseRedirect(settings.FRONTEND_BASE_URL + '?inactive=true')
 
 
+def get_oidc_claims(sociallogin):
+    """
+    Normalize SocialAccount.extra_data across allauth versions.
+
+    Since allauth 65.11.0, OpenID Connect claims are nested under
+    "userinfo" and/or "id_token" keys instead of being stored flat.
+    Older accounts (created pre-upgrade) still have the flat structure.
+    This returns a flat dict of claims regardless of which shape is present.
+    """
+    extra_data = sociallogin.account.extra_data or {}
+
+    if 'userinfo' in extra_data or 'id_token' in extra_data:
+        claims = {}
+        claims.update(extra_data.get('id_token') or {})
+        claims.update(extra_data.get('userinfo') or {})  # userinfo takes precedence if both present
+        return claims
+
+    # Old flat structure (pre-65.11.0)
+    return extra_data
+
+
 class RideSocialAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         """
         Overridden hook to lookup import DIT users by idir_username or bceid_username
         """
-        social_data = sociallogin.account.extra_data
+        social_data = get_oidc_claims(sociallogin)
         isIdir = social_data['identity_provider'] == 'azureidir'
         username = 'idir__' + social_data['idir_username'] \
             if isIdir else 'bceid__' + social_data['bceid_username']
@@ -48,7 +69,7 @@ class RideSocialAdapter(DefaultSocialAccountAdapter):
     def populate_user(self, request, sociallogin, data):
         user = super().populate_user(request, sociallogin, data)
 
-        social_data = sociallogin.account.extra_data or {}
+        social_data = get_oidc_claims(sociallogin)
         identity_provider = social_data.get('identity_provider')
         given_name = (social_data.get('given_name') or '').strip()
         family_name = (social_data.get('family_name') or '').strip()
