@@ -183,7 +183,7 @@ def make_request(request):
         'name': name,
         'email': request.user.email,
         'organization': organization.name,
-        'url': f'{settings.FRONTEND_BASE_URL}admin/users/rideuser/{request.user.id}/change'
+        'url': f'{settings.FRONTEND_BASE_URL}admin/users/rideuser/{request.user.id}/change/'
     }
     text = render_to_string('email/request_add_to_organization.txt', context)
     html = render_to_string('email/request_add_to_organization.html', context)
