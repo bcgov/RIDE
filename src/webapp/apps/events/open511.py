@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 import requests
+from prometheus_client import Counter
 from rest_framework.exceptions import ValidationError
 from timezonefinder import TimezoneFinder
 tz_finder = TimezoneFinder(in_memory=True)
@@ -13,6 +14,14 @@ from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType,
 from apps.events.roads import roads
 
 logger = logging.getLogger(__name__)
+OPEN511_SYNC_FAILURES = Counter(
+    "ride_open511_sync_failures",
+    "Number of failed attempts to synchronize events with Open511.",
+)
+OPEN511_SYNC_SUCCESSES = Counter(
+    "ride_open511_sync_successes",
+    "Number of successful synchronizations with Open511.",
+)
 
 accepted_roads = {road["NAME"]: road["ID"] for road in roads}
 
@@ -622,26 +631,31 @@ def sync_open511_data(event):
 
     request_method = requests.patch if previous_approved else requests.post
 
-    response = request_method(api_url, json=payload, headers=headers)
+    try:
+        response = request_method(api_url, json=payload, headers=headers)
 
-    if response.status_code == 200:
-        data = response.json()
-        if 'success' in data and data['success']:
-            return
+        if response.status_code == 200:
+            data = response.json()
+            if 'success' in data and data['success']:
+                OPEN511_SYNC_SUCCESSES.inc()
+                return
 
-        # Roll back the Event.save() transaction and surface error to the frontend
-        try:
-            if 'event_validation_errors' in data:
-                errors = list(data['event_validation_errors'].values())[0]
-                for error in errors:
-                    logger.warning(f'validation error while syncing event {event.id} to Open511: {error}')
+            # Roll back the Event.save() transaction and surface error to the frontend
+            try:
+                if 'event_validation_errors' in data:
+                    errors = list(data['event_validation_errors'].values())[0]
+                    for error in errors:
+                        logger.warning(f'validation error while syncing event {event.id} to Open511: {error}')
 
-                raise ValidationError({'open511': errors})
+                    raise ValidationError({'open511': errors})
 
-        except:
-            logger.warning(response.text)
-            raise ValidationError({'open511': [response.text]})
+            except:
+                logger.warning(response.text)
+                raise ValidationError({'open511': [response.text]})
 
-    logger.warning(response.text)
-    raise ValidationError({'open511': [response.text]})
+        logger.warning(response.text)
+        raise ValidationError({'open511': [response.text]})
+    except Exception:
+        OPEN511_SYNC_FAILURES.inc()
+        raise
 

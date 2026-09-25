@@ -1,7 +1,9 @@
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf import settings
+from django.contrib.auth.decorators import login_not_required
 from django.contrib import admin
 from django.urls import path, include
+from django_prometheus.exports import ExportToDjangoView
 
 from allauth.account.views import logout
 from allauth.account.decorators import secure_admin_login
@@ -20,6 +22,7 @@ admin.autodiscover()
 admin.site.login = secure_admin_login(admin.site.login)
 
 urlpatterns = [
+    path('metrics', login_not_required(ExportToDjangoView), name='prometheus-django-metrics'),
     path('admin/logout/', logout),
     path('admin/', admin.site.urls),
     path('api/', include((event_urls, 'events'), namespace='events')),

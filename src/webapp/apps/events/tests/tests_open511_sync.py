@@ -1,13 +1,22 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import Mock, patch
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import GeometryCollection, LineString, Point
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from requests.exceptions import ConnectionError
+from rest_framework.exceptions import ValidationError
 
-from apps.events.open511 import build_event_payload, build_open511_schedule
+from apps.events.open511 import (
+    OPEN511_SYNC_FAILURES,
+    OPEN511_SYNC_SUCCESSES,
+    build_event_payload,
+    build_open511_schedule,
+    sync_open511_data,
+)
 from apps.events.models import Event, TrafficImpact
 from apps.organizations.models import ServiceArea
 
@@ -30,6 +39,23 @@ class TestOpen511Sync(TestCase):
     def _parse_dt(self, value):
         dt = datetime.fromisoformat(value)
         return dt if dt.tzinfo else dt.replace(tzinfo=ZoneInfo("America/Vancouver"))
+
+    def _failure_count(self):
+        return OPEN511_SYNC_FAILURES.collect()[0].samples[0].value
+
+    def _success_count(self):
+        return OPEN511_SYNC_SUCCESSES.collect()[0].samples[0].value
+
+    def _approved_event(self):
+        service_area = ServiceArea.objects.create(id=1, name="Lower Mainland", sortingOrder=1, parent=None)
+        return self._make_event(self.post_payload["events"][0], service_area)
+
+    def test_metrics_endpoint_is_public_and_exposes_open511_counter(self):
+        response = self.client.get("/metrics")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ride_open511_sync_failures_total")
+        self.assertContains(response, "ride_open511_sync_successes_total")
 
     def _make_event(self, payload, service_area):
         geography = payload["geography"]
@@ -150,6 +176,53 @@ class TestOpen511Sync(TestCase):
         for evt, event in zip(expected["events"], (e1, e2)):
             evt["schedule"] = build_open511_schedule(event)
         assert self._normalize(payload) == expected
+
+    def test_failed_sync_increments_failure_counter(self):
+        event = self._approved_event()
+        failure_count = self._failure_count()
+
+        with override_settings(OPEN511_API_URL="https://open511.example", OPEN511_API_KEY="test-key"):
+            with patch("apps.events.open511.requests.post", return_value=Mock(status_code=400, text="Bad Request")):
+                with self.assertRaises(ValidationError):
+                    sync_open511_data(event)
+
+        self.assertEqual(self._failure_count(), failure_count + 1)
+
+    def test_request_exception_increments_failure_counter(self):
+        event = self._approved_event()
+        failure_count = self._failure_count()
+
+        with override_settings(OPEN511_API_URL="https://open511.example", OPEN511_API_KEY="test-key"):
+            with patch("apps.events.open511.requests.post", side_effect=ConnectionError):
+                with self.assertRaises(ConnectionError):
+                    sync_open511_data(event)
+
+        self.assertEqual(self._failure_count(), failure_count + 1)
+
+    def test_successful_sync_increments_success_counter_only(self):
+        event = self._approved_event()
+        failure_count = self._failure_count()
+        success_count = self._success_count()
+        response = Mock(status_code=200)
+        response.json.return_value = {"success": True}
+
+        with override_settings(OPEN511_API_URL="https://open511.example", OPEN511_API_KEY="test-key"):
+            with patch("apps.events.open511.requests.post", return_value=response):
+                sync_open511_data(event)
+
+        self.assertEqual(self._failure_count(), failure_count)
+    self.assertEqual(self._success_count(), success_count + 1)
+
+    def test_missing_configuration_does_not_increment_failure_counter(self):
+        event = self._approved_event()
+        failure_count = self._failure_count()
+
+        with override_settings(OPEN511_API_URL="", OPEN511_API_KEY=""):
+            with patch("apps.events.open511.requests.post") as mock_post:
+                self.assertIsNone(sync_open511_data(event))
+
+        mock_post.assert_not_called()
+        self.assertEqual(self._failure_count(), failure_count)
 
     def test_patch_payload(self):
         sa = ServiceArea.objects.create(id=1, name="Lower Mainland District", sortingOrder=1, parent=None)
