@@ -45,10 +45,21 @@ class RideSocialAdapter(DefaultSocialAccountAdapter):
         """
         Overridden hook to lookup import DIT users by idir_username or bceid_username
         """
-        social_data = get_oidc_claims(sociallogin)
-        isIdir = social_data['identity_provider'] == 'azureidir'
-        username = 'idir__' + social_data['idir_username'] \
-            if isIdir else 'bceid__' + social_data['bceid_username']
+        social_data = sociallogin.account.extra_data
+        identity_provider = social_data.get('identity_provider')
+
+        if identity_provider is None:
+            # Claim missing from this SSO client's token — can't determine IDP, skip linking
+            return
+
+        isIdir = identity_provider == 'azureidir'
+        username_claim = 'idir_username' if isIdir else 'bceid_username'
+        username_value = social_data.get(username_claim)
+
+        if not username_value:
+            return
+
+        username = ('idir__' if isIdir else 'bceid__') + username_value
 
         ride_user = RIDEUser.objects.filter(username__iexact=username).first()
 
@@ -63,7 +74,6 @@ class RideSocialAdapter(DefaultSocialAccountAdapter):
         ).exclude(user=ride_user).exists():
             return
 
-        # Link imported DIT user to social account
         sociallogin.connect(request, ride_user)
 
     def populate_user(self, request, sociallogin, data):
