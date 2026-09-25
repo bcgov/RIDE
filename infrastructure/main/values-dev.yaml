@@ -21,7 +21,7 @@ webapp:
     repository: ghcr.io/bcgov/ride-webapp
 
   prometheus:
-    enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
+    enabled: true
 
   vault:
     secretName: dev-webapp  # This is the name of the secret in vault that contains the environment variables for the app
@@ -55,7 +55,7 @@ static:
     repository: ghcr.io/bcgov/ride-static
 
   prometheus:
-    enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
+    enabled: false # Static content does not expose application metrics.
 
   vault:
     secretName: dev-static  # This is the name of the secret in vault that contains the environment variables for the app
@@ -135,7 +135,7 @@ tasks:
     secretName: dev-webapp  # This is the name of the secret in vault that contains the environment variables for the app
     authPath: auth/k8s-gold # Must match cluster. Use one of: k8s-silver, k8s-gold, k8s-golddr, k8s-emerald
   prometheus:
-    enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
+    enabled: true
   podDisruptionBudget: 
     enabled: false 
     minAvailable: 1

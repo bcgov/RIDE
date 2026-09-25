@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 from timezonefinder import TimezoneFinder
 timezone_finder = TimezoneFinder(in_memory=True)
 
-from ..open511 import get_schedule_description
+from apps.events.open511 import get_schedule_description
 
 vancouver = { 'lat': 49.246292, 'lng': -123.116226 }  # Pacific time
 cranbrook = { 'lat': 49.509724, 'lng': -115.766670 }  # aligned with Alberta, with DST

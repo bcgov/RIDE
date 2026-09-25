@@ -14,8 +14,6 @@ environ.Env.read_env(BASE_DIR / '.env', overwrite=True)
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG') == 'True'
 
-ALLOWED_HOSTS = []
-
 # Paths and urls
 APPEND_SLASH = False
 ROOT_URLCONF = 'config.urls'
@@ -27,6 +25,10 @@ FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:5173/')
 
 # Security
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS')
+# Allow the pod IP to be an allowed host so that Sysdig prometheus scraping works
+pod_ip = os.getenv('POD_IP')
+if pod_ip:
+    ALLOWED_HOSTS.append(pod_ip)
 CORS_ORIGIN_WHITELIST = env.list('DJANGO_CORS_ORIGIN_WHITELIST')
 CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CORS_ORIGIN_WHITELIST')
 CORS_ALLOW_HEADERS = default_headers + ('contenttype',)
@@ -50,6 +52,7 @@ AUTHENTICATION_BACKENDS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'django_prometheus',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.gis',
@@ -82,6 +85,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -94,6 +98,7 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.auth.middleware.LoginRequiredMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 TEMPLATES = [
