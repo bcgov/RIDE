@@ -21,7 +21,7 @@ webapp:
     repository: ghcr.io/bcgov/ride-webapp
 
   prometheus:
-    enabled: false # If you have prometheus metrics in the app, set to true so sysdig can scrape them.
+    enabled: true
 
   vault:
     secretName: uat-webapp  # This is the name of the secret in vault that contains the environment variables for the app
