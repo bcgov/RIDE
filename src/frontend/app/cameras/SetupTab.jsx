@@ -25,12 +25,6 @@ export default function SetupTab({ setupData, onChange }) {
   const [antennaes, setAntennaes] = useState([]);
   const [serviceProviders, setServiceProviders] = useState([]);
 
-  const displayDate = (isoDate) => {
-    if (!isoDate) return '';
-    const parsed = new Date(isoDate);
-    return isValid(parsed) ? format(parsed, 'dd-MMM-yyyy') : isoDate;
-  };
-
   useEffect(() => {
       const loadCameraTypes = async () => {
         try {
@@ -478,7 +472,7 @@ export default function SetupTab({ setupData, onChange }) {
                     <button
                       type="button"
                       className="link-btn"
-                      onClick={() => {/* trigger your password-reset flow here */}}
+                      onClick={() => {/* trigger password-reset flow */}}
                     >
                       <span className="link-style">New password</span>
                     </button>

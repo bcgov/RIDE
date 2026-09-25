@@ -860,8 +860,6 @@ export default function Cameras() {
   };
 
   // Context Menu State
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef(null);
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
   const headerMenuRef = useRef(null);
   useEffect(() => {

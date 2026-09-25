@@ -153,6 +153,21 @@ class CameraViewSet(viewsets.ModelViewSet):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
 
+    # Fields tracked for camera-level change history, and the label used
+    # for each in the history entry.
+    _TRACKED_CAMERA_FIELDS = {
+        "title": "title",
+        "description": "description",
+    }
+
+    # Fields tracked for camera-view-level change history.
+    _TRACKED_VIEW_FIELDS = (
+        "is_on",
+        "disabled_reason",
+        "disabled_short_description",
+        "disabled_long_description",
+    )
+
     def get_permissions(self):
         if self.action in ('create', 'destroy', 'export', 'service_request', 'clone'):
             return [IsCameraAdmin()]
@@ -170,43 +185,69 @@ class CameraViewSet(viewsets.ModelViewSet):
             description="Created camera",
         )
 
+    @staticmethod
+    def _diff_camera_fields(old_values, camera):
+        """Compares the tracked camera-level fields before/after a save
+        and returns a changes dict for whichever ones differ."""
+        changes = {}
+
+        for field in CameraViewSet._TRACKED_CAMERA_FIELDS:
+            old_val = old_values[field]
+            new_val = getattr(camera, field)
+            if old_val != new_val:
+                changes[field] = {"old": old_val, "new": new_val}
+
+        return changes
+
+    @staticmethod
+    def _diff_view_fields(old, view):
+        """Compares the tracked fields on a single CameraView before/after
+        a save and returns a changes dict for whichever ones differ."""
+        view_changes = {}
+
+        for field in CameraViewSet._TRACKED_VIEW_FIELDS:
+            old_val = old[field]
+            new_val = getattr(view, field)
+            if old_val != new_val:
+                view_changes[field] = {"old": old_val, "new": new_val}
+
+        return view_changes
+
+    def _record_view_change_history(self, camera, view, view_changes):
+        """Writes a single camera-view history entry, if there's anything
+        to report for it."""
+        if not view_changes:
+            return
+
+        action_type = "enabled" if view.is_on else "disabled"
+        orientation_label = view.orientation.capitalize() if view.orientation else "Unknown"
+
+        create_camera_history(
+            camera=camera,
+            user=self.request.user,
+            action_type=action_type,
+            category="Camera View",
+            description=f"{action_type.capitalize()} {orientation_label} view",
+            changes=view_changes,
+        )
+
     @transaction.atomic
     def perform_update(self, serializer):
         camera = self.get_object()
 
         # Capture Camera values BEFORE saving
-        old_values = {
-            "title": camera.title,
-            "description": camera.description,
-        }
+        old_values = {field: getattr(camera, field) for field in self._TRACKED_CAMERA_FIELDS}
 
         # Capture CameraView values BEFORE saving, keyed by id
         old_views = {
-            v.id: {
-                "is_on": v.is_on,
-                "disabled_reason": v.disabled_reason,
-                "disabled_short_description": v.disabled_short_description,
-                "disabled_long_description": v.disabled_long_description,
-            }
+            v.id: {field: getattr(v, field) for field in self._TRACKED_VIEW_FIELDS}
             for v in camera.views.all()
         }
 
         camera = serializer.save()
 
         # --- Camera-level diff ---
-        changes = {}
-
-        if old_values["title"] != camera.title:
-            changes["title"] = {
-                "old": old_values["title"],
-                "new": camera.title,
-            }
-
-        if old_values["description"] != camera.description:
-            changes["description"] = {
-                "old": old_values["description"],
-                "new": camera.description,
-            }
+        changes = self._diff_camera_fields(old_values, camera)
 
         if changes:
             create_camera_history(
@@ -218,35 +259,14 @@ class CameraViewSet(viewsets.ModelViewSet):
                 changes=changes,
             )
 
-        # --- CameraView-level diff  ---
+        # --- CameraView-level diff ---
         for view in camera.views.all():
             old = old_views.get(view.id)
             if old is None:
                 continue  # newly created view in this same PATCH — not a toggle event
 
-            view_changes = {}
-            for field in (
-                "is_on",
-                "disabled_reason",
-                "disabled_short_description",
-                "disabled_long_description",
-            ):
-                old_val = old[field]
-                new_val = getattr(view, field)
-                if old_val != new_val:
-                    view_changes[field] = {"old": old_val, "new": new_val}
-
-            if view_changes:
-                action_type = "disabled" if not view.is_on else "enabled"
-                orientation_label = view.orientation.capitalize() if view.orientation else "Unknown"
-                create_camera_history(
-                    camera=camera,
-                    user=self.request.user,
-                    action_type=action_type,
-                    category="Camera View",
-                    description=f"{action_type.capitalize()} {orientation_label} view",
-                    changes=view_changes,
-                )
+            view_changes = self._diff_view_fields(old, view)
+            self._record_view_change_history(camera, view, view_changes)
 
     @action(detail=True, methods=["get"], url_path="image-proxy")
     def image_proxy(self, request, pk=None):

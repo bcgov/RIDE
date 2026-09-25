@@ -17,7 +17,6 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
   const [draftName, setDraftName] = useState('');
 
   const [savingId, setSavingId] = useState(null);
-  const [saveError, setSaveError] = useState(null);
 
   const handleFieldChange = (id, field, value) => {
     const updatedViews = views.map((view) =>
@@ -58,7 +57,6 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
     if (!trimmed) return;
 
     setSavingId(viewId);
-    setSaveError(null);
 
     try {
       const response = await fetch(`/api/cameras/${cameraId}/`, {
@@ -95,7 +93,7 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
       setEditingId(null);
       setDraftName('');
     } catch (err) {
-      setSaveError('Could not save. Please try again.');
+      console.log('Could not save. Please try again.');
     } finally {
       setSavingId(null);
     }
