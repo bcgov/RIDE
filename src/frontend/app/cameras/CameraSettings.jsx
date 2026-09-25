@@ -81,7 +81,8 @@ const REPORT_FIELD_GROUPS = [
 
 const ALL_SETTINGS = [...SETTINGS, ...OTHER_SETTINGS];
 
-const SPECIAL_KEYS = ['report-fields', 'service-request-ccs', 'default-messaging', 'camera-order'];
+// const SPECIAL_KEYS = ['report-fields', 'service-request-ccs', 'default-messaging', 'camera-order'];
+const SPECIAL_KEYS = new Set(['report-fields', 'service-request-ccs', 'default-messaging', 'camera-order']);
 
 /* ------------------------------------------------------------------ *
  * Data hooks — one per settings section. Each owns its own state and
@@ -100,7 +101,7 @@ function useDbLookupSettings(selectedSetting) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const isActive = !SPECIAL_KEYS.includes(selectedSetting.key) && !!selectedSetting.endpoint;
+  const isActive = !SPECIAL_KEYS.has(selectedSetting.key) && !!selectedSetting.endpoint;
 
   useEffect(() => {
     if (!isActive) {

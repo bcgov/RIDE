@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClock,
@@ -20,6 +20,11 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    dialogRef.current?.showModal();
+  }, []);
 
   // Default timeframe: past 24 hours
   const now = new Date();
@@ -160,7 +165,20 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
     link.download = `camera-${camera?.id}-frame-${currentTimestamp}.jpg`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
+  };
+
+  // ESC key fires 'cancel' before the browser closes the dialog natively.
+  // Prevent that default and route the close through the parent instead.
+  const handleCancel = (event) => {
+    event.preventDefault();
+    onClose();
+  };
+
+  // A click landing on the <dialog> element itself (not a descendant)
+  // means it hit the backdrop area — treat that as "close".
+  const handleBackdropClick = (event) => {
+    if (event.target === dialogRef.current) onClose();
   };
 
   const viewOrientation = selectedView?.orientation || '';
@@ -169,127 +187,123 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
   }`;
 
   return (
-    <div className="modal-overlay">
-      <button 
-        type="button" 
-        className="modal-backdrop" 
-        aria-label="Close timelapse dialog" 
-        onClick={onClose} />
-      <div className="modal-content timelapse-modal" 
-        role="dialog" 
-        aria-modal="true" 
-        aria-labelledby="timelapse-modal" >
-        {/* HEADER */}
-        <div className="modal-header">
-          <FontAwesomeIcon icon={faClock} />
-          <h2>{modalTitle}</h2>
-          <button type="button" onClick={onClose} aria-label="Close modal">
-            <FontAwesomeIcon icon={faXmark} />
-          </button>
-        </div>
-
-        {/* 1. TIMEFRAME SELECTION */}
-        <div className="timelapse-timeframe">
-          <label>
-            Beginning:
-            <input
-              type="datetime-local"
-              value={beginTime}
-              onChange={(e) => setBeginTime(e.target.value)}
-            />
-          </label>
-          <label>
-            Ending:
-            <input
-              type="datetime-local"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-            />
-          </label>
-        </div>
-
-        {/* 2. DISPLAY PANE */}
-        <div className="timelapse-display">
-          {loading ? (
-            <div className="timelapse-placeholder">Loading timelapse...</div>
-          ) : error ? (
-            <div className="timelapse-placeholder">
-              <FontAwesomeIcon icon={faVideoSlash} />
-              <span>{error}</span>
-            </div>
-          ) : timestamps.length === 0 ? (
-            <div className="timelapse-placeholder">No timelapse frames available for this timeframe.</div>
-          ) : (
-            <>
-              <img src={currentImageUrl} alt={`Frame ${currentTimestamp}`} />
-              <div className="timestamp-overlay">
-                {formatTimestamp(currentTimestamp)}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* 3. SCRUBBER & CONTROLS */}
-        <div className="timelapse-controls">
-          <button
-            type="button"
-            className="ctrl-btn"
-            onClick={handlePrev}
-            disabled={currentIndex === 0 || loading}
-          >
-            <FontAwesomeIcon icon={faStepBackward} />
-          </button>
-
-          <button
-            type="button"
-            className="ctrl-btn play-btn"
-            onClick={() => setIsPlaying(!isPlaying)}
-            disabled={timestamps.length === 0 || loading}
-          >
-            <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
-          </button>
-
-          <button
-            type="button"
-            className="ctrl-btn"
-            onClick={handleNext}
-            disabled={currentIndex === timestamps.length - 1 || loading}
-          >
-            <FontAwesomeIcon icon={faStepForward} />
-          </button>
-
-          <input
-            type="range"
-            min="0"
-            max={timestamps.length > 0 ? timestamps.length - 1 : 0}
-            value={currentIndex}
-            onChange={(e) => setCurrentIndex(Number(e.target.value))}
-            disabled={timestamps.length === 0 || loading}
-            className="timelapse-scrubber"
-          />
-
-          <span className="frame-counter">
-            {timestamps.length > 0 ? `${currentIndex + 1} / ${timestamps.length}` : '0 / 0'}
-          </span>
-        </div>
-
-        {/* 4. ACTIONS */}
-        <div className="modal-actions">
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={handleSaveImages}
-            disabled={timestamps.length === 0}
-          >
-            <span>Save image</span>
-            <FontAwesomeIcon icon={faDownload} />
-          </button>
-          <button type="button" className="btn-text" onClick={onClose}>
-            <span>Cancel</span>
-            <FontAwesomeIcon icon={faXmark} />
-          </button>
-        </div>
+    <dialog
+      ref={dialogRef}
+      className="modal-content timelapse-modal"
+      aria-labelledby="timelapse-modal-title"
+      onCancel={handleCancel}
+      onClick={handleBackdropClick}
+    >
+      {/* HEADER */}
+      <div className="modal-header">
+        <FontAwesomeIcon icon={faClock} />
+        <h2 id="timelapse-modal-title">{modalTitle}</h2>
+        <button type="button" onClick={onClose} aria-label="Close modal">
+          <FontAwesomeIcon icon={faXmark} />
+        </button>
       </div>
-    </div>
+
+      {/* 1. TIMEFRAME SELECTION */}
+      <div className="timelapse-timeframe">
+        <label>
+          Beginning:
+          <input
+            type="datetime-local"
+            value={beginTime}
+            onChange={(e) => setBeginTime(e.target.value)}
+          />
+        </label>
+        <label>
+          Ending:
+          <input
+            type="datetime-local"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+          />
+        </label>
+      </div>
+
+      {/* 2. DISPLAY PANE */}
+      <div className="timelapse-display">
+        {loading ? (
+          <div className="timelapse-placeholder">Loading timelapse...</div>
+        ) : error ? (
+          <div className="timelapse-placeholder">
+            <FontAwesomeIcon icon={faVideoSlash} />
+            <span>{error}</span>
+          </div>
+        ) : timestamps.length === 0 ? (
+          <div className="timelapse-placeholder">No timelapse frames available for this timeframe.</div>
+        ) : (
+          <>
+            <img src={currentImageUrl} alt={`Frame ${currentTimestamp}`} />
+            <div className="timestamp-overlay">
+              {formatTimestamp(currentTimestamp)}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* 3. SCRUBBER & CONTROLS */}
+      <div className="timelapse-controls">
+        <button
+          type="button"
+          className="ctrl-btn"
+          onClick={handlePrev}
+          disabled={currentIndex === 0 || loading}
+        >
+          <FontAwesomeIcon icon={faStepBackward} />
+        </button>
+
+        <button
+          type="button"
+          className="ctrl-btn play-btn"
+          onClick={() => setIsPlaying(!isPlaying)}
+          disabled={timestamps.length === 0 || loading}
+        >
+          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+        </button>
+
+        <button
+          type="button"
+          className="ctrl-btn"
+          onClick={handleNext}
+          disabled={currentIndex === timestamps.length - 1 || loading}
+        >
+          <FontAwesomeIcon icon={faStepForward} />
+        </button>
+
+        <input
+          type="range"
+          min="0"
+          max={timestamps.length > 0 ? timestamps.length - 1 : 0}
+          value={currentIndex}
+          onChange={(e) => setCurrentIndex(Number(e.target.value))}
+          disabled={timestamps.length === 0 || loading}
+          className="timelapse-scrubber"
+        />
+
+        <span className="frame-counter">
+          {timestamps.length > 0 ? `${currentIndex + 1} / ${timestamps.length}` : '0 / 0'}
+        </span>
+      </div>
+
+      {/* 4. ACTIONS */}
+      <div className="modal-actions">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={handleSaveImages}
+          disabled={timestamps.length === 0}
+        >
+          <span>Save image</span>
+          <FontAwesomeIcon icon={faDownload} />
+        </button>
+        <button type="button" className="btn-text" onClick={onClose}>
+          <span>Cancel</span>
+          <FontAwesomeIcon icon={faXmark} />
+        </button>
+      </div>
+    </dialog>
   );
 }
