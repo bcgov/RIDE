@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import GeometryCollection, LineString, Point
 from django.test import TestCase, override_settings
+from allauth.socialaccount.models import SocialAccount
 from requests.exceptions import ConnectionError
 from rest_framework.exceptions import ValidationError
 
@@ -176,6 +177,20 @@ class TestOpen511Sync(TestCase):
         for evt, event in zip(expected["events"], (e1, e2)):
             evt["schedule"] = build_open511_schedule(event)
         assert self._normalize(payload) == expected
+
+    def test_payload_uses_username_from_social_account_claims(self):
+        event = self._approved_event()
+        SocialAccount.objects.create(
+            user=self.user,
+            provider="keycloak",
+            uid="oidc-user-1",
+            extra_data={"userinfo": {"idir_username": "testuser"}},
+        )
+
+        with override_settings(EVENT_PREFIX="TEST"):
+            payload = build_event_payload(event)
+
+        self.assertEqual(payload["last_update_userid"], "TEST_testuser")
 
     def test_failed_sync_increments_failure_counter(self):
         event = self._approved_event()
