@@ -563,7 +563,6 @@ export default function CameraDetails({ onBack }) {
           supplySerial: data.supply_serial,
           connectionIpAddress: data.connection_ip_address,
           connectionPort: data.connection_port,
-          onDemand: data.on_demand,
         });
 
         const newBasics = {
@@ -597,9 +596,6 @@ export default function CameraDetails({ onBack }) {
           communicationDevice: data.communication_device?.id ?? data.communication_device_id ?? '',
           antenna: data.antenna?.id ?? data.antenna_id ?? '',
           serviceProvider: data.service_provider?.id ?? data.service_provider_id ?? '',
-          cameraInstalled: data.camera_installed,
-          cameraLastInspected: data.camera_last_inspected,
-          modemInstalled: data.modem_installed,
           updateFrequency: data.update_frequency,
           macAddress: data.mac_address,
           username: data.username,
@@ -611,7 +607,6 @@ export default function CameraDetails({ onBack }) {
           supplySerial: data.supply_serial,
           connectionIpAddress: data.connection_ip_address,
           connectionPort: data.connection_port,
-          onDemand: data.on_demand,
         };
 
         const newViews = data.views?.length
@@ -997,7 +992,6 @@ export default function CameraDetails({ onBack }) {
                 }
                 onKeyDown={handleCameraNameKeyDown}
                 onBlur={() => setIsEditingName(false)}
-                autoFocus
                 disabled={isSavingName}
               />
             ) : (
@@ -1061,19 +1055,18 @@ export default function CameraDetails({ onBack }) {
                   <div className="flyout-section">
                     <span className="flyout-title">More</span>
 
-                    <a
-                      href="#"
+                    <button
+                      type="button"
                       className="flyout-item"
-                      aria-label="Edit title"
-                      onClick={(e) => {
-                        e.preventDefault();
+                      aria-label="Edit location name"
+                      onClick={() => {
                         setCameraName(basicsData.title || '');
                         setIsEditingName(true);
                       }}
                     >
                       <FontAwesomeIcon icon={faPenToSquare} className="item-icon" />
                       <span>Edit location name</span>
-                    </a>
+                    </button>
 
                     <a
                       href="https://timelapse.drivebc.ca"

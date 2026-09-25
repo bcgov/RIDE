@@ -452,11 +452,6 @@
     }
 
     .form-footer {
-      // padding: 16px 24px;
-      // border-top: 1px solid #e2e8f0;
-      // display: flex;
-      // justify-content: flex-end;
-
       display: flex;
       align-items: center;
       gap: 16px;
@@ -1373,9 +1368,6 @@ html {
   }
 }
 
-.view-card-image {
-  position: relative; // required so .camera-off-badge can be absolutely positioned inside it
-}
 
 .view-card-image--off img {
   filter: grayscale(70%) brightness(0.9);

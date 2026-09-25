@@ -17,8 +17,16 @@ export default function ExportReportModal({ onClose, onConfirm }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="export-report-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <button 
+        type="button" 
+        className="modal-backdrop" 
+        aria-label="Close export report dialog" 
+        onClick={onClose} />
+      <div className="export-report-modal" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="export-report-modal" >
         <div className="modal-header">
           <FontAwesomeIcon icon={faFileLines} />
           <h2>Export camera report</h2>

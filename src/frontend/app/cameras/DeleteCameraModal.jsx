@@ -17,8 +17,16 @@ export default function DeleteCameraModal({ onClose, onConfirm }) {
   };
 
   return createPortal(
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="delete-camera-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <button 
+        type="button" 
+        className="modal-backdrop" 
+        aria-label="Close delete camera dialog" 
+        onClick={onClose} />
+      <div className="delete-camera-modal" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="delete-camera-title" >
         <div className="modal-header">
           <FontAwesomeIcon icon={faTrash} />
           <h2>Delete camera?</h2>

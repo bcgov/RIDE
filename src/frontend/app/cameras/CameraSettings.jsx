@@ -143,14 +143,10 @@ export default function CameraSettings() {
     );
   }, [normalizedQuery]);
 
-  // Distinct regions derived from the cameras that have been fetched.
-  // `list` guards against `cameras` ever being a non-array (e.g. a
-  // paginated `{results: [...]}` or wrapped `{cameras: [...]}` response
-  // slipping through) so this never throws.
   const cameraRegions = useMemo(() => {
     const list = Array.isArray(cameras) ? cameras : [];
     const regions = new Set(list.map((cam) => cam.region?.name).filter(Boolean));
-    return Array.from(regions).sort();
+    return Array.from(regions).sort((a, b) => a.localeCompare(b));
   }, [cameras]);
 
   // Cameras for the selected region, grouped by road and sorted by display_order
@@ -896,7 +892,6 @@ export default function CameraSettings() {
                           <input
                             type="text"
                             value={editingCcName}
-                            autoFocus
                             onChange={(event) => setEditingCcName(event.target.value)}
                           />
                         </div>
@@ -1211,7 +1206,6 @@ export default function CameraSettings() {
                         <input
                           type="text"
                           value={editingName}
-                          autoFocus
                           onChange={(event) => setEditingName(event.target.value)}
                           onKeyDown={(event) => handleEditingKeyDown(event, item.id)}
                         />

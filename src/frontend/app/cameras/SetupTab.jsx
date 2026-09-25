@@ -480,7 +480,7 @@ export default function SetupTab({ setupData, onChange }) {
                       className="link-btn"
                       onClick={() => {/* trigger your password-reset flow here */}}
                     >
-                      <a>New password</a>
+                      <span className="link-style">New password</span>
                     </button>
                   </div>
                 </div>

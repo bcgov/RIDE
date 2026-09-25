@@ -135,7 +135,6 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
                     className="direction-title-input"
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
-                    autoFocus
                     aria-label={`Edit ${displayTitle} direction name`}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') saveEditing(id, camera_id);

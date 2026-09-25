@@ -59,8 +59,16 @@ export default function DisableViewModal({ view, camera, onClose, onConfirm }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="disable-view-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <button 
+        type="button" 
+        className="modal-backdrop" 
+        aria-label="Close disable view dialog" 
+        onClick={onClose} />
+      <div className="disable-view-modal" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="disable-view-modal" >
         <div className="modal-header">
           <FontAwesomeIcon icon={faVideoSlash} />
           <h2>Disable view visibility</h2>

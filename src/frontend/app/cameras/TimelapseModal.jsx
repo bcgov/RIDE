@@ -39,12 +39,12 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
   // Parses "YYYYMMDDHHmmss" string into a JS Date object
     const parseApiTimestamp = (ts) => {
     if (!ts || ts.length < 14) return null;
-    const year = parseInt(ts.slice(0, 4), 10);
-    const month = parseInt(ts.slice(4, 6), 10) - 1; // JS months are 0-indexed
-    const day = parseInt(ts.slice(6, 8), 10);
-    const hours = parseInt(ts.slice(8, 10), 10);
-    const mins = parseInt(ts.slice(10, 12), 10);
-    const secs = parseInt(ts.slice(12, 14), 10);
+    const year = Number.parseInt(ts.slice(0, 4), 10);
+    const month = Number.parseInt(ts.slice(4, 6), 10) - 1; // JS months are 0-indexed
+    const day = Number.parseInt(ts.slice(6, 8), 10);
+    const hours = Number.parseInt(ts.slice(8, 10), 10);
+    const mins = Number.parseInt(ts.slice(10, 12), 10);
+    const secs = Number.parseInt(ts.slice(12, 14), 10);
     return new Date(year, month, day, hours, mins, secs);
     };
 
@@ -169,8 +169,16 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
   }`;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content timelapse-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <button 
+        type="button" 
+        className="modal-backdrop" 
+        aria-label="Close timelapse dialog" 
+        onClick={onClose} />
+      <div className="modal-content timelapse-modal" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="timelapse-modal" >
         {/* HEADER */}
         <div className="modal-header">
           <FontAwesomeIcon icon={faClock} />

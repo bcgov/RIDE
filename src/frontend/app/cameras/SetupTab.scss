@@ -160,7 +160,6 @@
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 40px;
-    background-position: right 12px center;
     background-size: 20px 20px;
     cursor: pointer;
   }
@@ -201,4 +200,10 @@
       }
     }
   }
+}
+
+.link-style {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
 }
