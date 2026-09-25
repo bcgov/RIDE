@@ -14,7 +14,7 @@ from apps.organizations.models import ServiceArea
 class TestOpen511Sync(TestCase):
     def setUp(self):
         super().setUp()
-        base = Path(__file__).parent / "test_data"
+        base = Path(__file__).parents[1] / "test_data"
 
         self.patch_payload = json.loads((base / "patch_1_event.json").read_text())
         self.post_payload = json.loads((base / "post_2_new_events.json").read_text())
@@ -67,6 +67,7 @@ class TestOpen511Sync(TestCase):
             status=status,
             severity=severity,
             category="Road Maintenance" if "ROAD_MAINTENANCE" in payload["event_subtypes"] else "Collision",
+            situation=situation,
             direction={
                 "E": "Eastbound",
                 "W": "Westbound",
@@ -129,7 +130,11 @@ class TestOpen511Sync(TestCase):
         sa2 = ServiceArea.objects.create(id=2, name="Thompson-Nicola", sortingOrder=2, parent=None)
 
         e1 = self._make_event(self.post_payload["events"][0], sa1)
-        e2 = self._make_event(self.post_payload["events"][1], sa2)
+        e2 = self._make_event(
+            self.post_payload["events"][1],
+            sa2,
+            situation=Situation.ROAD_MAINTENANCE,
+        )
 
         payload = {"events": [build_event_payload(e1), build_event_payload(e2)]}
 
