@@ -9,6 +9,7 @@ from prometheus_client import Counter
 from rest_framework.exceptions import ValidationError
 from timezonefinder import TimezoneFinder
 tz_finder = TimezoneFinder(in_memory=True)
+from config.adapter import get_oidc_claims
 
 from apps.events.enums import EVENT_SUBTYPE_GROUPS, Severity, Status, EventType, SITUATION_LOOKUP, EventSubtype
 from apps.events.roads import roads
@@ -356,12 +357,14 @@ def build_event_description(event, ivr=False):
 
 def get_username(target_event):
     prefix = getattr(settings, 'EVENT_PREFIX', 'RIDE') + '_'
-    suffix = target_event.user.first_name + " " + target_event.user.last_name
+    suffix = f"{target_event.user.first_name} {target_event.user.last_name}".strip()
 
     social_account = SocialAccount.objects.filter(user=target_event.user).first()
     if social_account:
-        suffix = social_account.extra_data['bceid_username'] if 'bceid_username' in social_account.extra_data \
-            else social_account.extra_data['idir_username']
+        claims = get_oidc_claims(social_account)
+        username = claims.get('bceid_username') or claims.get('idir_username')
+        if username:
+            suffix = username
 
     return prefix + suffix
 

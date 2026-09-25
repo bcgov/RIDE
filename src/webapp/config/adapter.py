@@ -19,7 +19,7 @@ class RideAdapter(DefaultAccountAdapter):
         return HttpResponseRedirect(settings.FRONTEND_BASE_URL + '?inactive=true')
 
 
-def get_oidc_claims(sociallogin):
+def get_oidc_claims(sociallogin_or_account):
     """
     Normalize SocialAccount.extra_data across allauth versions.
 
@@ -28,7 +28,8 @@ def get_oidc_claims(sociallogin):
     Older accounts (created pre-upgrade) still have the flat structure.
     This returns a flat dict of claims regardless of which shape is present.
     """
-    extra_data = sociallogin.account.extra_data or {}
+    account = getattr(sociallogin_or_account, 'account', sociallogin_or_account)
+    extra_data = account.extra_data or {}
 
     if 'userinfo' in extra_data or 'id_token' in extra_data:
         claims = {}
