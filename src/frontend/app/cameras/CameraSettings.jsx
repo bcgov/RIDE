@@ -81,8 +81,7 @@ const REPORT_FIELD_GROUPS = [
 
 const ALL_SETTINGS = [...SETTINGS, ...OTHER_SETTINGS];
 
-// const SPECIAL_KEYS = ['report-fields', 'service-request-ccs', 'default-messaging', 'camera-order'];
-const SPECIAL_KEYS = new Set(['report-fields', 'service-request-ccs', 'default-messaging', 'camera-order']);
+const SPECIAL_KEYS = ['report-fields', 'service-request-ccs', 'default-messaging', 'camera-order'];
 
 /* ------------------------------------------------------------------ *
  * Data hooks — one per settings section. Each owns its own state and
@@ -101,7 +100,7 @@ function useDbLookupSettings(selectedSetting) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const isActive = !SPECIAL_KEYS.has(selectedSetting.key) && !!selectedSetting.endpoint;
+  const isActive = !SPECIAL_KEYS.includes(selectedSetting.key) && !!selectedSetting.endpoint;
 
   useEffect(() => {
     if (!isActive) {
@@ -372,7 +371,11 @@ function useServiceRequestCcsSettings(isActive) {
           throw new Error(`Failed to load Service Request CCs: ${response.status}`);
         }
         const data = await response.json();
-        setServiceRequestCcs(data.service_request_ccs ?? []);
+        const withIds = (data.service_request_ccs ?? []).map((cc) => ({
+          ...cc,
+          id: cc.id ?? crypto.randomUUID(),
+        }));
+        setServiceRequestCcs(withIds);
       } catch (err) {
         console.error('Failed to load Service Request CCs:', err);
         setError(err.message);
@@ -411,7 +414,7 @@ function useServiceRequestCcsSettings(isActive) {
     const email = newCcEmail.trim();
     if (!name || !email) return;
 
-    setServiceRequestCcs((prev) => [...prev, { name, email }]);
+    setServiceRequestCcs((prev) => [...prev, { id: crypto.randomUUID(), name, email }]);
     setNewCcName('');
     setNewCcEmail('');
   };
@@ -436,7 +439,11 @@ function useServiceRequestCcsSettings(isActive) {
       }
 
       const data = await response.json();
-      setServiceRequestCcs(data.service_request_ccs ?? []);
+      const withIds = (data.service_request_ccs ?? []).map((cc) => ({
+        ...cc,
+        id: cc.id ?? crypto.randomUUID(),
+      }));
+      setServiceRequestCcs(withIds);
     } catch (err) {
       console.error('Failed to save Service Request CCs:', err);
       setError(err.message);
@@ -970,7 +977,7 @@ function ServiceRequestCcsView({ ccs }) {
 
         {!loading &&
           !error &&
-          serviceRequestCcs.map((cc, index) => <ServiceRequestCcsRow key={index} cc={cc} index={index} ccs={ccs} />)}
+          serviceRequestCcs.map((cc, index) => <ServiceRequestCcsRow key={cc.id} cc={cc} index={index} ccs={ccs} />)}
 
         {!loading && !error && (
           <div className="settings-add-row">
@@ -1378,4 +1385,3 @@ export default function CameraSettings() {
     </div>
   );
 }
-

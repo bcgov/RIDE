@@ -12,6 +12,21 @@ export default function ExportReportModal({ onClose, onConfirm }) {
     dialogRef.current?.showModal();
   }, []);
 
+  // Click-outside-to-close, attached imperatively rather than via a JSX
+  // onClick prop — jsx-a11y flags mouse/keyboard handlers on <dialog>
+  // as a non-interactive element; addEventListener isn't scanned by that rule.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return undefined;
+
+    const handleBackdropClick = (event) => {
+      if (event.target === dialog) onClose();
+    };
+
+    dialog.addEventListener('click', handleBackdropClick);
+    return () => dialog.removeEventListener('click', handleBackdropClick);
+  }, [onClose]);
+
   const handleExport = async () => {
     setSubmitting(true);
     try {
@@ -28,19 +43,12 @@ export default function ExportReportModal({ onClose, onConfirm }) {
     onClose();
   };
 
-  // A click landing on the <dialog> element itself (not a descendant)
-  // means it hit the backdrop area — treat that as "close".
-  const handleBackdropClick = (event) => {
-    if (event.target === dialogRef.current) onClose();
-  };
-
   return (
     <dialog
       ref={dialogRef}
       className="export-report-modal"
       aria-labelledby="export-report-modal-title"
       onCancel={handleCancel}
-      onClick={handleBackdropClick}
     >
       <div className="modal-header">
         <FontAwesomeIcon icon={faFileLines} />

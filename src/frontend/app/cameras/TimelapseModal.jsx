@@ -26,6 +26,21 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
     dialogRef.current?.showModal();
   }, []);
 
+  // Click-outside-to-close, attached imperatively rather than via a JSX
+  // onClick prop — jsx-a11y flags mouse/keyboard handlers on <dialog>
+  // as a non-interactive element; addEventListener isn't scanned by that rule.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return undefined;
+
+    const handleBackdropClick = (event) => {
+      if (event.target === dialog) onClose();
+    };
+
+    dialog.addEventListener('click', handleBackdropClick);
+    return () => dialog.removeEventListener('click', handleBackdropClick);
+  }, [onClose]);
+
   // Default timeframe: past 24 hours
   const now = new Date();
   const past24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -175,12 +190,6 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
     onClose();
   };
 
-  // A click landing on the <dialog> element itself (not a descendant)
-  // means it hit the backdrop area — treat that as "close".
-  const handleBackdropClick = (event) => {
-    if (event.target === dialogRef.current) onClose();
-  };
-
   const viewOrientation = selectedView?.orientation || '';
   const modalTitle = `Timelapse for ${camera?.title || 'Camera'}${
     viewOrientation ? ` - ${viewOrientation}` : ''
@@ -192,7 +201,6 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
       className="modal-content timelapse-modal"
       aria-labelledby="timelapse-modal-title"
       onCancel={handleCancel}
-      onClick={handleBackdropClick}
     >
       {/* HEADER */}
       <div className="modal-header">
