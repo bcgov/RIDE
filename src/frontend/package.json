@@ -26,7 +26,7 @@
     "@fortawesome/react-fontawesome": "^3.3.0",
     "@headlessui/react": "^2.2.9",
     "@react-router/dev": "^7.5.3",
-    "@react-router/node": "^7.5.3",
+    "@react-router/node": "^7.9.4",
     "@react-router/serve": "^7.5.3",
     "@reduxjs/toolkit": "^2.11.2",
     "@turf/turf": "^7.2.0",
