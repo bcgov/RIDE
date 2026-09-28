@@ -1,6 +1,7 @@
 from django.contrib.gis.geos import LineString, MultiLineString, Point
 from django.core.management.base import BaseCommand
 import requests
+import sys
 
 from apps.events.hwy_coords import hwy_coords
 from apps.events.models import RouteGeometry
@@ -23,6 +24,11 @@ def build_route_geometries():
     along their route
 
     """
+    # Skip network calls during test suite execution
+    if "test" in sys.argv:
+        print("Skipping route geometry generation during test execution.")
+        return
+
     for key, routes in hwy_coords.items():
         ls_routes = []
 
