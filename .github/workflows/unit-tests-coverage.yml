@@ -54,6 +54,7 @@ jobs:
           pip install coverage
 
       - name: Run Tests
+        working-directory: ./src/webapp
         env:
           SECRET_KEY: testvar
           DEBUG: False
@@ -77,7 +78,9 @@ jobs:
           REDIS_PORT: 6379
           ROUTE_PLANNER_API_URL: http://route-mock:8080
           ROUTE_PLANNER_API_KEY: test-key
+          OPEN511_API_URL: http://open511-mock:8080
+          OPEN511_API_KEY: test-key
         run: |
-          coverage run ./src/webapp/manage.py test --noinput
+          coverage run manage.py test --noinput
           coverage report
           coverage xml
