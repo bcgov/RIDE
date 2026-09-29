@@ -112,7 +112,7 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
 
   // Prioritize Highway name with number
   const routeNumber = props?.HIGHWAY_ROUTE_NUMBER?.split('+')[0];
-  let name = routeNumber ? `Hwy ${routeNumber}` : props?.ROAD_NAME_FULL;
+  let name = (routeNumber && props?.ROAD_CLASS !== 'ramp') ? `Highway ${routeNumber}` : props?.ROAD_NAME_FULL;
 
   aliases = aliases.filter((alias) => alias !== name);
 
