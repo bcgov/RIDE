@@ -112,11 +112,6 @@ export default function Layout() {
     return { loginStateKnown: false };
   }
 
-  const has_organization = authContext.loginStateKnown && !authContext.request_organization;
-  const showUsersLink = has_organization && authContext.is_superuser && has_organization;
-  const showRoadConditionsLink = has_organization;
-  const showChainUpsLink = has_organization && authContext.is_approver;
-
   /* Rendering */
   // Main component
   return (
@@ -128,15 +123,13 @@ export default function Layout() {
           <>
             <NavLink to="/events/">Events</NavLink>
 
-            { showUsersLink &&
+            {authContext.is_superuser &&
               <NavLink to="/users/">Users</NavLink>
             }
 
-            { showRoadConditionsLink &&
-              <NavLink to="/segments/">Road Conditions</NavLink>
-            }
+            <NavLink to="/segments/">Road Conditions</NavLink>
 
-            { showChainUpsLink &&
+            {authContext.is_approver &&
               <NavLink to="/chainups/">Chain-Ups</NavLink>
             }
           </>

@@ -38,8 +38,6 @@ class Command(BaseCommand):
                             help='Set superuser flag to false')
         parser.add_argument('-c', '--clear-requests', action='store_true',
                             help='Remove user requests')
-        parser.add_argument('-o', '--clear-organizations', action='store_true',
-                            help='Remove user from all organizations')
 
     def handle(self, *args, **options):
 
@@ -84,9 +82,6 @@ class Command(BaseCommand):
         if options['clear_requests']:
             num, _ = user.request_set.all().delete()
             print(f'{num} requests deleted')
-
-        if options['clear_organizations']:
-            user.organizations.clear()
 
         if options['details']:
             groups = [group.name for group in user.groups.all()]
