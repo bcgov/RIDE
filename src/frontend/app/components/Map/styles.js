@@ -63,10 +63,10 @@ export const lineStyle2 = new Style({
 export const pinStartNormalStyle = new Style({
   image: new Icon({
     src:'/pin-start.svg',
-    width: 28,
-    height: 28,
-    opacity: 1,
-    displacement: [0, 0],
+    width: 32,
+    height: 32,
+    opacity: 0.7,
+    displacement: [0, 16],
   }),
 });
 
@@ -76,17 +76,17 @@ export const pinStartHoverStyle = new Style({
     width: 32,
     height: 32,
     opacity: 1,
-    displacement: [0, 0],
+    displacement: [0, 16],
   }),
 });
 
 export const pinStartActiveStyle = new Style({
   image: new Icon({
     src:'/pin-start.svg',
-    width: 30,
-    height: 30,
-    opacity: 1,
-    displacement: [0, 0],
+    width: 32,
+    height: 32,
+    opacity: 0.9,
+    displacement: [0, 16],
   }),
 });
 
@@ -123,10 +123,10 @@ export const pinLocationActiveStyle = new Style({
 export const pinEndNormalStyle = new Style({
   image: new Icon({
     src:'/pin-end.svg',
-    width: 28,
-    height: 28,
-    opacity: 1,
-    displacement: [0, 14],
+    width: 32,
+    height: 32,
+    opacity: 0.7,
+    displacement: [0, 16],
   }),
 });
 
@@ -143,10 +143,10 @@ export const pinEndHoverStyle = new Style({
 export const pinEndActiveStyle = new Style({
   image: new Icon({
     src:'/pin-end.svg',
-    width: 30,
-    height: 30,
-    opacity: 1,
-    displacement: [0, 15],
+    width: 32,
+    height: 32,
+    opacity: 0.9,
+    displacement: [0, 16],
   }),
 });
 
