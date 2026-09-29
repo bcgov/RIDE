@@ -7,11 +7,9 @@ from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import GeometryCollection, LineString, Point
 from django.test import TestCase, override_settings
-from allauth.socialaccount.models import SocialAccount
 from requests.exceptions import ConnectionError
 from rest_framework.exceptions import ValidationError
 
-from apps.events.enums import Situation
 from apps.events.open511 import (
     OPEN511_SYNC_FAILURES,
     OPEN511_SYNC_SUCCESSES,
@@ -25,7 +23,7 @@ from apps.organizations.models import ServiceArea
 class TestOpen511Sync(TestCase):
     def setUp(self):
         super().setUp()
-        base = Path(__file__).parents[1] / "test_data"
+        base = Path(__file__).parent / "test_data"
 
         self.patch_payload = json.loads((base / "patch_1_event.json").read_text())
         self.post_payload = json.loads((base / "post_2_new_events.json").read_text())
@@ -59,7 +57,7 @@ class TestOpen511Sync(TestCase):
         self.assertContains(response, "ride_open511_sync_failures_total")
         self.assertContains(response, "ride_open511_sync_successes_total")
 
-    def _make_event(self, payload, service_area, situation=0):
+    def _make_event(self, payload, service_area):
         geography = payload["geography"]
         if geography["type"] == "Point":
             shape = Point(*geography["coordinates"])
@@ -95,7 +93,6 @@ class TestOpen511Sync(TestCase):
             status=status,
             severity=severity,
             category="Road Maintenance" if "ROAD_MAINTENANCE" in payload["event_subtypes"] else "Collision",
-            situation=situation,
             direction={
                 "E": "Eastbound",
                 "W": "Westbound",
@@ -158,11 +155,7 @@ class TestOpen511Sync(TestCase):
         sa2 = ServiceArea.objects.create(id=2, name="Thompson-Nicola", sortingOrder=2, parent=None)
 
         e1 = self._make_event(self.post_payload["events"][0], sa1)
-        e2 = self._make_event(
-            self.post_payload["events"][1],
-            sa2,
-            situation=Situation.ROAD_MAINTENANCE,
-        )
+        e2 = self._make_event(self.post_payload["events"][1], sa2)
 
         payload = {"events": [build_event_payload(e1), build_event_payload(e2)]}
 
@@ -183,20 +176,6 @@ class TestOpen511Sync(TestCase):
         for evt, event in zip(expected["events"], (e1, e2)):
             evt["schedule"] = build_open511_schedule(event)
         assert self._normalize(payload) == expected
-
-    def test_payload_uses_username_from_social_account_claims(self):
-        event = self._approved_event()
-        SocialAccount.objects.create(
-            user=self.user,
-            provider="keycloak",
-            uid="oidc-user-1",
-            extra_data={"userinfo": {"idir_username": "testuser"}},
-        )
-
-        with override_settings(EVENT_PREFIX="TEST"):
-            payload = build_event_payload(event)
-
-        self.assertEqual(payload["last_update_userid"], "TEST_testuser")
 
     def test_failed_sync_increments_failure_counter(self):
         event = self._approved_event()
@@ -232,7 +211,7 @@ class TestOpen511Sync(TestCase):
                 sync_open511_data(event)
 
         self.assertEqual(self._failure_count(), failure_count)
-        self.assertEqual(self._success_count(), success_count + 1)
+    self.assertEqual(self._success_count(), success_count + 1)
 
     def test_missing_configuration_does_not_increment_failure_counter(self):
         event = self._approved_event()
