@@ -231,6 +231,7 @@ export default function EventsLayer({ event, dispatch }) {
                 isVisible: true,
                 cursor: 'grab',
                 canDrag: true,
+                ignorePreview: true,
               });
               map.pins.getSource().addFeature(map.start);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -249,6 +250,7 @@ export default function EventsLayer({ event, dispatch }) {
                 isVisible: true,
                 cursor: 'grab',
                 canDrag: true,
+                ignorePreview: true,
               });
               map.pins.getSource().addFeature(map.start);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -267,6 +269,7 @@ export default function EventsLayer({ event, dispatch }) {
                 isVisible: true,
                 cursor: 'grab',
                 canDrag: true,
+                ignorePreview: true,
               });
               map.pins.getSource().addFeature(map.start);
               map.getView().animate({ center: coordinate, duration: 250, easing: linear });
@@ -278,7 +281,7 @@ export default function EventsLayer({ event, dispatch }) {
       } else if (!event.location.end?.name && event.showForm) {
         items.push({
           label: 'Add end point',
-          action: (e) => {
+          action: () => {
             setContextMenu([]);
             map.end = new PinFeature({
               style: 'end',
@@ -287,6 +290,7 @@ export default function EventsLayer({ event, dispatch }) {
               isVisible: true,
               cursor: 'grab',
               canDrag: true,
+              ignorePreview: true,
             });
             map.pins.getSource().addFeature(map.end);
             map.getView().animate({ center: coordinate, duration: 250, easing: linear });
