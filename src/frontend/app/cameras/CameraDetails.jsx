@@ -10,9 +10,6 @@ import {
   faRedo,
   faExpand,
   faCircleCheck,
-  faMagnifyingGlass,
-  faChevronDown,
-  faChevronRight,
   faArrowUpRight,
   faCloudSun,
   faBolt,
@@ -29,6 +26,16 @@ import ViewsTab from './ViewsTab.jsx';
 import NotesTab from './NotesTab.jsx';
 import LogsTab from './LogsTab.jsx';
 import HistoryTab from './HistoryTab.jsx';
+import Button from '../components/shared/Button.jsx';
+import Flyout, { FlyoutItem, FlyoutSection } from '../components/shared/Flyout.jsx';
+import Sidebar, {
+  SidebarAccordion,
+  SidebarGroup,
+  SidebarItem,
+  SidebarLayout,
+  SidebarNav,
+  SidebarSearch,
+} from '../components/shared/Sidebar.jsx';
 import './CameraDetails.scss';
 import DeleteCameraModal from './DeleteCameraModal.jsx';
 import Toast from './Toast.jsx';
@@ -893,89 +900,49 @@ export default function CameraDetails({ onBack }) {
   }, [camera, currentView]);
 
   return (
-    <div className="camera-details-layout">
-      {!isExpandedView && (
-        <aside className="camera-nav-panel">
-          <div className="search-box">
-            <FontAwesomeIcon icon={faMagnifyingGlass} className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+    <>
+      <SidebarLayout
+        sidebar={!isExpandedView && (
+          <Sidebar backTo="/cameras/">
+            <SidebarSearch value={searchQuery} onChange={setSearchQuery} />
 
-          <div className="hierarchy-tree">
-            {Object.entries(cameraHierarchy).map(([regionName, highways]) => {
-              const isRegionExpanded = expandedRegions[regionName] ?? true;
+            <SidebarNav>
+              {Object.entries(cameraHierarchy).map(([regionName, highways]) => (
+                <SidebarGroup
+                  key={regionName}
+                  title={regionName}
+                  open={expandedRegions[regionName] ?? true}
+                  onToggle={() => toggleRegion(regionName)}
+                >
+                  {Object.entries(highways).map(([highwayName, cameras]) => {
+                    if (cameras.length === 0) return null;
+                    const hwyKey = `${regionName}-${highwayName}`;
 
-              return (
-                <div key={regionName} className="region-group">
-                  <button
-                    type="button"
-                    className="region-header"
-                    onClick={() => toggleRegion(regionName)}
-                  >
-                    <span>{regionName}</span>
-                    <FontAwesomeIcon
-                      icon={isRegionExpanded ? faChevronDown : faChevronRight}
-                    />
-                  </button>
-
-                  {isRegionExpanded && (
-                    <div className="region-content">
-                      {Object.entries(highways).map(([highwayName, cameras]) => {
-                        if (cameras.length === 0) return null;
-                        const hwyKey = `${regionName}-${highwayName}`;
-                        const isHighwayExpanded = expandedHighways[hwyKey] ?? true;
-
-                        return (
-                          <div key={hwyKey} className="highway-group">
-                            <button
-                              type="button"
-                              className="highway-header"
-                              onClick={() => toggleHighway(hwyKey)}
-                            >
-                              <span>{highwayName}</span>
-                              <FontAwesomeIcon
-                                icon={isHighwayExpanded ? faChevronDown : faChevronRight}
-                              />
-                            </button>
-
-                            {isHighwayExpanded && (
-                              <ul className="camera-list">
-                                {cameras.map((item) => {
-                                  const isSelected = String(item.id) === String(id);
-                                  return (
-                                    <li
-                                      key={item.id}
-                                      className={`camera-item ${isSelected ? 'selected' : ''}`}
-                                    >
-                                      <button
-                                        type="button"
-                                        className="camera-item-button"
-                                        onClick={() => navigate(`/cameras/${item.id}`)}
-                                      >
-                                        {item.title}
-                                      </button>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </aside>
-      )}
-
+                    return (
+                      <SidebarAccordion
+                        key={hwyKey}
+                        title={highwayName}
+                        open={expandedHighways[hwyKey] ?? true}
+                        onToggle={() => toggleHighway(hwyKey)}
+                      >
+                        {cameras.map((item) => (
+                          <SidebarItem
+                            key={item.id}
+                            selected={String(item.id) === String(id)}
+                            onClick={() => navigate(`/cameras/${item.id}`)}
+                          >
+                            {item.title}
+                          </SidebarItem>
+                        ))}
+                      </SidebarAccordion>
+                    );
+                  })}
+                </SidebarGroup>
+              ))}
+            </SidebarNav>
+          </Sidebar>
+        )}
+      >
       <div className="camera-details-container">
         <header className="details-header">
           <div className="title-section">
@@ -1006,99 +973,89 @@ export default function CameraDetails({ onBack }) {
           </div>
 
           <div className="actions-toolbar">
-            <button
-              type="button"
-              className="btn-secondary btn-service"
+            <Button
+              variant="secondary"
               onClick={() => {
                 setIsServiceRequestModalOpen(true);
                 setServiceRequestCamera(camera);
               }}
             >
               <FontAwesomeIcon icon={faBellConcierge} />
-              <span>Request service</span>
-            </button>
+              Request service
+            </Button>
 
             {driveBCWebcamId && (
-              <a
+              <Button
+                variant="tertiary"
                 href={`https://drivebc.ca/cameras/${driveBCWebcamId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-text btn-view-drivebc"
               >
                 <FontAwesomeIcon icon={faArrowUpRight} />
-                <span>View on DriveBC</span>
-              </a>
+                View on DriveBC
+              </Button>
             )}
 
-            <button
-              type="button"
-              className="btn-text btn-delete"
+            <Button
+              variant="danger"
               aria-label="Delete camera location"
               onClick={() => setIsDeleteModalOpen(true)}
             >
               <FontAwesomeIcon icon={faTrashCan} />
-              <span>Delete location</span>
-            </button>
+              Delete location
+            </Button>
 
             <div className="context-menu-wrapper" ref={menuRef}>
-              <button
-                type="button"
-                className="circle-action-btn"
+              <Button
+                variant="icon"
+                outlined
                 onClick={() => setIsMenuOpen((prev) => !prev)}
                 aria-label="More options"
                 aria-expanded={isMenuOpen}
               >
                 <FontAwesomeIcon icon={faEllipsisVertical} />
-              </button>
+              </Button>
               {isMenuOpen && (
-                <div className="context-flyout">
-                  <div className="flyout-section">
-                    <span className="flyout-title">More</span>
-
-                    <button
-                      type="button"
-                      className="flyout-item"
+                <Flyout>
+                  <FlyoutSection title="More">
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faPenToSquare} />}
                       aria-label="Edit location name"
                       onClick={() => {
                         setCameraName(basicsData.title || '');
                         setIsEditingName(true);
                       }}
                     >
-                      <FontAwesomeIcon icon={faPenToSquare} className="item-icon" />
-                      <span>Edit location name</span>
-                    </button>
+                      Edit location name
+                    </FlyoutItem>
 
-                    <a
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faClock} />}
                       href="https://timelapse.drivebc.ca"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flyout-item"
                     >
-                      <FontAwesomeIcon icon={faClock} className="item-icon" />
-                      <span>Timelapse</span>
-                    </a>
+                      Timelapse
+                    </FlyoutItem>
 
-                    <a
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
                       href="https://weather.gc.ca"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flyout-item"
                     >
-                      <FontAwesomeIcon icon={faCloudSun} className="item-icon" />
-                      <span>Weather</span>
-                    </a>
+                      Weather
+                    </FlyoutItem>
 
-                    <a href="#electrical-outages" className="flyout-item">
-                      <FontAwesomeIcon icon={faBolt} className="item-icon" />
-                      <span>Electrical outages</span>
-                    </a>
+                    <FlyoutItem icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
+                      Electrical outages
+                    </FlyoutItem>
 
-                    <a href="#forest-fires" className="flyout-item">
-                      <FontAwesomeIcon icon={faFire} className="item-icon" />
-                      <span>Forest fires</span>
-                    </a>
-                  </div>
-                </div>
+                    <FlyoutItem icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
+                      Forest fires
+                    </FlyoutItem>
+                  </FlyoutSection>
+                </Flyout>
               )}
             </div>
           </div>
@@ -1108,14 +1065,10 @@ export default function CameraDetails({ onBack }) {
           <div className="expanded-views-section">
             <div className="expanded-views-header">
               <h2>Showing all camera views</h2>
-              <button
-                type="button"
-                className="btn-close-expanded"
-                onClick={() => setIsExpandedView(false)}
-              >
+              <Button variant="secondary" onClick={() => setIsExpandedView(false)}>
                 <FontAwesomeIcon icon={faXmark} />
                 Close expanded view
-              </button>
+              </Button>
             </div>
 
             <div className="expanded-views-grid">
@@ -1133,14 +1086,10 @@ export default function CameraDetails({ onBack }) {
                     {orientationLabel(currentView?.orientation) || 'Camera'}
                   </span>
 
-                  <button
-                    type="button"
-                    className="btn-timelapse"
-                    onClick={() => setIsTimelapseModalOpen(true)}
-                  >
+                  <Button variant="secondary" onClick={() => setIsTimelapseModalOpen(true)}>
                     <FontAwesomeIcon icon={faClock} />
                     View timelapse
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="main-image-wrapper">
@@ -1164,14 +1113,10 @@ export default function CameraDetails({ onBack }) {
               <div className="views-section">
                 <div className="views-header">
                   <h2>Camera views</h2>
-                  <button
-                    type="button"
-                    className="btn-expand"
-                    onClick={() => setIsExpandedView(true)}
-                  >
+                  <Button variant="secondary" onClick={() => setIsExpandedView(true)}>
                     <FontAwesomeIcon icon={faExpand} />
                     Expand all views
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="views-grid">
@@ -1220,30 +1165,21 @@ export default function CameraDetails({ onBack }) {
               {activeTab == 'Basics' 
                 && 
                 <footer className="form-footer">
-                  <button
-                    type="button"
-                    className="btn-save"
-                    onClick={handleSave}
-                    disabled={!isDirty}
-                  >
+                  <Button onClick={handleSave} disabled={!isDirty}>
                     <FontAwesomeIcon icon={faCircleCheck} />
-                    <span>Save all changes</span>
-                  </button>
+                    Save all changes
+                  </Button>
 
-                  <button
-                    type="button"
-                    className="btn-undo"
-                    onClick={handleUndoChanges}
-                    disabled={!isDirty}
-                  >
+                  <Button variant="tertiary" onClick={handleUndoChanges} disabled={!isDirty}>
                     Undo changes
-                  </button>
+                  </Button>
                 </footer>
                 }
             </div>
           </div>
         )}
       </div>
+      </SidebarLayout>
 
       {isDeleteModalOpen && (
         <DeleteCameraModal
@@ -1289,6 +1225,6 @@ export default function CameraDetails({ onBack }) {
           onConfirm={handleConfirmDisable}
         />
       )}
-    </div>
+    </>
   );
 }

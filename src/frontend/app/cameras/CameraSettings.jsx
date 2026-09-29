@@ -1,15 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faGripVertical,
   faPenToSquare,
   faXmark,
   faCheck,
-  faChevronDown,
-  faMagnifyingGlass,
+  faCircleCheck,
 } from '@fortawesome/pro-regular-svg-icons';
+import { faChevronDown as faChevronDownSolid, faGripDots } from '@fortawesome/pro-solid-svg-icons';
 import { useSearchParams } from 'react-router';
 import { getCookie } from '../shared/helpers.js';
+import Button from '../components/shared/Button.jsx';
+import Sidebar, {
+  SidebarAccordion,
+  SidebarItem,
+  SidebarLayout,
+  SidebarLink,
+  SidebarMessage,
+  SidebarNav,
+  SidebarSearch,
+} from '../components/shared/Sidebar.jsx';
 import './CameraSettings.scss';
 import { API_HOST } from '../env.js';
 
@@ -765,105 +774,78 @@ function SettingsSidebar({
   camerasError,
 }) {
   return (
-    <aside className="camera-settings-sidebar">
-      <div className="settings-sidebar-title">Manage camera settings</div>
+    <Sidebar backTo="/cameras/">
+      <SidebarSearch
+        value={searchQuery}
+        onChange={setSearchQuery}
+        label="Search camera settings" />
 
-      <div className="settings-search">
-        <input
-          type="text"
-          placeholder="Search"
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          aria-label="Search camera settings"
-        />
-        <FontAwesomeIcon icon={faMagnifyingGlass} className="settings-search-icon" />
-      </div>
+      <SidebarNav>
+        {filteredSettings.length > 0 && (
+          <SidebarAccordion
+            title="Database setup"
+            open={isDbSetupOpen}
+            onToggle={setIsDbSetupOpen}>
+            {filteredSettings.map((setting) => (
+              <SidebarItem
+                key={setting.key}
+                selected={selectedSetting.key === setting.key}
+                onClick={() => selectSetting(setting)}>
+                {setting.label}
+              </SidebarItem>
+            ))}
+          </SidebarAccordion>
+        )}
 
-      {filteredSettings.length > 0 && (
-        <>
-          <button
-            type="button"
-            className="settings-section-header"
-            onClick={() => setIsDbSetupOpen((prev) => !prev)}
-            aria-expanded={isDbSetupOpen}
-          >
-            <span>Database setup</span>
-            <FontAwesomeIcon icon={faChevronDown} className={isDbSetupOpen ? 'rotated' : ''} />
-          </button>
-
-          {isDbSetupOpen && (
-            <nav className="settings-navigation">
-              {filteredSettings.map((setting) => (
-                <button
-                  key={setting.key}
-                  type="button"
-                  className={`settings-nav-item ${selectedSetting.key === setting.key ? 'active' : ''}`}
-                  onClick={() => selectSetting(setting)}
-                >
-                  {setting.label}
-                </button>
-              ))}
-            </nav>
-          )}
-        </>
-      )}
-
-      {filteredOtherSettings.map((setting) =>
-        setting.key === 'camera-order' ? (
-          <div key={setting.key} className="settings-section-group">
-            <button
-              type="button"
-              className={`settings-section-header ${selectedSetting.key === setting.key ? 'active' : 'collapsed'}`}
-              onClick={() => {
-                setIsCameraOrderOpen((prev) => !prev);
+        {filteredOtherSettings.map((setting) =>
+          setting.key === 'camera-order' ? (
+            <SidebarAccordion
+              key={setting.key}
+              title={setting.label}
+              open={isCameraOrderOpen}
+              onToggle={(open) => {
+                setIsCameraOrderOpen(open);
                 selectSetting(setting);
-              }}
-              aria-expanded={isCameraOrderOpen}
-            >
-              <span>{setting.label}</span>
-              <FontAwesomeIcon icon={faChevronDown} className={isCameraOrderOpen ? 'rotated' : ''} />
-            </button>
+              }}>
+              {loadingCameras && <SidebarMessage>Loading...</SidebarMessage>}
+              {!loadingCameras && camerasError && <SidebarMessage error>{camerasError}</SidebarMessage>}
+              {!loadingCameras &&
+                !camerasError &&
+                cameraRegions.map((region) => (
+                  <SidebarItem
+                    key={region}
+                    selected={selectedSetting.key === 'camera-order' && selectedRegion === region}
+                    onClick={() => selectCameraRegion(setting, region)}>
+                    {region}
+                  </SidebarItem>
+                ))}
+            </SidebarAccordion>
+          ) : (
+            <SidebarLink
+              key={setting.key}
+              selected={selectedSetting.key === setting.key}
+              onClick={() => selectSetting(setting)}>
+              {setting.label}
+            </SidebarLink>
+          )
+        )}
 
-            {isCameraOrderOpen && (
-              <nav className="settings-navigation settings-navigation-nested">
-                {loadingCameras && <div className="settings-message settings-message-small">Loading...</div>}
-                {!loadingCameras && camerasError && (
-                  <div className="settings-error settings-error-small">{camerasError}</div>
-                )}
-                {!loadingCameras &&
-                  !camerasError &&
-                  cameraRegions.map((region) => (
-                    <button
-                      key={region}
-                      type="button"
-                      className={`settings-nav-item ${
-                        selectedSetting.key === 'camera-order' && selectedRegion === region ? 'active' : ''
-                      }`}
-                      onClick={() => selectCameraRegion(setting, region)}
-                    >
-                      {region}
-                    </button>
-                  ))}
-              </nav>
-            )}
-          </div>
-        ) : (
-          <button
-            key={setting.key}
-            type="button"
-            className={`settings-section-header ${selectedSetting.key === setting.key ? 'active' : 'collapsed'}`}
-            onClick={() => selectSetting(setting)}
-          >
-            <span>{setting.label}</span>
-            <FontAwesomeIcon icon={faChevronDown} />
-          </button>
-        )
-      )}
+        {normalizedQuery && filteredSettings.length === 0 && filteredOtherSettings.length === 0 && (
+          <SidebarMessage>No matching settings</SidebarMessage>
+        )}
+      </SidebarNav>
+    </Sidebar>
+  );
+}
 
-      {normalizedQuery && filteredSettings.length === 0 && filteredOtherSettings.length === 0 && (
-        <div className="settings-no-results">No matching settings</div>
-      )}
-    </aside>
+function SaveFooter({ saving, disabled, onSave }) {
+  return (
+    <footer className="camera-settings-footer">
+      <Button size="lg" onClick={onSave} disabled={disabled}>
+        <FontAwesomeIcon icon={faCircleCheck} />
+        {saving ? 'Saving...' : 'Save changes'}
+      </Button>
+    </footer>
   );
 }
 
@@ -871,21 +853,24 @@ function ReportFieldsView({ reportFields }) {
   const { selectedReportFields, saving, toggleReportField, handleSave } = reportFields;
 
   return (
-    <div className="report-fields-container">
-      <p className="report-fields-description">Selected fields are included in the camera report</p>
+    <>
+      <div className="settings-body">
+        <div className="report-fields">
+          <p className="settings-description">Selected fields are included in the camera report</p>
 
-      <div className="report-fields-scroll-body">
-        <div className="report-fields-groups">
           {REPORT_FIELD_GROUPS.map((group) => (
-            <div key={group.category} className="report-field-row">
+            <div key={group.category} className="report-field-group">
               <div className="report-field-category">{group.category}</div>
               <div className="report-field-options">
                 {group.fields.map((field) => {
                   const isChecked = selectedReportFields.includes(field.id);
                   return (
-                    <label key={field.id} className={`report-field-pill ${isChecked ? 'active' : ''}`}>
+                    <label
+                      key={field.id}
+                      className={`report-field-item${isChecked ? ' report-field-item--selected' : ''}`}
+                    >
                       <input type="checkbox" checked={isChecked} onChange={() => toggleReportField(field.id)} />
-                      <span>{field.label}</span>
+                      {field.label}
                     </label>
                   );
                 })}
@@ -895,13 +880,20 @@ function ReportFieldsView({ reportFields }) {
         </div>
       </div>
 
-      <footer className="camera-settings-footer">
-        <button type="button" className="settings-save-btn" onClick={handleSave} disabled={saving}>
-          <FontAwesomeIcon icon={faCheck} />
-          <span>{saving ? 'Saving...' : 'Save changes'}</span>
-        </button>
-      </footer>
-    </div>
+      <SaveFooter saving={saving} disabled={saving} onSave={handleSave} />
+    </>
+  );
+}
+
+function RowActions({ children }) {
+  return <div className="settings-actions">{children}</div>;
+}
+
+function RowActionButton({ icon, label, onClick }) {
+  return (
+    <Button variant="tertiary" extraClasses="settings-action-btn" aria-label={label} onClick={onClick}>
+      <FontAwesomeIcon icon={icon} />
+    </Button>
   );
 }
 
@@ -911,61 +903,48 @@ function ServiceRequestCcsRow({ cc, index, ccs }) {
   if (editingCcIndex === index) {
     return (
       <div className="settings-row">
-        <div className="settings-drag-handle" title="Drag to reorder">
-          <FontAwesomeIcon icon={faGripVertical} />
+        <div className="settings-row__main">
+          <div className="settings-grip" title="Drag to reorder">
+            <FontAwesomeIcon icon={faGripDots} />
+          </div>
+          <input
+            type="text"
+            className="settings-input"
+            aria-label="Name"
+            value={editingCcName}
+            onChange={(event) => setEditingCcName(event.target.value)}
+          />
+          <input
+            type="email"
+            className="settings-input"
+            aria-label="Email"
+            value={editingCcEmail}
+            onChange={(event) => setEditingCcEmail(event.target.value)}
+          />
         </div>
 
-        <div className="settings-name">
-          <input type="text" value={editingCcName} onChange={(event) => setEditingCcName(event.target.value)} />
-        </div>
-
-        <div className="settings-email">
-          <input type="email" value={editingCcEmail} onChange={(event) => setEditingCcEmail(event.target.value)} />
-        </div>
-
-        <div className="settings-actions">
-          <button type="button" className="settings-action-btn" aria-label="Save" onClick={() => ccs.saveEditingCc(index)}>
-            <FontAwesomeIcon icon={faCheck} />
-          </button>
-          <button type="button" className="settings-action-btn" aria-label="Cancel" onClick={ccs.cancelEditingCc}>
-            <FontAwesomeIcon icon={faXmark} />
-          </button>
-        </div>
+        <RowActions>
+          <RowActionButton icon={faCheck} label="Save" onClick={() => ccs.saveEditingCc(index)} />
+          <RowActionButton icon={faXmark} label="Cancel" onClick={ccs.cancelEditingCc} />
+        </RowActions>
       </div>
     );
   }
 
   return (
     <div className="settings-row">
-      <div className="settings-drag-handle" title="Drag to reorder">
-        <FontAwesomeIcon icon={faGripVertical} />
+      <div className="settings-row__main">
+        <div className="settings-grip" title="Drag to reorder">
+          <FontAwesomeIcon icon={faGripDots} />
+        </div>
+        <span className="settings-name">{cc.name}</span>
+        <span className="settings-email">({cc.email})</span>
       </div>
 
-      <div className="cc-row">
-        <div className="settings-name">
-          <span>{cc.name}</span>
-          <span className="settings-email">({cc.email})</span>
-        </div>
-
-        <div className="settings-actions">
-          <button
-            type="button"
-            className="settings-action-btn"
-            aria-label={`Edit ${cc.name}`}
-            onClick={() => ccs.startEditingCc(index, cc)}
-          >
-            <FontAwesomeIcon icon={faPenToSquare} />
-          </button>
-          <button
-            type="button"
-            className="settings-action-btn"
-            aria-label={`Delete ${cc.name}`}
-            onClick={() => ccs.deleteCc(index)}
-          >
-            <FontAwesomeIcon icon={faXmark} />
-          </button>
-        </div>
-      </div>
+      <RowActions>
+        <RowActionButton icon={faPenToSquare} label={`Edit ${cc.name}`} onClick={() => ccs.startEditingCc(index, cc)} />
+        <RowActionButton icon={faXmark} label={`Delete ${cc.name}`} onClick={() => ccs.deleteCc(index)} />
+      </RowActions>
     </div>
   );
 }
@@ -975,57 +954,48 @@ function ServiceRequestCcsView({ ccs }) {
 
   return (
     <>
-      <section className="settings-list">
-        {loading && <div className="settings-message">Loading...</div>}
-        {!loading && error && <div className="settings-error">{error}</div>}
-
-        {!loading &&
-          !error &&
-          serviceRequestCcs.map((cc, index) => <ServiceRequestCcsRow key={cc.id} cc={cc} index={index} ccs={ccs} />)}
+      <section className="settings-body">
+        {loading && <p className="settings-message">Loading...</p>}
+        {!loading && error && <p className="settings-error">{error}</p>}
 
         {!loading && !error && (
-          <div className="settings-add-row">
-            <div className="settings-drag-handle">
-              <FontAwesomeIcon icon={faGripVertical} />
-            </div>
+          <div className="settings-list">
+            {serviceRequestCcs.map((cc, index) => (
+              <ServiceRequestCcsRow key={cc.id} cc={cc} index={index} ccs={ccs} />
+            ))}
 
-            <div className="settings-add-input">
-              <input
-                type="text"
-                placeholder="Name"
-                value={newCcName}
-                onChange={(event) => setNewCcName(event.target.value)}
-              />
-            </div>
+            <div className="settings-add-row">
+              <div className="settings-grip">
+                <FontAwesomeIcon icon={faGripDots} />
+              </div>
 
-            <div className="settings-add-input">
-              <input
-                type="email"
-                placeholder="Email"
-                value={newCcEmail}
-                onChange={(event) => setNewCcEmail(event.target.value)}
-              />
-            </div>
+              <div className="settings-add-fields">
+                <input
+                  type="text"
+                  className="settings-input"
+                  aria-label="Name"
+                  value={newCcName}
+                  onChange={(event) => setNewCcName(event.target.value)}
+                />
+                <input
+                  type="email"
+                  className="settings-input"
+                  aria-label="Email"
+                  value={newCcEmail}
+                  onChange={(event) => setNewCcEmail(event.target.value)}
+                />
 
-            <button
-              type="button"
-              className="settings-add-btn"
-              onClick={ccs.addCc}
-              disabled={!newCcName.trim() || !newCcEmail.trim()}
-            >
-              <FontAwesomeIcon icon={faCheck} />
-              <span>Add</span>
-            </button>
+                <Button variant="secondary" onClick={ccs.addCc} disabled={!newCcName.trim() || !newCcEmail.trim()}>
+                  <FontAwesomeIcon icon={faCheck} />
+                  Add
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </section>
 
-      <footer className="camera-settings-footer">
-        <button type="button" className="settings-save-btn" disabled={saving} onClick={ccs.handleSave}>
-          <FontAwesomeIcon icon={faCheck} />
-          <span>{saving ? 'Saving...' : 'Save changes'}</span>
-        </button>
-      </footer>
+      <SaveFooter saving={saving} disabled={saving} onSave={ccs.handleSave} />
     </>
   );
 }
@@ -1034,68 +1004,63 @@ function DefaultMessagingView({ messaging }) {
   const { defaultMessaging, loading, error, saving, updateField, handleSave } = messaging;
 
   return (
-    <div className="default-messaging-container">
-      <p className="default-messaging-description">
-        Configure the default messaging displayed when a camera view is disabled.
-      </p>
+    <>
+      <div className="settings-body">
+        <div className="default-messaging">
+          <p className="settings-description">Default messages shown in the following fields</p>
 
-      {loading ? (
-        <div className="settings-message">Loading...</div>
-      ) : (
-        <>
-          {error && <div className="settings-error">{error}</div>}
+          {loading ? (
+            <p className="settings-message">Loading...</p>
+          ) : (
+            <>
+              {error && <p className="settings-error">{error}</p>}
 
-          <div className="default-messaging-form">
-            <div className="default-messaging-field">
-              <label htmlFor="disabled-reason-default">Reason for disabling view</label>
-              <input
-                id="disabled-reason-default"
-                type="text"
-                value={defaultMessaging.disabled_reason_default}
-                onChange={(event) => updateField('disabled_reason_default', event.target.value)}
-                placeholder="Enter default disabled reason"
-                maxLength={255}
-              />
-            </div>
+              <div className="default-messaging__row">
+                <label className="default-messaging__label" htmlFor="disabled-reason-default">
+                  Reason for disabling view
+                </label>
+                <input
+                  id="disabled-reason-default"
+                  type="text"
+                  className="default-messaging__field"
+                  value={defaultMessaging.disabled_reason_default}
+                  onChange={(event) => updateField('disabled_reason_default', event.target.value)}
+                  maxLength={255}
+                />
+              </div>
 
-            <div className="default-messaging-field">
-              <label htmlFor="disabled-short-description">Short description for disabled view</label>
-              <input
-                id="disabled-short-description"
-                type="text"
-                value={defaultMessaging.disabled_short_description}
-                onChange={(event) => updateField('disabled_short_description', event.target.value)}
-                placeholder="Enter short description"
-                maxLength={255}
-              />
-            </div>
+              <div className="default-messaging__row">
+                <label className="default-messaging__label" htmlFor="disabled-short-description">
+                  Short description for disabled view
+                </label>
+                <input
+                  id="disabled-short-description"
+                  type="text"
+                  className="default-messaging__field"
+                  value={defaultMessaging.disabled_short_description}
+                  onChange={(event) => updateField('disabled_short_description', event.target.value)}
+                  maxLength={255}
+                />
+              </div>
 
-            <div className="default-messaging-field">
-              <label htmlFor="disabled-long-description">Long description for disabled view</label>
-              <textarea
-                id="disabled-long-description"
-                value={defaultMessaging.disabled_long_description}
-                onChange={(event) => updateField('disabled_long_description', event.target.value)}
-                placeholder="Enter long description"
-                rows={5}
-              />
-            </div>
-          </div>
-        </>
-      )}
+              <div className="default-messaging__row">
+                <label className="default-messaging__label" htmlFor="disabled-long-description">
+                  Long description for disabled view
+                </label>
+                <textarea
+                  id="disabled-long-description"
+                  className="default-messaging__field default-messaging__field--long"
+                  value={defaultMessaging.disabled_long_description}
+                  onChange={(event) => updateField('disabled_long_description', event.target.value)}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
-      <footer className="camera-settings-footer">
-        <button
-          type="button"
-          className="settings-save-btn"
-          onClick={handleSave}
-          disabled={saving || loading || !!error}
-        >
-          <FontAwesomeIcon icon={faCheck} />
-          <span>{saving ? 'Saving...' : 'Save changes'}</span>
-        </button>
-      </footer>
-    </div>
+      <SaveFooter saving={saving} disabled={saving || loading || !!error} onSave={handleSave} />
+    </>
   );
 }
 
@@ -1105,14 +1070,14 @@ function CameraOrderGroup({ group, groupIndex, cameraOrder }) {
   const isOpen = openCameraOrderGroups[group.road] !== false;
 
   return (
-    <div className="camera-order-group">
+    <div className={`camera-order-group${isOpen ? ' camera-order-group--open' : ''}`}>
       <button
         type="button"
         className="camera-order-group-header"
         onClick={() => toggleCameraOrderGroup(group.road)}
         aria-expanded={isOpen}
       >
-        <FontAwesomeIcon icon={faChevronDown} className={isOpen ? 'rotated' : ''} />
+        <FontAwesomeIcon icon={faChevronDownSolid} />
         <span>{group.road}</span>
       </button>
 
@@ -1121,18 +1086,16 @@ function CameraOrderGroup({ group, groupIndex, cameraOrder }) {
           {group.cameras.map((cam, camIndex) => (
             <div
               key={cam.id}
-              className="settings-row"
+              className="camera-order-item"
               draggable
               onDragStart={(event) => handleCameraDragStart(event, groupIndex, camIndex)}
               onDragOver={handleCameraDragOver}
               onDrop={(event) => handleCameraDrop(event, groupIndex, camIndex)}
             >
-              <div className="settings-drag-handle" title="Drag to reorder">
-                <FontAwesomeIcon icon={faGripVertical} />
+              <div className="settings-grip" title="Drag to reorder">
+                <FontAwesomeIcon icon={faGripDots} />
               </div>
-              <div className="settings-name">
-                <span>{cam.title}</span>
-              </div>
+              <span className="settings-name">{cam.title}</span>
             </div>
           ))}
         </div>
@@ -1146,34 +1109,26 @@ function CameraOrderView({ selectedRegion, cameraOrder }) {
     cameraOrder;
 
   return (
-    <div className="camera-order-container">
-      {loadingCameras && <div className="settings-message">Loading...</div>}
-      {!loadingCameras && camerasError && <div className="settings-error">{camerasError}</div>}
+    <>
+      <div className="settings-body">
+        {loadingCameras && <p className="settings-message">Loading...</p>}
+        {!loadingCameras && camerasError && <p className="settings-error">{camerasError}</p>}
 
-      {!loadingCameras && !camerasError && (
-        <div className="camera-order-scroll-body">
-          {draftCameraGroups.length === 0 && selectedRegion && (
-            <div className="settings-message">No cameras found for {selectedRegion}.</div>
-          )}
+        {!loadingCameras && !camerasError && (
+          <div className="settings-list">
+            {draftCameraGroups.length === 0 && selectedRegion && (
+              <p className="settings-message">No cameras found for {selectedRegion}.</p>
+            )}
 
-          {draftCameraGroups.map((group, groupIndex) => (
-            <CameraOrderGroup key={group.road} group={group} groupIndex={groupIndex} cameraOrder={cameraOrder} />
-          ))}
-        </div>
-      )}
+            {draftCameraGroups.map((group, groupIndex) => (
+              <CameraOrderGroup key={group.road} group={group} groupIndex={groupIndex} cameraOrder={cameraOrder} />
+            ))}
+          </div>
+        )}
+      </div>
 
-      <footer className="camera-settings-footer">
-        <button
-          type="button"
-          className="settings-save-btn"
-          disabled={saving || !hasCameraOrderChanges}
-          onClick={handleSaveCameraOrder}
-        >
-          <FontAwesomeIcon icon={faCheck} />
-          <span>{saving ? 'Saving...' : 'Save changes'}</span>
-        </button>
-      </footer>
-    </div>
+      <SaveFooter saving={saving} disabled={saving || !hasCameraOrderChanges} onSave={handleSaveCameraOrder} />
+    </>
   );
 }
 
@@ -1203,100 +1158,81 @@ function LookupTableView({ lookup }) {
 
   return (
     <>
-      <section className="settings-list">
-        {loading && <div className="settings-message">Loading...</div>}
-        {!loading && error && <div className="settings-error">{error}</div>}
-
-        {!loading &&
-          !error &&
-          items.map((item, index) => (
-            <div
-              key={item.id ?? `new-${index}`}
-              className="settings-row"
-              draggable
-              onDragStart={(event) => handleDragStart(event, index)}
-              onDragOver={handleDragOver}
-              onDrop={(event) => handleDrop(event, index)}
-            >
-              <div className="settings-drag-handle" title="Drag to reorder">
-                <FontAwesomeIcon icon={faGripVertical} />
-              </div>
-
-              <div className="settings-name">
-                {editingId !== null && editingId === item.id ? (
-                  <input
-                    type="text"
-                    value={editingName}
-                    onChange={(event) => setEditingName(event.target.value)}
-                    onKeyDown={(event) => handleEditingKeyDown(event, item.id)}
-                  />
-                ) : (
-                  <span>{item.name}</span>
-                )}
-              </div>
-
-              <div className="settings-actions">
-                {editingId !== null && editingId === item.id ? (
-                  <button
-                    type="button"
-                    className="settings-action-btn"
-                    aria-label="Save item"
-                    onClick={() => saveEditing(item.id)}
-                  >
-                    <FontAwesomeIcon icon={faCheck} />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="settings-action-btn"
-                    aria-label={`Edit ${item.name}`}
-                    onClick={() => startEditing(item)}
-                  >
-                    <FontAwesomeIcon icon={faPenToSquare} />
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  className="settings-action-btn"
-                  aria-label={`Delete ${item.name}`}
-                  onClick={() => handleDelete(item)}
-                >
-                  <FontAwesomeIcon icon={faXmark} />
-                </button>
-              </div>
-            </div>
-          ))}
+      <section className="settings-body">
+        {loading && <p className="settings-message">Loading...</p>}
+        {!loading && error && <p className="settings-error">{error}</p>}
 
         {!loading && !error && (
-          <div className="settings-add-row">
-            <div className="settings-drag-handle">
-              <FontAwesomeIcon icon={faGripVertical} />
-            </div>
+          <div className="settings-list">
+            {items.map((item, index) => {
+              const isEditing = editingId !== null && editingId === item.id;
 
-            <div className="settings-add-input">
-              <input
-                type="text"
-                value={newItemName}
-                onChange={(event) => setNewItemName(event.target.value)}
-                onKeyDown={handleNewItemKeyDown}
-              />
-            </div>
+              return (
+                <div
+                  key={item.id ?? `new-${index}`}
+                  className="settings-row"
+                  draggable
+                  onDragStart={(event) => handleDragStart(event, index)}
+                  onDragOver={handleDragOver}
+                  onDrop={(event) => handleDrop(event, index)}
+                >
+                  <div className="settings-row__main">
+                    <div className="settings-grip" title="Drag to reorder">
+                      <FontAwesomeIcon icon={faGripDots} />
+                    </div>
 
-            <button type="button" className="settings-add-btn" onClick={handleAdd} disabled={!newItemName.trim()}>
-              <FontAwesomeIcon icon={faCheck} />
-              <span>Add</span>
-            </button>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        className="settings-input"
+                        aria-label="Name"
+                        value={editingName}
+                        onChange={(event) => setEditingName(event.target.value)}
+                        onKeyDown={(event) => handleEditingKeyDown(event, item.id)}
+                      />
+                    ) : (
+                      <span className="settings-name">{item.name}</span>
+                    )}
+                  </div>
+
+                  <RowActions>
+                    {isEditing ? (
+                      <RowActionButton icon={faCheck} label="Save item" onClick={() => saveEditing(item.id)} />
+                    ) : (
+                      <RowActionButton icon={faPenToSquare} label={`Edit ${item.name}`} onClick={() => startEditing(item)} />
+                    )}
+                    <RowActionButton icon={faXmark} label={`Delete ${item.name}`} onClick={() => handleDelete(item)} />
+                  </RowActions>
+                </div>
+              );
+            })}
+
+            <div className="settings-add-row">
+              <div className="settings-grip">
+                <FontAwesomeIcon icon={faGripDots} />
+              </div>
+
+              <div className="settings-add-fields">
+                <input
+                  type="text"
+                  className="settings-input"
+                  aria-label="New item name"
+                  value={newItemName}
+                  onChange={(event) => setNewItemName(event.target.value)}
+                  onKeyDown={handleNewItemKeyDown}
+                />
+
+                <Button variant="secondary" onClick={handleAdd} disabled={!newItemName.trim()}>
+                  <FontAwesomeIcon icon={faCheck} />
+                  Add
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </section>
 
-      <footer className="camera-settings-footer">
-        <button type="button" className="settings-save-btn" disabled={saving || !hasChanges} onClick={handleSave}>
-          <FontAwesomeIcon icon={faCheck} />
-          <span>{saving ? 'Saving...' : 'Save changes'}</span>
-        </button>
-      </footer>
+      <SaveFooter saving={saving} disabled={saving || !hasChanges} onSave={handleSave} />
     </>
   );
 }
@@ -1355,28 +1291,31 @@ export default function CameraSettings() {
   const renderView = VIEW_COMPONENTS[selectedSetting.key];
 
   return (
-    <div className="camera-settings-page">
-      <SettingsSidebar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        normalizedQuery={normalizedQuery}
-        filteredSettings={filteredSettings}
-        filteredOtherSettings={filteredOtherSettings}
-        selectedSetting={selectedSetting}
-        selectedRegion={selectedRegion}
-        selectSetting={selectSetting}
-        selectCameraRegion={selectCameraRegion}
-        isDbSetupOpen={isDbSetupOpen}
-        setIsDbSetupOpen={setIsDbSetupOpen}
-        isCameraOrderOpen={isCameraOrderOpen}
-        setIsCameraOrderOpen={setIsCameraOrderOpen}
-        cameraRegions={cameraOrder.cameraRegions}
-        loadingCameras={cameraOrder.loadingCameras}
-        camerasError={cameraOrder.camerasError}
-      />
-
+    <SidebarLayout
+      sidebar={
+        <SettingsSidebar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          normalizedQuery={normalizedQuery}
+          filteredSettings={filteredSettings}
+          filteredOtherSettings={filteredOtherSettings}
+          selectedSetting={selectedSetting}
+          selectedRegion={selectedRegion}
+          selectSetting={selectSetting}
+          selectCameraRegion={selectCameraRegion}
+          isDbSetupOpen={isDbSetupOpen}
+          setIsDbSetupOpen={setIsDbSetupOpen}
+          isCameraOrderOpen={isCameraOrderOpen}
+          setIsCameraOrderOpen={setIsCameraOrderOpen}
+          cameraRegions={cameraOrder.cameraRegions}
+          loadingCameras={cameraOrder.loadingCameras}
+          camerasError={cameraOrder.camerasError}
+        />
+      }
+    >
       <main className="camera-settings-content">
         <header className="camera-settings-header">
+          <p className="camera-settings-eyebrow">Manage Camera Settings</p>
           <h1>
             {selectedSetting.key === 'camera-order' && selectedRegion ? `${selectedRegion} cameras` : selectedSetting.label}
           </h1>
@@ -1386,6 +1325,6 @@ export default function CameraSettings() {
           <LookupTableView lookup={lookup} />
         )}
       </main>
-    </div>
+    </SidebarLayout>
   );
 }

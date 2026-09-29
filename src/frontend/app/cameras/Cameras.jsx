@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 import {
   faMagnifyingGlass,
   faXmark,
-  faChevronDown,
   faRotate,
   faEllipsisVertical,
   faCirclePlus,
@@ -12,10 +11,8 @@ import {
   faCloudSun,
   faBolt,
   faFire,
-  faArrowUpRightFromSquare,
   faCopy,
   faCheckCircle, 
-  faClock, 
   faVideoSlash
 } from '@fortawesome/pro-regular-svg-icons';
 import { faEyeSlash } from '@fortawesome/pro-solid-svg-icons';
@@ -23,6 +20,9 @@ import ServiceRequestModal from './ServiceRequestModal';
 import DisableViewModal from './DisableViewModal.jsx';
 import ExportReportModal from './ExportReportModal.jsx';
 import Toast from './Toast.jsx';
+import Button from '../components/shared/Button.jsx';
+import Flyout, { FlyoutItem, FlyoutSection } from '../components/shared/Flyout.jsx';
+import Sidebar, { SidebarLayout, SidebarNav, SidebarOptionsAccordion } from '../components/shared/Sidebar.jsx';
 import { AuthContext } from '../contexts';
 import { getCookie } from '../shared/helpers.js';
 import './Cameras.scss';
@@ -227,57 +227,47 @@ function CameraRow({
         </div>
 
         <div className="camera-location-actions">
-          <button
-            type="button"
-            className="view-location-btn"
-            onClick={() => onViewOnDriveBC?.(camera)}
-          >
+          <Button variant="secondary" onClick={() => onViewOnDriveBC?.(camera)}>
             View location
-          </button>
+          </Button>
 
           {isCameraAdmin && (
             <div className="camera-header-menu" ref={menuRef}>
-              <button
-                type="button"
-                className={`more-menu-btn ${isMenuOpen ? 'active' : ''}`}
+              <Button
+                variant="tertiary"
+                size="sm"
                 onClick={() => setIsMenuOpen((prev) => !prev)}
                 aria-label="Location options"
+                aria-expanded={isMenuOpen}
               >
                 <FontAwesomeIcon icon={faEllipsisVertical} />
-                <span>More</span>
-              </button>
+                More
+              </Button>
 
               {isMenuOpen && (
-                <div className="context-flyout">
-                  <div className="flyout-section">
-                    <button
-                      type="button"
-                      className="flyout-item"
+                <Flyout>
+                  <FlyoutSection>
+                    <FlyoutItem
+                      icon={<WrenchIcon />}
                       onClick={() => {
                         setIsMenuOpen(false);
                         onServiceRequest?.(camera);
                       }}
                     >
-                      <WrenchIcon className="item-icon" size={16} />
-                      <span>Service request</span>
-                    </button>
+                      Service request
+                    </FlyoutItem>
 
-                    <button
-                      type="button"
-                      className="flyout-item"
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faCopy} />}
                       onClick={() => {
                         setIsMenuOpen(false);
                         onClone?.(camera);
                       }}
                     >
-                      <FontAwesomeIcon
-                        icon={faCopy}
-                        className="item-icon"
-                      />
-                      <span>Clone camera location</span>
-                    </button>
-                  </div>
-                </div>
+                      Clone camera location
+                    </FlyoutItem>
+                  </FlyoutSection>
+                </Flyout>
               )}
             </div>
           )}
@@ -946,89 +936,61 @@ export default function Cameras() {
   return (
     <>
     
-      <div className="cameras-page">
-
-        {/* LEFT FILTER PANEL */}
-        <aside className="camera-filters">
-
-          <div className="camera-filters-header">
-            <div className="camera-filters-title">
-              <span className="filter-label">Filters</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="clear-filters-btn"
-            >
-              <FontAwesomeIcon icon={faXmark} />
-              <span className="clear-label">Clear all</span>
-            </button>
-          </div>
-
-          <CameraFilterSection
-            title="Regions"
-            value={region}
-            options={regions}
-            onChange={setRegion}
-          />
-
-
-          <CameraFilterSection
-            title="Roads"
-            value={highway}
-            options={highways}
-            onChange={setHighway}
-          />
-
-
-          <CameraFilterSection
-            title="Statuses"
-            value={status}
-            options={[
-              'Delayed',
-              'Non-functions',
-            ]}
-            onChange={setStatus}
-          />
-
-
-          <CameraFilterSection
-            title="Visibility"
-            value={visibility}
-            options={[
-              'Visible on DriveBC',
-              'Hidden on DriveBC',
-            ]}
-            onChange={setVisibility}
-          />
-
-
-          <CameraFilterSection
-            title="Camera types"
-            value={cameraType}
-            options={cameraTypes}
-            onChange={setCameraType}
-          />
-
-
-          <CameraFilterSection
-            title="Communication methods"
-            value={communicationType}
-            options={communicationTypes}
-            onChange={setCommunicationType}
-          />
-
-
-          <CameraFilterSection
-            title="Power sources"
-            value={powerSource}
-            options={powerSources}
-            onChange={setPowerSource}
-          />
-
-        </aside>
-
+      <SidebarLayout
+        sidebar={
+          <Sidebar title="Filters" onClear={clearFilters}>
+            <SidebarNav>
+              <SidebarOptionsAccordion
+                title="Regions"
+                value={region}
+                options={regions}
+                onChange={setRegion} />
+  
+              <SidebarOptionsAccordion
+                title="Roads"
+                value={highway}
+                options={highways}
+                onChange={setHighway} />
+  
+              <SidebarOptionsAccordion
+                title="Statuses"
+                value={status}
+                options={[
+                  'Delayed',
+                  'Non-functions',
+                ]}
+                onChange={setStatus} />
+  
+              <SidebarOptionsAccordion
+                title="Visibility"
+                value={visibility}
+                options={[
+                  'Visible on DriveBC',
+                  'Hidden on DriveBC',
+                ]}
+                onChange={setVisibility} />
+  
+              <SidebarOptionsAccordion
+                title="Camera types"
+                value={cameraType}
+                options={cameraTypes}
+                onChange={setCameraType} />
+  
+              <SidebarOptionsAccordion
+                title="Communication methods"
+                value={communicationType}
+                options={communicationTypes}
+                onChange={setCommunicationType} />
+  
+              <SidebarOptionsAccordion
+                title="Power sources"
+                value={powerSource}
+                options={powerSources}
+                onChange={setPowerSource} />
+            </SidebarNav>
+          </Sidebar>
+        }
+      >
         <div className="camera-content-wrapper">
           <div className="cameras-header">
             <div>
@@ -1043,109 +1005,67 @@ export default function Cameras() {
 
             {/* Context Menu Container */}
             <div className="camera-header-menu" ref={headerMenuRef}>
-              <button
-                type="button"
-                className={`circle-menu-btn ${isHeaderMenuOpen ? 'active' : ''}`}
+              <Button
+                variant="icon"
+                outlined
+                extraClasses="circle-menu-btn"
                 onClick={() => setIsHeaderMenuOpen((prev) => !prev)}
                 aria-label="More options"
+                aria-expanded={isHeaderMenuOpen}
               >
                 <FontAwesomeIcon icon={faEllipsisVertical} />
-              </button>
+              </Button>
 
               {isHeaderMenuOpen && (
-                <div className="context-flyout">
-                  {/* Actions Section */}
+                <Flyout>
                   {isCameraAdmin && (
-                    <div className="flyout-section">
-                      <span className="flyout-title">Actions</span>
-
-                      <button
-                        type="button"
-                        className="flyout-item"
-                        onClick={() => {
-                          navigate('/cameras/new');
-                          setIsHeaderMenuOpen(false);
-                        }}
+                    <FlyoutSection title="Actions">
+                      <FlyoutItem
+                        to="/cameras/new"
+                        icon={<FontAwesomeIcon icon={faCirclePlus} />}
+                        onClick={() => setIsHeaderMenuOpen(false)}
                       >
-                        <FontAwesomeIcon icon={faCirclePlus} className="item-icon" />
-                        <span>New camera</span>
-                      </button>
+                        New camera
+                      </FlyoutItem>
 
-                      <button
-                        type="button"
-                        className="flyout-item"
+                      <FlyoutItem
+                        icon={<FontAwesomeIcon icon={faFile} />}
                         onClick={() => {
                           setIsExportModalOpen(true);
                           setIsHeaderMenuOpen(false);
                         }}
                       >
-                        <FontAwesomeIcon icon={faFile} className="item-icon" />
-                        <span>Export report</span>
-                      </button>
+                        Export report
+                      </FlyoutItem>
 
-                      <button
-                        type="button"
-                        className="flyout-item"
-                        onClick={() => {
-                          navigate('/cameras/settings?setting=service-providers');
-                          setIsHeaderMenuOpen(false);
-                        }}
+                      <FlyoutItem
+                        to="/cameras/settings?setting=service-providers"
+                        icon={<WrenchIcon />}
+                        onClick={() => setIsHeaderMenuOpen(false)}
                       >
-                        <WrenchIcon className="item-icon" size={16} />
-                        <span>Manage settings</span>
-                      </button>
-                    </div>
+                        Manage settings
+                      </FlyoutItem>
+                    </FlyoutSection>
                   )}
 
-                  {/* External Links Section */}
-                  <div className="flyout-section">
-                    <span className="flyout-title">External links</span>
-
-                    <a
-                      href="https://timelapse.drivebc.ca"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flyout-item"
-                    >
-                      <FontAwesomeIcon icon={faClock} className="item-icon" />
-                      <span>Timelapse</span>
-                      <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="external-icon" />
-                    </a>
-                    
-                    <a
+                  <FlyoutSection title="External links">
+                    <FlyoutItem
+                      external
+                      icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
                       href="https://weather.gc.ca"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flyout-item"
                     >
-                      <FontAwesomeIcon icon={faCloudSun} className="item-icon" transform="flip-h" /> 
-                      <span>Weather</span>
-                      <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="external-icon" />
-                    </a>
+                      Weather
+                    </FlyoutItem>
 
-                    <a
-                      href="#electrical-outages"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flyout-item"
-                    >
-                      <FontAwesomeIcon icon={faBolt} className="item-icon" />
-                      <span>Electrical outages</span>
-                      <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="external-icon" />
-                    </a>
+                    <FlyoutItem external icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
+                      Electrical outages
+                    </FlyoutItem>
 
-                    <a
-                      href="#forest-fires"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flyout-item"
-                    >
-                      <FontAwesomeIcon icon={faFire} className="item-icon" />
-                      <span>Forest fires</span>
-                      <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="external-icon" />
-                    </a>
-                  </div>
-                </div>
+                    <FlyoutItem external icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
+                      Forest fires
+                    </FlyoutItem>
+                  </FlyoutSection>
+                </Flyout>
               )}
             </div>
           </div>
@@ -1291,7 +1211,7 @@ export default function Cameras() {
           </main>
 
         </div>
-      </div>
+      </SidebarLayout>
 
       {isServiceRequestModalOpen && (
         <ServiceRequestModal
@@ -1354,65 +1274,4 @@ export default function Cameras() {
     </>
   );
 
-}
-
-
-/*
- * Reusable filter section.
- */
-function CameraFilterSection({
-  title,
-  value,
-  options,
-  onChange,
-}) {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <div className="camera-filter-section">
-
-      <button
-        type="button"
-        className="camera-filter-label"
-        onClick={() => setOpen(!open)}
-      >
-        <span>{title}</span>
-
-        <FontAwesomeIcon
-          icon={faChevronDown}
-          className={
-            open ? '' : 'collapsed'
-          }
-        />
-      </button>
-
-      {open && options.length > 0 && (
-        <div className="camera-filter-options">
-
-          {options.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={
-                value === option
-                  ? 'active'
-                  : ''
-              }
-              onClick={() =>
-                onChange(
-                  value === option
-                    ? ''
-                    : option
-                )
-              }
-            >
-              {option}
-            </button>
-          ))}
-
-        </div>
-      )}
-
-    </div>
-  );
 }
