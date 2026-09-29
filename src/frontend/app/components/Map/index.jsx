@@ -7,7 +7,7 @@ import { DebuggingContext, MapContext } from '../../contexts';
 import { createMap, ll2g, pointerMove } from './helpers';
 import { get } from '../../shared/helpers';
 
-import { GEOCODER_CLIENT_ID, GEOCODER_HOST } from '../../env';
+import { GEOCODER_CLIENT_ID, GEOCODER_HOST, ROUTABLE_LOCATIONS_HOST } from '../../env';
 
 import './map.scss';
 
@@ -41,8 +41,7 @@ const DropdownIndicator = (props) => {
   );
 };
 
-async function getLocations(addressInput) {
-  if (addressInput.length < 3) { return []; }
+async function getGeocoderLocations(addressInput) {
   return get(`${GEOCODER_HOST}/addresses.json`, {
       minScore: 50,
       maxResults: 7,
@@ -60,11 +59,63 @@ async function getLocations(addressInput) {
     value: feature.properties.fullAddress,
     label: feature.properties.fullAddress,
     location: feature.geometry.coordinates,
-  })))
+  })));
+}
+
+function escapeCqlString(value) {
+  return String(value).replace(/'/g, "''");
+}
+
+function sanitizeForILikePrefix(value) {
+  return String(value).replace(/%/g, "").replace(/_/g, "");
+}
+
+export function getRoutableLocations(addressInput) {
+  // return empty promise if address input is less than 2 characters
+  const trimmed = (addressInput || "").trim();
+  if (trimmed.length < 2) {
+    return Promise.resolve({ type: "FeatureCollection", features: [] });
+  }
+
+  // escape CQL string and sanitize for ILike prefix
+  const literal = escapeCqlString(sanitizeForILikePrefix(trimmed));
+  return get(
+    `${ROUTABLE_LOCATIONS_HOST}public/ows`,
+    {
+      service: "WFS",
+      version: "1.0.0",
+      request: "GetFeature",
+      typeName: "public:routable-locations",
+      outputFormat: "application/json",
+      maxFeatures: 5,
+      cql_filter: `authority='DriveBC' and name ilike '%${literal}%'`,
+    },
+    {},
+    false,
+  ).then((data) => data.features.map((feature) => ({
+    value: feature.properties.name,
+    label: feature.properties.name,
+    location: feature.geometry.coordinates,
+  })));
+}
+
+async function getLocations(addressInput) {
+  addressInput = addressInput.trim();
+  if (addressInput.length < 3) { return []; }
+  const geocoderPromise = getGeocoderLocations(addressInput);
+  const routablePromise = getRoutableLocations(addressInput);
+
+  return Promise.all([geocoderPromise, routablePromise]).then(
+    ([geocoderResults, routableResults]) => {
+      const results = [...geocoderResults, ...routableResults];
+      results.sort((a, b) => a.value < b.value ? -1 : 1);
+      return results;
+    }
+  );
 }
 
 
-export default function Map({ children, dispatch, event, clickHandler }) {
+export default function Map({ children, event, clickHandler }) {
 
   let creatingMap = false;
 

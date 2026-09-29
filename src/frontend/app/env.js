@@ -22,3 +22,7 @@ export const EVENT_POLLING_REFRESH = `${getEnv('EVENT_POLLING_REFRESH')}`;
 export const DMS_API_URL = `${getEnv('DMS_API_URL')}`;
 export const CLEARING_TIMEOUT = parseInt(`${getEnv('CLEARING_TIMEOUT', 900000)}`);
 export const ENVIRONMENT = `${getEnv('ENVIRONMENT')}`;
+// set to true to remove geometries from service areas so that data is small
+// enough for redux-devtools to work with the store
+export const ELIDE_SERVICE_AREA_GEOMETRIES = `${getEnv('ELIDE_SERVICE_AREA_GEOMETRIES')}`;
+export const ROUTABLE_LOCATIONS_HOST = `${getEnv('ROUTABLE_LOCATIONS_HOST', '')}`;
