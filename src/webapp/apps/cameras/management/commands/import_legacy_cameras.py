@@ -98,6 +98,14 @@ SELECT [ID]
 """
 
 
+def to_float_or_none(value):
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
 def get_legacy_connection():
     try:
         server = os.environ["LEGACY_SQL_SERVER_HOST"]
@@ -182,14 +190,14 @@ class Command(BaseCommand):
         with transaction.atomic():
             for row in rows:
                 try:
-                    # self._import_row(row, region_map, road_map, dry_run)
-                    self._import_row(
-                        row,
-                        region_map,
-                        road_map,
-                        business_area_map,
-                        dry_run,
-                    )
+                    with transaction.atomic():  # per-row savepoint
+                        self._import_row(
+                            row,
+                            region_map,
+                            road_map,
+                            business_area_map,
+                            dry_run,
+                        )
                     imported += 1
                 except Exception as exc:  # noqa: BLE001 - collect and continue past bad rows
                     skipped += 1
@@ -198,7 +206,7 @@ class Command(BaseCommand):
             if dry_run:
                 self.stdout.write(self.style.WARNING("Dry run: rolling back transaction."))
                 transaction.set_rollback(True)
-
+                
         self.stdout.write(self.style.SUCCESS(f"Imported {imported} cameras, skipped {skipped}."))
         for legacy_id, message in errors[:20]:
             self.stdout.write(self.style.WARNING(f"  legacy ID {legacy_id}: {message}"))
@@ -292,9 +300,9 @@ class Command(BaseCommand):
             power_source=power_source,
             camera_credit=clean_str(row.get("Cam_InternetCredit"), 255),
             camera_credit_url=clean_str(row.get("Cam_InternetWebsite_URL"), 500) or None,
-            locations_geo_latitude=row.get("Cam_LocationsGeo_Latitude"),
-            locations_geo_longitude=row.get("Cam_LocationsGeo_Longitude"),
-            locations_elevation=row.get("Cam_LocationsElevation"),
+            locations_geo_latitude=to_float_or_none(row.get("Cam_LocationsGeo_Latitude")),
+            locations_geo_longitude=to_float_or_none(row.get("Cam_LocationsGeo_Longitude")),
+            locations_elevation=to_float_or_none(row.get("Cam_LocationsElevation")),
             # ASSUMPTION: modem ESN doubles as the closest legacy equivalent
             # of a MAC address. Verify against real data / hardware docs.
             mac_address=clean_str(row.get("Cam_MaintenanceModem_ESN"), 50),
