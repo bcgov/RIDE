@@ -1,3 +1,5 @@
+@use "../styles/variables.scss" as *;
+
 .view-item-card {
   margin-bottom: 28px;
 }
@@ -28,15 +30,6 @@
   margin: 0;
 }
 
-.icon-edit-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #0b3c6d;
-  font-size: 15px;
-  padding: 2px;
-}
-
 /* Pill Badges / Buttons */
 .badge-default {
   background-color: #2563eb; /* Active blue */
@@ -48,21 +41,6 @@
   display: inline-block;
 }
 
-.btn-make-default {
-  background-color: #f1f5f9; /* Soft grey button */
-  color: #475569;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  padding: 6px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.btn-make-default:hover {
-  background-color: #e2e8f0;
-}
-
 .direction-title-input {
   font-size: 1.1rem;
   font-weight: 600;
@@ -72,45 +50,6 @@
   flex: 0 1 auto;
   width: 160px;
   min-width: 80px;
-}
-
-.btn-save-name {
-  background-color: #003366;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &:hover:not(:disabled) {
-    background-color: darken(#003366, 5%);
-  }
-}
-
-.btn-cancel-name {
-  background: none;
-  border: none;
-  color: #333;
-  padding: 6px 10px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  &:hover {
-    color: #000;
-  }
 }
 
 .view-header-right {
@@ -128,14 +67,8 @@
   margin-left: auto;
 }
 
-.btn-label {
-  @media (max-width: 480px) {
-    display: none;
-  }
-}
-
-.btn-save-name,
-.btn-cancel-name {
-  white-space: nowrap;
-  padding: 6px 12px;
+// Figma: filled grey "Make default" on top of the tertiary button
+.btn-make-default {
+  background: $Grey-invert;
+  font-weight: 700;
 }

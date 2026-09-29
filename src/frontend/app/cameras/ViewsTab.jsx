@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faCheck, faXmark } from '@fortawesome/pro-regular-svg-icons';
+import Button from '../components/shared/Button.jsx';
 import './ViewsTab.scss';
 import { getCookie } from "../shared/helpers.js";
 
@@ -102,19 +103,17 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
     if (isEditing) {
       return (
         <div className="edit-actions">
-          <button
-            type="button"
-            className="btn-save-name"
+          <Button
             onClick={() => saveEditing(id, camera_id)}
             disabled={!draftName.trim() || savingId === id}
           >
             {savingId === id ? 'Saving…' : 'Save'}
             <FontAwesomeIcon icon={faCheck} />
-          </button>
-          <button type="button" className="btn-cancel-name" onClick={cancelEditing} title="Cancel">
-            <span className="btn-label">Cancel</span>
+          </Button>
+          <Button variant="tertiary" onClick={cancelEditing} title="Cancel">
+            Cancel
             <FontAwesomeIcon icon={faXmark} />
-          </button>
+          </Button>
         </div>
       );
     }
@@ -124,13 +123,9 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
     }
 
     return (
-      <button
-        type="button"
-        className="btn-make-default"
-        onClick={() => onSetDefault(id)}
-      >
+      <Button variant="tertiary" size="sm" extraClasses="btn-make-default" onClick={() => onSetDefault(id)}>
         Make default
-      </button>
+      </Button>
     );
   };
 
@@ -178,14 +173,14 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
                 )}
 
                 {is_on && !isEditing && (
-                  <button
-                    type="button"
-                    className="icon-edit-btn"
+                  <Button
+                    variant="icon"
+                    size="sm"
                     aria-label={`Edit ${displayTitle} direction name`}
                     onClick={() => startEditing(view)}
                   >
                     <FontAwesomeIcon icon={faPenToSquare} />
-                  </button>
+                  </Button>
                 )}
               </div>
 

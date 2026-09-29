@@ -9,6 +9,7 @@ import {
   faMinus,
   faUser,
 } from '@fortawesome/pro-regular-svg-icons';
+import Button from '../components/shared/Button.jsx';
 import './HistoryTab.scss'
 
 export default function HistoryTab({ cameraId }) {
@@ -127,14 +128,15 @@ export default function HistoryTab({ cameraId }) {
             {/* Entry Header */}
             <div className="history-card-header">
               <span className="timestamp-title">{formatTimestamp(entry.timestamp)}</span>
-              <button
-                type="button"
-                className="btn-collapse-toggle"
+              <Button
+                variant="icon"
+                size="sm"
+                outlined
                 onClick={() => toggleCollapse(entry.id)}
                 aria-label={isCollapsed ? 'Expand history entry' : 'Collapse history entry'}
               >
                 <FontAwesomeIcon icon={isCollapsed ? faChevronDown : faChevronUp} />
-              </button>
+              </Button>
             </div>
 
             {/* Entry Content (Shown when expanded) */}

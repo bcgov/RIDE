@@ -6,6 +6,7 @@ import {
   faPlus,
 } from '@fortawesome/pro-regular-svg-icons';
 import { getCookie } from '../shared/helpers.js';
+import Button from '../components/shared/Button.jsx';
 import './NotesTab.scss'
 import { API_HOST } from '../env.js';
 
@@ -134,14 +135,10 @@ export default function NotesTab({ cameraId }) {
         {/* Card Header */}
         <div className="notes-card-header">
           <h2 className="notes-title">Entries</h2>
-          <button
-            type="button"
-            className="btn-add-entry"
-            onClick={() => setIsAdding(!isAdding)}
-          >
+          <Button variant="secondary" size="sm" onClick={() => setIsAdding(!isAdding)}>
             <FontAwesomeIcon icon={faPlus} />
-            <span>Add entry</span>
-          </button>
+            Add entry
+          </Button>
         </div>
 
         {/* Inline Form to Add Entry */}
@@ -154,20 +151,12 @@ export default function NotesTab({ cameraId }) {
               onChange={(e) => setNewNoteContent(e.target.value)}
             />
             <div className="form-actions">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setIsAdding(false)}
-              >
+              <Button variant="secondary" onClick={() => setIsAdding(false)}>
                 Cancel
-              </button>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={handleAddSubmit}
-              >
+              </Button>
+              <Button onClick={handleAddSubmit}>
                 Save entry
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -206,34 +195,22 @@ export default function NotesTab({ cameraId }) {
                       onChange={(e) => setEditContent(e.target.value)}
                     />
                     <div className="form-actions">
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        onClick={handleCancelEdit}
-                      >
+                      <Button variant="secondary" onClick={handleCancelEdit}>
                         Cancel
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-primary"
-                        onClick={() => handleSaveEdit(note.id)}
-                      >
+                      </Button>
+                      <Button onClick={() => handleSaveEdit(note.id)}>
                         Save
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
                     <>
                       <p className="note-content">{note.content}</p>
                       {note.author === currentUserId && (
-                        <button
-                          type="button"
-                          className="btn-edit-note"
-                          onClick={() => handleStartEdit(note)}
-                        >
+                        <Button variant="link" onClick={() => handleStartEdit(note)}>
                           <FontAwesomeIcon icon={faPenToSquare} />
-                          <span>Edit note</span>
-                        </button>
+                          Edit note
+                        </Button>
                       )}
                     </>
                 )}
