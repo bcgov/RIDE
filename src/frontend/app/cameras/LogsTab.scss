@@ -19,7 +19,7 @@
     border: 0;
     border-radius: 8px;
     background: $Grey20;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.5;
     color: $Grey80;
@@ -51,7 +51,7 @@
         flex-shrink: 0;
         width: 130px;
         min-height: 21px;
-        font-size: 12px;
+        font-size: 0.75rem;
         font-weight: 700;
         line-height: 1.5;
         color: $Grey80;
@@ -66,7 +66,7 @@
       }
 
       .log-message {
-        font-size: 14px;
+        font-size: 0.875rem;
         line-height: 1.5;
         color: $Type-Primary;
       }
@@ -74,7 +74,7 @@
       .success-icon,
       .error-icon {
         width: 13.333px; // Figma's icon box
-        font-size: 12px;
+        font-size: 0.75rem;
       }
 
       .success-icon {

@@ -22,7 +22,7 @@
   cursor: pointer;
 
   svg {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   &:disabled {
@@ -37,7 +37,7 @@
     padding: 0 6px;
 
     svg {
-      font-size: 10px;
+      font-size: 0.625rem;
     }
   }
 
@@ -116,14 +116,14 @@
     color: $ViewDetailsText;
 
     svg {
-      font-size: 16px;
+      font-size: 1rem;
     }
 
     &.ride-btn--sm {
       --ride-btn-icon-size: 24px;
 
       svg {
-        font-size: 12px;
+        font-size: 0.75rem;
       }
     }
   }

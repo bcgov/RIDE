@@ -57,7 +57,7 @@
 
 .category-label {
   display: block;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.5;
   color: $Type-Secondary;
 }
@@ -81,7 +81,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.4286;
   color: $Type-Primary;
@@ -90,7 +90,7 @@
 .action-icon {
   width: 19px;
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: $Type-Secondary;
 }
 
@@ -105,7 +105,7 @@
   display: block;
   padding: 0 4px;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.4286;
 }
 
@@ -129,13 +129,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.3333;
   letter-spacing: 0.3px;
   color: $Type-Secondary;
 
   svg {
     width: auto;
-    font-size: 10px;
+    font-size: 0.625rem;
   }
 }

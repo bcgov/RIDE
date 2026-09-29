@@ -1,3 +1,5 @@
+@use "../styles/variables.scss" as *;
+
 // Route wrapper for every /cameras screen. It owns the sizing the pages inside
 // rely on, so it does not depend on which page's styles happen to be loaded.
 .cameras-page {
@@ -7,7 +9,7 @@
   height: 100%;
   min-width: 0;
   min-height: 0;
-  background: #FAF9F8;
+  background: $Grey10;
   overflow-y: auto;
   overflow-x: hidden;
 

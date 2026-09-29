@@ -17,13 +17,13 @@
     .camera-id-group {
       .field-label-sm {
         display: block;
-        font-size: 12px;
+        font-size: 0.75rem;
         line-height: 1.5;
         color: $Type-Primary;
       }
 
       .camera-id-value {
-        font-size: 24px;
+        font-size: 1.5rem;
         font-weight: 700;
         line-height: 1.5;
         color: $Type-Primary;
@@ -79,6 +79,11 @@
         &::after {
           transform: translateX(14px);
         }
+      }
+
+      // Figma: "Form / Switcher" hover (on state only)
+      &:hover input:checked + .toggle-switch-ui {
+        background-color: $BtnHover-Primary;
       }
     }
   }
