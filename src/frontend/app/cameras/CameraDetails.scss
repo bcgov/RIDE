@@ -175,8 +175,29 @@
         }
       }
 
+      // .main-image-wrapper {
+      //   width: 100%;
+      //   display: flex;
+      //   align-items: center;
+      //   justify-content: center;
+      //   overflow: hidden;
+      //   border-radius: 8px 8px 0 0;
+
+      //   img {
+      //     width: 100%;
+      //     height: 100%;
+      //     object-fit: contain;
+      //     border-radius: 8px 8px 0 0;
+      //   }
+
+      //   .image-placeholder {
+      //     color: #94a3b8;
+      //   }
+      // }
+
       .main-image-wrapper {
         width: 100%;
+        aspect-ratio: 16 / 9;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -191,6 +212,8 @@
         }
 
         .image-placeholder {
+          width: 100%;
+          height: 100%;
           color: #94a3b8;
         }
       }
