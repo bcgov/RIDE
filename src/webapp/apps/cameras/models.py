@@ -281,7 +281,7 @@ class Camera(models.Model):
     password = models.CharField(max_length=20, blank=True)
     serial_number = models.CharField(max_length=50, blank=True)
     phone_number = models.CharField(max_length=50, blank=True)
-    baud_rate = models.IntegerField(default=0, blank=True, null=True)
+    baud_rate = models.CharField(max_length=20, blank=True)
     supply_type = models.CharField(max_length=50, blank=True)
     supply_serial = models.CharField(max_length=50, blank=True)
     connection_ip_address = models.GenericIPAddressField(

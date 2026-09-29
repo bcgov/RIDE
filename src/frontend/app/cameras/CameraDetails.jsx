@@ -322,19 +322,21 @@ export default function CameraDetails({ onBack }) {
         road_id: toNumberOrNull(basicsData.road),
         camera_type_id: toNumberOrNull(setupData.cameraType),
         camera_make_id: toNumberOrNull(setupData.cameraMake),
-        on_demand: setupData.onDemand,
         camera_installed: setupData.cameraInstalled || null,
         camera_last_inspected: setupData.cameraLastInspected || null,
         modem_installed: setupData.modemInstalled || null,
         update_frequency: setupData.updateFrequency || 0,
-        mac_address: setupData.macAddress || null,
-        username: setupData.username || null,
-        password: setupData.password || null,
-        serial_number: setupData.serialNumber || null,
-        phone_number: setupData.phoneNumber || null,
-        baud_rate: setupData.baudRate || 0,
-        supply_type: setupData.supplyType || null,
-        supply_serial: setupData.supplySerial || null,
+        mac_address: setupData.macAddress || '',
+        username: setupData.username || '',
+        password: setupData.password || '',
+        serial_number: setupData.serialNumber || '',
+        phone_number: setupData.phoneNumber || '',
+        baud_rate: setupData.baudRate ? String(setupData.baudRate) : '',
+        supply_type: setupData.supplyType || '',
+        supply_serial: setupData.supplySerial || '',
+        connection_ip_address: setupData.connectionIpAddress || null,
+        connection_port: toNumberOrNull(setupData.connectionPort),
+        on_demand: setupData.onDemand === '' ? null : Boolean(setupData.onDemand),
         connection_type_id: toNumberOrNull(setupData.connectionType),
         connection_protocol_id: toNumberOrNull(setupData.connectionProtocol),
         communication_type_id: toNumberOrNull(setupData.communicationType),
@@ -351,8 +353,7 @@ export default function CameraDetails({ onBack }) {
         locations_geo_longitude: toNumberOrNull(basicsData.longitude),
         locations_elevation: toNumberOrNull(basicsData.elevation),
         views: buildViewsPayload(viewsData),
-        connection_ip_address: setupData.connectionIpAddress,
-        connection_port: setupData.connectionPort,
+        
       };
 
       const url = camera ? `/api/cameras/${camera.id}/` : '/api/cameras/';
@@ -414,9 +415,9 @@ export default function CameraDetails({ onBack }) {
 
   // Refresh the page every minute to get latest data
   useEffect(() => {
+    if (!id || id === 'new') return undefined;
     const intervalId = window.setInterval(() => {
       const updatedDriveBCData = loadCamera();
-      console.log('bruce test');
       console.log(updatedDriveBCData);
     }, 60 * 1000);
 
@@ -644,9 +645,17 @@ export default function CameraDetails({ onBack }) {
     };
 
   useEffect(() => {
-    if (id) {
+    if (id && id !== 'new') {
       loadCamera();
+    } else {
+      // New camera: nothing to fetch yet. Snapshot the initial (empty)
+      // form state so isDirty only flips true once the user actually
+      // changes something — otherwise Save stays disabled forever.
+      setSavedSnapshot(
+        JSON.stringify({ basics: basicsData, setup: setupData, views: viewsData })
+      );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const isDirty = useMemo(() => {
