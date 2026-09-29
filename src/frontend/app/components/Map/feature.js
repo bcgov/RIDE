@@ -109,7 +109,7 @@ export class PinFeature extends RideFeature {
   propertyChanged(e) {
     if (e.key === 'isPreview') {
 
-      if (this.normal?.getImage()) {
+      if (this.normal?.getImage() && !this.get('ignorePreview')) {
         if (this.get('isPreview')) {
           this.normal.getImage().setOpacity(0.4);
         } else {
