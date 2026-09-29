@@ -1,56 +1,49 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
 // The card (background, border, rounded corners) comes from SidebarLayout;
 // this is the scrolling content inside it.
 .camera-details-container {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 24px;
   box-sizing: border-box;
 
+  // Figma: page header (32px left, 16px right, 12px above and below)
   .details-header {
+    position: relative;
+    z-index: 100; // keeps the flyout above the media area
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    position: sticky;
-    top: -24px;
-    z-index: 100;
-
-    margin-top: -24px;
-    padding-top: 24px;
-    padding-bottom: 16px;
-    background: #fff;
-
-    /* Full-width divider */
-    &::after {
-      content: '';
-      position: absolute;
-      left: -32px;
-      right: -32px;
-      bottom: 0;
-      height: 1px;
-      background: #e2e8f0;
-    }
+    padding: 12px 16px 12px 32px;
+    border-bottom: 1px solid $Divider;
+    border-top-left-radius: 8px;
 
     .title-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      gap: 24px;
+      min-width: 0;
+    }
 
-      h1 {
-        font-size: 28px;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-      }
-      .badge-ondemand {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 2px 8px;
-        color: #013366;
-        font-weight: 500;
-        white-space: nowrap;
-        background: #f1f8fe;
-        border-radius: 32px;
+    // Figma: "Status / Pills"
+    .badge-ondemand {
+      @include text-label;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 22px;
+      padding: 2px 8px;
+      border-radius: 32px;
+      background: $Blue10;
+      font-weight: 700;
+      color: $BC-Blue;
+      white-space: nowrap;
+
+      svg {
+        width: auto;
+        font-size: 12px;
       }
     }
 
@@ -58,13 +51,23 @@
       display: flex;
       align-items: center;
       gap: 12px;
+
+      // Figma: "View on DriveBC" is a borderless button in the primary text color
+      .ride-btn--tertiary {
+        color: $Type-Primary;
+      }
+
+      // 12px + 8px = the 20px Figma leaves before the menu button
+      .context-menu-wrapper {
+        margin-left: 8px;
+      }
     }
   }
 
   .details-grid {
     display: grid;
-    grid-template-columns: 1fr 480px;
-    gap: 32px;
+    flex: 1 0 auto;
+    grid-template-columns: 1fr 510px;
 
     @media (max-width: 1200px) {
       grid-template-columns: 1fr;
@@ -72,62 +75,44 @@
   }
 
   /* Left Media Section */
+  // Left media section (Figma: 32px each side, 16px above)
   .media-pane {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px 32px 24px;
+
     .main-preview-card {
-      /* No border/background box in the target design — the toolbar
-         row and the image sit as plain stacked elements, not inside
-         a bordered card. */
-      background: transparent;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
 
       .preview-toolbar {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 0 0 12px;
-        margin-top: 12px;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding: 8px 12px 8px 0;
 
         .current-view-label {
-          font-size: 15px;
+          font-size: 20px;
           font-weight: 700;
-          color: #1e293b;
+          line-height: 1.7;
+          color: $Type-Secondary;
         }
       }
 
-      // .main-image-wrapper {
-      //   width: 100%;
-      //   display: flex;
-      //   align-items: center;
-      //   justify-content: center;
-      //   overflow: hidden;
-      //   border-radius: 8px 8px 0 0;
-
-      //   img {
-      //     width: 100%;
-      //     height: 100%;
-      //     object-fit: contain;
-      //     border-radius: 8px 8px 0 0;
-      //   }
-
-      //   .image-placeholder {
-      //     color: #94a3b8;
-      //   }
-      // }
-
       .main-image-wrapper {
-        width: 100%;
-        aspect-ratio: 16 / 9;
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 100%;
+        max-height: 820px;
         overflow: hidden;
         border-radius: 8px 8px 0 0;
 
         img {
           width: 100%;
-          height: 100%;
-          object-fit: contain;
-          border-radius: 8px 8px 0 0;
+          height: auto;
+          border-radius: 8px;
         }
 
         .image-placeholder {
@@ -141,215 +126,139 @@
     .views-section {
       .views-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
+        justify-content: space-between;
+        padding: 8px 12px 8px 0;
 
         h2 {
-          font-size: 18px;
           margin: 0;
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 1.7;
+          color: $Type-Secondary;
         }
       }
 
+      // 8px gap + 4px card wrapper padding in Figma
       .views-grid {
         display: grid;
-        /* Force exactly 3 equal columns */
         grid-template-columns: repeat(3, 1fr);
         gap: 16px;
-        margin-top: 16px;
-
-        .view-card {
-          display: flex;
-          flex-direction: column;
-          padding: 0;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          background: #ffffff;
-          overflow: hidden;
-          cursor: pointer;
-          text-align: left;
-          transition: all 0.15s ease-in-out;
-
-          &:hover {
-            border-color: #94a3b8;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-          }
-
-          &.selected {
-            border: 2px solid #0284c7;
-            box-shadow: 0 0 0 1px #0284c7;
-          }
-
-          .view-card-image {
-            width: 100%;
-            height: 120px;
-            background-color: #0f172a;
-            position: relative;
-
-            img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-
-            .placeholder-thumb {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 100%;
-              color: #64748b;
-              font-size: 20px;
-            }
-          }
-
-          .view-card-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 10px;
-            background-color: #ffffff;
-            border-top: 1px solid #f1f5f9;
-            font-size: 12px;
-
-            .view-info-left {
-              display: flex;
-              align-items: center;
-              gap: 6px;
-
-              .status-toggle-pill {
-                width: 22px;
-                height: 13px;
-                border-radius: 10px;
-                background-color: #cbd5e1;
-                display: inline-flex;
-                align-items: center;
-                padding: 2px;
-                box-sizing: border-box;
-                transition: background-color 0.2s ease;
-
-                .toggle-dot {
-                  width: 9px;
-                  height: 9px;
-                  border-radius: 50%;
-                  background-color: #ffffff;
-                  transition: transform 0.2s ease;
-                }
-
-                &.active {
-                  background-color: #1e3a8a;
-
-                  .toggle-dot {
-                    transform: translateX(9px);
-                  }
-                }
-              }
-
-              .direction-label {
-                font-weight: 600;
-                color: #1e293b;
-              }
-            }
-
-            .view-info-right {
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              color: #64748b;
-              font-size: 11px;
-
-              .timestamp-icon {
-                font-size: 10px;
-              }
-            }
-          }
-        }
+        margin-top: 12px;
       }
     }
   }
 
-  /* Right Form Section */
+  // Figma: "Camera location settings" panel
   .form-pane {
-    margin-top: -20px;
-    border: 1px solid #e2e8f0;
-    border-top: none;
-    border-right: none;
-    background: #ffffff;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding-top: 7px;
+    border-left: 1px solid $Divider;
+    background: $White;
 
     .form-pane-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1e293b;
-      padding: 20px 24px 12px;
       margin: 0;
-      margin-top: 12px;
+      padding: 8px 16px;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.7;
+      color: $Type-Primary;
     }
 
     .details-tabs {
       display: flex;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 0 16px;
+      gap: 30px;
+      padding: 4px 16px 0;
+      border-bottom: 1px solid $Divider;
 
+      // The active underline overlaps the bar's own bottom line
       .tab-btn {
-        padding: 14px 16px;
-        border: none;
-        background: none;
+        @include text-small-body;
+        @include focus-ring;
+        margin-bottom: -1px;
+        padding: 8px 0 6px;
+        border: 0;
         border-bottom: 2px solid transparent;
-        font-weight: 500;
-        color: #64748b;
+        background: none;
+        color: $Type-Primary;
         cursor: pointer;
 
         &.active {
-          border-bottom-color: #4a73dc;
-          font-weight: bold;
-          color: #000000;
+          border-bottom-color: $Focus;
+          font-weight: 700;
         }
       }
     }
 
     .tab-content {
-      padding: 20px 24px;
       flex-grow: 1;
+      padding: 20px 16px 24px;
 
       .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--form-section-gap, 16px);
         margin-bottom: 24px;
 
+        &:last-child {
+          margin-bottom: 0;
+        }
+
         .section-title {
-          font-family: 'BC Sans', sans-serif;
           display: block;
+          margin: 0;
           font-size: 12px;
           font-weight: 700;
-          color: #605E5C;
-          margin-bottom: 16px;
+          line-height: 1.5;
+          color: $Grey80;
         }
       }
 
       .form-group {
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        margin-bottom: 16px;
+        gap: 8px;
+        margin: 0;
 
         label {
-          font-size: 13px;
-          color: #475569;
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 1.5;
+          color: $Type-Secondary;
         }
 
-        input,
+        input:not([type='checkbox']):not([type='radio']),
         select,
         textarea {
-          padding: 8px 12px;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          font-size: 14px;
-          outline: none;
-          resize: none;
+          @include text-small-body;
+          @include focus-ring;
+          width: 100%;
+          height: 32px;
+          padding: 0 var(--field-padding-right, 8px) 0 8px;
+          border: 1px solid $Divider;
+          border-radius: 4px;
+          box-sizing: border-box;
+          background: $White;
+          font-family: inherit;
+          color: $Type-Primary;
+        }
 
-          &:focus {
-            border-color: #0284c7;
-          }
+        textarea {
+          height: 112px;
+          padding: 8px;
+          resize: vertical;
+        }
+
+        // Figma: 14px chevron in a 20px box, 8px from the right edge
+        select {
+          padding-right: 36px;
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+          background-repeat: no-repeat;
+          background-position: right 6px center;
+          background-size: 24px 24px;
+          appearance: none;
+          cursor: pointer;
         }
       }
 
@@ -365,129 +274,59 @@
           grid-template-columns: 1fr 1fr 1fr;
         }
       }
-    }
 
-    .form-footer {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      // Inputs with a trailing icon (calendar, password eye)
+      .input-with-icon {
+        --field-padding-right: 36px; // room for the icon
+        position: relative;
 
-      .ride-btn {
-        flex: none;
-        min-height: 36px;
-        margin: 0 auto 20px;
-      }
-    }
-  }
-}
+        .input-icon {
+          position: absolute;
+          top: 50%;
+          right: 12px;
+          transform: translateY(-50%);
+          color: $Type-Primary;
+          pointer-events: none;
+        }
 
-/* Setup Tab Styles */
-.setup-tab {
-  .setup-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+        .icon-btn-toggle {
+          position: absolute;
+          top: 50%;
+          right: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          border: none;
+          background: none;
+          transform: translateY(-50%);
+          color: $Type-Primary;
+          cursor: pointer;
 
-    .camera-id-group {
-      .field-label-sm {
-        display: block;
-        font-size: 12px;
-        color: #64748b;
-        margin-bottom: 2px;
-      }
-
-      .camera-id-value {
-        font-size: 22px;
-        font-weight: 700;
-        color: #0f172a;
-      }
-    }
-
-    .toggle-label-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-size: 14px;
-      color: #334155;
-
-      input[type='checkbox'] {
-        display: none;
-
-        &:checked + .toggle-switch-ui {
-          background-color: #0f3d6c;
-
-          &::before {
-            transform: translateX(16px);
+          &:hover {
+            color: $Type-Secondary;
           }
         }
       }
-
-      .toggle-switch-ui {
-        position: relative;
-        width: 36px;
-        height: 20px;
-        background-color: #cbd5e1;
-        border-radius: 20px;
-        transition: background-color 0.2s;
-
-        &::before {
-          content: '';
-          position: absolute;
-          top: 2px;
-          left: 2px;
-          width: 16px;
-          height: 16px;
-          background-color: #ffffff;
-          border-radius: 50%;
-          transition: transform 0.2s;
-        }
-      }
-    }
-  }
-
-  .form-section {
-    margin-bottom: 28px;
-
-    .section-title {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      color: #475569;
-      margin-bottom: 14px;
-    }
-  }
-
-  /* Inputs with right-aligned icons (Calendar / Password eye) */
-  .input-with-icon {
-    position: relative;
-    display: flex;
-    align-items: center;
-
-    input {
-      width: 100%;
-      padding-right: 36px;
     }
 
-    .input-icon {
-      position: absolute;
-      right: 12px;
-      color: #64748b;
-      pointer-events: none;
-    }
+    // Figma: "publish actions". Sticks to the bottom of the visible area.
+    .form-footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      margin-top: auto;
+      padding: 12px 24px;
+      box-sizing: border-box;
+      background: $White;
+      box-shadow: $Shadow-medium;
 
-    .icon-btn-toggle {
-      position: absolute;
-      right: 8px;
-      background: none;
-      border: none;
-      color: #64748b;
-      padding: 4px 6px;
-      cursor: pointer;
-
-      &:hover {
-        color: #1e293b;
+      .ride-btn {
+        min-height: 36px;
       }
     }
   }
@@ -499,34 +338,36 @@
   gap: 8px;
 
   h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1e293b;
     margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.6875;
+    color: $Type-Primary;
   }
 
+  // Same height as the title so the header does not jump while editing
   .camera-name-input {
     width: 360px;
-    padding: 6px 10px;
-    border: 1px solid #0284c7;
-    border-radius: 6px;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1e293b;
-    outline: none;
+    height: 54px;
+    padding: 0 8px;
+    border: 1px solid $Focus;
+    border-radius: 4px;
     box-sizing: border-box;
-
-    &:focus {
-      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
-    }
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.6875;
+    color: $Type-Primary;
+    outline: none;
   }
 }
 
+// Figma: "Form / Switcher" (28×14)
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 22px;
+  flex-shrink: 0;
+  width: 28px;
+  height: 14px;
 }
 
 .toggle-switch input {
@@ -537,59 +378,38 @@
 
 .slider {
   position: absolute;
-  cursor: pointer;
   inset: 0;
-  background-color: #ccc; /* Off state */
+  border-radius: 999px;
+  background-color: $Grey50;
+  cursor: pointer;
   transition: 0.2s ease;
-  border-radius: 22px;
 }
 
 .slider::before {
   position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  top: 3px;
-  background-color: #ffffff;
-  transition: 0.2s ease;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
+  background-color: $White;
+  content: "";
+  transition: 0.2s ease;
 }
 
-/* Checked state: Deep Navy Blue */
 .toggle-switch input:checked + .slider {
-  background-color: #0b3c6d;
+  background-color: $BC-Blue;
 }
 
-/* Move thumb when checked */
 .toggle-switch input:checked + .slider::before {
-  transform: translateX(18px);
+  transform: translateX(14px);
 }
 
-/* Focus ring */
 .toggle-switch input:focus-visible + .slider {
-  box-shadow: 0 0 0 2px rgba(11, 60, 109, 0.35);
-}
-
-
-
-
-.view-card {
-  cursor: pointer;
-}
-
-.view-card:hover {
-  border-color: #999;
-}
-
-.view-card.selected {
-  border: 2px solid #0078d4;
-}
-
-.view-card:focus-visible {
-  outline: 2px solid #0078d4;
+  outline: 2px solid $Focus;
   outline-offset: 2px;
 }
+
 html {
   scrollbar-gutter: stable;
 }
@@ -652,270 +472,198 @@ html {
 
 
 
+// Figma: "Camera details - expand all views"
+.expanded-views-section {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+  padding: 16px 32px 4px;
+  box-sizing: border-box;
+}
+
 .expanded-views-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.7;
+    color: $Type-Primary;
+  }
 }
 
 .expanded-views-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
+  gap: 36px 22px;
 }
 
-.view-card--expanded .view-card-image {
-  aspect-ratio: 16 / 9; // bigger thumbnail than the sidebar cards
-}
-
-
-.expanded-views-section {
-  width: 100%;
+// Figma: view card, shared by the views grid and the expanded view
+.view-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding-top: 8px;
+  min-width: 0;
+  border: 2px solid $Divider;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background: $White;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease;
 
+  &:hover {
+    border-color: $Grey70;
+  }
 
+  &.selected {
+    border-color: $Focus;
 
-  .expanded-views-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e5e7eb;
-
-    h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #1f2937;
-      margin: 0;
+    .view-card-footer {
+      background: $Blue10;
     }
   }
 
-  .expanded-views-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); // 3 columns as in Figma design
-    gap: 16px;
+  .view-card-select-area {
+    @include focus-ring;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
   }
-}
-/* =====================================================================
-   EXPANDED CAMERA VIEWS - SHARED CARD STYLES
 
-   IMPORTANT:
-   The normal camera cards are styled under:
-       .camera-details-container .media-pane .views-section .views-grid
+  .view-card-image {
+    width: 100%;
+    height: 132px;
+    background-color: $Grey110;
+    overflow: hidden;
 
-   Expanded cards are rendered under:
-       .expanded-views-section .expanded-views-grid
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-   Therefore the styles below intentionally live at the top level so the
-   card footer and status switch are styled in BOTH layouts.
-   ===================================================================== */
+    .placeholder-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: 20px;
+      color: $Grey70;
+    }
+  }
 
-.expanded-views-grid .view-card {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-width: 0;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #ffffff;
-  overflow: hidden;
-  cursor: pointer;
-  text-align: left;
-  color: inherit;
-  font: inherit;
-  transition: border-color 0.15s ease-in-out,
-              box-shadow 0.15s ease-in-out;
-}
+  .view-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background: $White;
+  }
 
-.expanded-views-grid .view-card:hover {
-  border-color: #94a3b8;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
+  .view-info-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
 
-.expanded-views-grid .view-card.selected {
-  border: 2px solid #0284c7;
-  box-shadow: 0 0 0 1px #0284c7;
-}
+  .direction-label {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: $Type-Primary;
+    white-space: nowrap;
+  }
 
-/* Clickable image area */
-.expanded-views-grid .view-card .view-card-select-area {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  height: auto;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  box-sizing: border-box;
-}
+  .view-info-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    font-size: 12px;
+    line-height: 1.5;
+    color: $Type-Secondary;
+    white-space: nowrap;
 
-.expanded-views-grid .view-card .view-card-image,
-.expanded-views-grid .view-card--expanded .view-card-image {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  min-height: 0;
-  background-color: #0f172a;
-  position: relative;
-  overflow: hidden;
-  box-sizing: border-box;
-}
+    .timestamp-icon {
+      width: auto;
+      font-size: 10px;
+    }
+  }
 
-.expanded-views-grid .view-card .view-card-image img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+  // Expanded view: borderless cards with a larger image and a grey 48px footer
+  &.view-card--expanded {
+    border: 0;
+    cursor: default; // not selectable here
 
-.expanded-views-grid .view-card .view-card-image .placeholder-thumb {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: #64748b;
-  font-size: 20px;
-}
+    .view-card-image {
+      height: auto;
+      aspect-ratio: 800 / 468;
+    }
 
-/* ---------------------------------------------------------
-   Expanded card footer
-   --------------------------------------------------------- */
+    .view-card-footer,
+    &.selected .view-card-footer {
+      height: 48px;
+      box-sizing: border-box;
+      background: $Grey10;
+    }
 
-.expanded-views-grid .view-card .view-card-footer {
-  display: flex !important;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  min-height: 44px;
-  height: auto;
-  padding: 8px 10px;
-  margin: 0;
-  box-sizing: border-box;
-  background-color: #ffffff;
-  border-top: 1px solid #f1f5f9;
-  font-size: 12px;
-  color: #1e293b;
-}
+    .direction-label,
+    .view-info-right {
+      font-size: 14px;
+      line-height: 1.5;
+    }
 
-.expanded-views-grid .view-card .view-info-left {
-  display: flex !important;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  flex-shrink: 0;
-}
-
-.expanded-views-grid .view-card .view-info-right {
-  display: flex !important;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  margin-left: auto;
-  color: #64748b;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-/* ---------------------------------------------------------
-   Expanded card ON/OFF switch
-
-   This is deliberately explicit because the original switch styles
-   were nested inside .views-grid and therefore did not match expanded
-   cards.
-   --------------------------------------------------------- */
-
-.expanded-views-grid .view-card .view-info-left .status-toggle-pill {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: flex-start;
-  flex: 0 0 22px;
-  width: 22px !important;
-  min-width: 22px !important;
-  max-width: 22px;
-  height: 13px !important;
-  min-height: 13px !important;
-  max-height: 13px;
-  padding: 2px;
-  margin: 0;
-  box-sizing: border-box;
-  border-radius: 10px;
-  background-color: #cbd5e1;
-  vertical-align: middle;
-  line-height: 0;
-  transition: background-color 0.2s ease;
-}
-
-.expanded-views-grid .view-card .view-info-left .status-toggle-pill .toggle-dot {
-  display: block !important;
-  flex: 0 0 9px;
-  width: 9px !important;
-  min-width: 9px !important;
-  height: 9px !important;
-  min-height: 9px !important;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  border-radius: 50%;
-  background-color: #ffffff;
-  transition: transform 0.2s ease;
-}
-
-.expanded-views-grid .view-card .view-info-left .status-toggle-pill.active {
-  background-color: #1e3a8a;
-}
-
-.expanded-views-grid .view-card .view-info-left .status-toggle-pill.active .toggle-dot {
-  transform: translateX(9px);
-}
-
-.expanded-views-grid .view-card .direction-label {
-  display: inline-block;
-  font-weight: 600;
-  color: #1e293b;
-  white-space: nowrap;
-  line-height: 1.2;
-}
-
-.expanded-views-grid .view-card .timestamp-icon {
-  font-size: 10px;
-  flex-shrink: 0;
-}
-
-.expanded-views-grid .view-card .timestamp-text {
-  white-space: nowrap;
-}
-
-/* Keep the expanded grid responsive */
-@media (max-width: 1100px) {
-  .expanded-views-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    .view-info-right .timestamp-icon {
+      font-size: 12px;
+    }
   }
 }
 
+// Figma: "Form / Switcher" (28×14), the card's on/off button
 .status-toggle-pill {
-  border: none;
-  background-color: #cbd5e1; // keep your existing off-state color
+  @include focus-ring;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 14px;
   padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  box-sizing: border-box;
+  background: $Grey50;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 
-  &:focus-visible {
-    outline: 2px solid #0284c7;
-    outline-offset: 2px;
+  .toggle-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: $White;
+    transition: transform 0.2s ease;
+  }
+
+  &.active {
+    background: $BC-Blue;
+
+    .toggle-dot {
+      transform: translateX(14px);
+    }
   }
 }
 

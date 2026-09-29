@@ -204,7 +204,7 @@ export default function NotesTab({ cameraId }) {
                     </div>
                   </div>
                 ) : (
-                    <>
+                    <div className="note-comment">
                       <p className="note-content">{note.content}</p>
                       {note.author === currentUserId && (
                         <Button variant="link" onClick={() => handleStartEdit(note)}>
@@ -212,7 +212,7 @@ export default function NotesTab({ cameraId }) {
                           Edit note
                         </Button>
                       )}
-                    </>
+                    </div>
                 )}
               </div>
             );

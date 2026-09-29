@@ -812,10 +812,30 @@ export default function CameraDetails({ onBack }) {
         })
       : '1:00 pm PST';
 
-    const handleSelect = () => {
-      handleViewSelect(view.id);
-      if (expanded) setIsExpandedView(false);
-    };
+
+    const thumbnail = (
+      <div className={`view-card-image ${!view.is_on ? 'view-card-image--off' : ''}`}>
+        {(view.image_url || view.drivebc_webcam_id) && !failedThumbs[view.id] ? (
+          <img
+            src={getProxiedImageUrl(view, camera?.id)}
+            alt={view.orientation}
+            onError={() =>
+              setFailedThumbs((prev) => ({ ...prev, [view.id]: true }))
+            }
+          />
+        ) : (
+          <div className="placeholder-thumb placeholder-thumb--unavailable">
+            <FontAwesomeIcon icon={faVideoSlash} />
+          </div>
+        )}
+
+        {!view.is_on && (
+          <span className="camera-off-badge">
+            <FontAwesomeIcon icon={faEyeSlash} />
+          </span>
+        )}
+      </div>
+    );
 
     return (
       <div
@@ -824,35 +844,19 @@ export default function CameraDetails({ onBack }) {
           isSelected ? 'selected' : ''
         }`}
       >
-        <button
-          type="button"
-          className="view-card-select-area"
-          onClick={handleSelect}
-          aria-pressed={isSelected}
-          aria-label={`Select ${view.orientation} view`}
-        >
-          <div className={`view-card-image ${!view.is_on ? 'view-card-image--off' : ''}`}>
-            {(view.image_url || view.drivebc_webcam_id) && !failedThumbs[view.id] ? (
-              <img
-                src={getProxiedImageUrl(view, camera?.id)}
-                alt={view.orientation}
-                onError={() =>
-                  setFailedThumbs((prev) => ({ ...prev, [view.id]: true }))
-                }
-              />
-            ) : (
-              <div className="placeholder-thumb placeholder-thumb--unavailable">
-                <FontAwesomeIcon icon={faVideoSlash} />
-              </div>
-            )}
-
-            {!view.is_on && (
-              <span className="camera-off-badge">
-                <FontAwesomeIcon icon={faEyeSlash} />
-              </span>
-            )}
-          </div>
-        </button>
+        {expanded ? (
+          thumbnail
+        ) : (
+          <button
+            type="button"
+            className="view-card-select-area"
+            onClick={() => handleViewSelect(view.id)}
+            aria-pressed={isSelected}
+            aria-label={`Select ${view.orientation} view`}
+          >
+            {thumbnail}
+          </button>
+        )}
 
         <div className="view-card-footer">
           <div className="view-info-left">

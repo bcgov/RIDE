@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDays,
-  faWifiSlash,
+  faWifiExclamation,
   faCircleCheck,
 } from '@fortawesome/pro-regular-svg-icons';
 import DatePicker from 'react-datepicker';
@@ -120,7 +120,7 @@ export default function LogsTab({ cameraId, refreshKey }) {
 
               <div className="log-details">
                 <FontAwesomeIcon
-                  icon={log.is_error ? faWifiSlash : faCircleCheck}
+                  icon={log.is_error ? faWifiExclamation : faCircleCheck}
                   className={log.is_error ? 'error-icon' : 'success-icon'}
                 />
                 <span className="log-message">{log.message}</span>

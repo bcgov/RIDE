@@ -88,7 +88,7 @@
   // the width of its shape instead of Font Awesome's fixed 1.25em box.
   &--link {
     @include text-label;
-    min-height: 0;
+    min-height: 20px; // Figma: the icon's line-height sets the link's height
     gap: 4px;
     padding: 0;
     border: 0;

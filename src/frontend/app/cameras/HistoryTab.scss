@@ -1,3 +1,11 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// Figma: History tab. Cards sit 12px from the panel edges instead of 16px.
+.camera-details-container .form-pane .tab-content.history-tab {
+  padding: 20px 12px 12px;
+}
+
 .history-tab {
   display: flex;
   flex-direction: column;
@@ -5,99 +13,129 @@
 }
 
 .history-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 12px;
+  border: 1px solid $Divider;
+  border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: $White;
 }
 
 .history-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
-  background: #f4f5f7;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: $Grey20;
+
+  .ride-btn--outlined {
+    background: $Grey10;
+  }
 }
 
 .timestamp-title {
-  font-size: 14px;
-  color: #111827;
-  font-weight: bold;
+  @include text-label;
+  font-weight: 700;
+  color: $Type-Primary;
 }
 
 .history-card-body {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 12px;
 }
 
 .history-section {
-  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .category-label {
   display: block;
   font-size: 12px;
-  color: #9ca3af;
-  margin-bottom: 8px;
+  line-height: 1.5;
+  color: $Type-Secondary;
 }
 
 .actions-list {
-  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .action-item {
-  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .action-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
+  gap: 4px;
   font-size: 14px;
-  color: #111827;
+  font-weight: 700;
+  line-height: 1.4286;
+  color: $Type-Primary;
 }
 
 .action-icon {
-  font-size: 13px;
-  color: #6b7280;
+  width: 19px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: $Type-Secondary;
 }
 
 .value-chips {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 6px;
-  margin-left: 22px;
+  padding: 0 20px;
 }
 
 .chip {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  width: fit-content;
+  display: block;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.4286;
 }
 
 .chip-new {
-  background: #dcfce7;
-  color: #166534;
+  background: $Green20;
+  color: $Green-text;
 }
 
 .chip-old {
-  background: #fee2e2;
-  color: #991b1b;
+  background: $Surface-major;
+  color: $Red-dark;
   text-decoration: line-through;
+}
+
+// Figma: view changes use the lighter green
+.history-section--views .chip-new {
+  background: $Green10;
 }
 
 .history-footer {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
-  font-size: 13px;
-  color: #6b7280;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.3333;
+  letter-spacing: 0.3px;
+  color: $Type-Secondary;
+
+  svg {
+    width: auto;
+    font-size: 10px;
+  }
 }

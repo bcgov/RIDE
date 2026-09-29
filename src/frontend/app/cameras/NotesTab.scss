@@ -1,85 +1,86 @@
-.notes-card {
-  padding: 0;
-}
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
 
+// Figma: Notes tab. An "Entries" header, then one block per note.
 .notes-card-header {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  padding-bottom: 8px;
 }
 
 .notes-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
   margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: $Grey100;
 }
 
 .notes-list {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .note-item {
-  padding: 14px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.note-item:last-child {
-  border-bottom: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
 }
 
 .note-item-header {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 4px;
-}
-
-.author-info {
-  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
-.author-name {
+.note-item .author-name {
   font-weight: 700;
-  font-size: 14px;
-  color: #111827;
-}
-
-.note-icon {
-  display: none; /* mock doesn't show an icon next to the name */
+  color: $Type-Secondary;
 }
 
 .updated-time {
-  font-size: 13px;
-  color: #9ca3af;
+  color: $Grey80;
+}
+
+// The note text and its "Edit note" link sit 8px apart
+.note-comment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .note-content {
+  width: 100%;
+  margin: 0;
   font-size: 14px;
-  color: #374151;
   line-height: 1.5;
-  margin: 0 0 6px 0;
+  color: $Type-Primary;
   white-space: pre-wrap;
 }
 
 .add-note-form,
 .edit-note-form {
-  margin-bottom: 14px;
-}
+  margin-bottom: 8px;
 
-.add-note-form textarea,
-.edit-note-form textarea {
-  width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
+  textarea {
+    @include text-small-body;
+    @include focus-ring;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid $Divider;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background: $White;
+    font-family: inherit;
+    color: $Type-Primary;
+    resize: vertical;
+  }
 }
 
 .form-actions {
@@ -91,7 +92,7 @@
 
 .notes-loading,
 .notes-empty {
-  color: #9ca3af;
-  font-size: 14px;
-  padding: 12px 0;
+  @include text-small-body;
+  margin: 0;
+  color: $Type-Secondary;
 }

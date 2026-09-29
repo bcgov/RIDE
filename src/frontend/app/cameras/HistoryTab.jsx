@@ -143,7 +143,7 @@ export default function HistoryTab({ cameraId }) {
             {!isCollapsed && (
               <div className="history-card-body">
                 {entry.sections?.map((section, idx) => (
-                  <div key={`section-${section.actions[0].type}-${section.actions[0].text}-${section.actions[0].subtext}`} className="history-section">
+                  <div key={`section-${section.actions[0].type}-${section.actions[0].text}-${section.actions[0].subtext}`} className={`history-section history-section--${String(section.category).toLowerCase()}`}>
                     <span className="category-label">{section.category}</span>
 
                     <ul className="actions-list">
