@@ -144,45 +144,41 @@ export default function Home() {
     modalRef.current?.close();
   }
 
-  const hasOrganization = (authContext.service_areas || []).length > 0;
-
   return authContext.loginStateKnown && authContext.username && (
     <div className="events-home">
-      { hasOrganization &&
-        <div className="panel">
-          <h3>Events</h3>
-          <Tabs>
-            <Tabs.Tab name='active' label='Active'>
-              <Events dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} current={event} />
-            </Tabs.Tab>
+      <div className="panel">
+        <h3>Events</h3>
+        <Tabs>
+          <Tabs.Tab name='active' label='Active'>
+            <Events dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} current={event} />
+          </Tabs.Tab>
 
-            <Tabs.Tab name='queue' label={
-              <span>
-                Awaiting Approval
-                <Bubble classes={'num'} selector={memoizedPending} />
-              </span>
-            }>
-              <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
-            </Tabs.Tab>
-          </Tabs>
+          <Tabs.Tab name='queue' label={
+            <span>
+              Awaiting Approval
+              <Bubble classes={'num'} selector={memoizedPending} />
+            </span>
+          }>
+            <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
+          </Tabs.Tab>
+        </Tabs>
 
-          { (event.showForm || event.showHistory) && event.location.start.name &&
-            <div className="form-overlay">
-              <EventForm
-                map={mapRef.current}
-                preview={() => setPreview(!preview)}
-                cancel={cancel}
-                event={event}
-                eventDispatch={dispatch}
-                computed={computed}
-                visibleLayers={visibleLayers}
-                serviceAreaBoundaries={serviceAreaBoundaries}
-                goToFunc={centerMap}
-                setAlertContext={setAlertContext} />
-            </div>
-          }
-        </div>
-      }
+        { (event.showForm || event.showHistory) && event.location.start.name &&
+          <div className="form-overlay">
+            <EventForm
+              map={mapRef.current}
+              preview={() => setPreview(!preview)}
+              cancel={cancel}
+              event={event}
+              eventDispatch={dispatch}
+              computed={computed}
+              visibleLayers={visibleLayers}
+              serviceAreaBoundaries={serviceAreaBoundaries}
+              goToFunc={centerMap}
+              setAlertContext={setAlertContext} />
+          </div>
+        }
+      </div>
 
       <MapContext.Provider value={{ map, setMap }}>
         <Map dispatch={dispatch} event={event} clickHandler={clickHandler}>

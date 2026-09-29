@@ -203,10 +203,6 @@ export default function EventsLayer({ event, dispatch }) {
       (authContext?.service_areas || []).map((id) => String(id))
     );
 
-    if (userAreaIds.size === 0) {
-      return []; // user has no organization, so no area permissions
-    };
-
     const authorizedBoundaries = Object.values(serviceAreaBoundaries || {}).filter((boundary) => (
       boundary?.geometry && userAreaIds.has(String(boundary.id))
     ));
