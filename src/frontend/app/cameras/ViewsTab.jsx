@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faCheck, faXmark } from '@fortawesome/pro-regular-svg-icons';
 import Button from '../components/shared/Button.jsx';
+import Switch from '../components/shared/Switch.jsx';
 import './ViewsTab.scss';
 import { getCookie } from "../shared/helpers.js";
 
@@ -146,15 +147,11 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
             {/* View Header Row */}
             <div className="view-header">
               <div className="view-header-left">
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={is_on}
-                    onChange={(e) => handleToggle(id, e.target.checked)}
-                    aria-label={`Toggle ${view.name}`}
-                  />
-                  <span className="slider round" />
-                </label>
+                <Switch
+                  checked={is_on}
+                  onChange={(next) => handleToggle(id, next)}
+                  aria-label={`${displayTitle} view`}
+                />
 
                 {isEditing ? (
                   <input
@@ -207,7 +204,7 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
 
                 <div className="form-group">
                   <label htmlFor={`view-path-${id}`}>
-                    Path to this view's image
+                    Path to this view&apos;s image
                   </label>
                   <input
                     type="text"

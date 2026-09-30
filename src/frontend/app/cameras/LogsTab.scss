@@ -19,9 +19,7 @@
     border: 0;
     border-radius: 8px;
     background: $Grey20;
-    font-size: 0.875rem;
-    font-weight: 700;
-    line-height: 1.5;
+    @include text-small-body-bold;
     color: $Grey80;
     cursor: pointer;
 
@@ -51,9 +49,7 @@
         flex-shrink: 0;
         width: 130px;
         min-height: 21px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        line-height: 1.5;
+        @include text-label-bold;
         color: $Grey80;
       }
 

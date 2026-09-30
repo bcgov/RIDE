@@ -196,9 +196,7 @@
   flex-shrink: 0;
   width: 164px;
   height: 40px;
-  font-size: 0.875rem;
-  font-weight: 700;
-  line-height: 1.5;
+  @include text-small-body-bold;
   color: $Type-Primary;
 }
 
@@ -227,6 +225,16 @@
     border-color: $Focus;
     background: $Blue10;
     color: $BC-Blue;
+  }
+
+  // Figma: "Form / checklist item" hover (unselected items only)
+  &:not(&--selected):hover {
+    background: $Grey10;
+    color: $Type-Secondary;
+
+    input {
+      border-color: $Grey100;
+    }
   }
 
   input {
@@ -271,9 +279,7 @@
   flex-shrink: 0;
   width: 287px;
   height: 40px;
-  font-size: 0.875rem;
-  font-weight: 700;
-  line-height: 1.5;
+  @include text-small-body-bold;
   color: $Type-Secondary;
 }
 

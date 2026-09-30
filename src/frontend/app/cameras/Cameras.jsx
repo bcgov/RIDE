@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   faMagnifyingGlass,
   faXmark,
@@ -12,7 +12,6 @@ import {
   faBolt,
   faFire,
   faCopy,
-  faCheckCircle, 
   faVideoSlash
 } from '@fortawesome/pro-regular-svg-icons';
 import { faEyeSlash } from '@fortawesome/pro-solid-svg-icons';
@@ -21,6 +20,7 @@ import DisableViewModal from './DisableViewModal.jsx';
 import ExportReportModal from './ExportReportModal.jsx';
 import Toast from './Toast.jsx';
 import Button from '../components/shared/Button.jsx';
+import Switch from '../components/shared/Switch.jsx';
 import Flyout, { FlyoutItem, FlyoutSection } from '../components/shared/Flyout.jsx';
 import Sidebar, { SidebarLayout, SidebarNav, SidebarOptionsAccordion } from '../components/shared/Sidebar.jsx';
 import { AuthContext } from '../contexts';
@@ -58,9 +58,8 @@ function CameraViewCard({ view, camera, onSelectCamera, onToggleView }) {
     <div className="camera-card">
       <button
         type="button"
-        className={`camera-image ${!isOn ? 'camera-image--off' : ''}`}
+        className={['camera-image', !isOn && 'camera-image--off', isStale && 'camera-image--stale', isDelayed && 'camera-image--delayed'].filter(Boolean).join(' ')}
         onClick={() => onSelectCamera?.(camera, view)}
-        style={{ cursor: 'pointer' }}
       >
         {isUnavailable ? (
           <div className="camera-image-placeholder">
@@ -98,19 +97,12 @@ function CameraViewCard({ view, camera, onSelectCamera, onToggleView }) {
       </button>
 
       <div className="camera-card-footer">
+        <Switch
+          checked={isOn}
+          onChange={() => onToggleView?.(camera, view)}
+          aria-label={`${direction || 'Camera'} view`}
+        />
         <span className="camera-direction">{direction || 'Camera'}</span>
-        <button
-          type="button"
-          className={`camera-switch ${isOn ? 'camera-switch--on' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation(); // prevent triggering onSelectCamera on the parent button
-            onToggleView?.(camera, view);
-          }}
-          aria-label={isOn ? 'Turn view off' : 'Turn view on'}
-          aria-pressed={isOn}
-        >
-          <span />
-        </button>
       </div>
     </div>
   );
@@ -216,13 +208,15 @@ function CameraRow({
   return (
     <section className="camera-location">
       <div className="camera-location-header">
-        <div className="camera-location-title-group">
-          <div className="camera-location-meta">
-            <h4 className="camera-landmark">{camera.title}</h4>
-            <div className="camera-update-time">
-              <FontAwesomeIcon icon={faRotate} />
-              <RelativeUpdateTime lastUpdated={latestUpdated} />
-            </div>
+        <div className="camera-location-meta">
+          <h4 className="camera-landmark">
+            <Link to={`/cameras/${camera.id}`} state={{ camera }} className="camera-landmark__link">
+              {camera.title}
+            </Link>
+          </h4>
+          <div className="camera-update-time">
+            <FontAwesomeIcon icon={faRotate} />
+            <RelativeUpdateTime lastUpdated={latestUpdated} />
           </div>
         </div>
 
@@ -1232,19 +1226,11 @@ export default function Cameras() {
 
     {/* SUCCESS TOAST */}
     {serviceRequestSent && (
-      <div className="service-request-toast">
-        <FontAwesomeIcon icon={faCheckCircle} />
-
-        <span>Service request sent successfully</span>
-
-        <button
-          type="button"
-          onClick={() => setServiceRequestSent(false)}
-          aria-label="Close notification"
-        >
-          <FontAwesomeIcon icon={faXmark} />
-        </button>
-      </div>
+      <Toast
+        message="Service request sent successfully"
+        variant="success"
+        onClose={() => setServiceRequestSent(false)}
+      />
     )}
 
     {disableModalTarget && (

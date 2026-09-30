@@ -138,6 +138,16 @@
     }
   }
 
+  // Figma: destructive confirmation (e.g. "Delete organization")
+  &--danger.ride-btn--filled {
+    background: $Error;
+    color: $White;
+
+    &:hover:not(:disabled) {
+      background: $Red-dark;
+    }
+  }
+
   &--outlined {
     border-color: $Divider;
     background: $White;

@@ -1,18 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClock, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import {
-  faClock,
-  faXmark,
-  faPlay,
+  faBackwardStep,
+  faForwardStep,
   faPause,
-  faStepBackward,
-  faStepForward,
-  faDownload,
-} from '@fortawesome/pro-regular-svg-icons';
-import { faVideoSlash } from '@fortawesome/pro-solid-svg-icons';
-import './Modal.scss';
+  faPlay,
+  faVideoSlash,
+} from '@fortawesome/pro-solid-svg-icons';
 import './TimelapseModal.scss';
+import Button from '../components/shared/Button.jsx';
+import Dialog, { DialogCancel } from '../components/shared/Dialog.jsx';
 import { getCookie } from "../shared/helpers.js";
+
+// 'NORTH' -> 'North'
+const orientationLabel = (orientation) =>
+  orientation.charAt(0) + orientation.slice(1).toLowerCase();
 
 export default function TimelapseModal({ camera, selectedView, onClose }) {
   const [timestamps, setTimestamps] = useState([]);
@@ -20,27 +23,6 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const dialogRef = useRef(null);
-
-  useEffect(() => {
-    dialogRef.current?.showModal();
-  }, []);
-
-  // Click-outside-to-close, attached imperatively rather than via a JSX
-  // onClick prop — jsx-a11y flags mouse/keyboard handlers on <dialog>
-  // as a non-interactive element; addEventListener isn't scanned by that rule.
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return undefined;
-
-    const handleBackdropClick = (event) => {
-      if (event.target === dialog) onClose();
-    };
-
-    dialog.addEventListener('click', handleBackdropClick);
-    return () => dialog.removeEventListener('click', handleBackdropClick);
-  }, [onClose]);
-
   // Default timeframe: past 24 hours
   const now = new Date();
   const past24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -183,16 +165,9 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
     link.remove();
   };
 
-  // ESC key fires 'cancel' before the browser closes the dialog natively.
-  // Prevent that default and route the close through the parent instead.
-  const handleCancel = (event) => {
-    event.preventDefault();
-    onClose();
-  };
-
   const viewOrientation = selectedView?.orientation || '';
   const modalTitle = `Timelapse for ${camera?.title || 'Camera'}${
-    viewOrientation ? ` - ${viewOrientation}` : ''
+    viewOrientation ? ` - ${orientationLabel(viewOrientation)}` : ''
   }`;
 
   // Picks what to show in the display pane. Uses early returns instead of a
@@ -219,117 +194,99 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
       );
     }
 
-    return (
-      <>
-        <img src={currentImageUrl} alt={`Frame ${currentTimestamp}`} />
-        <div className="timestamp-overlay">
-          {formatTimestamp(currentTimestamp)}
-        </div>
-      </>
-    );
+    return <img src={currentImageUrl} alt={`Frame from ${formatTimestamp(currentTimestamp)}`} />;
   };
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="modal-content timelapse-modal"
-      aria-labelledby="timelapse-modal-title"
-      onCancel={handleCancel}
+    <Dialog
+      icon={faClock}
+      title={modalTitle}
+      onClose={onClose}
+      message
+      actions={
+        <>
+          <Button onClick={handleSaveImages} disabled={timestamps.length === 0}>
+            Save image
+            <FontAwesomeIcon icon={faDownload} />
+          </Button>
+          <DialogCancel onClick={onClose} />
+        </>
+      }
     >
-      {/* HEADER */}
-      <div className="modal-header">
-        <FontAwesomeIcon icon={faClock} />
-        <h2 id="timelapse-modal-title">{modalTitle}</h2>
-        <button type="button" onClick={onClose} aria-label="Close modal">
-          <FontAwesomeIcon icon={faXmark} />
-        </button>
-      </div>
+      <div className="timelapse-body">
+        {/* 1. TIMEFRAME SELECTION */}
+        <div className="timelapse-timeframe">
+          <label className="timelapse-field">
+            Beginning:
+            <input
+              type="datetime-local"
+              className="ride-dialog__input"
+              value={beginTime}
+              onChange={(e) => setBeginTime(e.target.value)}
+            />
+          </label>
+          <label className="timelapse-field">
+            Ending:
+            <input
+              type="datetime-local"
+              className="ride-dialog__input"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+            />
+          </label>
+        </div>
 
-      {/* 1. TIMEFRAME SELECTION */}
-      <div className="timelapse-timeframe">
-        <label>
-          Beginning:
+        {/* 2. DISPLAY PANE */}
+        <div className="timelapse-display">
+          {renderDisplayContent()}
+        </div>
+
+        {/* 3. PLAY CONTROLS & SCRUBBER */}
+        <div className="timelapse-controls">
+          <div className="timelapse-play-controls">
+            <button
+              type="button"
+              className="ctrl-btn"
+              onClick={handlePrev}
+              disabled={currentIndex === 0 || loading}
+              aria-label="Previous frame"
+            >
+              <FontAwesomeIcon icon={faBackwardStep} />
+            </button>
+
+            <button
+              type="button"
+              className="ctrl-btn ctrl-btn--play"
+              onClick={() => setIsPlaying(!isPlaying)}
+              disabled={timestamps.length === 0 || loading}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+            </button>
+
+            <button
+              type="button"
+              className="ctrl-btn"
+              onClick={handleNext}
+              disabled={currentIndex === timestamps.length - 1 || loading}
+              aria-label="Next frame"
+            >
+              <FontAwesomeIcon icon={faForwardStep} />
+            </button>
+          </div>
+
           <input
-            type="datetime-local"
-            value={beginTime}
-            onChange={(e) => setBeginTime(e.target.value)}
+            type="range"
+            min="0"
+            max={timestamps.length > 0 ? timestamps.length - 1 : 0}
+            value={currentIndex}
+            onChange={(e) => setCurrentIndex(Number(e.target.value))}
+            disabled={timestamps.length === 0 || loading}
+            className="timelapse-scrubber"
+            aria-label={`Frame ${timestamps.length > 0 ? currentIndex + 1 : 0} of ${timestamps.length}`}
           />
-        </label>
-        <label>
-          Ending:
-          <input
-            type="datetime-local"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
-        </label>
+        </div>
       </div>
-
-      {/* 2. DISPLAY PANE */}
-      <div className="timelapse-display">
-        {renderDisplayContent()}
-      </div>
-
-      {/* 3. SCRUBBER & CONTROLS */}
-      <div className="timelapse-controls">
-        <button
-          type="button"
-          className="ctrl-btn"
-          onClick={handlePrev}
-          disabled={currentIndex === 0 || loading}
-        >
-          <FontAwesomeIcon icon={faStepBackward} />
-        </button>
-
-        <button
-          type="button"
-          className="ctrl-btn play-btn"
-          onClick={() => setIsPlaying(!isPlaying)}
-          disabled={timestamps.length === 0 || loading}
-        >
-          <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
-        </button>
-
-        <button
-          type="button"
-          className="ctrl-btn"
-          onClick={handleNext}
-          disabled={currentIndex === timestamps.length - 1 || loading}
-        >
-          <FontAwesomeIcon icon={faStepForward} />
-        </button>
-
-        <input
-          type="range"
-          min="0"
-          max={timestamps.length > 0 ? timestamps.length - 1 : 0}
-          value={currentIndex}
-          onChange={(e) => setCurrentIndex(Number(e.target.value))}
-          disabled={timestamps.length === 0 || loading}
-          className="timelapse-scrubber"
-        />
-
-        <span className="frame-counter">
-          {timestamps.length > 0 ? `${currentIndex + 1} / ${timestamps.length}` : '0 / 0'}
-        </span>
-      </div>
-
-      {/* 4. ACTIONS */}
-      <div className="modal-actions">
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={handleSaveImages}
-          disabled={timestamps.length === 0}
-        >
-          <span>Save image</span>
-          <FontAwesomeIcon icon={faDownload} />
-        </button>
-        <button type="button" className="btn-text" onClick={onClose}>
-          <span>Cancel</span>
-          <FontAwesomeIcon icon={faXmark} />
-        </button>
-      </div>
-    </dialog>
+    </Dialog>
   );
 }

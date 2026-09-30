@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router";
 import {
@@ -27,6 +27,7 @@ import NotesTab from './NotesTab.jsx';
 import LogsTab from './LogsTab.jsx';
 import HistoryTab from './HistoryTab.jsx';
 import Button from '../components/shared/Button.jsx';
+import Switch from '../components/shared/Switch.jsx';
 import Flyout, { FlyoutItem, FlyoutSection } from '../components/shared/Flyout.jsx';
 import Sidebar, {
   SidebarAccordion,
@@ -860,19 +861,12 @@ export default function CameraDetails({ onBack }) {
 
         <div className="view-card-footer">
           <div className="view-info-left">
-            <button
-              type="button"
-              className={`status-toggle-pill ${view.is_on ? 'active' : ''}`}
+            <Switch
+              checked={view.is_on}
+              onChange={() => handleToggleView(view)}
               title={view.is_on ? 'Active' : 'Inactive'}
-              aria-label={view.is_on ? 'Turn view off' : 'Turn view on'}
-              aria-pressed={view.is_on}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleToggleView(view);
-              }}
-            >
-              <span className="toggle-dot" />
-            </button>
+              aria-label={`${orientationLabel(view.orientation)} view`}
+            />
             <span className="direction-label">
               {orientationLabel(view.orientation)}
             </span>
@@ -1115,7 +1109,7 @@ export default function CameraDetails({ onBack }) {
                   ) : (
                     <div className="image-placeholder">
                       <FontAwesomeIcon icon={faVideoSlash} />
-                      <span className="camera-status camera-status--unavailable-details">
+                      <span className="image-unavailable-badge">
                         Unavailable
                       </span>
                     </div>

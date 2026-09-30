@@ -17,8 +17,7 @@
     .camera-id-group {
       .field-label-sm {
         display: block;
-        font-size: 0.75rem;
-        line-height: 1.5;
+        @include text-label-regular;
         color: $Type-Primary;
       }
 
@@ -38,53 +37,6 @@
       cursor: pointer;
       color: $Type-Secondary;
       @include text-small-body;
-
-      input[type='checkbox'] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-
-        &:focus-visible + .toggle-switch-ui {
-          outline: 2px solid $Focus;
-          outline-offset: 2px;
-        }
-      }
-
-      .toggle-switch-ui {
-        position: relative;
-        flex-shrink: 0;
-        width: 28px;
-        height: 14px;
-        border-radius: 999px;
-        background-color: $Grey50;
-        transition: background-color 0.15s ease;
-
-        &::after {
-          content: '';
-          position: absolute;
-          top: 2px;
-          left: 2px;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background-color: $White;
-          transition: transform 0.15s ease;
-        }
-      }
-
-      input:checked + .toggle-switch-ui {
-        background-color: $BC-Blue;
-
-        &::after {
-          transform: translateX(14px);
-        }
-      }
-
-      // Figma: "Form / Switcher" hover (on state only)
-      &:hover input:checked + .toggle-switch-ui {
-        background-color: $BtnHover-Primary;
-      }
     }
   }
 }

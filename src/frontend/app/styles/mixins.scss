@@ -26,3 +26,30 @@
   line-height: 1.3333;
   letter-spacing: 0.3px;
 }
+
+// Figma "bold/smallBody": 14px bold text, 21px line-height
+@mixin text-small-body-bold {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+// Figma "regular/label": 12px text, 18px line-height
+@mixin text-label-regular {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+// Figma "bold/label": 12px bold text, 18px line-height
+@mixin text-label-bold {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+// Figma "bold/H5": 20px bold text, 34px line-height
+@mixin text-heading-5 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.7;
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDays,
@@ -7,11 +7,10 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 import './SetupTab.scss';
 
-// import DatePicker from 'react-datepicker';
-import { format, parse, isValid } from 'date-fns';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import Switch from '../components/shared/Switch.jsx';
 
 export default function SetupTab({ setupData, onChange }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -169,12 +168,10 @@ export default function SetupTab({ setupData, onChange }) {
           <div className="camera-id-value">{setupData.cameraId}</div>
         </div>
         <label className="toggle-label-group">
-          <input
-            type="checkbox"
+          <Switch
             checked={setupData.onDemand}
-            onChange={(e) => onChange('onDemand', e.target.checked)}
+            onChange={(next) => onChange('onDemand', next)}
           />
-          <span className="toggle-switch-ui" />
           <span className="toggle-text">On-demand camera</span>
         </label>
       </div>

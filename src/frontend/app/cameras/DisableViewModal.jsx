@@ -1,34 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faVideoSlash } from '@fortawesome/pro-regular-svg-icons';
-import './DisableViewModal.scss';
+import { faVideoSlash } from '@fortawesome/pro-regular-svg-icons';
 
-export default function DisableViewModal({ view, camera, onClose, onConfirm }) {
+// Components
+import Button from '../components/shared/Button.jsx';
+import Dialog, { DialogCancel } from '../components/shared/Dialog.jsx';
+
+export default function DisableViewModal({ view, onClose, onConfirm }) {
   const [reason, setReason] = useState('');
   const [shortDescription, setShortDescription] = useState('');
   const [longDescription, setLongDescription] = useState('');
   const [loadingDefaults, setLoadingDefaults] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const dialogRef = useRef(null);
-
-  useEffect(() => {
-    dialogRef.current?.showModal();
-  }, []);
-
-  // Click-outside-to-close, attached imperatively rather than via a JSX
-  // onClick prop — jsx-a11y flags mouse/keyboard handlers on <dialog>
-  // as a non-interactive element; addEventListener isn't scanned by that rule.
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return undefined;
-
-    const handleBackdropClick = (event) => {
-      if (event.target === dialog) onClose();
-    };
-
-    dialog.addEventListener('click', handleBackdropClick);
-    return () => dialog.removeEventListener('click', handleBackdropClick);
-  }, [onClose]);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,37 +61,33 @@ export default function DisableViewModal({ view, camera, onClose, onConfirm }) {
     }
   };
 
-  // ESC key fires 'cancel' before the browser closes the dialog natively.
-  // Prevent that default and route the close through the parent instead.
-  const handleCancel = (event) => {
-    event.preventDefault();
-    onClose();
-  };
-
   return (
-    <dialog
-      ref={dialogRef}
-      className="disable-view-modal"
-      aria-labelledby="disable-view-modal-title"
-      onCancel={handleCancel}
+    <Dialog
+      icon={faVideoSlash}
+      title="Disable view visibility"
+      onClose={onClose}
+      actions={
+        <>
+          <Button onClick={handleDisable} disabled={!canSubmit}>
+            {submitting ? 'Disabling…' : 'Disable view'}
+            <FontAwesomeIcon icon={faVideoSlash} />
+          </Button>
+          <DialogCancel onClick={onClose} />
+        </>
+      }
     >
-      <div className="modal-header">
-        <FontAwesomeIcon icon={faVideoSlash} />
-        <h2 id="disable-view-modal-title">Disable view visibility</h2>
-        <button type="button" onClick={onClose} aria-label="Close">
-          <FontAwesomeIcon icon={faXmark} />
-        </button>
+      <div className="ride-dialog__field">
+        <p className="ride-dialog__section-title">
+          Disabled view is blacked-out on DriveBC:
+        </p>
+        <p className="ride-dialog__value">{orientationLabelSafe(view)} view</p>
       </div>
 
-      <p className="modal-subtitle">
-        Disabled view is blacked-out on DriveBC:
-      </p>
-      <h3>{orientationLabelSafe(view)} view</h3>
-
-      <label className="modal-field">
-        <span>Reason for disabling</span>
+      <label className="ride-dialog__field">
+        <span className="ride-dialog__label">Reason for disabling</span>
         <input
           type="text"
+          className="ride-dialog__input"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="Traffic accident"
@@ -116,41 +95,28 @@ export default function DisableViewModal({ view, camera, onClose, onConfirm }) {
         />
       </label>
 
-      <label className="modal-field">
-        <span>Short description for disabled view displayed on DriveBC</span>
+      <label className="ride-dialog__field">
+        <span className="ride-dialog__label">Short description for disabled view displayed on DriveBC</span>
         <input
           type="text"
+          className="ride-dialog__input"
           value={shortDescription}
           onChange={(e) => setShortDescription(e.target.value)}
           disabled={loadingDefaults}
         />
       </label>
 
-      <label className="modal-field">
-        <span>Long description for the disabled view on DriveBC</span>
+      <label className="ride-dialog__field">
+        <span className="ride-dialog__label">Long description for the disabled view on DriveBC</span>
         <textarea
           rows={4}
+          className="ride-dialog__input"
           value={longDescription}
           onChange={(e) => setLongDescription(e.target.value)}
           disabled={loadingDefaults}
         />
       </label>
-
-      <div className="modal-actions">
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={handleDisable}
-          disabled={!canSubmit}
-        >
-          <FontAwesomeIcon icon={faVideoSlash} />
-          {submitting ? 'Disabling…' : 'Disable view'}
-        </button>
-        <button type="button" className="btn-text" onClick={onClose}>
-          Cancel <FontAwesomeIcon icon={faXmark} />
-        </button>
-      </div>
-    </dialog>
+    </Dialog>
   );
 }
 

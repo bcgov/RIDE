@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEnvelope,
-  faXmark,
   faPaperPlane,
 } from '@fortawesome/pro-regular-svg-icons';
 import './ServiceRequestModal.scss';
+import Button from '../components/shared/Button.jsx';
+import Dialog, { DialogCancel } from '../components/shared/Dialog.jsx';
 import { API_HOST } from '../env.js';
 import { getCookie } from "../shared/helpers.js";
 
@@ -70,22 +71,6 @@ export default function ServiceRequestModal({
     • Camera Control Panel
     • DriveBC`
       );
-
-  const dialogRef = useRef(null);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-
-    if (dialog && !dialog.open) {
-      dialog.showModal();
-    }
-
-    return () => {
-      if (dialog?.open) {
-        dialog.close();
-      }
-    };
-  }, []);
 
   useEffect(() => {
     setSubject(
@@ -177,100 +162,54 @@ export default function ServiceRequestModal({
     }
   };
 
-  const handleClose = () => {
-    const dialog = dialogRef.current;
-
-    if (dialog?.open) {
-      dialog.close();
-    }
-
-    onClose();
-  };
-
   return (
-    <dialog
-      ref={dialogRef}
-      className="service-request-modal"
-      aria-labelledby="service-request-title"
-      onCancel={onClose}
+    <Dialog
+      icon={faEnvelope}
+      title="Camera service request"
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      message
+      actions={
+        <>
+          <Button type="submit">
+            Send request
+            <FontAwesomeIcon icon={faPaperPlane} />
+          </Button>
+          <DialogCancel onClick={onClose} />
+        </>
+      }
     >
-        <div className="service-request-modal-header">
-          <div className="service-request-modal-title">
-            <FontAwesomeIcon icon={faEnvelope} />
+      <div className="service-request-fields">
+        <RecipientRow
+          label="To"
+          recipients={toRecipients}
+          type="to"
+          onToggle={toggleRecipient}
+        />
 
-            <h2 id="service-request-title">
-              Camera service request
-            </h2>
-          </div>
+        <RecipientRow
+          label="CC"
+          recipients={ccRecipients}
+          type="cc"
+          onToggle={toggleRecipient}
+        />
 
-          <button
-            type="button"
-            className="service-request-close"
-            onClick={handleClose}
-            aria-label="Close service request"
-          >
-            <FontAwesomeIcon icon={faXmark} />
-          </button>
-        </div>
+        <input
+          type="text"
+          className="ride-dialog__input service-request-subject"
+          aria-label="Subject"
+          value={subject}
+          onChange={(event) => setSubject(event.target.value)}
+        />
 
-        <form onSubmit={handleSubmit}>
-          <div className="service-request-content">
-
-            <RecipientRow
-              label="To"
-              recipients={toRecipients}
-              type="to"
-              onToggle={toggleRecipient}
-            />
-
-            <RecipientRow
-              label="CC"
-              recipients={ccRecipients}
-              type="cc"
-              onToggle={toggleRecipient}
-            />
-
-            <input
-              type="text"
-              className="service-request-subject"
-              value={subject}
-              onChange={(event) =>
-                setSubject(event.target.value)
-              }
-            />
-
-            <textarea
-              className="service-request-body"
-              value={body}
-              onChange={(event) =>
-                setBody(event.target.value)
-              }
-            />
-          </div>
-
-          <div className="service-request-modal-footer">
-            <button
-              type="submit"
-              className="send-request-button"
-            >
-              Send request
-
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </button>
-
-            <button
-              type="button"
-              className="cancel-request-button"
-              onClick={onClose}
-            >
-              Cancel
-
-              <FontAwesomeIcon icon={faXmark} />
-            </button>
-          </div>
-        </form>
-      
-    </dialog>
+        <textarea
+          className="ride-dialog__input service-request-body"
+          aria-label="Message"
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+        />
+      </div>
+    </Dialog>
   );
 }
 
@@ -297,6 +236,7 @@ function RecipientRow({
                 ? 'recipient-chip--selected'
                 : ''
             }`}
+            aria-pressed={recipient.enabled}
             onClick={() =>
               onToggle(recipient.id, type)
             }

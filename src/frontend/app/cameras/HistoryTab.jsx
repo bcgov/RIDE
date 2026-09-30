@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronUp,
@@ -142,12 +142,12 @@ export default function HistoryTab({ cameraId }) {
             {/* Entry Content (Shown when expanded) */}
             {!isCollapsed && (
               <div className="history-card-body">
-                {entry.sections?.map((section, idx) => (
+                {entry.sections?.map((section) => (
                   <div key={`section-${section.actions[0].type}-${section.actions[0].text}-${section.actions[0].subtext}`} className={`history-section history-section--${String(section.category).toLowerCase()}`}>
                     <span className="category-label">{section.category}</span>
 
                     <ul className="actions-list">
-                      {section.actions?.map((action, actionIdx) => (
+                      {section.actions?.map((action) => (
                         <li key={`${action.type}-${action.text}-${action.subtext}`} className="action-item">
                           <div className="action-row">
                             <FontAwesomeIcon

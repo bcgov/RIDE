@@ -12,7 +12,7 @@ export default function Toast({ message, variant = 'info', onClose }) {
   const icon = VARIANT_ICONS[variant] ?? faVideo;
 
   return (
-    <div className={`service-request-toast toast--${variant}`}>
+    <div className={`ride-toast ride-toast--${variant}`}>
       <FontAwesomeIcon icon={icon} />
       <span>{message}</span>
       <button type="button" onClick={onClose} aria-label="Close notification">
