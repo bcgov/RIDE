@@ -19,7 +19,7 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  padding: 16px 32px 15px; // Figma draws the 1px border inside its 16px bottom padding
+  padding: 16px 32px 15px 24px; // same side insets as the Cameras page header; the 1px border sits inside the 16px bottom padding
   border-bottom: 1px solid $Divider;
 }
 
@@ -46,12 +46,12 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 7px 32px 0;
+  padding: 7px 16px 0 28px; // same insets as the Cameras page body
 }
 
 .camera-settings-footer {
   flex-shrink: 0;
-  padding: 20px 32px;
+  padding: 20px 16px 20px 28px;
 }
 
 .settings-message,
@@ -80,10 +80,7 @@
   width: 262px;
   height: 36px;
   padding: 0 8px;
-  border: 1px solid $Divider;
-  border-radius: 4px;
-  box-sizing: border-box;
-  background: $White;
+  @include field-box;
   color: $Type-Primary;
 
   &::placeholder {
@@ -290,10 +287,7 @@
   min-width: 0;
   height: 40px;
   padding: 8px 12px;
-  border: 1px solid $Divider;
-  border-radius: 4px;
-  box-sizing: border-box;
-  background: $White;
+  @include field-box;
   font-family: inherit;
   line-height: 1.5;
   color: $Type-Primary;

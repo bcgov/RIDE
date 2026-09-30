@@ -860,17 +860,16 @@ export default function CameraDetails({ onBack }) {
         )}
 
         <div className="view-card-footer">
-          <div className="view-info-left">
+          <label className="view-info-left">
             <Switch
               checked={view.is_on}
               onChange={() => handleToggleView(view)}
               title={view.is_on ? 'Active' : 'Inactive'}
-              aria-label={`${orientationLabel(view.orientation)} view`}
             />
             <span className="direction-label">
               {orientationLabel(view.orientation)}
             </span>
-          </div>
+          </label>
 
           <div className="view-info-right">
             <FontAwesomeIcon icon={faRedo} className="timestamp-icon" />

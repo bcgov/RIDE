@@ -26,7 +26,7 @@ export default function DeleteCameraModal({ onClose, onConfirm }) {
       message
       actions={
         <>
-          <Button variant="danger" filled onClick={handleDelete} disabled={deleting}>
+          <Button size="dialog" variant="danger" filled onClick={handleDelete} disabled={deleting}>
             {deleting ? 'Deleting…' : 'Delete camera'}
             <FontAwesomeIcon icon={faTrashCan} />
           </Button>

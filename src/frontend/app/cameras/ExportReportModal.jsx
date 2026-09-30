@@ -27,7 +27,7 @@ export default function ExportReportModal({ onClose, onConfirm }) {
       message
       actions={
         <>
-          <Button onClick={handleExport} disabled={submitting}>
+          <Button size="dialog" onClick={handleExport} disabled={submitting}>
             {submitting ? 'Exporting…' : 'Export report'}
             <FontAwesomeIcon icon={faFileLines} />
           </Button>

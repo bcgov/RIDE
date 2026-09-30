@@ -205,7 +205,7 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
       message
       actions={
         <>
-          <Button onClick={handleSaveImages} disabled={timestamps.length === 0}>
+          <Button size="dialog" onClick={handleSaveImages} disabled={timestamps.length === 0}>
             Save image
             <FontAwesomeIcon icon={faDownload} />
           </Button>

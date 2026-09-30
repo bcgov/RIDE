@@ -138,10 +138,7 @@
     @include focus-ring;
     min-height: 32px;
     padding: 6px 8px;
-    border: 1px solid $Divider;
-    border-radius: 4px;
-    box-sizing: border-box;
-    background: $White;
+    @include field-box;
     font-family: inherit;
     color: $Type-Primary;
 
@@ -164,22 +161,5 @@
     display: flex;
     align-items: center;
     gap: 32px;
-
-    .ride-btn {
-      min-height: 0;
-      padding: 6px 12px;
-      border-width: 0;
-      line-height: 1.5;
-
-      svg {
-        width: auto;
-        font-size: 0.875rem;
-      }
-    }
-
-    .ride-btn--tertiary {
-      @include text-body;
-      color: $Type-Primary;
-    }
   }
 }

@@ -1,31 +1,6 @@
 @use "../styles/variables.scss" as *;
 @use "../styles/mixins.scss" as *;
 
-/* Force viewport containment */
-html, body, #root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-body {
-  display: flex;
-  flex-direction: column;
-  width: 100vw;
-  height: 100vh;
-}
-
-main {
-  flex: 1 1 0%; 
-  width: 100%;
-  min-width: 0; 
-  min-height: 0; /* REQUIRED: allows flex child to shrink below content size */
-  display: flex;
-}
-
-
 /* =========================================================
    MAIN CONTENT
    ========================================================= */
@@ -53,9 +28,9 @@ main {
   align-items: flex-start;
   justify-content: space-between;
 
-  margin-bottom: 18px;
-  margin-left: 24px;
-  margin-right: 32px;
+  margin-bottom: 20px;
+  padding: 0 32px 18px 24px;
+  border-bottom: 1px solid $Divider;
   background: $White;
 }
 
@@ -70,11 +45,7 @@ main {
 }
 
 .camera-count {
-  font-family: 'BC Sans', sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  line-height: 27.01px;
-  letter-spacing: 0%;
+  @include text-body;
   color: #323130;
 }
 
@@ -186,6 +157,8 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: fit-content;
+  cursor: pointer;
 }
 
 
@@ -297,13 +270,6 @@ main {
   color: #666;
 }
 
-h4 {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: $Black;
-}
-
 
 /* Circular Button Trigger: spacing only, the look comes from <Button>.
    20px keeps the 36px button centered on the heading row. */
@@ -323,66 +289,13 @@ h4 {
    ========================================================= */
 
 
-.view-mode-toggle {
-  display: flex;
-  background: $White;
-  border: 1px solid $Divider;
-  border-radius: 6px;
-  overflow: hidden;
-  margin-right: 16px;
-
-  button {
-    padding: 7px 16px;
-    border: none;
-    background: $White;
-    font-size: 0.8125rem;
-    cursor: pointer;
-    color: #444;
-
-    &:first-child {
-      border-right: 1px solid #d6d6d6;
-    }
-
-    &.active {
-      background: $Focus;
-      font-weight: 600;
-      color: $White;
-    }
-
-    &:hover:not(.active) {
-      background: #f8f8f8;
-    }
-  }
-
-}
-
-
-.camera-header-divider {
-  border-bottom: 1px solid #d6d6d6;
-  margin-bottom: 20px;
-}
-
-.camera-search-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: $White;
-}
-
 
 .camera-image-placeholder {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: $Surface-status-red;
+  @include image-unavailable;
 
   svg {
     width: auto;
     font-size: 2rem;
-    color: $Base-red;
   }
 }
 
@@ -419,7 +332,6 @@ h4 {
 }
 
 
-
 /* =========================================================
    CAMERA LOCATION (Figma: "Camera overview - Compact")
    ========================================================= */
@@ -433,18 +345,24 @@ h4 {
   background: $White;
 }
 
+// Line the text up, not the boxes: the title, the time and the buttons differ in size and
+// start with an icon, so the last baseline is the one that lands on the text
+.camera-location-header,
+.camera-location-meta,
+.camera-location-actions {
+  align-items: last baseline;
+}
+
 .camera-location-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
+  padding: 5px 12px 6px; // 44px tall: 33px of aligned content plus 11px
   background: $Grey10;
   border-radius: 8px 8px 0 0;
 }
 
 .camera-location-meta {
   display: flex;
-  align-items: center;
   gap: 8px;
 }
 
@@ -483,32 +401,16 @@ h4 {
 
 .camera-location-actions {
   display: flex;
-  align-items: center;
   gap: 16px;
   flex-shrink: 0;
 
-  // Figma: this instance of the secondary button is 12px padded with a 6px radius
-  .ride-btn--secondary {
-    padding: 0 12px;
-    border-radius: 6px;
+  // Same as "View on DriveBC" on the details page: a borderless button in the primary text color
+  .ride-btn--tertiary {
+    color: $Type-Primary;
   }
 }
 
 .camera-header-menu {
   position: relative;
-
-  // Figma: "More" is a pill button on the header's grey
-  .ride-btn {
-    gap: 4px;
-    min-height: 30px;
-    padding: 0 4px;
-    background: $Grey10;
-    font-weight: 700;
-    color: $Type-Secondary;
-
-    &:hover:not(:disabled),
-    &[aria-expanded='true'] {
-      background: $BtnHover-Tertiary;
-    }
-  }
+  display: flex; // so the wrapper takes the button's own text baseline, not its icon's
 }

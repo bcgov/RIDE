@@ -72,10 +72,7 @@
     @include focus-ring;
     width: 100%;
     padding: 8px;
-    border: 1px solid $Divider;
-    border-radius: 4px;
-    box-sizing: border-box;
-    background: $White;
+    @include field-box;
     font-family: inherit;
     color: $Type-Primary;
     resize: vertical;

@@ -53,3 +53,27 @@
   font-weight: 700;
   line-height: 1.7;
 }
+
+// Figma "Form / Field": the bordered white box of an input, textarea or select
+@mixin field-box {
+  border: 1px solid $Divider;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background: $White;
+}
+
+// Figma: an image that could not be shown, a red-tinted box with a camera-slash icon.
+// The icon size is set where it is used.
+@mixin image-unavailable {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: $Surface-status-red;
+
+  svg {
+    color: $Base-red;
+  }
+}

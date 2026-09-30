@@ -90,7 +90,7 @@ export default function Dialog(props) {
 // Figma: the plain "Cancel" that follows a dialog's main action
 export function DialogCancel({ onClick }) {
   return (
-    <Button variant="tertiary" onClick={onClick}>
+    <Button variant="tertiary" size="dialog" onClick={onClick}>
       Cancel
       <FontAwesomeIcon icon={faXmark} />
     </Button>

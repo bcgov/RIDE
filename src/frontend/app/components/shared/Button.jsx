@@ -4,6 +4,8 @@ import './Button.scss';
 // Figma: "Buttons / Primary | Secondary | Tertiary | Links | Icon only"
 //   variant: primary | secondary | tertiary | danger | link | icon
 //   filled:  danger only, solid red background for destructive confirmations
+//   pill:    icon-and-label pill, e.g. "More"
+//   size "dialog" is the padding of the buttons that close a modal
 //   size:    sm | md | lg  (icon: sm 24px, md 36px circle)
 //   as:      element to render, e.g. "a" for link-styled anchors
 // Icons are passed as children (before or after the label) and sized by CSS.
@@ -15,6 +17,7 @@ export default function Button(props) {
     size = 'md',
     outlined,
     filled,
+    pill,
     as: Tag = 'button',
     extraClasses,
     children,
@@ -27,6 +30,7 @@ export default function Button(props) {
     `ride-btn--${size}`,
     outlined && 'ride-btn--outlined',
     filled && 'ride-btn--filled',
+    pill && 'ride-btn--pill',
     extraClasses,
   ].filter(Boolean).join(' ');
 

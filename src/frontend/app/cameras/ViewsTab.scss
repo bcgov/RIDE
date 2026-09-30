@@ -69,10 +69,7 @@
   min-width: 80px;
   height: 32px;
   padding: 0 8px;
-  border: 1px solid $Divider;
-  border-radius: 4px;
-  box-sizing: border-box;
-  background: $White;
+  @include field-box;
   color: $Type-Primary;
 }
 

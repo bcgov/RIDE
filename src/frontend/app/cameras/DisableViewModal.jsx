@@ -68,7 +68,7 @@ export default function DisableViewModal({ view, onClose, onConfirm }) {
       onClose={onClose}
       actions={
         <>
-          <Button onClick={handleDisable} disabled={!canSubmit}>
+          <Button size="dialog" onClick={handleDisable} disabled={!canSubmit}>
             {submitting ? 'Disabling…' : 'Disable view'}
             <FontAwesomeIcon icon={faVideoSlash} />
           </Button>

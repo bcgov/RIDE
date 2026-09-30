@@ -48,6 +48,34 @@
     line-height: 1.5;
   }
 
+  // Figma: the buttons that close a modal (a confirm action, then a plain Cancel)
+  &--dialog {
+    min-height: 0;
+    padding: 6px 12px;
+    border-width: 0;
+    line-height: 1.5;
+
+    svg {
+      width: auto;
+      font-size: 0.875rem;
+    }
+
+    &.ride-btn--tertiary {
+      @include text-body;
+      color: $Type-Primary;
+    }
+  }
+
+  // The icon-and-label "More" button on a grey header (use with tertiary)
+  &--pill {
+    gap: 4px;
+    min-height: 30px;
+    padding: 0 4px;
+    background: $Grey10;
+    font-weight: 700;
+    color: $Type-Secondary;
+  }
+
   // Variants
   &--primary {
     background: $BC-Blue;

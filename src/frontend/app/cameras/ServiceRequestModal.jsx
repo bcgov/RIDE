@@ -171,7 +171,7 @@ export default function ServiceRequestModal({
       message
       actions={
         <>
-          <Button type="submit">
+          <Button size="dialog" type="submit">
             Send request
             <FontAwesomeIcon icon={faPaperPlane} />
           </Button>

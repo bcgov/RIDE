@@ -222,6 +222,7 @@
 
         label {
           @include text-label-regular;
+          font-weight: 400;
           color: $Type-Secondary;
         }
 
@@ -233,10 +234,7 @@
           width: 100%;
           height: 32px;
           padding: 0 var(--field-padding-right, 8px) 0 8px;
-          border: 1px solid $Divider;
-          border-radius: 4px;
-          box-sizing: border-box;
-          background: $White;
+          @include field-box;
           font-family: inherit;
           color: $Type-Primary;
         }
@@ -358,17 +356,10 @@
 }
 
 .image-placeholder {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: $Surface-status-red;
+  @include image-unavailable;
 
   svg {
     font-size: 2rem;
-    color: $Base-red;
   }
 }
 
@@ -387,16 +378,10 @@
 }
 
 .placeholder-thumb--unavailable {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: $Surface-status-red;
-  width: 100%;
-  height: 100%;
+  @include image-unavailable;
 
   svg {
     font-size: 1rem;
-    color: $Base-red;
   }
 }
 
@@ -510,6 +495,7 @@
     align-items: center;
     gap: 8px;
     min-width: 0;
+    cursor: pointer;
   }
 
   .direction-label {

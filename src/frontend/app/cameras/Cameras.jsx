@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useRef, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from "react-router";
 import {
+  faArrowUpRight,
   faMagnifyingGlass,
   faXmark,
   faRotate,
@@ -96,14 +97,13 @@ function CameraViewCard({ view, camera, onSelectCamera, onToggleView }) {
         )}
       </button>
 
-      <div className="camera-card-footer">
+      <label className="camera-card-footer">
         <Switch
           checked={isOn}
           onChange={() => onToggleView?.(camera, view)}
-          aria-label={`${direction || 'Camera'} view`}
         />
         <span className="camera-direction">{direction || 'Camera'}</span>
-      </div>
+      </label>
     </div>
   );
 }
@@ -221,8 +221,9 @@ function CameraRow({
         </div>
 
         <div className="camera-location-actions">
-          <Button variant="secondary" onClick={() => onViewOnDriveBC?.(camera)}>
-            View location
+          <Button variant="tertiary" onClick={() => onViewOnDriveBC?.(camera)}>
+            <FontAwesomeIcon icon={faArrowUpRight} />
+            View on DriveBC
           </Button>
 
           {isCameraAdmin && (
@@ -230,6 +231,7 @@ function CameraRow({
               <Button
                 variant="tertiary"
                 size="sm"
+                pill
                 onClick={() => setIsMenuOpen((prev) => !prev)}
                 aria-label="Location options"
                 aria-expanded={isMenuOpen}
@@ -330,7 +332,6 @@ export default function Cameras() {
   const [cameraType, setCameraType] = useState('');
   const [communicationType, setCommunicationType] = useState('');
   const [powerSource, setPowerSource] = useState('');
-  const [viewMode, setViewMode] = useState('compact');
   const [serviceRequestCamera, setServiceRequestCamera] = useState(null);
   const [isServiceRequestModalOpen, setIsServiceRequestModalOpen] = useState(false);
   const [serviceRequestSent, setServiceRequestSent] = useState(false);
@@ -1071,41 +1072,20 @@ export default function Cameras() {
             </div>
           )}
 
-          <div className="camera-header-divider" />
-
-          {/* SEARCH ROW */}
-          <div className="camera-search-row">
-            <div className="camera-search">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search"
-              />
-              <FontAwesomeIcon icon={faMagnifyingGlass} />
-              {search && (
-                <button type="button" onClick={() => setSearch('')}>
-                  <FontAwesomeIcon icon={faXmark} />
-                </button>
-              )}
-            </div>
-
-            <div className="view-mode-toggle">
-              <button
-                type="button"
-                className={viewMode === 'list' ? 'active' : ''}
-                onClick={() => setViewMode('list')}
-              >
-                List
+          {/* SEARCH */}
+          <div className="camera-search">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search"
+            />
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+            {search && (
+              <button type="button" onClick={() => setSearch('')}>
+                <FontAwesomeIcon icon={faXmark} />
               </button>
-              <button
-                type="button"
-                className={viewMode === 'compact' ? 'active' : ''}
-                onClick={() => setViewMode('compact')}
-              >
-                Compact
-              </button>
-            </div>
+            )}
           </div>
 
           {/* MAIN CAMERA CONTENT */}
