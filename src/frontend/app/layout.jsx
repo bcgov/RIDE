@@ -123,7 +123,7 @@ export default function Layout() {
   // Main component
   return (
     <>
-      <header className={`enf-${ENVIRONMENT}`}>
+      <header className={`env-${ENVIRONMENT}`}>
         <NavLink to="/"><Logo /></NavLink>
 
         {authContext.username &&
