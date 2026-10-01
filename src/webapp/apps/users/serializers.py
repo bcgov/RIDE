@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.organizations.models import ServiceArea
 from apps.users.models import RIDEUser, Request
 from django.contrib.auth.models import Group
+from config.adapter import get_oidc_claims
 
 
 class RIDEUserSerializer(serializers.ModelSerializer):
@@ -28,9 +29,10 @@ class RIDEUserSerializer(serializers.ModelSerializer):
         social_account = self._get_social_account(obj)
         if not social_account:
             return ''
-        return social_account.extra_data.get('bceid_username') \
+        claims = get_oidc_claims(social_account)
+        return claims.get('bceid_username') \
             if social_account.provider == 'bceid' \
-            else social_account.extra_data.get('idir_username')
+            else claims.get('idir_username')
 
     def get_social_provider(self, obj):
         social_account = self._get_social_account(obj)
