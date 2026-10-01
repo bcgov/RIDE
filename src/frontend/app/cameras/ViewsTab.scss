@@ -1,0 +1,96 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// One card per camera view; collapsed (off) views are just the header row
+.views-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Figma: "Form / Checkbox" row (switch, name, edit, badge)
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 40px;
+}
+
+.view-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.direction-title {
+  @include text-body;
+  margin: 0;
+  font-weight: 700;
+  color: $Type-Primary;
+}
+
+// Figma: the fields sit 9px below the header and 9px apart
+.view-body-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.badge-default {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background-color: $Focus;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: $White;
+}
+
+// Figma: filled grey pill on top of the tertiary button
+.btn-make-default {
+  min-height: 0;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: $Grey20;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: $Grey80;
+}
+
+.direction-title-input {
+  @include text-small-body;
+  @include focus-ring;
+  flex: 0 1 auto;
+  width: 160px;
+  min-width: 80px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid $Divider;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background: $White;
+  color: $Type-Primary;
+}
+
+.view-header-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
