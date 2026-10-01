@@ -4,6 +4,7 @@ import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 // Navigation
 import { useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
 
 // OpenLayers
 import { boundingExtent, getCenter } from 'ol/extent';
@@ -66,6 +67,10 @@ export default function Home() {
   // Selectors
   const visibleLayers = useSelector(state => state.visibleLayers);
   const serviceAreaBoundaries = useSelector(selectAllServiceAreaBoundaries);
+  const pending = createSelector(
+    [memoizedPending],
+    (events) => events.filter((event) => (authContext.service_areas || []).includes(event.service_area)),
+  );
 
   // Effects
   useEffect(() => {
@@ -159,7 +164,7 @@ export default function Home() {
             <Tabs.Tab name='queue' label={
               <span>
                 Awaiting Approval
-                <Bubble classes={'num'} selector={memoizedPending} />
+                <Bubble classes={'num'} selector={pending} />
               </span>
             }>
               <Queue dispatch={dispatch} goToFunc={centerMap} map={mapRef.current} />
