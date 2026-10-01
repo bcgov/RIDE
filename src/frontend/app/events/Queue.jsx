@@ -73,10 +73,11 @@ function Pending({ event, dispatch, goToFunc, map }) {
 
 export default function Queue({ dispatch, goToFunc, map }) {
   const pending = useSelector(memoizedPending);
+  const { authContext } = useContext(AuthContext);
 
   return (
     <div className='queue'>
-      {pending.map((event) => (
+      {pending.filter((event) => authContext.service_areas.includes(event.service_area)).map((event) => (
         <Pending
           key={`pending-${event.id}v${event.version}`}
           event={event}
