@@ -198,8 +198,9 @@
    STATES
    ========================================================= */
 
-.cameras-loading {
-  padding: 30px;
+// Placeholder where a filter heading goes while the page loads
+.cameras-skeleton__filter {
+  padding: 4px 8px;
 }
 
 

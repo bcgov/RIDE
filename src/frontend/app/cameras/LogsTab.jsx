@@ -8,6 +8,7 @@ import {
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './LogsTab.scss';
+import SkeletonList from '../components/shared/SkeletonList.jsx';
 
 export default function LogsTab({ cameraId, refreshKey }) {
   const [logs, setLogs] = useState([]);
@@ -79,7 +80,7 @@ export default function LogsTab({ cameraId, refreshKey }) {
 
   return (
     <div className="tab-content logs-tab">
-      <div className="form-group date-filter-group">
+      <div className="form-group">
         <label htmlFor="logDate">Date</label>
 
         <div className="input-with-icon">
@@ -89,7 +90,6 @@ export default function LogsTab({ cameraId, refreshKey }) {
             onChange={(date) => setSelectedDate(date)}
             dateFormat="dd-MMM-yyyy"
             placeholderText="dd-MMM-yyyy"
-            className="date-picker-input"
           />
           <FontAwesomeIcon icon={faCalendarDays} className="input-icon" />
         </div>
@@ -105,7 +105,11 @@ export default function LogsTab({ cameraId, refreshKey }) {
         </button>
       </div>
 
-      {isLoading && <div className="no-logs">Loading logs...</div>}
+      {isLoading && (
+        <div className="logs-skeleton">
+          <SkeletonList count={6} height={45} gap={4} />
+        </div>
+      )}
 
       {!isLoading && error && <div className="no-logs">Failed to load logs.</div>}
 

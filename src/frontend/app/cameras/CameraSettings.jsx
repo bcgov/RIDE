@@ -10,6 +10,7 @@ import { faChevronDown as faChevronDownSolid, faGripDots } from '@fortawesome/pr
 import { useSearchParams } from 'react-router';
 import { getCookie } from '../shared/helpers.js';
 import Button from '../components/shared/Button.jsx';
+import SkeletonList from '../components/shared/SkeletonList.jsx';
 import useDragReorder from './useDragReorder.js';
 import Sidebar, {
   SidebarAccordion,
@@ -769,7 +770,7 @@ function SettingsSidebar({
                 setIsCameraOrderOpen(open);
                 selectSetting(setting);
               }}>
-              {loadingCameras && <SidebarMessage>Loading...</SidebarMessage>}
+              {loadingCameras && <SkeletonList count={3} height={32} gap={4} />}
               {!loadingCameras && camerasError && <SidebarMessage error>{camerasError}</SidebarMessage>}
               {!loadingCameras &&
                 !camerasError &&
@@ -917,7 +918,7 @@ function ServiceRequestCcsView({ ccs }) {
   return (
     <>
       <section className="settings-body">
-        {loading && <p className="settings-message">Loading...</p>}
+        {loading && <SkeletonList count={4} height={44} />}
         {!loading && error && <p className="settings-error">{error}</p>}
 
         {!loading && !error && (
@@ -966,7 +967,7 @@ function DefaultMessagingView({ messaging }) {
           <p className="settings-description">Default messages shown in the following fields</p>
 
           {loading ? (
-            <p className="settings-message">Loading...</p>
+            <SkeletonList count={3} height={40} />
           ) : (
             <>
               {error && <p className="settings-error">{error}</p>}
@@ -1005,7 +1006,7 @@ function DefaultMessagingView({ messaging }) {
                 </label>
                 <textarea
                   id="disabled-long-description"
-                  className="default-messaging__field default-messaging__field--long"
+                  className="default-messaging__field"
                   value={defaultMessaging.disabled_long_description}
                   onChange={(event) => updateField('disabled_long_description', event.target.value)}
                 />
@@ -1060,7 +1061,7 @@ function CameraOrderView({ selectedRegion, cameraOrder }) {
   return (
     <>
       <div className="settings-body">
-        {loadingCameras && <p className="settings-message">Loading...</p>}
+        {loadingCameras && <SkeletonList count={3} height={44} />}
         {!loadingCameras && camerasError && <p className="settings-error">{camerasError}</p>}
 
         {!loadingCameras && !camerasError && (
@@ -1107,7 +1108,7 @@ function LookupTableView({ lookup }) {
   return (
     <>
       <section className="settings-body" {...listProps}>
-        {loading && <p className="settings-message">Loading...</p>}
+        {loading && <SkeletonList count={4} height={44} />}
         {!loading && error && <p className="settings-error">{error}</p>}
 
         {!loading && !error && (

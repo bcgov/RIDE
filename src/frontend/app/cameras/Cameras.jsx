@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from "react-router";
+import { orientationLabel } from './helpers.js';
 import {
   faArrowUpRight,
   faRotate,
@@ -18,6 +19,7 @@ import ServiceRequestModal from './ServiceRequestModal';
 import DisableViewModal from './DisableViewModal.jsx';
 import ExportReportModal from './ExportReportModal.jsx';
 import Toast from './Toast.jsx';
+import CamerasSkeleton from './CamerasSkeleton.jsx';
 import Button from '../components/shared/Button.jsx';
 import Switch from '../components/shared/Switch.jsx';
 import SearchInput from '../components/shared/SearchInput.jsx';
@@ -38,12 +40,6 @@ function getCameraName(camera) {
     'Unnamed camera'
   );
 }
-
-function orientationLabel(orientation) {
-  if (!orientation) return '';
-  return orientation.charAt(0) + orientation.slice(1).toLowerCase();
-}
-
 
 function CameraViewCard({ view, camera, onSelectCamera, onToggleView }) {
   const direction = orientationLabel(view.orientation);
@@ -866,11 +862,7 @@ export default function Cameras() {
   }, [isHeaderMenuOpen]);
 
   if (loading) {
-    return (
-      <div className="cameras-loading">
-        Loading cameras...
-      </div>
-    );
+    return <CamerasSkeleton />;
   }
 
   const handleExportReport = async () => {

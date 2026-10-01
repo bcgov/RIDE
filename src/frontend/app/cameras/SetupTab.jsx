@@ -172,7 +172,7 @@ export default function SetupTab({ setupData, onChange }) {
             checked={setupData.onDemand}
             onChange={(next) => onChange('onDemand', next)}
           />
-          <span className="toggle-text">On-demand camera</span>
+          <span>On-demand camera</span>
         </label>
       </div>
 
@@ -235,7 +235,6 @@ export default function SetupTab({ setupData, onChange }) {
                 }}
                 dateFormat="dd-MMM-yyyy"
                 placeholderText="dd-MMM-yyyy"
-                className="date-picker-input"
               />
 
               <FontAwesomeIcon
@@ -263,7 +262,6 @@ export default function SetupTab({ setupData, onChange }) {
                 }}
                 dateFormat="dd-MMM-yyyy"
                 placeholderText="dd-MMM-yyyy"
-                className="date-picker-input"
               />
               <FontAwesomeIcon icon={faCalendarDays} className="input-icon" />
             </div>
@@ -468,7 +466,6 @@ export default function SetupTab({ setupData, onChange }) {
                     </div>
                     <button
                       type="button"
-                      className="link-btn"
                       onClick={() => {/* trigger password-reset flow */}}
                     >
                       <span className="link-style">New password</span>
@@ -615,7 +612,6 @@ export default function SetupTab({ setupData, onChange }) {
                 }}
                 dateFormat="dd-MMM-yyyy"
                 placeholderText="dd-MMM-yyyy"
-                className="date-picker-input"
               />
               <FontAwesomeIcon icon={faCalendarDays} className="input-icon" />
             </div>

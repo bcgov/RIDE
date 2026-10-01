@@ -6,6 +6,7 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 import { getCookie } from '../shared/helpers.js';
 import Button from '../components/shared/Button.jsx';
+import SkeletonList from '../components/shared/SkeletonList.jsx';
 import './NotesTab.scss'
 import { API_HOST } from '../env.js';
 
@@ -129,7 +130,7 @@ export default function NotesTab({ cameraId }) {
   };
 
   return (
-    <div className="tab-content notes-tab">
+    <div className="tab-content">
       <div className="notes-card">
         {/* Card Header */}
         <div className="notes-card-header">
@@ -162,7 +163,7 @@ export default function NotesTab({ cameraId }) {
 
         {/* Notes List */}
         <div className="notes-list">
-          {loading && <p className="notes-loading">Loading notes...</p>}
+          {loading && <SkeletonList count={3} height={72} />}
 
           {!loading && notes.length === 0 && (
             <p className="notes-empty">No notes yet.</p>
@@ -174,7 +175,7 @@ export default function NotesTab({ cameraId }) {
             return (
               <div key={note.id} className="note-item">
                 <div className="note-item-header">
-                  <div className="author-info">
+                  <div>
                     <span className="author-name">
                       {note.author_name || 'Unknown'}
                     </span>

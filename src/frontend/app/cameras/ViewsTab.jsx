@@ -2,15 +2,10 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faCheck, faXmark } from '@fortawesome/pro-regular-svg-icons';
 import Button from '../components/shared/Button.jsx';
+import { orientationLabel } from './helpers.js';
 import Switch from '../components/shared/Switch.jsx';
 import './ViewsTab.scss';
 import { getCookie } from "../shared/helpers.js";
-
-// Helper to format "NORTHWEST" or "north" -> "Northwest" / "North"
-const formatDirection = (str) => {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
 
 export default function ViewsTab({ views = [], onChange, onSetDefault }) {
   // Track which view is currently in "editing name" mode, and its draft value.
@@ -46,7 +41,7 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
   const startEditing = (view) => {
     setEditingId(view.id);
     // Seed the draft with whatever is currently displayed as the title
-    setDraftName(formatDirection(view.orientation || view.direction) || `View ${view.id}`);
+    setDraftName(orientationLabel(view.orientation || view.direction) || `View ${view.id}`);
   };
 
   const cancelEditing = () => {
@@ -137,12 +132,12 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
         const isEditing = editingId === id;
 
         // Resolve title string safely
-        const displayTitle = formatDirection(orientation || direction) || `View ${id}`;
+        const displayTitle = orientationLabel(orientation || direction) || `View ${id}`;
 
         return (
           <div
             key={id}
-            className={`view-item-card ${is_on ? 'is-enabled' : 'is-disabled'}`}
+            className={is_on ? 'is-enabled' : 'is-disabled'}
           >
             {/* View Header Row */}
             <div className="view-header">
@@ -198,7 +193,6 @@ export default function ViewsTab({ views = [], onChange, onSetDefault }) {
                     id={`view-id-${id}`}
                     value={id}
                     readOnly
-                    className="input-readonly"
                   />
                 </div>
 

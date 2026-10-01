@@ -10,12 +10,11 @@ import {
 } from '@fortawesome/pro-solid-svg-icons';
 import './TimelapseModal.scss';
 import Button from '../components/shared/Button.jsx';
+import { orientationLabel } from './helpers.js';
 import Dialog, { DialogCancel } from '../components/shared/Dialog.jsx';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { getCookie } from "../shared/helpers.js";
-
-// 'NORTH' -> 'North'
-const orientationLabel = (orientation) =>
-  orientation.charAt(0) + orientation.slice(1).toLowerCase();
 
 export default function TimelapseModal({ camera, selectedView, onClose }) {
   const [timestamps, setTimestamps] = useState([]);
@@ -174,7 +173,7 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
   // nested ternary (SonarCloud: extract nested ternary into a statement).
   const renderDisplayContent = () => {
     if (loading) {
-      return <div className="timelapse-placeholder">Loading timelapse...</div>;
+      return <Skeleton containerClassName="timelapse-skeleton" height="100%" borderRadius={0} />;
     }
 
     if (error) {

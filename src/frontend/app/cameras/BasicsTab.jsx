@@ -83,7 +83,7 @@ useEffect(() => {
 }, []);
 
   return (
-    <div className="tab-content basics-tab">
+    <div className="tab-content">
       {/* Required Details */}
       <div className="form-section">
         <span className="section-title">Required details</span>

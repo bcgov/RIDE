@@ -154,10 +154,10 @@ export default function HistoryTab({ cameraId }) {
                               icon={getActionIcon(action.type)}
                               className={`action-icon ${action.type}`}
                             />
-                            <span className="action-text">{action.text}</span>
+                            <span>{action.text}</span>
                           </div>
                           {/* {action.subtext && (
-                            <p className="action-subtext">{action.subtext}</p>
+                            <p>{action.subtext}</p>
                           )} */}
                           {action.subtext && renderSubtext(action.subtext)}
                         </li>
@@ -168,7 +168,7 @@ export default function HistoryTab({ cameraId }) {
 
                 {/* Footer User Attribution */}
                 <div className="history-footer">
-                  <FontAwesomeIcon icon={faUser} className="user-icon" />
+                  <FontAwesomeIcon icon={faUser} />
                   <span className="author-name">{entry.user}</span>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { faVideoSlash } from '@fortawesome/pro-regular-svg-icons';
 
 // Components
 import Button from '../components/shared/Button.jsx';
+import { orientationLabel } from './helpers.js';
 import Dialog, { DialogCancel } from '../components/shared/Dialog.jsx';
 
 export default function DisableViewModal({ view, onClose, onConfirm }) {
@@ -80,7 +81,7 @@ export default function DisableViewModal({ view, onClose, onConfirm }) {
         <p className="ride-dialog__section-title">
           Disabled view is blacked-out on DriveBC:
         </p>
-        <p className="ride-dialog__value">{orientationLabelSafe(view)} view</p>
+        <p className="ride-dialog__value">{orientationLabel(view?.orientation) || 'Camera'} view</p>
       </div>
 
       <label className="ride-dialog__field">
@@ -120,8 +121,3 @@ export default function DisableViewModal({ view, onClose, onConfirm }) {
   );
 }
 
-function orientationLabelSafe(view) {
-  const o = view?.orientation;
-  if (!o) return 'Camera';
-  return o.charAt(0) + o.slice(1).toLowerCase();
-}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router";
+import { orientationLabel } from './helpers.js';
 import {
   faPenToSquare,
   faTrashCan,
@@ -38,16 +39,13 @@ import Sidebar, {
   SidebarSearch,
 } from '../components/shared/Sidebar.jsx';
 import './CameraDetails.scss';
+import './TabForm.scss';
 import DeleteCameraModal from './DeleteCameraModal.jsx';
 import Toast from './Toast.jsx';
 import TimelapseModal from './TimelapseModal.jsx';
 import ServiceRequestModal from './ServiceRequestModal';
 import DisableViewModal from './DisableViewModal.jsx';
-
-function orientationLabel(orientation) {
-  if (!orientation) return '';
-  return orientation.charAt(0) + orientation.slice(1).toLowerCase();
-}
+import DetailsSkeleton, { CameraListSkeleton } from './DetailsSkeleton.jsx';
 
 // The tabs that edit the form behind Save and Undo; Notes, Logs and History save on their own
 const SAVEABLE_TABS = ['Basics', 'Setup', 'Views'];
@@ -74,11 +72,14 @@ export default function CameraDetails({ onBack }) {
   ];
 
   const [allCameras, setAllCameras] = useState([]);
+  const [isLoadingCameraList, setIsLoadingCameraList] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedRegions, setExpandedRegions] = useState({});
   const [expandedHighways, setExpandedHighways] = useState({});
 
   const [camera, setCamera] = useState(null);
+  // True until the first load of an existing camera finishes; the refresh every minute does not use it
+  const [isLoadingCamera, setIsLoadingCamera] = useState(Boolean(id) && id !== 'new');
   const [activeTab, setActiveTab] = useState('Basics');
   const [selectedViewId, setSelectedViewId] = useState(initialViewId);
   const [basicsData, setBasicsData] = useState({
@@ -440,6 +441,8 @@ export default function CameraDetails({ onBack }) {
         }
       } catch (err) {
         console.error('Failed to load camera hierarchy:', err);
+      } finally {
+        setIsLoadingCameraList(false);
       }
     };
 
@@ -650,8 +653,10 @@ export default function CameraDetails({ onBack }) {
 
   useEffect(() => {
     if (id && id !== 'new') {
-      loadCamera();
+      setIsLoadingCamera(true);
+      loadCamera().finally(() => setIsLoadingCamera(false));
     } else {
+      setIsLoadingCamera(false);
       // New camera: nothing to fetch yet. Snapshot the initial (empty)
       // form state so isDirty only flips true once the user actually
       // changes something — otherwise Save stays disabled forever.
@@ -876,7 +881,7 @@ export default function CameraDetails({ onBack }) {
 
           <div className="view-info-right">
             <FontAwesomeIcon icon={faRedo} className="timestamp-icon" />
-            <span className="timestamp-text">{formattedTime}</span>
+            <span>{formattedTime}</span>
           </div>
         </div>
       </div>
@@ -916,7 +921,8 @@ export default function CameraDetails({ onBack }) {
             <SidebarSearch value={searchQuery} onChange={setSearchQuery} />
 
             <SidebarNav>
-              {Object.entries(cameraHierarchy).map(([regionName, highways]) => (
+              {isLoadingCameraList && <CameraListSkeleton />}
+              {!isLoadingCameraList && Object.entries(cameraHierarchy).map(([regionName, highways]) => (
                 <SidebarGroup
                   key={regionName}
                   title={regionName}
@@ -952,243 +958,247 @@ export default function CameraDetails({ onBack }) {
           </Sidebar>
         )}
       >
-      <div className="camera-details-container">
-        <header className="details-header">
-          <div className="title-section">
-            {isEditingName ? (
-              <input
-                type="text"
-                className="camera-name-input"
-                value={basicsData.title}
-                onChange={(event) =>
-                  setBasicsData((prev) => ({
-                    ...prev,
-                    title: event.target.value,
-                  }))
-                }
-                onKeyDown={handleCameraNameKeyDown}
-                onBlur={() => setIsEditingName(false)}
-                disabled={isSavingName}
-              />
-            ) : (
-              <>
-                <h1>{basicsData.title || 'New Camera'}</h1>
-                <span className="badge-ondemand">
-                  <FontAwesomeIcon icon={faInfoCircle} />
-                  On-demand
-                </span>
-              </>
-            )}
-          </div>
-
-          <div className="actions-toolbar">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setIsServiceRequestModalOpen(true);
-                setServiceRequestCamera(camera);
-              }}
-            >
-              <FontAwesomeIcon icon={faBellConcierge} />
-              Request service
-            </Button>
-
-            {driveBCWebcamId && (
-              <Button
-                variant="tertiary"
-                href={`https://drivebc.ca/cameras/${driveBCWebcamId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FontAwesomeIcon icon={faArrowUpRight} />
-                View on DriveBC
-              </Button>
-            )}
-
-            <Button
-              variant="danger"
-              aria-label="Delete camera location"
-              onClick={() => setIsDeleteModalOpen(true)}
-            >
-              <FontAwesomeIcon icon={faTrashCan} />
-              Delete location
-            </Button>
-
-            <div className="context-menu-wrapper" ref={menuRef}>
-              <Button
-                variant="icon"
-                outlined
-                onClick={() => setIsMenuOpen((prev) => !prev)}
-                aria-label="More options"
-                aria-expanded={isMenuOpen}
-              >
-                <FontAwesomeIcon icon={faEllipsisVertical} />
-              </Button>
-              {isMenuOpen && (
-                <Flyout>
-                  <FlyoutSection title="More">
-                    <FlyoutItem
-                      icon={<FontAwesomeIcon icon={faPenToSquare} />}
-                      aria-label="Edit location name"
-                      onClick={() => {
-                        setCameraName(basicsData.title || '');
-                        setIsEditingName(true);
-                      }}
-                    >
-                      Edit location name
-                    </FlyoutItem>
-
-                    <FlyoutItem
-                      icon={<FontAwesomeIcon icon={faClock} />}
-                      href="https://timelapse.drivebc.ca"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Timelapse
-                    </FlyoutItem>
-
-                    <FlyoutItem
-                      icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
-                      href="https://weather.gc.ca"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Weather
-                    </FlyoutItem>
-
-                    <FlyoutItem icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
-                      Electrical outages
-                    </FlyoutItem>
-
-                    <FlyoutItem icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
-                      Forest fires
-                    </FlyoutItem>
-                  </FlyoutSection>
-                </Flyout>
+      {isLoadingCamera ? (
+        <DetailsSkeleton />
+      ) : (
+        <div className="camera-details-container">
+          <header className="details-header">
+            <div className="title-section">
+              {isEditingName ? (
+                <input
+                  type="text"
+                  className="camera-name-input"
+                  value={basicsData.title}
+                  onChange={(event) =>
+                    setBasicsData((prev) => ({
+                      ...prev,
+                      title: event.target.value,
+                    }))
+                  }
+                  onKeyDown={handleCameraNameKeyDown}
+                  onBlur={() => setIsEditingName(false)}
+                  disabled={isSavingName}
+                />
+              ) : (
+                <>
+                  <h1>{basicsData.title || 'New Camera'}</h1>
+                  <span className="badge-ondemand">
+                    <FontAwesomeIcon icon={faInfoCircle} />
+                    On-demand
+                  </span>
+                </>
               )}
             </div>
-          </div>
-        </header>
 
-        {isExpandedView ? (
-          <div className="expanded-views-section">
-            <div className="expanded-views-header">
-              <h2>Showing all camera views</h2>
-              <Button variant="secondary" onClick={() => setIsExpandedView(false)}>
-                <FontAwesomeIcon icon={faXmark} />
-                Close expanded view
+            <div className="actions-toolbar">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setIsServiceRequestModalOpen(true);
+                  setServiceRequestCamera(camera);
+                }}
+              >
+                <FontAwesomeIcon icon={faBellConcierge} />
+                Request service
               </Button>
+
+              {driveBCWebcamId && (
+                <Button
+                  variant="tertiary"
+                  href={`https://drivebc.ca/cameras/${driveBCWebcamId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FontAwesomeIcon icon={faArrowUpRight} />
+                  View on DriveBC
+                </Button>
+              )}
+
+              <Button
+                variant="danger"
+                aria-label="Delete camera location"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                <FontAwesomeIcon icon={faTrashCan} />
+                Delete location
+              </Button>
+
+              <div className="context-menu-wrapper" ref={menuRef}>
+                <Button
+                  variant="icon"
+                  outlined
+                  onClick={() => setIsMenuOpen((prev) => !prev)}
+                  aria-label="More options"
+                  aria-expanded={isMenuOpen}
+                >
+                  <FontAwesomeIcon icon={faEllipsisVertical} />
+                </Button>
+                {isMenuOpen && (
+                  <Flyout>
+                    <FlyoutSection title="More">
+                      <FlyoutItem
+                        icon={<FontAwesomeIcon icon={faPenToSquare} />}
+                        aria-label="Edit location name"
+                        onClick={() => {
+                          setCameraName(basicsData.title || '');
+                          setIsEditingName(true);
+                        }}
+                      >
+                        Edit location name
+                      </FlyoutItem>
+
+                      <FlyoutItem
+                        icon={<FontAwesomeIcon icon={faClock} />}
+                        href="https://timelapse.drivebc.ca"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Timelapse
+                      </FlyoutItem>
+
+                      <FlyoutItem
+                        icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
+                        href="https://weather.gc.ca"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Weather
+                      </FlyoutItem>
+
+                      <FlyoutItem icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
+                        Electrical outages
+                      </FlyoutItem>
+
+                      <FlyoutItem icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
+                        Forest fires
+                      </FlyoutItem>
+                    </FlyoutSection>
+                  </Flyout>
+                )}
+              </div>
             </div>
+          </header>
 
-            <div className="expanded-views-grid">
-              {viewsList
-                // .filter((view) => view.is_on ?? true)
-                .map((view) => renderViewCard(view, { expanded: true }))}
+          {isExpandedView ? (
+            <div className="expanded-views-section">
+              <div className="expanded-views-header">
+                <h2>Showing all camera views</h2>
+                <Button variant="secondary" onClick={() => setIsExpandedView(false)}>
+                  <FontAwesomeIcon icon={faXmark} />
+                  Close expanded view
+                </Button>
+              </div>
+
+              <div className="expanded-views-grid">
+                {viewsList
+                  // .filter((view) => view.is_on ?? true)
+                  .map((view) => renderViewCard(view, { expanded: true }))}
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="details-grid">
-            <div className="media-scroll">
-              <div className="media-pane">
-                <div className="main-preview-card">
-                  <div className="preview-toolbar">
-                    <span className="current-view-label">
-                      {orientationLabel(currentView?.orientation) || 'Camera'}
-                    </span>
+          ) : (
+            <div className="details-grid">
+              <div className="media-scroll">
+                <div className="media-pane">
+                  <div className="main-preview-card">
+                    <div className="preview-toolbar">
+                      <span className="current-view-label">
+                        {orientationLabel(currentView?.orientation) || 'Camera'}
+                      </span>
 
-                    <Button variant="secondary" onClick={() => setIsTimelapseModalOpen(true)}>
-                      <FontAwesomeIcon icon={faClock} />
-                      View timelapse
-                    </Button>
+                      <Button variant="secondary" onClick={() => setIsTimelapseModalOpen(true)}>
+                        <FontAwesomeIcon icon={faClock} />
+                        View timelapse
+                      </Button>
+                    </div>
+
+                    <div className="main-image-wrapper">
+                      {mainImageUrl && !mainImgFailed ? (
+                        <img
+                          src={mainImageUrl}
+                          alt={camera?.title || 'Camera view'}
+                          onError={() => setMainImgFailed(true)}
+                        />
+                      ) : (
+                        <div className="image-placeholder">
+                          <FontAwesomeIcon icon={faVideoSlash} />
+                          <span className="image-unavailable-badge">
+                            Unavailable
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="main-image-wrapper">
-                    {mainImageUrl && !mainImgFailed ? (
-                      <img
-                        src={mainImageUrl}
-                        alt={camera?.title || 'Camera view'}
-                        onError={() => setMainImgFailed(true)}
-                      />
-                    ) : (
-                      <div className="image-placeholder">
-                        <FontAwesomeIcon icon={faVideoSlash} />
-                        <span className="image-unavailable-badge">
-                          Unavailable
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  <div className="views-section">
+                    <div className="views-header">
+                      <h2>Camera views</h2>
+                      <Button variant="secondary" onClick={() => setIsExpandedView(true)}>
+                        <FontAwesomeIcon icon={faExpand} />
+                        Expand all views
+                      </Button>
+                    </div>
 
-                <div className="views-section">
-                  <div className="views-header">
-                    <h2>Camera views</h2>
-                    <Button variant="secondary" onClick={() => setIsExpandedView(true)}>
-                      <FontAwesomeIcon icon={faExpand} />
-                      Expand all views
-                    </Button>
-                  </div>
-
-                  <div className="views-grid">
-                    {viewsList
-                      .map((view) => renderViewCard(view))}
+                    <div className="views-grid">
+                      {viewsList
+                        .map((view) => renderViewCard(view))}
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <div className="form-pane">
+                <h2 className="form-pane-title">Camera location settings</h2>
+
+                <nav className="details-tabs">
+                  {['Basics', 'Setup', 'Views', 'Notes', 'Logs', 'History'].map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </nav>
+
+                {activeTab === 'Basics' && (
+                  <BasicsTab basicsData={basicsData} onChange={handleBasicsChange} />
+                )}
+
+                {activeTab === 'Setup' && (
+                  <SetupTab setupData={setupData} onChange={handleSetupChange} />
+                )}
+
+                {activeTab === 'Views' && (
+                  <ViewsTab
+                    views={viewsData}
+                    onChange={setViewsData}
+                    onSetDefault={handleSetDefaultView}
+                  />
+                )}
+
+                {activeTab === 'Notes' && <NotesTab cameraId={camera?.id} />}
+                {activeTab === 'Logs' && <LogsTab cameraId={camera?.id} refreshKey={logsVersion} />}
+                {activeTab === 'History' && <HistoryTab cameraId={camera?.id} />}
+
+                {SAVEABLE_TABS.includes(activeTab) && (
+                  <footer className="form-footer">
+                    <Button onClick={handleSave} disabled={!isDirty}>
+                      <FontAwesomeIcon icon={faCircleCheck} />
+                      Save all changes
+                    </Button>
+
+                    <Button variant="tertiary" onClick={handleUndoChanges} disabled={!isDirty}>
+                      Undo changes
+                    </Button>
+                  </footer>
+                )}
+              </div>
             </div>
-
-            <div className="form-pane">
-              <h2 className="form-pane-title">Camera location settings</h2>
-
-              <nav className="details-tabs">
-                {['Basics', 'Setup', 'Views', 'Notes', 'Logs', 'History'].map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </nav>
-
-              {activeTab === 'Basics' && (
-                <BasicsTab basicsData={basicsData} onChange={handleBasicsChange} />
-              )}
-
-              {activeTab === 'Setup' && (
-                <SetupTab setupData={setupData} onChange={handleSetupChange} />
-              )}
-
-              {activeTab === 'Views' && (
-                <ViewsTab
-                  views={viewsData}
-                  onChange={setViewsData}
-                  onSetDefault={handleSetDefaultView}
-                />
-              )}
-
-              {activeTab === 'Notes' && <NotesTab cameraId={camera?.id} />}
-              {activeTab === 'Logs' && <LogsTab cameraId={camera?.id} refreshKey={logsVersion} />}
-              {activeTab === 'History' && <HistoryTab cameraId={camera?.id} />}
-
-              {SAVEABLE_TABS.includes(activeTab) && (
-                <footer className="form-footer">
-                  <Button onClick={handleSave} disabled={!isDirty}>
-                    <FontAwesomeIcon icon={faCircleCheck} />
-                    Save all changes
-                  </Button>
-
-                  <Button variant="tertiary" onClick={handleUndoChanges} disabled={!isDirty}>
-                    Undo changes
-                  </Button>
-                </footer>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
       </SidebarLayout>
 
       {isDeleteModalOpen && (
