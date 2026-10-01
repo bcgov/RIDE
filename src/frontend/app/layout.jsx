@@ -9,9 +9,11 @@ import { faBug } from '@fortawesome/pro-solid-svg-icons';
 
 // Internal imports
 import { AlertContext, AuthContext, DebuggingContext } from './contexts';
-import { API_HOST, SHOW_DEBUG_CONTROL } from './env.js';
+import { API_HOST, ENVIRONMENT, SHOW_DEBUG_CONTROL } from './env.js';
 import Alert from "./components/shared/Alert";
 import UserNavigation from "./components/shared/UserNavigation";
+
+import Logo from './shared/icons/Logo.jsx';
 
 // Styling
 import './layout.scss';
@@ -121,8 +123,8 @@ export default function Layout() {
   // Main component
   return (
     <>
-      <header>
-        <NavLink to="/"><img src='/ride-logo.svg'  alt="Government of British Columbia Route Information and Data Entry"/></NavLink>
+      <header className={`enf-${ENVIRONMENT}`}>
+        <NavLink to="/"><Logo /></NavLink>
 
         {authContext.username &&
           <>

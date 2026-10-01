@@ -1,6 +1,3 @@
-// React
-import React from "react";
-
 // Internal imports
 import { API_HOST, DEPLOYMENT_TAG, RELEASE } from '../../env.js';
 import { getCookie } from "../../shared/helpers";
@@ -9,7 +6,7 @@ import { handleFormSubmit } from "../../shared/handlers";
 // External imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/pro-regular-svg-icons';
-import { faCircleUser } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleUser, faUserShield } from '@fortawesome/pro-solid-svg-icons';
 import { Menu, MenuButton, MenuItems } from '@headlessui/react'
 
 // Styling
@@ -27,7 +24,7 @@ export default function UserNavigation(props) {
   return authContext?.username && (
     <Menu as="div" className={`ride-dropdown user-nav`}>
       <MenuButton className="ride-dropdown-button user-nav-btn" aria-label="Account settings">
-        <FontAwesomeIcon id="user-icon" icon={faCircleUser} aria-hidden="true" />
+        <FontAwesomeIcon id="user-icon" icon={faUserShield} aria-hidden="true" />
         <FontAwesomeIcon icon={faChevronDown} aria-hidden="true" className="ride-dropdown-icon" />
       </MenuButton>
 
