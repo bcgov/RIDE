@@ -1,0 +1,52 @@
+@use "../../styles/variables.scss" as *;
+@use "../../styles/mixins.scss" as *;
+
+.ride-search {
+  --search-height: 32px;
+  --search-inset: 8px;
+  position: relative;
+
+  &__input {
+    @include text-small-body;
+    @include focus-ring;
+    @include field-box;
+    width: 100%;
+    height: var(--search-height);
+    padding: 0 calc(var(--search-inset) + 28px) 0 var(--search-inset);
+    color: $Type-Primary;
+
+    &::placeholder {
+      color: $Type-Disabled;
+    }
+  }
+
+  // Sits inside the field at the right edge; the clear button takes the magnifier's place
+  &__icon {
+    position: absolute;
+    top: 50%;
+    right: var(--search-inset);
+    transform: translateY(-50%);
+    font-size: 0.875rem;
+    color: $Type-Disabled;
+    pointer-events: none;
+
+    &,
+    svg {
+      width: auto;
+    }
+  }
+
+  &__clear {
+    @include focus-ring;
+    display: flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover {
+      color: $Type-Primary;
+    }
+  }
+}

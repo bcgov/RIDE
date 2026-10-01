@@ -3,8 +3,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from "react-router";
 import {
   faArrowUpRight,
-  faMagnifyingGlass,
-  faXmark,
   faRotate,
   faEllipsisVertical,
   faCirclePlus,
@@ -22,6 +20,7 @@ import ExportReportModal from './ExportReportModal.jsx';
 import Toast from './Toast.jsx';
 import Button from '../components/shared/Button.jsx';
 import Switch from '../components/shared/Switch.jsx';
+import SearchInput from '../components/shared/SearchInput.jsx';
 import Flyout, { FlyoutItem, FlyoutSection } from '../components/shared/Flyout.jsx';
 import Sidebar, { SidebarLayout, SidebarNav, SidebarOptionsAccordion } from '../components/shared/Sidebar.jsx';
 import { AuthContext } from '../contexts';
@@ -1073,20 +1072,7 @@ export default function Cameras() {
           )}
 
           {/* SEARCH */}
-          <div className="camera-search">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search"
-            />
-            <FontAwesomeIcon icon={faMagnifyingGlass} />
-            {search && (
-              <button type="button" onClick={() => setSearch('')}>
-                <FontAwesomeIcon icon={faXmark} />
-              </button>
-            )}
-          </div>
+          <SearchInput className="camera-search" value={search} onChange={setSearch} />
 
           {/* MAIN CAMERA CONTENT */}
           <main className="camera-content">

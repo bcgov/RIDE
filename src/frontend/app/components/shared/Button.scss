@@ -41,11 +41,9 @@
     }
   }
 
+  // Figma "Medium": 36px, with the same padding and weight as md
   &--lg {
     min-height: 36px;
-    padding: 0 16px;
-    font-weight: 700;
-    line-height: 1.5;
   }
 
   // Figma: the buttons that close a modal (a confirm action, then a plain Cancel)

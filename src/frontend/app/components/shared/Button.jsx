@@ -6,7 +6,8 @@ import './Button.scss';
 //   filled:  danger only, solid red background for destructive confirmations
 //   pill:    icon-and-label pill, e.g. "More"
 //   size "dialog" is the padding of the buttons that close a modal
-//   size:    sm | md | lg  (icon: sm 24px, md 36px circle)
+//   size:    sm 28px | md 32px | lg 36px  (icon: sm 24px, md 36px circle)
+//            These are Figma's X-Small, Small and Medium
 //   as:      element to render, e.g. "a" for link-styled anchors
 // Icons are passed as children (before or after the label) and sized by CSS.
 export default function Button(props) {

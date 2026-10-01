@@ -10,6 +10,7 @@ import { faChevronDown as faChevronDownSolid, faGripDots } from '@fortawesome/pr
 import { useSearchParams } from 'react-router';
 import { getCookie } from '../shared/helpers.js';
 import Button from '../components/shared/Button.jsx';
+import useDragReorder from './useDragReorder.js';
 import Sidebar, {
   SidebarAccordion,
   SidebarItem,
@@ -202,25 +203,11 @@ function useDbLookupSettings(selectedSetting) {
     setItems((prev) => prev.filter((current) => current.id !== item.id || current.id === null));
   };
 
-  const handleDragStart = (event, index) => {
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', String(index));
-  };
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (event, targetIndex) => {
-    event.preventDefault();
-    const sourceIndex = Number(event.dataTransfer.getData('text/plain'));
-    if (Number.isNaN(sourceIndex) || sourceIndex === targetIndex) return;
-
+  const moveItem = (from, to) => {
     setItems((prev) => {
       const next = [...prev];
-      const [movedItem] = next.splice(sourceIndex, 1);
-      next.splice(targetIndex, 0, movedItem);
+      const [movedItem] = next.splice(from, 1);
+      next.splice(to, 0, movedItem);
       return next.map((item, index) => ({ ...item, display_order: index }));
     });
   };
@@ -288,9 +275,7 @@ function useDbLookupSettings(selectedSetting) {
     saveEditing,
     handleEditingKeyDown,
     handleDelete,
-    handleDragStart,
-    handleDragOver,
-    handleDrop,
+    moveItem,
     handleSave,
   };
 }
@@ -663,33 +648,12 @@ function useCameraOrderSettings({ selectedSetting, selectedRegion, isCameraOrder
     });
   };
 
-  const handleCameraDragStart = (event, groupIndex, camIndex) => {
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', JSON.stringify({ groupIndex, camIndex }));
-  };
-
-  const handleCameraDragOver = (event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleCameraDrop = (event, targetGroupIndex, targetCamIndex) => {
-    event.preventDefault();
-
-    let source;
-    try {
-      source = JSON.parse(event.dataTransfer.getData('text/plain'));
-    } catch {
-      return;
-    }
-
-    if (!source || source.groupIndex !== targetGroupIndex || source.camIndex === targetCamIndex) return;
-
+  const moveCamera = (groupIndex, from, to) => {
     setDraftCameraGroups((prev) => {
       const next = prev.map((group) => ({ ...group, cameras: [...group.cameras] }));
-      const groupCams = next[targetGroupIndex].cameras;
-      const [moved] = groupCams.splice(source.camIndex, 1);
-      groupCams.splice(targetCamIndex, 0, moved);
+      const groupCams = next[groupIndex].cameras;
+      const [moved] = groupCams.splice(from, 1);
+      groupCams.splice(to, 0, moved);
       return next;
     });
   };
@@ -742,9 +706,7 @@ function useCameraOrderSettings({ selectedSetting, selectedRegion, isCameraOrder
     openCameraOrderGroups,
     saving,
     toggleCameraOrderGroup,
-    handleCameraDragStart,
-    handleCameraDragOver,
-    handleCameraDrop,
+    moveCamera,
     handleSaveCameraOrder,
   };
 }
@@ -964,32 +926,26 @@ function ServiceRequestCcsView({ ccs }) {
               <ServiceRequestCcsRow key={cc.id} cc={cc} index={index} ccs={ccs} />
             ))}
 
-            <div className="settings-add-row">
-              <div className="settings-grip">
-                <FontAwesomeIcon icon={faGripDots} />
-              </div>
+            <div className="settings-add-fields">
+              <input
+                type="text"
+                className="settings-input"
+                aria-label="Name"
+                value={newCcName}
+                onChange={(event) => setNewCcName(event.target.value)}
+              />
+              <input
+                type="email"
+                className="settings-input"
+                aria-label="Email"
+                value={newCcEmail}
+                onChange={(event) => setNewCcEmail(event.target.value)}
+              />
 
-              <div className="settings-add-fields">
-                <input
-                  type="text"
-                  className="settings-input"
-                  aria-label="Name"
-                  value={newCcName}
-                  onChange={(event) => setNewCcName(event.target.value)}
-                />
-                <input
-                  type="email"
-                  className="settings-input"
-                  aria-label="Email"
-                  value={newCcEmail}
-                  onChange={(event) => setNewCcEmail(event.target.value)}
-                />
-
-                <Button variant="secondary" onClick={ccs.addCc} disabled={!newCcName.trim() || !newCcEmail.trim()}>
-                  <FontAwesomeIcon icon={faCheck} />
-                  Add
-                </Button>
-              </div>
+              <Button variant="secondary" onClick={ccs.addCc} disabled={!newCcName.trim() || !newCcEmail.trim()}>
+                <FontAwesomeIcon icon={faCheck} />
+                Add
+              </Button>
             </div>
           </div>
         )}
@@ -1065,12 +1021,12 @@ function DefaultMessagingView({ messaging }) {
 }
 
 function CameraOrderGroup({ group, groupIndex, cameraOrder }) {
-  const { openCameraOrderGroups, toggleCameraOrderGroup, handleCameraDragStart, handleCameraDragOver, handleCameraDrop } =
-    cameraOrder;
+  const { openCameraOrderGroups, toggleCameraOrderGroup, moveCamera } = cameraOrder;
+  const { rowProps, listProps } = useDragReorder((from, to) => moveCamera(groupIndex, from, to));
   const isOpen = openCameraOrderGroups[group.road] !== false;
 
   return (
-    <div className={`camera-order-group${isOpen ? ' camera-order-group--open' : ''}`}>
+    <div className={`camera-order-group${isOpen ? ' camera-order-group--open' : ''}`} {...listProps}>
       <button
         type="button"
         className="camera-order-group-header"
@@ -1084,14 +1040,7 @@ function CameraOrderGroup({ group, groupIndex, cameraOrder }) {
       {isOpen && (
         <div className="camera-order-list">
           {group.cameras.map((cam, camIndex) => (
-            <div
-              key={cam.id}
-              className="camera-order-item"
-              draggable
-              onDragStart={(event) => handleCameraDragStart(event, groupIndex, camIndex)}
-              onDragOver={handleCameraDragOver}
-              onDrop={(event) => handleCameraDrop(event, groupIndex, camIndex)}
-            >
+            <div key={cam.id} {...rowProps(camIndex, 'camera-order-item')}>
               <div className="settings-grip" title="Drag to reorder">
                 <FontAwesomeIcon icon={faGripDots} />
               </div>
@@ -1150,15 +1099,14 @@ function LookupTableView({ lookup }) {
     saveEditing,
     handleEditingKeyDown,
     handleDelete,
-    handleDragStart,
-    handleDragOver,
-    handleDrop,
+    moveItem,
     handleSave,
   } = lookup;
+  const { rowProps, listProps } = useDragReorder(moveItem);
 
   return (
     <>
-      <section className="settings-body">
+      <section className="settings-body" {...listProps}>
         {loading && <p className="settings-message">Loading...</p>}
         {!loading && error && <p className="settings-error">{error}</p>}
 
@@ -1168,14 +1116,7 @@ function LookupTableView({ lookup }) {
               const isEditing = editingId !== null && editingId === item.id;
 
               return (
-                <div
-                  key={item.id ?? `new-${index}`}
-                  className="settings-row"
-                  draggable
-                  onDragStart={(event) => handleDragStart(event, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(event) => handleDrop(event, index)}
-                >
+                <div key={item.id ?? `new-${index}`} {...rowProps(index, 'settings-row')}>
                   <div className="settings-row__main">
                     <div className="settings-grip" title="Drag to reorder">
                       <FontAwesomeIcon icon={faGripDots} />
@@ -1207,26 +1148,20 @@ function LookupTableView({ lookup }) {
               );
             })}
 
-            <div className="settings-add-row">
-              <div className="settings-grip">
-                <FontAwesomeIcon icon={faGripDots} />
-              </div>
+            <div className="settings-add-fields">
+              <input
+                type="text"
+                className="settings-input"
+                aria-label="New item name"
+                value={newItemName}
+                onChange={(event) => setNewItemName(event.target.value)}
+                onKeyDown={handleNewItemKeyDown}
+              />
 
-              <div className="settings-add-fields">
-                <input
-                  type="text"
-                  className="settings-input"
-                  aria-label="New item name"
-                  value={newItemName}
-                  onChange={(event) => setNewItemName(event.target.value)}
-                  onKeyDown={handleNewItemKeyDown}
-                />
-
-                <Button variant="secondary" onClick={handleAdd} disabled={!newItemName.trim()}>
-                  <FontAwesomeIcon icon={faCheck} />
-                  Add
-                </Button>
-              </div>
+              <Button variant="secondary" onClick={handleAdd} disabled={!newItemName.trim()}>
+                <FontAwesomeIcon icon={faCheck} />
+                Add
+              </Button>
             </div>
           </div>
         )}

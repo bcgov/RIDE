@@ -1,10 +1,11 @@
 import { Children, useState, useId } from 'react';
 import { Link } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faMagnifyingGlass, faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { faChevronLeft, faXmark } from '@fortawesome/pro-regular-svg-icons';
 import { faChevronDown, faChevronUp, faMinus, faPlus } from '@fortawesome/pro-solid-svg-icons';
 
 import Button from './Button.jsx';
+import SearchInput from './SearchInput.jsx';
 
 // Styling
 import './Sidebar.scss';
@@ -64,15 +65,7 @@ export function SidebarSearch(props) {
   // Main Component
   return (
     <div className="ride-sidebar-search">
-      <input
-        type="text"
-        className="ride-sidebar-search__input"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label={label || placeholder} />
-
-      <FontAwesomeIcon icon={faMagnifyingGlass} className="ride-sidebar-search__icon" />
+      <SearchInput value={value} onChange={onChange} label={label} placeholder={placeholder} />
     </div>
   );
 }
