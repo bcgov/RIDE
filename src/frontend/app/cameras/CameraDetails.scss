@@ -65,13 +65,32 @@
     }
   }
 
+  // Fills what is left under the header, and each column scrolls on its own
   .details-grid {
     display: grid;
-    flex: 1 0 auto;
+    flex: 1 1 0;
+    min-height: 0;
     grid-template-columns: 1fr 510px;
+    grid-template-rows: minmax(0, 1fr);
+  }
 
-    @media (max-width: 1200px) {
+  // Scrolls the camera image area; the media pane inside is centred with a max width
+  .media-scroll {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  // Stacked: one column, and the page scrolls as a whole again
+  @media (max-width: 1200px) {
+    .details-grid {
+      flex: 1 0 auto;
       grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+
+    .media-scroll,
+    .form-pane {
+      overflow-y: visible;
     }
   }
 
@@ -151,6 +170,8 @@
   .form-pane {
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
     padding-top: 7px;
     border-left: 1px solid $Divider;
     background: $White;

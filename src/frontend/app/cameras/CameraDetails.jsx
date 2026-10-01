@@ -49,6 +49,9 @@ function orientationLabel(orientation) {
   return orientation.charAt(0) + orientation.slice(1).toLowerCase();
 }
 
+// The tabs that edit the form behind Save and Undo; Notes, Logs and History save on their own
+const SAVEABLE_TABS = ['Basics', 'Setup', 'Views'];
+
 export default function CameraDetails({ onBack }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -1085,49 +1088,51 @@ export default function CameraDetails({ onBack }) {
           </div>
         ) : (
           <div className="details-grid">
-            <div className="media-pane">
-              <div className="main-preview-card">
-                <div className="preview-toolbar">
-                  <span className="current-view-label">
-                    {orientationLabel(currentView?.orientation) || 'Camera'}
-                  </span>
+            <div className="media-scroll">
+              <div className="media-pane">
+                <div className="main-preview-card">
+                  <div className="preview-toolbar">
+                    <span className="current-view-label">
+                      {orientationLabel(currentView?.orientation) || 'Camera'}
+                    </span>
 
-                  <Button variant="secondary" onClick={() => setIsTimelapseModalOpen(true)}>
-                    <FontAwesomeIcon icon={faClock} />
-                    View timelapse
-                  </Button>
+                    <Button variant="secondary" onClick={() => setIsTimelapseModalOpen(true)}>
+                      <FontAwesomeIcon icon={faClock} />
+                      View timelapse
+                    </Button>
+                  </div>
+
+                  <div className="main-image-wrapper">
+                    {mainImageUrl && !mainImgFailed ? (
+                      <img
+                        src={mainImageUrl}
+                        alt={camera?.title || 'Camera view'}
+                        onError={() => setMainImgFailed(true)}
+                      />
+                    ) : (
+                      <div className="image-placeholder">
+                        <FontAwesomeIcon icon={faVideoSlash} />
+                        <span className="image-unavailable-badge">
+                          Unavailable
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="main-image-wrapper">
-                  {mainImageUrl && !mainImgFailed ? (
-                    <img
-                      src={mainImageUrl}
-                      alt={camera?.title || 'Camera view'}
-                      onError={() => setMainImgFailed(true)}
-                    />
-                  ) : (
-                    <div className="image-placeholder">
-                      <FontAwesomeIcon icon={faVideoSlash} />
-                      <span className="image-unavailable-badge">
-                        Unavailable
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
+                <div className="views-section">
+                  <div className="views-header">
+                    <h2>Camera views</h2>
+                    <Button variant="secondary" onClick={() => setIsExpandedView(true)}>
+                      <FontAwesomeIcon icon={faExpand} />
+                      Expand all views
+                    </Button>
+                  </div>
 
-              <div className="views-section">
-                <div className="views-header">
-                  <h2>Camera views</h2>
-                  <Button variant="secondary" onClick={() => setIsExpandedView(true)}>
-                    <FontAwesomeIcon icon={faExpand} />
-                    Expand all views
-                  </Button>
-                </div>
-
-                <div className="views-grid">
-                  {viewsList
-                    .map((view) => renderViewCard(view))}
+                  <div className="views-grid">
+                    {viewsList
+                      .map((view) => renderViewCard(view))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1168,8 +1173,7 @@ export default function CameraDetails({ onBack }) {
               {activeTab === 'Logs' && <LogsTab cameraId={camera?.id} refreshKey={logsVersion} />}
               {activeTab === 'History' && <HistoryTab cameraId={camera?.id} />}
 
-              {activeTab == 'Basics' 
-                && 
+              {SAVEABLE_TABS.includes(activeTab) && (
                 <footer className="form-footer">
                   <Button onClick={handleSave} disabled={!isDirty}>
                     <FontAwesomeIcon icon={faCircleCheck} />
@@ -1180,7 +1184,7 @@ export default function CameraDetails({ onBack }) {
                     Undo changes
                   </Button>
                 </footer>
-                }
+              )}
             </div>
           </div>
         )}
