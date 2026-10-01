@@ -20,24 +20,13 @@ class RideAdapter(DefaultAccountAdapter):
 
 
 def get_oidc_claims(sociallogin_or_account):
-    """
-    Normalize SocialAccount.extra_data across allauth versions.
-
-    Since allauth 65.11.0, OpenID Connect claims are nested under
-    "userinfo" and/or "id_token" keys instead of being stored flat.
-    Older accounts (created pre-upgrade) still have the flat structure.
-    This returns a flat dict of claims regardless of which shape is present.
-    """
+    """Return userinfo claims or legacy flat allauth extra_data."""
     account = getattr(sociallogin_or_account, 'account', sociallogin_or_account)
     extra_data = account.extra_data or {}
 
-    if 'userinfo' in extra_data or 'id_token' in extra_data:
-        claims = {}
-        claims.update(extra_data.get('id_token') or {})
-        claims.update(extra_data.get('userinfo') or {})  # userinfo takes precedence if both present
-        return claims
+    if 'userinfo' in extra_data:
+        return extra_data.get('userinfo') or {}
 
-    # Old flat structure (pre-65.11.0)
     return extra_data
 
 

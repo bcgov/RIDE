@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from apps.events.models import Event
 from apps.events.serializers import EventSerializer
 from apps.users.models import RIDEUser
+from config.adapter import get_oidc_claims
 
 
 tz_finder = TimezoneFinder(in_memory=True)
@@ -41,7 +42,7 @@ approved: {approved} (latest: {latest_approved})
 
 def get_username(user):
     for account in user.socialaccount_set.all():
-        return getattr(account, 'extra_data', {}).get('idir_username', 'BCeID')
+        return get_oidc_claims(account).get('idir_username', 'BCeID')
     return 'Django'
 
 USER = '{first_name} {last_name} <{email}> ({account})'
