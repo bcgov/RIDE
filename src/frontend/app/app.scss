@@ -1,5 +1,6 @@
 @use "tailwindcss";
 @use "./styles/typography.scss";
+@use "./styles/variables.scss" as *;
 
 
 body {
@@ -19,6 +20,7 @@ body {
   header {
     padding: 0 1rem 0.25rem 1rem;
     flex: 0;
+    color: $BC-Blue;
 
     a {
       display: inline-block;
@@ -28,6 +30,28 @@ body {
       &.active {
         font-weight: bold;
       }
+    }
+
+    &.env-dev, &.env-test, &.env-uat {
+      color: $White;
+
+      a {
+        color: $White;
+
+        svg { color: $White; }
+      }
+    }
+
+    &.env-dev {
+      background-color: $Green;
+    }
+
+    &.env-test {
+      background-color: $Orange100;
+    }
+
+    &.env-uat {
+      background-color: $Purple100;
     }
   }
 
@@ -44,9 +68,9 @@ body {
 
       button {
         cursor: pointer;
-        fill: #ccc;
+        opacity: 0.5;
         &.debugging {
-          fill: #666;
+          opacity: 1;
         }
       }
     }
