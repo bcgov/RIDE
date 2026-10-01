@@ -506,7 +506,7 @@ export class EventForm extends Component {
               { switchType
                 ? <select
                     value={event.type}
-                    onChange={(e) => eventDispatch({ type: 'set', value: { type: e.target.value } })}
+                    onChange={(e) => eventDispatch({ type: 'set type', value: { type: e.target.value } })}
                   >
                     { CHANGE_TYPE_FORMS.map((t) => {
                       return <option key={t}>{t}</option>

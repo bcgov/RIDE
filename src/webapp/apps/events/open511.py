@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 from zoneinfo import ZoneInfo
 
 from allauth.socialaccount.models import SocialAccount
@@ -235,6 +236,10 @@ ORDERED_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
 VANCOUVER = [-123.116226, 49.246292]
 
+LONG_FORMAT = '%-I:%M %p %Z on %A %B %-d, %Y'
+if os.name == 'nt':
+    LONG_FORMAT = '%#I:%M %p %Z on %A %B %#d, %Y'
+
 def build_event_description(event, ivr=False):
 
     parts = []
@@ -292,22 +297,21 @@ def build_event_description(event, ivr=False):
     local_start_time = datetime.datetime.now(timezone)
     if event.start_time or event.end_time:
 
-        short_start = short_end = None
-
+        start = end = None
         if event.start_time:
             local_start_time = event.start_time.astimezone(timezone)
-            short_start = f'{local_start_time.strftime('%a %b')} {local_start_time.day}'
+            start = local_start_time.strftime(LONG_FORMAT)
 
         if event.end_time:
             local_end_time = event.end_time.astimezone(timezone)
-            short_end = f'{local_end_time.strftime('%a %b')} {local_end_time.day}'
+            end = local_end_time.strftime(LONG_FORMAT)
 
-        if short_start and short_end:
-            parts.append(sentence(f"Starting {short_start} until {short_end}"))
-        elif short_start:
-            parts.append(sentence(f"Starting {short_start}"))
-        elif short_end:
-            parts.append(sentence(f"Until {short_end}"))
+        if start and end:
+            parts.append(sentence(f"Starting {start} until {end}"))
+        elif start:
+            parts.append(sentence(f"Starting {start}"))
+        elif end:
+            parts.append(sentence(f"Until {end}"))
 
     for schedule in event.schedules or []:
         parts.append(get_schedule_description(schedule, local_start_time))

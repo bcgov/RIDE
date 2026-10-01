@@ -45,15 +45,19 @@ export default function eventReducer(event, action) {
     }
 
     case 'set type': {
-      if (action.event_type === 'Road condition') {
-        event.type = 'ROAD_CONDITION';
-        event.timing.nextUpdate = getNextUpdate();
-      } else {
-        event.type = action.event_type;
-        event.timing.nextUpdate = getLater(event.details.severity);
+      let new_type = action.value.type;
+      const timing = { ...event.timing };
+      if (action.value.type === 'Road condition') {
+        new_type = 'ROAD_CONDITION';
+        timing.nextUpdate = getNextUpdate();
+      } else if (action.value.type === 'Incident') {
+        timing.nextUpdate = getLater(event.details.severity);
+        timing.nextUpdateIsDefault = true;
+        timing.startTime = null;
+      } else { // Planned Event
+        timing.nextUpdate = null;
       }
-      event.timing.nextUpdateIsDefault = true;
-      return {...event};
+      return {...event, type: new_type, timing};
     }
 
     case 'set start': {
