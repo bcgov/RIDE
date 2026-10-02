@@ -1,0 +1,94 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// Figma: Notes tab. An "Entries" header, then one block per note.
+.notes-card-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.notes-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: $Grey100;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.note-item {
+  animation: ride-fade-in $Motion-base $Ease-out backwards;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+}
+
+.note-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  @include text-label-regular;
+}
+
+.note-item .author-name {
+  font-weight: 700;
+  color: $Type-Secondary;
+}
+
+.updated-time {
+  color: $Grey80;
+}
+
+// The note text and its "Edit note" link sit 8px apart
+.note-comment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.note-content {
+  width: 100%;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: $Type-Primary;
+  white-space: pre-wrap;
+}
+
+.add-note-form,
+.edit-note-form {
+  margin-bottom: 8px;
+
+  textarea {
+    @include text-small-body;
+    @include focus-ring;
+    width: 100%;
+    padding: 8px;
+    @include field-box;
+    font-family: inherit;
+    color: $Type-Primary;
+    resize: vertical;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.notes-empty {
+  @include text-small-body;
+  margin: 0;
+  color: $Type-Secondary;
+}

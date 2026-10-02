@@ -1,0 +1,48 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+.setup-tab {
+  // Figma: rows and the section title are 12px apart on this tab (16px on Basics)
+  --form-section-gap: 12px;
+
+  font-family: inherit;
+
+  // Figma: "Form / Text field" (Camera ID) and "Form / Switcher"
+  .setup-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+
+    .camera-id-group {
+      .field-label-sm {
+        display: block;
+        @include text-label-regular;
+        color: $Type-Primary;
+      }
+
+      .camera-id-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.5;
+        color: $Type-Primary;
+      }
+    }
+
+    .toggle-label-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      cursor: pointer;
+      color: $Type-Secondary;
+      @include text-small-body;
+    }
+  }
+}
+
+.link-style {
+  color: $ViewDetailsText;
+  text-decoration: underline;
+  cursor: pointer;
+}

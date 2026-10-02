@@ -21,7 +21,12 @@ import {
 
 import { faVideoSlash, faEyeSlash } from '@fortawesome/pro-solid-svg-icons';
 import { getCookie } from "../shared/helpers.js";
-import { BasicsTab, SetupTab, ViewsTab, NotesTab, LogsTab, HistoryTab } from './DetailsTabs.jsx';
+import BasicsTab from './BasicsTab.jsx';
+import SetupTab from './SetupTab.jsx';
+import ViewsTab from './ViewsTab.jsx';
+import NotesTab from './NotesTab.jsx';
+import LogsTab from './LogsTab.jsx';
+import HistoryTab from './HistoryTab.jsx';
 import Button from '../components/shared/Button.jsx';
 import Switch from '../components/shared/Switch.jsx';
 import Flyout, { FlyoutItem, FlyoutSection } from '../components/shared/Flyout.jsx';
@@ -34,6 +39,7 @@ import Sidebar, {
   SidebarSearch,
 } from '../components/shared/Sidebar.jsx';
 import './CameraDetails.scss';
+import './TabForm.scss';
 import DeleteCameraModal from './DeleteCameraModal.jsx';
 import Toast from './Toast.jsx';
 import TimelapseModal from './TimelapseModal.jsx';
