@@ -7,7 +7,9 @@ const adapter = createEntityAdapter({
 })
 
 const url = `${API_HOST}/api/service_areas/boundaries`;
-const validList = (data) => Array.isArray(data) && data.length > 1;
+
+// data must be an array of non-zero length, and the geometry coordinates must not be empty
+const validList = (data) => Array.isArray(data) && data.length > 1 && data[0].geometry?.coordinates[0];
 
 const refreshThunk = createAsyncThunk(
   'serviceAreaBoundaries/refresh',
