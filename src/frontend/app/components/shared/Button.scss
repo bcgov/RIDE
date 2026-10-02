@@ -20,9 +20,14 @@
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
+  @include transition(background-color, border-color, color, transform);
 
   svg {
     font-size: 0.75rem;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
   }
 
   &:disabled {

@@ -126,7 +126,7 @@
   height: 16px;
   color: $Grey80;
   cursor: grab;
-  transition: color 0.15s ease;
+  @include transition(color);
 
 
   &:active {
@@ -144,7 +144,7 @@
   @include text-body;
   margin: 0;
   color: $Type-Primary;
-  transition: color 0.15s ease;
+  @include transition(color);
 }
 
 // A row that can be dragged is picked up by its name as well as by the grip, so the name gets
@@ -236,6 +236,7 @@
   box-sizing: border-box;
   color: $Type-Primary;
   cursor: pointer;
+  @include transition(background-color, border-color, color);
 
   &--selected {
     border-color: $Focus;
@@ -324,6 +325,9 @@
 .camera-order-group {
   padding-bottom: 12px;
   border-bottom: 1px solid $Divider;
+  @include transition(padding-bottom);
+  transition-duration: $Motion-slow;
+  transition-timing-function: $Ease-standard;
 
   &--open {
     padding-bottom: 4px;
@@ -379,47 +383,17 @@
 .camera-order-item {
   position: relative;
 
-  // The row being dragged stays in place, dimmed
+  // The row being dragged is dimmed, and stands in as the gap where it will land
   &.is-dragging {
     opacity: 0.4;
   }
 
-  // The drop line: drawn in the gap next to the row the item will land beside
-  &.drop-before::before,
-  &.drop-after::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    left: 0;
-    height: 2px;
-    border-radius: 1px;
-    background: $Focus;
-    pointer-events: none;
-  }
-}
-
-.settings-row {
-  &.drop-before::before {
-    top: -9px; // middle of the 16px gap above
-  }
-
-  // Nothing above the first row but 7px of padding, so the line sits inside that
-  &:first-child.drop-before::before {
-    top: -5px;
-  }
-
-  &.drop-after::after {
-    bottom: -10px; // under the 1px divider, middle of the 16px gap below
-  }
-}
-
-.camera-order-item {
-  &.drop-before::before {
-    top: -3px; // middle of the 4px gap above
-  }
-
-  &.drop-after::after {
-    bottom: -4px; // under the 1px divider, middle of the 4px gap below
+  // While a drag is on, rows slide to open the gap. The transition is only on during the drag,
+  // so the rows do not animate again when the drop reorders them.
+  &.is-reordering {
+    @include transition(transform);
+    transition-duration: $Motion-base;
+    transition-timing-function: $Ease-standard;
   }
 }
 

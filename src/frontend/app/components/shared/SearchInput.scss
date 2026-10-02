@@ -44,6 +44,7 @@
     background: none;
     cursor: pointer;
     pointer-events: auto;
+    @include transition(color);
 
     &:hover {
       color: $Type-Primary;

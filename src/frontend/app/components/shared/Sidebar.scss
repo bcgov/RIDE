@@ -75,6 +75,7 @@
     @include text-label-regular;
     color: $Type-Primary;
     cursor: pointer;
+    @include transition(background-color);
 
     &:hover {
       background: $Grey20;
@@ -104,7 +105,6 @@
 .ride-sidebar-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 
   &__header {
     @include focus-ring;
@@ -127,10 +127,12 @@
     }
   }
 
+  // The 4px under the header is padding, not a gap, so it closes with the body
   &__body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    padding-top: 4px;
   }
 }
 
@@ -138,7 +140,6 @@
 .ride-sidebar-accordion {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 
   &__header {
     @include text-small-body;
@@ -155,6 +156,7 @@
     text-align: left;
     color: $Grey80;
     cursor: pointer;
+    @include transition(color);
 
     &:hover {
       color: $Type-Secondary;
@@ -174,13 +176,24 @@
     svg {
       font-size: 0.75rem;
     }
+
+    // The chevron points down; it turns over as the list opens
+    &[aria-expanded] svg {
+      @include transition(transform);
+      transition-duration: $Motion-slow;
+      transition-timing-function: $Ease-standard;
+    }
+
+    &[aria-expanded='true'] svg {
+      transform: rotate(180deg);
+    }
   }
 
   &__list {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 0 20px;
+    padding: 4px 20px 0;
   }
 }
 
@@ -196,6 +209,7 @@
   text-align: left;
   color: $Type-Secondary;
   cursor: pointer;
+  @include transition(background-color, border-color);
 
   &:hover {
     background: $Grey20;

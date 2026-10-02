@@ -2,9 +2,10 @@ import { Children, useState, useId } from 'react';
 import { Link } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faXmark } from '@fortawesome/pro-regular-svg-icons';
-import { faChevronDown, faChevronUp, faMinus, faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDown, faMinus, faPlus } from '@fortawesome/pro-solid-svg-icons';
 
 import Button from './Button.jsx';
+import Collapse from './Collapse.jsx';
 import SearchInput from './SearchInput.jsx';
 
 // Styling
@@ -109,8 +110,10 @@ export function SidebarGroup(props) {
         <FontAwesomeIcon icon={isOpen ? faMinus : faPlus} />
       </button>
 
-      {isOpen && Children.count(children) > 0 &&
-        <div id={bodyId} className="ride-sidebar-group__body">{children}</div>
+      {Children.count(children) > 0 &&
+        <Collapse open={isOpen}>
+          <div id={bodyId} className="ride-sidebar-group__body">{children}</div>
+        </Collapse>
       }
     </div>
   );
@@ -146,11 +149,13 @@ export function SidebarAccordion(props) {
         aria-controls={listId}
         onClick={toggle}>
         <span>{title}</span>
-        <FontAwesomeIcon icon={isOpen ? faChevronUp : faChevronDown} />
+        <FontAwesomeIcon icon={faChevronDown} />
       </button>
 
-      {isOpen && Children.count(children) > 0 &&
-        <div id={listId} className="ride-sidebar-accordion__list">{children}</div>
+      {Children.count(children) > 0 &&
+        <Collapse open={isOpen}>
+          <div id={listId} className="ride-sidebar-accordion__list">{children}</div>
+        </Collapse>
       }
     </div>
   );

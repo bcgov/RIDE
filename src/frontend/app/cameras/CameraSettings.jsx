@@ -11,6 +11,7 @@ import { useSearchParams } from 'react-router';
 import { getCookie } from '../shared/helpers.js';
 import Button from '../components/shared/Button.jsx';
 import SkeletonList from '../components/shared/SkeletonList.jsx';
+import Collapse from '../components/shared/Collapse.jsx';
 import useDragReorder from './useDragReorder.js';
 import Sidebar, {
   SidebarAccordion,
@@ -1038,7 +1039,7 @@ function CameraOrderGroup({ group, groupIndex, cameraOrder }) {
         <span>{group.road}</span>
       </button>
 
-      {isOpen && (
+      <Collapse open={isOpen}>
         <div className="camera-order-list">
           {group.cameras.map((cam, camIndex) => (
             <div key={cam.id} {...rowProps(camIndex, 'camera-order-item')}>
@@ -1049,7 +1050,7 @@ function CameraOrderGroup({ group, groupIndex, cameraOrder }) {
             </div>
           ))}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useParams, useNavigate, useSearchParams, useLocation } from "react-router";
 import { orientationLabel } from './helpers.js';
@@ -21,12 +21,7 @@ import {
 
 import { faVideoSlash, faEyeSlash } from '@fortawesome/pro-solid-svg-icons';
 import { getCookie } from "../shared/helpers.js";
-import BasicsTab from './BasicsTab.jsx';
-import SetupTab from './SetupTab.jsx';
-import ViewsTab from './ViewsTab.jsx';
-import NotesTab from './NotesTab.jsx';
-import LogsTab from './LogsTab.jsx';
-import HistoryTab from './HistoryTab.jsx';
+import { BasicsTab, SetupTab, ViewsTab, NotesTab, LogsTab, HistoryTab } from './DetailsTabs.jsx';
 import Button from '../components/shared/Button.jsx';
 import Switch from '../components/shared/Switch.jsx';
 import Flyout, { FlyoutItem, FlyoutSection } from '../components/shared/Flyout.jsx';
@@ -39,7 +34,6 @@ import Sidebar, {
   SidebarSearch,
 } from '../components/shared/Sidebar.jsx';
 import './CameraDetails.scss';
-import './TabForm.scss';
 import DeleteCameraModal from './DeleteCameraModal.jsx';
 import Toast from './Toast.jsx';
 import TimelapseModal from './TimelapseModal.jsx';
@@ -81,6 +75,9 @@ export default function CameraDetails({ onBack }) {
   // True until the first load of an existing camera finishes; the refresh every minute does not use it
   const [isLoadingCamera, setIsLoadingCamera] = useState(Boolean(id) && id !== 'new');
   const [activeTab, setActiveTab] = useState('Basics');
+  // The sliding tab underline: measured from the active tab, and animated only after its first position
+  const tabsRef = useRef(null);
+  const [tabsReady, setTabsReady] = useState(false);
   const [selectedViewId, setSelectedViewId] = useState(initialViewId);
   const [basicsData, setBasicsData] = useState({
     title: '',
@@ -419,6 +416,28 @@ export default function CameraDetails({ onBack }) {
   };
 
   // Refresh the page every minute to get latest data
+  useLayoutEffect(() => {
+    const nav = tabsRef.current;
+    if (!nav) return undefined;
+
+    const placeUnderline = () => {
+      const active = nav.querySelector('.tab-btn.active');
+      if (!active) return;
+      nav.style.setProperty('--tab-x', `${active.offsetLeft}px`);
+      nav.style.setProperty('--tab-width', `${active.offsetWidth}px`);
+    };
+
+    placeUnderline();
+    const frame = requestAnimationFrame(() => setTabsReady(true));
+    window.addEventListener('resize', placeUnderline);
+    document.fonts?.ready.then(placeUnderline);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', placeUnderline);
+    };
+  }, [activeTab, isLoadingCamera, isExpandedView]);
+
   useEffect(() => {
     if (!id || id === 'new') return undefined;
     const intervalId = window.setInterval(() => {
@@ -961,7 +980,7 @@ export default function CameraDetails({ onBack }) {
       {isLoadingCamera ? (
         <DetailsSkeleton />
       ) : (
-        <div className="camera-details-container">
+        <div className="camera-details-container fade-in">
           <header className="details-header">
             <div className="title-section">
               {isEditingName ? (
@@ -1033,48 +1052,46 @@ export default function CameraDetails({ onBack }) {
                 >
                   <FontAwesomeIcon icon={faEllipsisVertical} />
                 </Button>
-                {isMenuOpen && (
-                  <Flyout>
-                    <FlyoutSection title="More">
-                      <FlyoutItem
-                        icon={<FontAwesomeIcon icon={faPenToSquare} />}
-                        aria-label="Edit location name"
-                        onClick={() => {
-                          setCameraName(basicsData.title || '');
-                          setIsEditingName(true);
-                        }}
-                      >
-                        Edit location name
-                      </FlyoutItem>
+                <Flyout open={isMenuOpen}>
+                  <FlyoutSection title="More">
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faPenToSquare} />}
+                      aria-label="Edit location name"
+                      onClick={() => {
+                        setCameraName(basicsData.title || '');
+                        setIsEditingName(true);
+                      }}
+                    >
+                      Edit location name
+                    </FlyoutItem>
 
-                      <FlyoutItem
-                        icon={<FontAwesomeIcon icon={faClock} />}
-                        href="https://timelapse.drivebc.ca"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Timelapse
-                      </FlyoutItem>
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faClock} />}
+                      href="https://timelapse.drivebc.ca"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Timelapse
+                    </FlyoutItem>
 
-                      <FlyoutItem
-                        icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
-                        href="https://weather.gc.ca"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Weather
-                      </FlyoutItem>
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
+                      href="https://weather.gc.ca"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Weather
+                    </FlyoutItem>
 
-                      <FlyoutItem icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
-                        Electrical outages
-                      </FlyoutItem>
+                    <FlyoutItem icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
+                      Electrical outages
+                    </FlyoutItem>
 
-                      <FlyoutItem icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
-                        Forest fires
-                      </FlyoutItem>
-                    </FlyoutSection>
-                  </Flyout>
-                )}
+                    <FlyoutItem icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
+                      Forest fires
+                    </FlyoutItem>
+                  </FlyoutSection>
+                </Flyout>
               </div>
             </div>
           </header>
@@ -1149,7 +1166,7 @@ export default function CameraDetails({ onBack }) {
               <div className="form-pane">
                 <h2 className="form-pane-title">Camera location settings</h2>
 
-                <nav className="details-tabs">
+                <nav className={`details-tabs${tabsReady ? ' is-ready' : ''}`} ref={tabsRef}>
                   {['Basics', 'Setup', 'Views', 'Notes', 'Logs', 'History'].map((tab) => (
                     <button
                       key={tab}

@@ -15,14 +15,14 @@
   box-sizing: border-box;
   background: $Grey50;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  @include transition(background-color);
 
   &__dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
     background: $White;
-    transition: transform 0.2s ease;
+    @include transition(transform);
   }
 
   &[aria-checked='true'] {

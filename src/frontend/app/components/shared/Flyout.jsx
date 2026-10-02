@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowUpRightFromSquare } from '@fortawesome/pro-regular-svg-icons';
@@ -6,9 +7,23 @@ import { faArrowUpRightFromSquare } from '@fortawesome/pro-regular-svg-icons';
 import './Flyout.scss';
 
 // Figma: "flyout". Opens below its trigger, aligned to the right edge; the
-// trigger's wrapper needs `position: relative`.
-export default function Flyout({ children }) {
-  return <div className="ride-flyout">{children}</div>;
+// trigger's wrapper needs `position: relative`. It stays mounted while it animates out
+// after `open` turns false.
+export default function Flyout({ open, children }) {
+  const [isMounted, setIsMounted] = useState(open);
+
+  if (open && !isMounted) setIsMounted(true);
+  if (!isMounted) return null;
+
+  const handleAnimationEnd = (event) => {
+    if (!open && event.target === event.currentTarget) setIsMounted(false);
+  };
+
+  return (
+    <div className={`ride-flyout${open ? '' : ' is-closing'}`} onAnimationEnd={handleAnimationEnd}>
+      {children}
+    </div>
+  );
 }
 
 // A group of items with an optional title (Figma: "Actions", "External links", "More")

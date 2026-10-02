@@ -138,7 +138,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
+  @include transition(box-shadow);
 
   // Same grey outline the view cards get on hover on the details page
   &:hover {
@@ -154,7 +154,7 @@
   height: 100%;
 
   object-fit: cover;
-  transition: filter 0.15s ease;
+  @include transition(filter);
 }
 
 // A view that is switched off shows its image at half strength

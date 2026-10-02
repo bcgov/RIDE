@@ -39,6 +39,7 @@
   color: $Grey80;
   opacity: 0.9;
   cursor: pointer;
+  @include transition(background-color, color, opacity);
 
   &:hover {
     background: $Grey30;

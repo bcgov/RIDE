@@ -17,6 +17,8 @@
   box-sizing: border-box;
   background: $Grey10;
   box-shadow: $Shadow-medium;
+  transform-origin: top right;
+  animation: ride-flyout-in $Motion-base $Ease-out backwards;
 
   &__section {
     display: flex;
@@ -60,6 +62,7 @@
     white-space: nowrap;
     color: $Type-Primary;
     cursor: pointer;
+    @include transition(background-color, color);
 
     &:hover {
       background: $Grey10;
@@ -79,5 +82,24 @@
     width: 16px;
     font-size: 0.625rem;
     color: $Grey80;
+  }
+}
+
+@keyframes ride-flyout-in {
+  from {
+    opacity: 0;
+    transform: translateY(-$Motion-shift);
+  }
+}
+
+.ride-flyout.is-closing {
+  animation: ride-flyout-out $Motion-fast $Ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes ride-flyout-out {
+  to {
+    opacity: 0;
+    transform: translateY(-$Motion-shift);
   }
 }

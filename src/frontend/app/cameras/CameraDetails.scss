@@ -97,7 +97,7 @@
     display: grid;
     flex: 1 1 0;
     min-height: 0;
-    grid-template-columns: 1fr 510px;
+    grid-template-columns: minmax(800px, 1fr) 510px;
     grid-template-rows: minmax(0, 1fr);
   }
 
@@ -107,19 +107,6 @@
     overflow-y: auto;
   }
 
-  // Stacked: one column, and the page scrolls as a whole again
-  @media (max-width: 1200px) {
-    .details-grid {
-      flex: 1 0 auto;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
-    }
-
-    .media-scroll,
-    .form-pane {
-      overflow-y: visible;
-    }
-  }
 
   /* Left Media Section */
   // Left media section (Figma: 32px each side, 16px above)
@@ -216,7 +203,26 @@
       padding: 4px 16px 0;
       border-bottom: 1px solid $Divider;
 
-      // The active underline overlaps the bar's own bottom line
+      // The active underline slides between tabs; it overlaps the bar's own bottom line.
+      // --tab-x and --tab-width are measured from the active tab in CameraDetails.jsx.
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: var(--tab-width, 0);
+        height: 2px;
+        background: $Focus;
+        transform: translateX(var(--tab-x, 0));
+        pointer-events: none;
+      }
+
+      &.is-ready::after {
+        transition: transform $Motion-base $Ease-standard, width $Motion-base $Ease-standard;
+      }
+
       .tab-btn {
         @include text-small-body;
         @include focus-ring;
@@ -227,6 +233,7 @@
         background: none;
         color: $Type-Primary;
         cursor: pointer;
+        @include transition(color);
 
         // Figma: "Parts / Tabs" hover (inactive tabs only) shows the text in $Grey80
         &:hover:not(.active) {
@@ -234,7 +241,6 @@
         }
 
         &.active {
-          border-bottom-color: $Focus;
           font-weight: 700;
         }
       }
@@ -365,7 +371,7 @@
   overflow: hidden;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s ease;
+  @include transition(border-color);
 
   &:hover {
     border-color: $Grey70;

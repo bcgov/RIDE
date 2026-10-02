@@ -103,6 +103,15 @@ $BtnActive-Secondary: $White;
 //Animations
 $Anim-gentle: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
+// Motion. Durations by how often the interaction happens; easings by direction.
+$Motion-fast: 120ms; // hover, press, switch, tab underline
+$Motion-base: 180ms; // menus, flyouts, toast, content fading in
+$Motion-slow: 240ms; // dialogs and other larger surfaces
+$Ease-out: cubic-bezier(0.2, 0, 0, 1); // entering, or answering the user
+$Ease-in: cubic-bezier(0.4, 0, 1, 1); // leaving
+$Ease-standard: cubic-bezier(0.4, 0, 0.2, 1); // moving or resizing on screen
+$Motion-shift: 4px; // how far menus slide in
+
 $Border-dark: #353433;
 
 $GreyOnBlue: #5C6B78;

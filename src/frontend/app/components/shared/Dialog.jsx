@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/pro-regular-svg-icons';
@@ -10,11 +10,15 @@ import Button from './Button.jsx';
 // Styling
 import './Dialog.scss';
 
+// Lets the buttons inside a dialog close it with the exit animation
+const DialogContext = createContext(null);
+
 // Figma: "Modal - *". A native <dialog> with the themed header (circled icon,
 // title, close button) and a padded content area.
 //   icon      Font Awesome icon shown in the header circle
 //   title     heading text
-//   onClose   called for the close button, Escape and a click on the backdrop
+//   onClose   called for the close button, Escape and a click on the backdrop, once the dialog
+//             has animated out. A dialog the parent unmounts itself closes without the animation.
 //   actions   footer buttons, e.g. a primary Button followed by a tertiary Cancel
 //   onSubmit  renders the content as a <form>, so a submit button can send it
 //   message   text-only dialog: wider gap before the actions
@@ -26,6 +30,12 @@ export default function Dialog(props) {
   // Refs
   const dialogRef = useRef(null);
   const titleId = useId();
+
+  // States
+  const [isClosing, setIsClosing] = useState(false);
+
+  // The parent hears about the close when the exit animation ends
+  const requestClose = () => setIsClosing(true);
 
   /* Hooks */
   // Effects
@@ -45,35 +55,47 @@ export default function Dialog(props) {
     if (!dialog) return undefined;
 
     const handleBackdropClick = (event) => {
-      if (event.target === dialog) onClose();
+      if (event.target === dialog) setIsClosing(true);
     };
 
     dialog.addEventListener('click', handleBackdropClick);
     return () => dialog.removeEventListener('click', handleBackdropClick);
-  }, [onClose]);
+  }, []);
 
   /* Handlers */
   // ESC key fires 'cancel' before the browser closes the dialog natively.
   // Prevent that default and route the close through the parent instead.
   const handleCancel = (event) => {
     event.preventDefault();
-    onClose();
+    requestClose();
+  };
+
+  const handleAnimationEnd = (event) => {
+    if (isClosing && event.target === event.currentTarget) onClose();
   };
 
   /* Rendering */
   // Main Component
   const Content = onSubmit ? 'form' : 'div';
-  const classes = ['ride-dialog', message && 'ride-dialog--message', className]
+  const classes = ['ride-dialog', message && 'ride-dialog--message', isClosing && 'is-closing', className]
     .filter(Boolean).join(' ');
 
   return createPortal(
-    <dialog ref={dialogRef} className={classes} aria-labelledby={titleId} onCancel={handleCancel} tabIndex={-1}>
+    <DialogContext value={requestClose}>
+    <dialog
+      ref={dialogRef}
+      className={classes}
+      aria-labelledby={titleId}
+      onCancel={handleCancel}
+      onAnimationEnd={handleAnimationEnd}
+      tabIndex={-1}
+    >
       <header className="ride-dialog__header">
         <span className="ride-dialog__icon">
           <FontAwesomeIcon icon={icon} />
         </span>
         <h2 id={titleId} className="ride-dialog__title">{title}</h2>
-        <button type="button" className="ride-dialog__close" onClick={onClose} aria-label="Close">
+        <button type="button" className="ride-dialog__close" onClick={requestClose} aria-label="Close">
           <FontAwesomeIcon icon={faXmarkBold} />
         </button>
       </header>
@@ -82,15 +104,18 @@ export default function Dialog(props) {
         {children}
         {actions && <div className="ride-dialog__actions">{actions}</div>}
       </Content>
-    </dialog>,
+    </dialog>
+    </DialogContext>,
     document.body
   );
 }
 
 // Figma: the plain "Cancel" that follows a dialog's main action
 export function DialogCancel({ onClick }) {
+  const requestClose = useContext(DialogContext);
+
   return (
-    <Button variant="tertiary" size="dialog" onClick={onClick}>
+    <Button variant="tertiary" size="dialog" onClick={requestClose ?? onClick}>
       Cancel
       <FontAwesomeIcon icon={faXmark} />
     </Button>

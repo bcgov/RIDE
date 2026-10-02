@@ -12,6 +12,7 @@
   background: $Grey10;
   overflow-y: auto;
   overflow-x: hidden;
+  isolation: isolate; // the z-index values inside stay inside, below the app header's menus
 
   > section {
     display: flex;

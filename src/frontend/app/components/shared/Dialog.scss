@@ -19,8 +19,22 @@
     outline: none;
   }
 
+  &[open] {
+    animation: ride-dialog-in $Motion-slow $Ease-out backwards;
+  }
+
   &::backdrop {
     background: rgba($Black, 0.2);
+    animation: ride-fade-in $Motion-slow $Ease-out backwards;
+  }
+
+  // Faster out than in
+  &.is-closing {
+    animation: ride-dialog-out $Motion-base $Ease-in forwards;
+
+    &::backdrop {
+      animation: ride-fade-out $Motion-base $Ease-in forwards;
+    }
   }
 
   &__header {
@@ -71,6 +85,7 @@
     background: none;
     color: $BC-Blue;
     cursor: pointer;
+    @include transition(background-color);
 
     &:hover {
       background: $BtnHover-Tertiary;
@@ -161,5 +176,19 @@
     display: flex;
     align-items: center;
     gap: 32px;
+  }
+}
+
+@keyframes ride-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes ride-dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
   }
 }

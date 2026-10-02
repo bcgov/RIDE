@@ -77,3 +77,11 @@
     color: $Base-red;
   }
 }
+
+// Transitions the listed properties at the fast duration. Reduced motion is handled
+// globally in styles/motion.scss.
+@mixin transition($properties...) {
+  transition-property: $properties;
+  transition-duration: $Motion-fast;
+  transition-timing-function: $Ease-out;
+}

@@ -235,31 +235,29 @@ function CameraRow({
                 More
               </Button>
 
-              {isMenuOpen && (
-                <Flyout>
-                  <FlyoutSection>
-                    <FlyoutItem
-                      icon={<WrenchIcon />}
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        onServiceRequest?.(camera);
-                      }}
-                    >
-                      Service request
-                    </FlyoutItem>
+              <Flyout open={isMenuOpen}>
+                <FlyoutSection>
+                  <FlyoutItem
+                    icon={<WrenchIcon />}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onServiceRequest?.(camera);
+                    }}
+                  >
+                    Service request
+                  </FlyoutItem>
 
-                    <FlyoutItem
-                      icon={<FontAwesomeIcon icon={faCopy} />}
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        onClone?.(camera);
-                      }}
-                    >
-                      Clone camera location
-                    </FlyoutItem>
-                  </FlyoutSection>
-                </Flyout>
-              )}
+                  <FlyoutItem
+                    icon={<FontAwesomeIcon icon={faCopy} />}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onClone?.(camera);
+                    }}
+                  >
+                    Clone camera location
+                  </FlyoutItem>
+                </FlyoutSection>
+              </Flyout>
             </div>
           )}
         </div>
@@ -977,7 +975,7 @@ export default function Cameras() {
           </Sidebar>
         }
       >
-        <div className="camera-content-wrapper">
+        <div className="camera-content-wrapper fade-in">
           <div className="cameras-header">
             <div>
               <h1>Cameras</h1>
@@ -1002,57 +1000,55 @@ export default function Cameras() {
                 <FontAwesomeIcon icon={faEllipsisVertical} />
               </Button>
 
-              {isHeaderMenuOpen && (
-                <Flyout>
-                  {isCameraAdmin && (
-                    <FlyoutSection title="Actions">
-                      <FlyoutItem
-                        to="/cameras/new"
-                        icon={<FontAwesomeIcon icon={faCirclePlus} />}
-                        onClick={() => setIsHeaderMenuOpen(false)}
-                      >
-                        New camera
-                      </FlyoutItem>
-
-                      <FlyoutItem
-                        icon={<FontAwesomeIcon icon={faFile} />}
-                        onClick={() => {
-                          setIsExportModalOpen(true);
-                          setIsHeaderMenuOpen(false);
-                        }}
-                      >
-                        Export report
-                      </FlyoutItem>
-
-                      <FlyoutItem
-                        to="/cameras/settings?setting=service-providers"
-                        icon={<WrenchIcon />}
-                        onClick={() => setIsHeaderMenuOpen(false)}
-                      >
-                        Manage settings
-                      </FlyoutItem>
-                    </FlyoutSection>
-                  )}
-
-                  <FlyoutSection title="External links">
+              <Flyout open={isHeaderMenuOpen}>
+                {isCameraAdmin && (
+                  <FlyoutSection title="Actions">
                     <FlyoutItem
-                      external
-                      icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
-                      href="https://weather.gc.ca"
+                      to="/cameras/new"
+                      icon={<FontAwesomeIcon icon={faCirclePlus} />}
+                      onClick={() => setIsHeaderMenuOpen(false)}
                     >
-                      Weather
+                      New camera
                     </FlyoutItem>
 
-                    <FlyoutItem external icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
-                      Electrical outages
+                    <FlyoutItem
+                      icon={<FontAwesomeIcon icon={faFile} />}
+                      onClick={() => {
+                        setIsExportModalOpen(true);
+                        setIsHeaderMenuOpen(false);
+                      }}
+                    >
+                      Export report
                     </FlyoutItem>
 
-                    <FlyoutItem external icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
-                      Forest fires
+                    <FlyoutItem
+                      to="/cameras/settings?setting=service-providers"
+                      icon={<WrenchIcon />}
+                      onClick={() => setIsHeaderMenuOpen(false)}
+                    >
+                      Manage settings
                     </FlyoutItem>
                   </FlyoutSection>
-                </Flyout>
-              )}
+                )}
+
+                <FlyoutSection title="External links">
+                  <FlyoutItem
+                    external
+                    icon={<FontAwesomeIcon icon={faCloudSun} transform="flip-h" />}
+                    href="https://weather.gc.ca"
+                  >
+                    Weather
+                  </FlyoutItem>
+
+                  <FlyoutItem external icon={<FontAwesomeIcon icon={faBolt} />} href="#electrical-outages">
+                    Electrical outages
+                  </FlyoutItem>
+
+                  <FlyoutItem external icon={<FontAwesomeIcon icon={faFire} />} href="#forest-fires">
+                    Forest fires
+                  </FlyoutItem>
+                </FlyoutSection>
+              </Flyout>
             </div>
           </div>
 

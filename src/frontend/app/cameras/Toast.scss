@@ -16,7 +16,7 @@
   border-radius: 4px;
   background: $Grey100;
   color: $White;
-  animation: toast-slide-in 0.2s ease-out;
+  animation: toast-slide-in $Motion-base $Ease-out backwards;
 
   svg {
     flex-shrink: 0;
@@ -37,11 +37,17 @@
     color: $White;
     opacity: 0.6;
     cursor: pointer;
+    @include transition(opacity);
 
     &:hover {
       opacity: 1;
     }
   }
+}
+
+.ride-toast.is-closing {
+  animation: toast-slide-out $Motion-base $Ease-in forwards;
+  pointer-events: none;
 }
 
 .ride-toast + .ride-toast {
@@ -51,10 +57,17 @@
 @keyframes toast-slide-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 8px);
+    transform: translate(-50%, 2 * $Motion-shift);
   }
   to {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+}
+
+@keyframes toast-slide-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, 2 * $Motion-shift);
   }
 }

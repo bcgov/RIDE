@@ -88,6 +88,8 @@
     width: auto;
   }
 
+  @include transition(color);
+
   &--play {
     font-size: 1.125rem;
   }
