@@ -9,7 +9,9 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
 import { AlertContext, AuthContext, MapContext } from '../../../contexts';
+import { API_HOST } from '../../../env';
 import { getRoute, getRouteWithoutClosures, getRouteWithoutClosuresOrFSRs } from '../../../shared';
+import { get } from '../../../shared/helpers';
 import { getNearby } from '../../../events/forms/Location/helpers';
 import { Drag, g2ll, getDRA, getSnapped, ll2g, selectFeature } from '../helpers';
 import { PinFeature } from '../feature';
@@ -86,6 +88,9 @@ function transform_prop_value(value) {
   */
 export async function applyPinLocationUpdate(e, point, dispatch, snapped, search) {
   const snappedCoord = snapped ?? getSnapped(e.coordinate, e.pixel, e.map);
+  const [ lng, lat ] = g2ll(snappedCoord);
+  const timezone = await get(`${API_HOST}/api/timezone`, { lat, lng });
+
   let location = {
     name: 'pending',
     pending: true,
@@ -93,6 +98,7 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
     nearbyError: '',
     coords: g2ll(snappedCoord),
     candidates: [],
+    ...timezone,
   };
 
   dispatch({ type: point.action, value: location, });
@@ -118,6 +124,7 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
 
   Object.assign(location, {
     ... props,
+    ... timezone,
     name,
     alias: aliases[0],
     aliases,

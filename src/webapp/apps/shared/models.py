@@ -242,6 +242,8 @@ class VersionedModel(models.Model):
                         changes[field.name] = diff(previous, current)
                     elif field.get_internal_type() == 'GeometryCollectionField':
                         changes[field.name] = json.loads(previous.geojson)
+                    elif field.get_internal_type() == 'ForeignKey':
+                        changes[field.name] = previous.pk
                     else:
                         changes[field.name] = previous
 

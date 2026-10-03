@@ -191,6 +191,18 @@
 
       input, select {
         width: 100%;
+
+        &.with-timezone {
+          position: relative;
+          font-size: 0.85rem;
+
+          &::after {
+            content: attr(data-tz);
+            position: absolute;
+            right: 25px;
+            top: 0;
+          }
+        }
       }
 
       .inline {

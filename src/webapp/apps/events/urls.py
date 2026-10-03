@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework import routers
 
-from .views import Events, Pending, Notes, TrafficImpacts, RoadConditions, Conditions, ChainUps, Closures
+from .views import Events, Pending, Notes, TrafficImpacts, RoadConditions, Conditions, ChainUps, Closures, timezone
 
 router = routers.SimpleRouter(trailing_slash=False)
 router.register('events/pending', Pending, basename='pending')
@@ -13,5 +13,6 @@ router.register('traffic-impacts', TrafficImpacts)
 router.register('conditions', Conditions)
 
 urlpatterns = [
-    path('events/closures', Closures.as_view())
+    path('events/closures', Closures.as_view()),
+    path('timezone', timezone)
 ] + router.urls

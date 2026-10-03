@@ -2,13 +2,14 @@ import copy
 import datetime
 import json
 from dataclasses import dataclass, field
+from zoneinfo import ZoneInfo
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -19,6 +20,7 @@ from apps.events.permissions import EventServiceAreaPermission
 from apps.events.serializers import EventSerializer, EventHistorySerializer, EventDiffSerializer, ConditionSerializer
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
+from apps.shared import tz_finder
 from apps.users.permissions import IsApprover
 from .enums import EventType
 from .helpers import get_default_next_update, get_chainup_next_update
@@ -458,3 +460,22 @@ class Closures(APIView):
                      "RESTRICTION_AZIMUTH": -1,
                     } for tlid in tlids]
         return Response(closures)
+
+
+@api_view()
+def timezone(request):
+    lat = request.query_params.get('lat')
+    lng = request.query_params.get('lng')
+
+    if lat is None:
+        return Response(status=400, data={'detail': 'Missing required argument lat'})
+
+    if lng is None:
+        return Response(status=400, data={'detail': 'Missing required argument lng'})
+
+    try:
+        zone = tz_finder.timezone_at(lng=lng, lat=lat)
+    except ValueError as e:
+        return Response(status=400, data={ 'detail': str(e) })
+
+    return Response(data={ 'timezone': zone })
