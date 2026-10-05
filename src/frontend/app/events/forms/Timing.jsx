@@ -59,7 +59,6 @@ export default function EventTiming({ errors, event, dispatch, isRoadCondition }
           <FontAwesomeIcon
             icon={faEraser}
             onClick={() => {
-              document.getElementById('nextUpdateTime').value = '';
               dispatch({
                 type: 'set',
                 section: 'timing',
@@ -100,7 +99,6 @@ export default function EventTiming({ errors, event, dispatch, isRoadCondition }
             <FontAwesomeIcon
               icon={faEraser}
               onClick={() => {
-                document.getElementById('endTime').value = '';
                 dispatch({
                   type: 'set',
                   section: 'timing',

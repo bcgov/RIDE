@@ -32,6 +32,8 @@ export function tzUnaware(datestring, timezone) {
  * e.g., '2026-09-16T14:35' becomes [2026, 9, 16, 14, 35]
  */
 export function tzAware(datestring, timezone) {
+  if (!datestring) { return ''; }
+
   const expanded = datestring.split(/[-T:]/).map((i) => parseInt(i));
   expanded[1] -= 1; // months argument is zero indexed
   if (timezone) {
