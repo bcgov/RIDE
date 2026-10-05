@@ -84,7 +84,11 @@ export function addEvent(event, map, dispatch, visibleLayers) {
   if (route) {
     const gg = feature.getGeometry().getGeometries();
     if (event.type === 'ROAD_CONDITION') {
-      gg.push(new Polygon([event.polygon.map((latLng) => ll2g(latLng))]));
+      if (Array.isArray(event.polygon[0][0])) {
+        gg.push(new Polygon([event.polygon[0].map((latLng) => ll2g(latLng))]));
+      } else {
+        gg.push(new Polygon([event.polygon.map((latLng) => ll2g(latLng))]));
+      }
     } else {
       gg.push(new LineString(route.geometry.coordinates.map((latLng) => ll2g(latLng))));
     }
