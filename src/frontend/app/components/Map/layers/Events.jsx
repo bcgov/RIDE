@@ -10,7 +10,7 @@ import GeoJSON from 'ol/format/GeoJSON.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { linear } from 'ol/easing';
-import { Point, LineString, GeometryCollection, Polygon } from 'ol/geom';
+import { GeometryCollection, LineString, MultiPolygon, Point, Polygon } from 'ol/geom';
 import { Icon, Style } from 'ol/style';
 
 import { AlertContext, AuthContext, MapContext } from '../../../contexts.js';
@@ -85,7 +85,8 @@ export function addEvent(event, map, dispatch, visibleLayers) {
     const gg = feature.getGeometry().getGeometries();
     if (event.type === 'ROAD_CONDITION') {
       if (Array.isArray(event.polygon[0][0])) {
-        gg.push(new Polygon([event.polygon[0].map((latLng) => ll2g(latLng))]));
+        const polygons = event.polygon.map((polygon) => polygon.map((latLng) => ll2g(latLng)))
+        gg.push(new MultiPolygon([polygons]));
       } else {
         gg.push(new Polygon([event.polygon.map((latLng) => ll2g(latLng))]));
       }
