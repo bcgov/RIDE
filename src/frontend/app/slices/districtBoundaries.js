@@ -19,7 +19,6 @@ const refreshThunk = createAsyncThunk(
     if (cached) {
       const data = await cached.json();
       if (validList(data)) {
-        console.log('using cached data');
         return data;
       }
       await cache.delete(url);
