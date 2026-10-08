@@ -82,13 +82,8 @@ export function click(evt, dispatch) {
   const feature = evt.map.getFeaturesAtPixel(evt.pixel,{
     layerFilter: (layer) => layer.listenForClicks,
   })[0];
-  console.log(feature);
   if (feature?.noSelect || feature?.get('noSelect')) { return; }
 
-    console.log(feature.get('type'));
-  if (feature.get('type') === 'sign') {
-    console.log(feature.get('raw'));
-  }
   else if (feature?.styleState) { // new selection
     selectFeature(evt.map, feature);
     const raw = feature.pointFeature.get('raw');
