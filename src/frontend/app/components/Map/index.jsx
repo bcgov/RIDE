@@ -1,13 +1,31 @@
 import { useContext, useCallback, useEffect, useRef, useState } from 'react';
 import { components } from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import {
+  faArrowRotateRight,
+  faBuilding,
+  faCity,
+  faInputText,
+  faMagnifyingGlass,
+  faPlus,
+  faXmark
+} from '@fortawesome/pro-regular-svg-icons';
+import {
+  faArchway,
+  faRoad,
+  faMapLocation,
+  faSignHanging,
+  faTrafficLightStop,
+  faTree
+} from '@fortawesome/duotone-regular-svg-icons';
 
 import { DebuggingContext, MapContext } from '../../contexts';
 import { createMap, ll2g, pointerMove } from './helpers';
 import { get } from '../../shared/helpers';
 
-import { GEOCODER_CLIENT_ID, GEOCODER_HOST, ROUTABLE_LOCATIONS_HOST } from '../../env';
+import { API_HOST, GEOCODER_CLIENT_ID, GEOCODER_HOST, ROUTABLE_LOCATIONS_HOST } from '../../env';
 
 import './map.scss';
 
@@ -41,10 +59,79 @@ const DropdownIndicator = (props) => {
   );
 };
 
+const OPTION_ICON = {
+  landmarks: {
+    A1: <FontAwesomeIcon icon={faRoad} />,
+    A2: <FontAwesomeIcon icon={faRoad} />,
+    A3: <FontAwesomeIcon icon={faRoad} />,
+    A5: <FontAwesomeIcon icon={faRoad} />,
+    A8: <FontAwesomeIcon icon={faRoad} />,
+    B3: <FontAwesomeIcon icon={faRoad} />,
+    B4: <FontAwesomeIcon icon={faRoad} />,
+    D1: <FontAwesomeIcon icon={faArchway} />,
+    G6: <FontAwesomeIcon icon={faRoad} />,
+    R1: <FontAwesomeIcon icon={faTree} />,
+    R2: <FontAwesomeIcon icon={faTree} />,
+    S4: <FontAwesomeIcon icon={faSignHanging} />,
+    Y1: <FontAwesomeIcon icon={faMapLocation} />,
+    Y3: <FontAwesomeIcon icon={faMapLocation} />,
+    Y4: <FontAwesomeIcon icon={faMapLocation} />,
+  },
+  crossroad: <FontAwesomeIcon icon={faTrafficLightStop} />,
+  geocoder: {
+    street: <FontAwesomeIcon icon={faRoad} />,
+    default: <FontAwesomeIcon icon={faCity} />
+  },
+  routable: <FontAwesomeIcon icon={faArchway} />,
+}
+
+
+function getIcon(data) {
+  if (data.source === 'landmarks') {
+    return OPTION_ICON['landmarks'][data.type]
+  } else if (data.source === 'geocoder') {
+    const sub = data.matchPrecision === 'STREET' ? 'street' : 'default';
+    return OPTION_ICON['geocoder'][sub];
+  }
+  return OPTION_ICON[data.source];
+}
+
+const CustomOption = ({ data, label, innerProps, }) => {
+  return (
+    <div className='option' {...innerProps}>
+      <div className='option-icon'>{getIcon(data)}</div>
+      <div className='option-label'>{label}</div>
+    </div>
+  );
+}
+
+async function getCrossroads(road) {
+  return get(`${API_HOST}/api/crossroads`, {
+    road
+  }).then((data) => data.map((crossroad) => ({
+    value: crossroad.name,
+    label: `${crossroad.name} on ${crossroad.route}`,
+    location: crossroad.geometry.coordinates,
+    source: 'crossroad',
+  })));
+}
+
+async function getLandmarks(address) {
+  return get(`${API_HOST}/api/landmarks`, {
+    address
+  }).then((data) => data.map((landmark) => ({
+    value: landmark.description,
+    label: landmark.description,
+    location: landmark.geometry.coordinates,
+    source: 'landmarks',
+    type: landmark.landmark_type
+  })));
+}
+
 async function getGeocoderLocations(addressInput) {
   return get(`${GEOCODER_HOST}/addresses.json`, {
       minScore: 50,
-      maxResults: 7,
+      maxResults: 15,
       echo: 'false',
       brief: true,
       autoComplete: true,
@@ -55,11 +142,14 @@ async function getGeocoderLocations(addressInput) {
     }, {
       'apiKey': `${GEOCODER_CLIENT_ID}`,
     }
-  ).then(data => data.features.map((feature) => ({
+  ).then(data => {
+    return data.features.map((feature) => ({
     value: feature.properties.fullAddress,
     label: feature.properties.fullAddress,
     location: feature.geometry.coordinates,
-  })));
+    source: 'geocoder',
+    matchPrecision: feature.properties.matchPrecision,
+  }))});
 }
 
 function escapeCqlString(value) {
@@ -96,18 +186,29 @@ export function getRoutableLocations(addressInput) {
     value: feature.properties.name,
     label: feature.properties.name,
     location: feature.geometry.coordinates,
+    source: 'routable',
   })));
 }
 
 async function getLocations(addressInput) {
   addressInput = addressInput.trim();
   if (addressInput.length < 3) { return []; }
+
   const geocoderPromise = getGeocoderLocations(addressInput);
   const routablePromise = getRoutableLocations(addressInput);
+  const landmarksPromise = getLandmarks(addressInput);
+  const crossroadsPromise = getCrossroads(addressInput);
 
-  return Promise.all([geocoderPromise, routablePromise]).then(
-    ([geocoderResults, routableResults]) => {
-      const results = [...geocoderResults, ...routableResults];
+  return Promise.all([
+    geocoderPromise, routablePromise, landmarksPromise, crossroadsPromise
+  ]).then(
+    ([geocoderResults, routableResults, landmarkResults, crossroadResults]) => {
+      const results = [
+        ...geocoderResults,
+        ...routableResults,
+        ...landmarkResults,
+        ...crossroadResults,
+      ];
       results.sort((a, b) => a.value < b.value ? -1 : 1);
       return results;
     }
@@ -179,12 +280,14 @@ export default function Map({ children, event, clickHandler }) {
           loadOptions={getLocations}
           placeholder="Search location"
           openMenuOnFocus={false}
+          menuIsOpen={true}
           noOptionsMessage={(e) => e.inputValue && e.inputValue.length > 2 ? 'No matches' : null }
           components={{
             IndicatorSeparator: () => null,
             DropdownIndicator,
             ClearIndicator: () => null,
             Input,
+            Option: CustomOption,
           }}
           onClearAll={() => {
             setSearchInput('');

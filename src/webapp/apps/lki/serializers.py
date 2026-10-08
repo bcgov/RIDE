@@ -61,7 +61,9 @@ class Landmark(ModelSerializer):
     segment = Segment()
 
     def get_distance(self, obj):
-        return obj.distance.m
+        if hasattr(obj, 'distance'):
+            return obj.distance.m
+        return -1
 
     def get_label(self, obj):
         return obj.description

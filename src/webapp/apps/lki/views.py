@@ -36,11 +36,15 @@ class Landmarks(viewsets.ReadOnlyModelViewSet):
         queryset = super().get_queryset()
         lat = self.request.query_params.get('lat')
         lon = self.request.query_params.get('lon')
+        address = self.request.query_params.get('address')
+
         if lat is not None and lon is not None:
             pnt = Point((float(lon), float(lat)), srid=4326)
             return queryset.filter(geometry__distance_lte=(pnt, 10000)) \
                 .annotate(distance=Distance("geometry", pnt)) \
                 .order_by('distance')
+        elif address is not None:
+            return queryset.filter(description__icontains=address)
         return queryset
 
 
@@ -55,15 +59,15 @@ class Crossroads(viewsets.ReadOnlyModelViewSet):
         queryset = super().get_queryset()
         lat = self.request.query_params.get('lat')
         lon = self.request.query_params.get('lon')
+        road = self.request.query_params.get('road')
 
         if lat is not None and lon is not None:
             pnt = Point((float(lon), float(lat)), srid=4326)
             queryset = queryset.filter(geometry__distance_lte=(pnt, 5000)) \
                 .annotate(distance=Distance("geometry", pnt)) \
                 .order_by('distance')
-
-        else:  # unbounded queries return nothing
-            queryset = queryset.none()
+        elif road is not None:
+            return queryset.filter(name__icontains=road)
 
         return queryset
 
