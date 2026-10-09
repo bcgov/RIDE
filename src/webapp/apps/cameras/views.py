@@ -48,7 +48,15 @@ EXPORT_FIELD_MAP = {
         'closeby_geotechnical_sensors': ('Close-by Geotechnical Sensors', lambda c: getattr(c, 'geotechnical_sensors', '')),
     }
 
-class BulkUpdateViewSet(viewsets.ReadOnlyModelViewSet):
+class RoleReadAdminWriteMixin:
+    """Camera role can read; only camera admins can write."""
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return [IsCameraRole()]
+        return [IsCameraAdmin()]
+
+class BulkUpdateViewSet(RoleReadAdminWriteMixin, viewsets.ReadOnlyModelViewSet):
 
     model = None
 
@@ -643,6 +651,7 @@ class CameraViewSet(viewsets.ModelViewSet):
 
 class CameraHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CameraHistorySerializer
+    permission_classes = [IsCameraRole]
 
     def get_queryset(self):
         return CameraHistory.objects.filter(
@@ -741,6 +750,7 @@ class CameraNoteViewSet(viewsets.ModelViewSet):
 
 class CameraLogViewSet(viewsets.ModelViewSet):
     serializer_class = CameraLogSerializer
+    permission_classes = [IsCameraRole]
 
     def get_queryset(self):
         return CameraLog.objects.filter(camera_id=self.kwargs['camera_id'])
@@ -749,7 +759,7 @@ class CameraLogViewSet(viewsets.ModelViewSet):
         camera = Camera.objects.get(id=self.kwargs['camera_id'])
         serializer.save(camera=camera)
 
-class CameraReportSettingsViewSet(viewsets.GenericViewSet):
+class CameraReportSettingsViewSet(RoleReadAdminWriteMixin, viewsets.GenericViewSet):
     serializer_class = CameraReportSettingsSerializer
 
     @action(
@@ -777,7 +787,7 @@ class CameraReportSettingsViewSet(viewsets.GenericViewSet):
 
         return Response(serializer.data)
 
-class ServiceRequestCcsViewSet(viewsets.GenericViewSet):
+class ServiceRequestCcsViewSet(RoleReadAdminWriteMixin, viewsets.GenericViewSet):
     serializer_class = ServiceRequestCcsSerializer
 
     def list(self, request, *args, **kwargs):
@@ -821,7 +831,7 @@ class ServiceRequestCcsViewSet(viewsets.GenericViewSet):
 
         return Response(serializer.data)
 
-class CameraDefaultMessagingViewSet(viewsets.GenericViewSet):
+class CameraDefaultMessagingViewSet(RoleReadAdminWriteMixin, viewsets.GenericViewSet):
 
     serializer_class = CameraDefaultMessagingSerializer
 
@@ -860,7 +870,7 @@ class CameraDefaultMessagingViewSet(viewsets.GenericViewSet):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
 
-class CamerasOrderViewSet(viewsets.ViewSet):
+class CamerasOrderViewSet(RoleReadAdminWriteMixin, viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         cameras = Camera.objects.all().order_by('display_order')
         return Response({
