@@ -149,6 +149,10 @@ export default function CameraDetails({ onBack }) {
   const isFirstLoad = useRef(true);
   const [logsVersion, setLogsVersion] = useState(0);
   const [disableModalTarget, setDisableModalTarget] = useState(null);
+  const isDirtyRef = useRef(false);
+  // Set by a background refresh that updates `camera` while the user has unsaved
+  // edits, so the camera.views -> viewsData sync effect skips that one update.
+  const suppressViewsSyncRef = useRef(false);
 
   const handleToggleView = (view) => {
     if (view.is_on) {
@@ -331,7 +335,6 @@ export default function CameraDetails({ onBack }) {
         update_frequency: setupData.updateFrequency || 0,
         mac_address: setupData.macAddress || '',
         username: setupData.username || '',
-        password: setupData.password || '',
         serial_number: setupData.serialNumber || '',
         phone_number: setupData.phoneNumber || '',
         baud_rate: setupData.baudRate ? String(setupData.baudRate) : '',
@@ -356,8 +359,12 @@ export default function CameraDetails({ onBack }) {
         locations_geo_longitude: toNumberOrNull(basicsData.longitude),
         locations_elevation: toNumberOrNull(basicsData.elevation),
         views: buildViewsPayload(viewsData),
-        
       };
+
+      // The password is write-only: only send it when the user typed a new one
+      if (setupData.password) {
+        payload.password = setupData.password;
+      }
 
       const url = camera ? `/api/cameras/${camera.id}/` : '/api/cameras/';
       const method = camera ? 'PATCH' : 'POST';
@@ -377,8 +384,16 @@ export default function CameraDetails({ onBack }) {
       const savedCamera = await response.json();
       setCamera(savedCamera);
 
+      // Clear the typed password and show the "password set" placeholder
+      const savedSetup = {
+        ...setupData,
+        password: '',
+        hasPassword: savedCamera.has_password ?? false,
+      };
+      setSetupData(savedSetup);
+
       if (onBack) onBack(savedCamera);
-      setSavedSnapshot(JSON.stringify({ basics: basicsData, setup: setupData, views: viewsData }));
+      setSavedSnapshot(JSON.stringify({ basics: basicsData, setup: savedSetup, views: viewsData }));
       setToast({ message: 'Changes saved', variant: 'success' });
     } catch (error) {
       console.error(error);
@@ -416,7 +431,6 @@ export default function CameraDetails({ onBack }) {
     }
   };
 
-  // Refresh the page every minute to get latest data
   useLayoutEffect(() => {
     const nav = tabsRef.current;
     if (!nav) return undefined;
@@ -439,11 +453,12 @@ export default function CameraDetails({ onBack }) {
     };
   }, [activeTab, isLoadingCamera, isExpandedView]);
 
+  // Refresh every minute to get the latest data (image timestamps, logs).
+  // Background refreshes never overwrite unsaved form edits.
   useEffect(() => {
     if (!id || id === 'new') return undefined;
     const intervalId = window.setInterval(() => {
-      const updatedDriveBCData = loadCamera();
-      console.log(updatedDriveBCData);
+      void loadCamera({ background: true });
     }, 60 * 1000);
 
     return () => {
@@ -479,7 +494,7 @@ export default function CameraDetails({ onBack }) {
   };
 
 
-  const loadCamera = async () => {
+  const loadCamera = async ({ background = false } = {}) => {
       try {
         const response = await fetch(`/api/cameras/${id}/`);
         if (!response.ok) {
@@ -531,75 +546,45 @@ export default function CameraDetails({ onBack }) {
 
         isFirstLoad.current = false;
         data.views = mergedViews;
+
+        // Checked after the awaits above, so it reflects what the user did
+        // while the request was in flight.
+        const hasUnsavedEdits = background && isDirtyRef.current;
+
+        // Always refresh what the cards and logs render from
+        if (hasUnsavedEdits) {
+          suppressViewsSyncRef.current = true;
+        }
         setCamera(data);
         setLogsVersion((v) => v + 1);
 
-        if (data.views?.length) {
-          let viewToSelect = null;
-          if (initialViewId) {
-            viewToSelect = data.views.find((view) => String(view.id) === String(initialViewId));
+        // A background refresh must not touch the form, the snapshot, the
+        // selected view or the sidebar expansion state.
+        if (hasUnsavedEdits) return;
+
+        if (!background) {
+          if (data.views?.length) {
+            let viewToSelect = null;
+            if (initialViewId) {
+              viewToSelect = data.views.find((view) => String(view.id) === String(initialViewId));
+            }
+            if (!viewToSelect) {
+              viewToSelect =
+                data.views.find((view) => view.is_default) ||
+                data.views.find((view) => view.is_on) ||
+                data.views[0];
+            }
+            if (viewToSelect) setSelectedViewId(String(viewToSelect.id));
+          } else {
+            setSelectedViewId(null);
           }
-          if (!viewToSelect) {
-            viewToSelect =
-              data.views.find((view) => view.is_default) ||
-              data.views.find((view) => view.is_on) ||
-              data.views[0];
-          }
-          if (viewToSelect) setSelectedViewId(String(viewToSelect.id));
-        } else {
-          setSelectedViewId(null);
+
+          const regName = data.region?.name || 'Other';
+          const roadName = data.road?.name || 'Other';
+
+          setExpandedRegions((prev) => ({ ...prev, [regName]: true }));
+          setExpandedHighways((prev) => ({ ...prev, [`${regName}-${roadName}`]: true }));
         }
-
-        const regName = data.region?.name || 'Other';
-        const roadName = data.road?.name || 'Other';
-
-        setExpandedRegions((prev) => ({ ...prev, [regName]: true }));
-        setExpandedHighways((prev) => ({ ...prev, [`${regName}-${roadName}`]: true }));
-
-        setBasicsData({
-          title: data.title || '',
-          description: data.description || '',
-          road: data.road?.id ?? null,
-          region: data.region?.id ?? '',
-          roadMaintenanceContractor: data.road_maintenance_contractor?.id ?? null,
-          electricalContractor: data.electrical_contractor?.id ?? null,
-          businessArea: data.business_area?.id ?? null,
-          latitude: data.locations_geo_latitude ?? '',
-          longitude: data.locations_geo_longitude ?? '',
-          elevation: data.locations_elevation || '',
-          imageWatermark: data.image_watermark || '',
-          cameraCredit: data.camera_credit || '',
-          cameraCreditUrl: data.camera_credit_url || '',
-        });
-
-        setSetupData({
-          cameraId: data.id ?? '',
-          cameraType: data.camera_type?.id ?? data.camera_type_id ?? '',
-          cameraMake: data.camera_make?.id ?? data.camera_make_id ?? '',
-          onDemand: data.on_demand,
-          cameraInstalled: data.camera_installed,
-          cameraLastInspected: data.camera_last_inspected,
-          modemInstalled: data.modem_installed,
-          connectionType: data.connection_type?.id ?? data.connection_type_id ?? '',
-          connectionProtocol: data.connection_protocol?.id ?? data.connection_protocol_id ?? '',
-          communicationType: data.communication_type?.id ?? data.communication_type_id ?? '',
-          powerSource: data.power_source?.id ?? data.power_source_id ?? '',
-          communicationDevice: data.communication_device?.id ?? data.communication_device_id ?? '',
-          antenna: data.antenna?.id ?? data.antenna_id ?? '',
-          serviceProvider: data.service_provider?.id ?? data.service_provider_id ?? '',
-          updateFrequency: data.update_frequency,
-          macAddress: data.mac_address,
-          username: data.username,
-          password: '',
-          hasPassword: data.has_password ?? false,
-          serialNumber: data.serial_number,
-          phoneNumber: data.phone_number,
-          baudRate: data.baud_rate,
-          supplyType: data.supply_type,
-          supplySerial: data.supply_serial,
-          connectionIpAddress: data.connection_ip_address,
-          connectionPort: data.connection_port,
-        });
 
         const newBasics = {
           title: data.title || '',
@@ -635,7 +620,7 @@ export default function CameraDetails({ onBack }) {
           updateFrequency: data.update_frequency,
           macAddress: data.mac_address,
           username: data.username,
-          password: data.password,
+          password: '',
           hasPassword: data.has_password ?? false,
           serialNumber: data.serial_number,
           phoneNumber: data.phone_number,
@@ -696,6 +681,8 @@ export default function CameraDetails({ onBack }) {
       savedSnapshot
     );
   }, [basicsData, setupData, viewsData, savedSnapshot]);
+
+  isDirtyRef.current = isDirty;
 
   const handleUndoChanges = () => {
     if (!savedSnapshot) return;
@@ -772,6 +759,13 @@ export default function CameraDetails({ onBack }) {
   };
 
   useEffect(() => {
+    // A background refresh while the user has unsaved edits updates `camera`
+    // for the cards only; don't let it overwrite the Views tab form state.
+    if (suppressViewsSyncRef.current) {
+      suppressViewsSyncRef.current = false;
+      return;
+    }
+
     if (camera?.views?.length) {
       const formattedViews = [...camera.views]
         .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
