@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 import re
 
+from .fields import EncryptedTextField
+
 
 class BaseLookupModel(models.Model):
     """Abstract base class for standard lookup/reference tables."""
@@ -278,7 +280,8 @@ class Camera(models.Model):
     update_frequency = models.IntegerField(default=0, blank=True, null=True)
     mac_address = models.CharField(max_length=50, blank=True)
     username = models.CharField(max_length=20, blank=True)
-    password = models.CharField(max_length=20, blank=True)
+    # Encrypted at rest (Fernet). Write-only in the API
+    password = EncryptedTextField(blank=True)
     serial_number = models.CharField(max_length=50, blank=True)
     phone_number = models.CharField(max_length=50, blank=True)
     baud_rate = models.CharField(max_length=20, blank=True)

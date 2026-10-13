@@ -42,7 +42,7 @@ class CameraTypeSerializer(serializers.ModelSerializer):
 
 class ConnectionTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CameraType
+        model = ConnectionType
         fields = ['id', 'name']
 
 class ConnectionProtocolSerializer(serializers.ModelSerializer):
@@ -97,6 +97,9 @@ class ElectricalContractorSerializer(serializers.ModelSerializer):
 
 class CameraSerializer(serializers.ModelSerializer):
     views = CameraViewSerializer(many=True, required=False)
+
+    # Lets the UI show "Password set" without ever receiving the value
+    has_password = serializers.SerializerMethodField()
 
     road = RoadSerializer(read_only=True)
     road_id = serializers.PrimaryKeyRelatedField(
@@ -229,6 +232,13 @@ class CameraSerializer(serializers.ModelSerializer):
     class Meta:
         model = Camera
         fields = '__all__'
+        extra_kwargs = {
+            # Never returned in responses; only accepted on write
+            'password': {'write_only': True, 'required': False, 'allow_blank': True},
+        }
+
+    def get_has_password(self, obj):
+        return bool(obj.password)
 
     # Required for POST requests with nested views
     def create(self, validated_data):
@@ -248,6 +258,10 @@ class CameraSerializer(serializers.ModelSerializer):
     # Required for PATCH / PUT requests with nested views
     def update(self, instance, validated_data):
         views_data = validated_data.pop('views', None)
+
+        # An empty or missing password means "unchanged", not "clear it"
+        if not validated_data.get('password'):
+            validated_data.pop('password', None)
 
         # Update Camera
         for attr, value in validated_data.items():

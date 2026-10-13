@@ -26,6 +26,7 @@ import Collapse from '../components/shared/Collapse.jsx';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import './DetailsTabs.scss';
+import PasswordField from './PasswordField.jsx';
 
 // =========================================================
 // Basics
@@ -670,23 +671,11 @@ export function SetupTab({ setupData, onChange }) {
                       />
                     </div>
                     <div className="form-group">
-                      <label htmlFor="password">Password</label>
-                      <div className="input-with-icon">
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          id="password"
-                          value={setupData.password}
-                          onChange={(e) => onChange('password', e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          className="icon-btn-toggle"
-                          onClick={() => setShowPassword(!showPassword)}
-                          aria-label="Toggle password visibility"
-                        >
-                          <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
-                        </button>
-                      </div>
+                      <PasswordField
+                        value={setupData.password}
+                        hasPassword={setupData.hasPassword}
+                        onChange={(next) => onChange('password', next)}
+                      />
                     </div>
                   </div>
                 </>
@@ -704,23 +693,11 @@ export function SetupTab({ setupData, onChange }) {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <div className="input-with-icon">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        value={setupData.password}
-                        onChange={(e) => onChange('password', e.target.value)}
-                      />
-                      <button
-                        type="button"
-                        className="icon-btn-toggle"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label="Toggle password visibility"
-                      >
-                        <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
-                      </button>
-                    </div>
+                    <PasswordField
+                      value={setupData.password}
+                      hasPassword={setupData.hasPassword}
+                      onChange={(next) => onChange('password', next)}
+                    />
                   </div>
                 </div>
               )}
@@ -737,23 +714,11 @@ export function SetupTab({ setupData, onChange }) {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <div className="input-with-icon">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
+                    <PasswordField
                         value={setupData.password}
-                        onChange={(e) => onChange('password', e.target.value)}
+                        hasPassword={setupData.hasPassword}
+                        onChange={(next) => onChange('password', next)}
                       />
-                      <button
-                        type="button"
-                        className="icon-btn-toggle"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label="Toggle password visibility"
-                      >
-                        <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
-                      </button>
-                    </div>
                     <button
                       type="button"
                       onClick={() => {/* trigger password-reset flow */}}
