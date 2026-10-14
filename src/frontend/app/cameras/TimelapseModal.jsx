@@ -35,7 +35,7 @@ export default function TimelapseModal({ camera, selectedView, onClose }) {
 
   // Extract viewId from selectedView or URL query parameters
   const urlParams = new URLSearchParams(window.location.search);
-  const viewId = selectedView?.id || urlParams.get("view");
+  const viewId = selectedView?.drivebc_webcam_id || urlParams.get("view");
 
   // Parses "YYYYMMDDHHmmss" string into a JS Date object
   const parseApiTimestamp = (ts) => {

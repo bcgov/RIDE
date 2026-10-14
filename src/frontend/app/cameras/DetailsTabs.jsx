@@ -1046,7 +1046,7 @@ export function ViewsTab({ views = [], onChange, onSetDefault }) {
   return (
     <div className="tab-content views-tab">
       {views.map((view) => {
-        const { id, orientation, direction, is_on, image_url, description } = view;
+        const { id, orientation, direction, is_on, image_url, description, drivebc_webcam_id } = view;
         const isEditing = editingId === id;
 
         // Resolve title string safely

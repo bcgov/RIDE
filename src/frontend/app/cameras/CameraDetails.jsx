@@ -645,6 +645,7 @@ export default function CameraDetails({ onBack }) {
                 last_update_attempt: view.last_update_attempt,
                 last_update_modified: view.last_update_modified,
                 camera_id: view.camera_id,
+                drivebc_webcam_id: view.drivebc_webcam_id || null,
               }))
           : DEFAULT_VIEWS;
 
@@ -780,6 +781,7 @@ export default function CameraDetails({ onBack }) {
           last_update_attempt: view.last_update_attempt,
           last_update_modified: view.last_update_modified,
           camera_id: view.camera_id,
+          drivebc_webcam_id: view.drivebc_webcam_id || null,
         }));
 
       setViewsData(formattedViews);

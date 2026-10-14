@@ -22,8 +22,18 @@ import logging
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 import traceback
+import re
+from datetime import datetime
+from urllib.parse import quote
+import requests
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
+
 
 logger = logging.getLogger(__name__)
+
+ID_RE = re.compile(r"[0-9]+")
+TIMESTAMP_RE = re.compile(r"[0-9]{14}")  # YYYYMMDDHHMMSS, matches the consumer's utc_timestamp_str
+CACHE_BUST_RE = re.compile(r"[0-9]{1,20}")  # t is a cache-buster; adjust if yours isn't numeric
 
 # 1. Define the full mapping of frontend field IDs -> (Header Title, Value Extractor)
 EXPORT_FIELD_MAP = {
@@ -47,6 +57,19 @@ EXPORT_FIELD_MAP = {
         'closeby_weather_stations': ('Close-by Weather Stations', lambda c: getattr(c, 'weather_stations', '')),
         'closeby_geotechnical_sensors': ('Close-by Geotechnical Sensors', lambda c: getattr(c, 'geotechnical_sensors', '')),
     }
+
+def _is_valid_id(value) -> bool:
+    return bool(value) and ID_RE.fullmatch(str(value)) is not None
+
+
+def _is_valid_timestamp(value) -> bool:
+    if not value or not TIMESTAMP_RE.fullmatch(value):
+        return False
+    try:
+        datetime.strptime(value, "%Y%m%d%H%M%S")  # rejects 20261399999999
+    except ValueError:
+        return False
+    return True
 
 class RoleReadAdminWriteMixin:
     """Camera role can read; only camera admins can write."""
@@ -397,7 +420,7 @@ class CameraViewSet(viewsets.ModelViewSet):
 
         if view_id:
             matching_view = camera.views.filter(
-                id=view_id
+                drivebc_webcam_id=view_id
             ).first()
 
         if not matching_view:
@@ -503,54 +526,49 @@ class CameraViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="timelapse-image")
     def timelapse_image(self, request, pk=None):
-        """
-        Proxies request to fetch the raw JPEG binary frame for a given timestamp.
-
-        GET /api/cameras/{pk}/timelapse-image/?view=21&timestamp=20260902190507
-        """
         camera = self.get_object()
 
         view_id = request.query_params.get("view")
         timestamp = request.query_params.get("timestamp")
 
-        if not timestamp:
+        if not _is_valid_timestamp(timestamp):
             return Response(
-                {"detail": "Timestamp query parameter is required."},
+                {"detail": "timestamp must be 14 digits in YYYYMMDDHHMMSS format."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        matching_view = None
+        # A non-numeric view id would otherwise raise ValueError in the ORM (500)
+        if view_id and not _is_valid_id(view_id):
+            return Response(
+                {"detail": "view must be numeric."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if view_id:
-            matching_view = camera.views.filter(
-                id=view_id
-            ).first()
-
+        matching_view = camera.views.filter(id=view_id).first() if view_id else None
         if not matching_view:
             matching_view = camera.views.first()
 
-        if not matching_view or not matching_view.drivebc_webcam_id:
+        webcam_id = matching_view.drivebc_webcam_id if matching_view else None
+        if not _is_valid_id(webcam_id):
             return Response(
                 {"detail": "No valid DriveBC webcam ID found for this view."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        webcam_id = matching_view.drivebc_webcam_id
-
         api_key = getattr(settings, "DRIVEBC_TIMELAPSE_API_KEY", None)
-        drivebc_timelapse_api_root = getattr(settings, "DRIVEBC_TIMELAPSE_API_ROOT", None)
-
-        if not api_key:
-            logger.error(
-                "DriveBC API credentials are not configured."
-            )
-
+        api_root = getattr(settings, "DRIVEBC_TIMELAPSE_API_ROOT", None)
+        if not api_key or not api_root:
+            logger.error("DriveBC timelapse API credentials/root are not configured.")
             return Response(
-                {"detail": "External API credentials are not configured."},
+                {"detail": "External API is not configured."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        target_url = f"{drivebc_timelapse_api_root}/{webcam_id}/timelapse/{timestamp}/"
+        # quote() is defense in depth; the regex already guarantees safe characters
+        target_url = (
+            f"{api_root.rstrip('/')}/{quote(str(webcam_id), safe='')}"
+            f"/timelapse/{quote(timestamp, safe='')}/"
+        )
 
         headers = {
             "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
@@ -558,63 +576,47 @@ class CameraViewSet(viewsets.ModelViewSet):
         }
 
         try:
-            # Fetch binary response from upstream
             resp = requests.get(
                 target_url,
                 headers=headers,
                 timeout=(3, 15),
+                allow_redirects=False,  # see note below
             )
 
             if resp.status_code != 200:
                 logger.warning(
-                    "DriveBC timelapse image API returned status %s "
-                    "for webcam %s, timestamp %s",
-                    resp.status_code,
-                    webcam_id,
-                    timestamp,
+                    "DriveBC timelapse image API returned status %s for webcam %s, timestamp %s",
+                    resp.status_code, webcam_id, timestamp,
                 )
-
                 return Response(
                     {
-                        "detail": (
-                            "The external timelapse image service "
-                            "returned an error."
-                        ),
+                        "detail": "The external timelapse image service returned an error.",
                         "upstream_status": resp.status_code,
                     },
                     status=status.HTTP_502_BAD_GATEWAY,
                 )
 
-            # Return raw image directly to frontend
-            return HttpResponse(
-                resp.content,
-                content_type=resp.headers.get(
-                    "Content-Type",
-                    "image/jpeg",
-                ),
-            )
+            content_type = resp.headers.get("Content-Type", "image/jpeg")
+            if not content_type.lower().startswith("image/"):
+                logger.warning("Unexpected upstream content type %r for webcam %s", content_type, webcam_id)
+                return Response(
+                    {"detail": "Unexpected response from timelapse service."},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+
+            response = HttpResponse(resp.content, content_type=content_type)
+            response["X-Content-Type-Options"] = "nosniff"
+            return response
 
         except requests.exceptions.Timeout:
-            logger.warning(
-                "DriveBC timelapse image request timed out "
-                "for webcam %s, timestamp %s",
-                webcam_id,
-                timestamp,
-            )
-
+            logger.warning("DriveBC timelapse image request timed out for webcam %s, timestamp %s", webcam_id, timestamp)
             return Response(
                 {"detail": "External timelapse image service timed out."},
                 status=status.HTTP_504_GATEWAY_TIMEOUT,
             )
 
         except requests.exceptions.RequestException:
-            logger.exception(
-                "DriveBC timelapse image request failed "
-                "for webcam %s, timestamp %s",
-                webcam_id,
-                timestamp,
-            )
-
+            logger.exception("DriveBC timelapse image request failed for webcam %s, timestamp %s", webcam_id, timestamp)
             return Response(
                 {"detail": "Failed to fetch image frame."},
                 status=status.HTTP_502_BAD_GATEWAY,
@@ -892,9 +894,36 @@ class CamerasOrderViewSet(RoleReadAdminWriteMixin, viewsets.ViewSet):
         return self.update(request, *args, **kwargs)
 
 def camera_image_proxy(request, webcam_id):
+    webcam_id = str(webcam_id)
+    if not ID_RE.fullmatch(webcam_id):
+        return HttpResponseBadRequest("Invalid webcam id.")
+
+    t = request.GET.get("t", "")
+    if t and not CACHE_BUST_RE.fullmatch(t):
+        return HttpResponseBadRequest("Invalid t parameter.")
+
     url = f"https://www.drivebc.ca/images/{webcam_id}.jpg"
-    params = {"t": request.GET.get("t", "")}
-    resp = requests.get(url, params=params, timeout=5)
+    params = {"t": t} if t else None
+
+    try:
+        resp = requests.get(
+            url,
+            params=params,
+            timeout=(3, 5),
+            allow_redirects=False,
+        )
+    except requests.exceptions.RequestException:
+        logger.warning("Image proxy request failed for webcam %s", webcam_id, exc_info=True)
+        return HttpResponse(status=502)
+
     if resp.status_code != 200:
         return HttpResponseNotFound()
-    return HttpResponse(resp.content, content_type=resp.headers.get("Content-Type", "image/jpeg"))
+
+    content_type = resp.headers.get("Content-Type", "image/jpeg")
+    if not content_type.lower().startswith("image/"):
+        logger.warning("Unexpected content type %r for webcam %s", content_type, webcam_id)
+        return HttpResponse(status=502)
+
+    response = HttpResponse(resp.content, content_type=content_type)
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
