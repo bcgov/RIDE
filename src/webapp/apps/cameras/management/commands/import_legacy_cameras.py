@@ -104,6 +104,7 @@ SELECT [ID]
       ,[Cam_LocationsElevation]
       ,[Cam_LocationsGeo_Latitude]
       ,[Cam_LocationsGeo_Longitude]
+      ,[Cam_LocationsWeather_Station]
       ,[Cam_MaintenanceCamera_Make]
       ,[Cam_MaintenanceSN]
       ,[Cam_MaintenanceCredentials]
@@ -644,6 +645,7 @@ class Command(BaseCommand):
             locations_geo_latitude=to_float_or_none(row.get("Cam_LocationsGeo_Latitude")),
             locations_geo_longitude=to_float_or_none(row.get("Cam_LocationsGeo_Longitude")),
             locations_elevation=to_float_or_none(row.get("Cam_LocationsElevation")),
+            weather_station=clean_str(row.get("Cam_LocationsWeather_Station"), 255),
             mac_address=clean_str(row.get("Cam_MaintenanceModem_ESN"), 50),
             username=clean_str(row.get("Cam_InternetOn_Demand_Username"), 20),
             password=clean_str(row.get("Cam_InternetOn_Demand_Password"), 20),
@@ -665,6 +667,7 @@ class Command(BaseCommand):
 
         CameraView.objects.create(
             camera=camera,
+            description=clean_str(row.get("Cam_InternetCaption"), 255),
             orientation=normalize_orientation(row.get("Cam_LocationsOrientation")),
             image_url=f"https://www.drivebc.ca/images/{legacy_id}.jpg",
             disabled_short_description=clean_str(row.get("Cam_ControlShort_Message"), 255),

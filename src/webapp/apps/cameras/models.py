@@ -257,6 +257,12 @@ class Camera(models.Model):
         blank=True,
         verbose_name="Elevation (metres)",
     )
+    weather_station = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Weather Station",
+    )
 
     # ============================================================
     # Optional Display Info

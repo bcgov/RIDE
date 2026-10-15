@@ -295,7 +295,14 @@ function useReportFieldsSettings(isActive) {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`${API_HOST}/api/camera-report-settings/fields/`);
+        const response = await fetch(`${API_HOST}/api/camera-report-settings/fields/`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+        });
         if (!response.ok) throw new Error(`Failed to load report fields: ${response.status}`);
         const data = await response.json();
         setSelectedReportFields(data.selected_fields ?? []);
@@ -323,6 +330,7 @@ function useReportFieldsSettings(isActive) {
     try {
       const response = await fetch(`${API_HOST}/api/camera-report-settings/fields/`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': getCookie('csrftoken'),

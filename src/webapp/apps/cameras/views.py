@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions
-from .models import Camera, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote, CameraLog, CameraHistory, ServiceRequestCcs, CameraDefaultMessaging
+from .models import Camera, CameraView, Region, CameraType, CameraMake, Road, RoadMaintenanceContractor, BusinessArea, ElectricalContractor, ConnectionType, ConnectionProtocol, CommunicationType, PowerSource, CommunicationDevice, Antenna, ServiceProvider, CameraNote, CameraLog, CameraHistory, ServiceRequestCcs, CameraDefaultMessaging
 from .serializers import CameraSerializer, RegionSerializer, RoadSerializer, RoadMaintenanceContractorSerializer, BusinessAreaSerializer, ElectricalContractorSerializer, CameraTypeSerializer, CameraMakeSerializer, ConnectionTypeSerializer, ConnectionProtocolSerializer, CommunicationTypeSerializer, PowerSourceSerializer, CommunicationDeviceSerializer, AntennaeSerializer, ServiceProviderSerializer, CameraNoteSerializer, CameraLogSerializer, CameraHistorySerializer, ServiceRequestCcsSerializer, CameraDefaultMessagingSerializer, CamerasOrderSerializer, CameraOrderReadSerializer
 from django.db import transaction
 from rest_framework import status, viewsets
@@ -27,6 +27,7 @@ from datetime import datetime
 from urllib.parse import quote
 import requests
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
+from django.db.models import Prefetch
 
 
 logger = logging.getLogger(__name__)
@@ -41,20 +42,26 @@ EXPORT_FIELD_MAP = {
         'business_area': ('Business Area', lambda c: c.business_area.name if getattr(c, 'business_area', None) else ''),
         'region': ('Region', lambda c: c.region.name if c.region else ''),
         'road': ('Road', lambda c: c.road.name if c.road else ''),
-        'elevation': ('Elevation', lambda c: getattr(c, 'elevation', '')),
+        'elevation': ('Elevation', lambda c: getattr(c, 'locations_elevation', '')),
         'latitude': ('Latitude', lambda c: c.locations_geo_latitude),
         'longitude': ('Longitude', lambda c: c.locations_geo_longitude),
         'image_watermark': ('Image Watermark', lambda c: getattr(c, 'image_watermark', '')),
         'camera_credit': ('Camera Credit', lambda c: getattr(c, 'camera_credit', '')),
         'camera_url': ('Camera URL', lambda c: getattr(c, 'camera_url', '')),
         'notes': ('Notes', lambda c: getattr(c, 'notes', '')),
-        'camera_views': ('Camera Views', lambda c: getattr(c, 'camera_views', '')),
-        'view_descriptions': ('View Descriptions', lambda c: getattr(c, 'view_descriptions', '')),
+        'camera_views': (
+            'Camera Views',
+            lambda c: '; '.join(str(v.orientation) for v in c.views.all() if v.orientation),
+        ),
+        'view_descriptions': (
+            'View Descriptions',
+            lambda c: '; '.join(v.description for v in c.views.all() if v.description),
+        ),      
         'camera_type': ('Camera Type', lambda c: c.camera_type.name if c.camera_type else ''),
         'camera_make': ('Camera Make', lambda c: c.camera_make.name if c.camera_make else ''),
-        'installed_date': ('Installed Date', lambda c: getattr(c, 'installed_date', '')),
-        'last_inspected': ('Last Inspected', lambda c: getattr(c, 'last_inspected', '')),
-        'closeby_weather_stations': ('Close-by Weather Stations', lambda c: getattr(c, 'weather_stations', '')),
+        'installed_date': ('Installed Date', lambda c: getattr(c, 'camera_installed', '')),
+        'last_inspected': ('Last Inspected', lambda c: getattr(c, 'camera_last_inspected', '')),
+        'closeby_weather_stations': ('Close-by Weather Stations', lambda c: getattr(c, 'weather_station', '')),
         'closeby_geotechnical_sensors': ('Close-by Geotechnical Sensors', lambda c: getattr(c, 'geotechnical_sensors', '')),
     }
 
@@ -343,14 +350,32 @@ class CameraViewSet(viewsets.ModelViewSet):
         cameras = Camera.objects.select_related(
             'road', 'region', 'camera_type', 'camera_make',
             'power_source', 'communication_type',
-        ).all()
+        ).prefetch_related(
+            Prefetch(
+                'views',
+                queryset=CameraView.objects
+                    .exclude(image_url__isnull=True)
+                    .exclude(image_url='')
+                    .order_by('id'),
+            )
+        )
 
         # 4. Dynamically generate values for each row based on active keys
         for camera in cameras:
             row = [camera.id, camera.title]
+
             for key in active_keys:
-                extractor = EXPORT_FIELD_MAP[key][1]
-                row.append(extractor(camera))
+                if key == 'camera_url':
+                    value = (
+                        f"{settings.FRONTEND_BASE_URL.rstrip('/')}"
+                        f"/cameras/{camera.id}"
+                    )
+                else:
+                    extractor = EXPORT_FIELD_MAP[key][1]
+                    value = extractor(camera)
+
+                row.append(value)
+
             writer.writerow(row)
 
         return response
