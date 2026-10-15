@@ -1,0 +1,368 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.camera-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;       /* Fill remaining horizontal & vertical space */
+  min-width: 0;       
+  min-height: 0;      /* REQUIRED: enables child scrolling */
+}
+
+.camera-content {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 16px 60px 28px; // Figma: body has 28px left, 16px right, 16px under the toolbar
+  box-sizing: border-box;
+  background: $White;
+}
+
+
+.cameras-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+  padding: 0 32px 18px 24px;
+  border-top-left-radius: 8px;
+  border-bottom: 1px solid $Divider;
+}
+
+
+.cameras-header h1 {
+  margin: 0;
+
+  font-size: 2.25rem;
+  line-height: 1.2;
+  font-weight: 700;
+  padding: 16px 0 0;
+}
+
+.camera-count {
+  @include text-body;
+  color: $Type-Primary;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.camera-search {
+  --search-height: 35px;
+  --search-inset: 12px;
+  width: 320px;
+  margin-left: 28px;
+}
+
+
+/* =========================================================
+   HIGHWAY GROUP
+   ========================================================= */
+
+.camera-highway-group {
+  margin-bottom: 34px;
+}
+
+
+.camera-highway-group > h2 {
+  margin: 0 0 12px;
+  @include text-heading-5;
+  color: $Type-Primary;
+}
+
+
+/* =========================================================
+   LOCATION
+   ========================================================= */
+
+
+/* =========================================================
+   CAMERA CARDS
+   ========================================================= */
+
+.camera-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 8px 12px;
+}
+
+
+.camera-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 0 0 160px;
+  width: 160px;
+}
+
+
+.camera-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  cursor: pointer;
+}
+
+
+.camera-direction {
+  @include text-small-body-bold;
+  color: $Type-Primary;
+}
+
+
+/* =========================================================
+   CAMERA IMAGE
+   ========================================================= */
+
+.camera-image {
+  @include focus-ring;
+  position: relative;
+
+  width: 100%;
+  height: 135px;
+
+  overflow: hidden;
+  border-radius: 4px;
+  background: $Grey30;
+
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  @include transition(box-shadow);
+
+  // Same grey outline the view cards get on hover on the details page
+  &:hover {
+    box-shadow: 0 0 0 2px $Grey70;
+  }
+}
+
+
+.camera-image img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  @include transition(filter);
+}
+
+// A view that is switched off shows its image at half strength
+.camera-image--off img {
+  opacity: 0.5;
+}
+
+.camera-image--delayed {
+  background: $Gold20;
+}
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+// Figma: "Pill" in the top right of the thumbnail
+.camera-image .camera-status {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  @include text-label-bold;
+}
+
+.camera-image .camera-status--stale {
+  background: $Grey50;
+  color: $Grey100;
+}
+
+.camera-image .camera-status--delayed {
+  background: $Gold60;
+  color: $Gold110;
+}
+
+
+/* =========================================================
+
+
+/* =========================================================
+   STATES
+   ========================================================= */
+
+// Placeholder where a filter heading goes while the page loads
+.cameras-skeleton__filter {
+  padding: 4px 8px;
+}
+
+
+.cameras-error {
+  margin-bottom: 15px;
+  padding: 10px;
+
+  border: 1px solid $Error;
+  background: $Surface-major;
+
+  color: $Red-dark;
+}
+
+
+.camera-no-results {
+  padding: 60px 20px;
+
+  text-align: center;
+
+  color: $Grey80;
+}
+
+
+/* Circular Button Trigger: spacing only, the look comes from <Button>.
+   20px keeps the 36px button centered on the heading row. */
+.circle-menu-btn {
+  margin-top: 20px;
+}
+
+
+.camera-groups {
+  width: 100%;
+}
+
+
+/* =========================================================
+   LOCATION ROW HEADER ACTIONS
+   ("View location" + "More" buttons, right-aligned per row)
+   ========================================================= */
+
+
+
+.camera-image-placeholder {
+  @include image-unavailable;
+
+  svg {
+    width: auto;
+    font-size: 2rem;
+  }
+}
+
+.camera-image .camera-status--unavailable {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+
+  background: $Red-dark;
+  color: $White;
+}
+
+// Figma: dark "Pill" with the eye-slash icon, centred on a switched-off view
+.camera-image .camera-off-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 16px;
+  background-color: $Grey100;
+  color: $Grey-invert;
+
+  svg {
+    width: auto;
+    font-size: 0.625rem;
+  }
+}
+
+
+/* =========================================================
+   CAMERA LOCATION (Figma: "Camera overview - Compact")
+   ========================================================= */
+
+.camera-location {
+  margin-bottom: 12px;
+  border: 1px solid $Divider;
+  border-radius: 8px;
+  /* No overflow:hidden here: the header's "More" dropdown is absolutely
+     positioned and would be clipped. The header is rounded to match instead. */
+  background: $White;
+}
+
+// Line the text up, not the boxes: the title, the time and the buttons differ in size and
+// start with an icon, so the last baseline is the one that lands on the text
+.camera-location-header,
+.camera-location-meta,
+.camera-location-actions {
+  align-items: last baseline;
+}
+
+.camera-location-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 12px 6px; // 44px tall: 33px of aligned content plus 11px
+  background: $Grey10;
+  border-radius: 8px 8px 0 0;
+}
+
+.camera-location-meta {
+  display: flex;
+  gap: 8px;
+}
+
+// The location title links to its detail page but keeps the heading's look
+.camera-landmark {
+  margin: 0;
+}
+
+.camera-landmark__link {
+  @include focus-ring;
+  @include text-body;
+  font-weight: 700;
+  color: $Type-Secondary;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Figma: "Pill" with the refresh icon and the time since the last update
+.camera-update-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 16px;
+  @include text-label-bold;
+  color: $Grey80;
+
+  svg {
+    width: auto;
+    font-size: 0.625rem;
+  }
+}
+
+.camera-location-actions {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+
+  // Same as "View on DriveBC" on the details page: a borderless button in the primary text color
+  .ride-btn--tertiary {
+    color: $Type-Primary;
+  }
+}
+
+.camera-header-menu {
+  position: relative;
+  display: flex; // so the wrapper takes the button's own text baseline, not its icon's
+}

@@ -75,6 +75,7 @@ $Red-dark: #B73433;
 $Yellow-10: #FFFEE0;
 
 $Surface-tinted: #FBFDFF;
+$Surface-status-red: #FEF2F7; // Figma "surface-status-red": unavailable camera image
 
 $Surface-camera: #F1F8FE; //same as $Blue10
 $Surface-major: #F4E1E2;
@@ -106,6 +107,15 @@ $BtnActive-Secondary: $White;
 //Animations
 $Anim-gentle: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
+// Motion. Durations by how often the interaction happens; easings by direction.
+$Motion-fast: 120ms; // hover, press, switch, tab underline
+$Motion-base: 180ms; // menus, flyouts, toast, content fading in
+$Motion-slow: 240ms; // dialogs and other larger surfaces
+$Ease-out: cubic-bezier(0.2, 0, 0, 1); // entering, or answering the user
+$Ease-in: cubic-bezier(0.4, 0, 1, 1); // leaving
+$Ease-standard: cubic-bezier(0.4, 0, 0.2, 1); // moving or resizing on screen
+$Motion-shift: 4px; // how far menus slide in
+
 $Border-dark: #353433;
 
 $GreyOnBlue: #5C6B78;
@@ -125,7 +135,13 @@ $ViewDetailsText: #255A90;
 
 // Ferries, wildfire under control
 $Green: #3B7142;
+$Green10: #F8FBF9;
+$Green20: #EFF7F1;
+$Green-text: #42814A;
 
 // Error notification
 $Error-Notification: #FDD47B;
 $Stale-Notification: #E0DEDC;
+
+// Shadows (Figma "shadow/medium")
+$Shadow-medium: 0 6.4px 14.4px rgba(0, 0, 0, 0.13), 0 1.2px 3.6px rgba(0, 0, 0, 0.1);

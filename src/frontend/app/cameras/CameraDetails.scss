@@ -1,0 +1,530 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// The sidebar's camera list while it loads: headings and cameras inset like the real ones
+.details-skeleton__heading {
+  padding: 4px 8px;
+}
+
+.details-skeleton__items {
+  padding: 0 28px 0 20px;
+}
+
+// The card (background, border, rounded corners) comes from SidebarLayout;
+// this is the scrolling content inside it.
+.camera-details-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  // Figma: page header (32px left, 16px right, 12px above and below)
+  .details-header {
+    position: relative;
+    z-index: 100; // keeps the flyout above the media area
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 1200px;
+    padding: 12px 16px 12px 32px;
+    border-bottom: 1px solid $Divider;
+    border-top-left-radius: 8px;
+
+    .title-section {
+      gap: 24px;
+      min-width: 0;
+    }
+
+    // Figma: "Status / Pills"
+    .badge-ondemand {
+      @include text-label;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 22px;
+      padding: 2px 8px;
+      border-radius: 32px;
+      background: $Blue10;
+      font-weight: 700;
+      color: $BC-Blue;
+      white-space: nowrap;
+
+      svg {
+        width: auto;
+        font-size: 0.75rem;
+      }
+    }
+
+    .actions-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      // Figma: "View on DriveBC" is a borderless button in the primary text color
+      .ride-btn--tertiary {
+        color: $Type-Primary;
+      }
+
+      // 12px + 8px = the 20px Figma leaves before the menu button
+      .context-menu-wrapper {
+        margin-left: 8px;
+      }
+    }
+  }
+
+  // Skeleton blocks in the header: no line box around them (the library adds a <br> after each),
+  // so the loading header is the same height as the real one
+  .details-header .react-loading-skeleton {
+    display: block;
+
+    + br {
+      display: none;
+    }
+  }
+
+  // The camera image while it loads: the same 800:468 shape the real image has
+  .details-skeleton__image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 800 / 468;
+    line-height: 1;
+  }
+
+  // Fills what is left under the header, and each column scrolls on its own
+  .details-grid {
+    display: grid;
+    flex: 1 1 0;
+    min-height: 0;
+    grid-template-columns: minmax(800px, 1fr) 510px;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  // Scrolls the camera image area; the media pane inside is centred with a max width
+  .media-scroll {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+
+  /* Left Media Section */
+  // Left media section (Figma: 32px each side, 16px above)
+  .media-pane {
+    width: 100%;
+    max-width: 1200px;
+    min-width: 800px;
+    margin: 0 auto;
+    padding: 16px 32px 24px;
+
+    .main-preview-card {
+      margin-bottom: 22px;
+
+      .preview-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding: 8px 0;
+
+        .current-view-label {
+          @include text-heading-5;
+          color: $Type-Secondary;
+        }
+
+        .btn-timelapse {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          cursor: pointer;
+        }
+      }
+
+      .main-image-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-height: 820px;
+        overflow: hidden;
+        border-radius: 8px 8px 0 0;
+
+        img {
+          width: 100%;
+          height: auto;
+          border-radius: 8px;
+        }
+
+        .image-placeholder {
+          width: 100%;
+          height: 100%;
+          color: $Grey70;
+        }
+      }
+    }
+
+    .views-section {
+      .views-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+
+        h2 {
+          margin: 0;
+          @include text-heading-5;
+          color: $Type-Secondary;
+        }
+      }
+
+      // 8px gap + 4px card wrapper padding in Figma
+      .views-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 12px;
+      }
+    }
+  }
+
+  // Figma: "Camera location settings" panel
+  .form-pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    padding-top: 7px;
+    border-left: 1px solid $Divider;
+    background: $White;
+
+    .form-pane-title {
+      margin: 0;
+      padding: 8px 16px;
+      @include text-heading-5;
+      color: $Type-Primary;
+    }
+
+    .details-tabs {
+      display: flex;
+      gap: 30px;
+      padding: 4px 16px 0;
+      border-bottom: 1px solid $Divider;
+
+      // The active underline slides between tabs; it overlaps the bar's own bottom line.
+      // --tab-x and --tab-width are measured from the active tab in CameraDetails.jsx.
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: var(--tab-width, 0);
+        height: 2px;
+        background: $Focus;
+        transform: translateX(var(--tab-x, 0));
+        pointer-events: none;
+      }
+
+      &.is-ready::after {
+        transition: transform $Motion-base $Ease-standard, width $Motion-base $Ease-standard;
+      }
+
+      .tab-btn {
+        @include text-small-body;
+        @include focus-ring;
+        margin-bottom: -1px;
+        padding: 8px 0 6px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        color: $Type-Primary;
+        cursor: pointer;
+        @include transition(color);
+
+        // Figma: "Parts / Tabs" hover (inactive tabs only) shows the text in $Grey80
+        &:hover:not(.active) {
+          color: $Grey80;
+        }
+
+        &.active {
+          font-weight: 700;
+        }
+      }
+    }
+
+    // Figma: "publish actions". Sticks to the bottom of the visible area.
+    .form-footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding: 12px 16px;
+      box-sizing: border-box;
+      background: $White;
+      box-shadow: $Shadow-medium;
+
+      .ride-btn {
+        min-height: 36px;
+      }
+    }
+  }
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.6875;
+    color: $Type-Primary;
+  }
+
+  // Same height as the title so the header does not jump while editing
+  .camera-name-input {
+    width: 360px;
+    height: 54px;
+    padding: 0 8px;
+    border: 1px solid $Focus;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.6875;
+    color: $Type-Primary;
+    outline: none;
+  }
+}
+
+.image-placeholder {
+  @include image-unavailable;
+
+  svg {
+    font-size: 2rem;
+  }
+}
+
+// Badge on the details page's main preview when the image is unavailable
+.image-unavailable-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+  background-color: $Base-red;
+  color: $White;
+}
+
+.placeholder-thumb--unavailable {
+  @include image-unavailable;
+
+  svg {
+    font-size: 1rem;
+  }
+}
+
+
+.context-menu-wrapper {
+  position: relative;
+}
+
+// Figma: "Camera details - expand all views"
+.expanded-views-section {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+  padding: 16px 32px 4px;
+  box-sizing: border-box;
+}
+
+.expanded-views-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    @include text-heading-5;
+    color: $Type-Primary;
+  }
+}
+
+.expanded-views-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px 22px;
+}
+
+// Figma: view card, shared by the views grid and the expanded view
+.view-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 2px solid $Divider;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background: $White;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  @include transition(border-color);
+
+  &:hover {
+    border-color: $Grey70;
+  }
+
+  &.selected {
+    border-color: $Focus;
+
+    .view-card-footer {
+      background: $Blue10;
+    }
+  }
+
+  .view-card-select-area {
+    @include focus-ring;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .view-card-image {
+    width: 100%;
+    height: 132px;
+    background-color: $Grey110;
+    overflow: hidden;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .placeholder-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: 1.25rem;
+      color: $Grey70;
+    }
+  }
+
+  .view-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background: $White;
+  }
+
+  .view-info-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .direction-label {
+    @include text-label-bold;
+    color: $Type-Primary;
+    white-space: nowrap;
+  }
+
+  .view-info-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    @include text-label-regular;
+    color: $Type-Secondary;
+    white-space: nowrap;
+
+    .timestamp-icon {
+      width: auto;
+      font-size: 0.625rem;
+    }
+  }
+
+  // Expanded view: borderless cards with a larger image and a grey 48px footer
+  &.view-card--expanded {
+    border: 0;
+    cursor: default; // not selectable here
+
+    .view-card-image {
+      height: auto;
+      aspect-ratio: 800 / 468;
+    }
+
+    .view-card-footer,
+    &.selected .view-card-footer {
+      height: 48px;
+      box-sizing: border-box;
+      background: $Grey10;
+    }
+
+    .direction-label,
+    .view-info-right {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .view-info-right .timestamp-icon {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.view-card-image--off {
+  img {
+    filter: grayscale(60%) brightness(0.75);
+    opacity: 0.7;
+  }
+}
+
+.view-card-image {
+  position: relative; // needed so .camera-off-badge can be absolutely positioned inside it
+
+  .camera-off-badge {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%); /* Centers the badge horizontally relative to itself */
+
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba($Grey110, 0.75);
+    color: $White;
+    border-radius: 50%;
+    font-size: 0.6875rem;
+  }
+}

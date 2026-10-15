@@ -1,0 +1,377 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+/* =========================================================
+   Main content
+========================================================= */
+
+.camera-settings-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+// Figma: page header of the Manage settings screens
+.camera-settings-header {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 1200px;
+  padding: 16px 32px 15px 24px; // same side insets as the Cameras page header; the 1px border sits inside the 16px bottom padding
+  border-bottom: 1px solid $Divider;
+}
+
+.camera-settings-eyebrow {
+  @include text-label;
+  margin: 0;
+  font-weight: 700;
+  color: $Type-Secondary;
+}
+
+.camera-settings-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.6875;
+  color: $Type-Primary;
+}
+
+// =========================================================
+// Body and footer shared by every view (Figma: "Details tab")
+// =========================================================
+
+.settings-body {
+  flex: 1;
+  min-height: 0;
+  min-width: 1200px;
+  overflow-y: auto;
+  padding: 12px 16px 0 28px; // same insets as the Cameras page body
+}
+
+.camera-settings-footer {
+  flex-shrink: 0;
+  padding: 20px 16px 20px 28px;
+}
+
+.settings-message,
+.settings-error {
+  @include text-small-body;
+  margin: 0;
+}
+
+.settings-error {
+  color: $Red-dark;
+}
+
+.settings-description {
+  @include text-body;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  margin: 0;
+  color: $Type-Primary;
+}
+
+// Text field used by the add and edit rows, and the message fields
+.settings-input {
+  @include text-small-body;
+  @include focus-ring;
+  width: 262px;
+  height: 36px;
+  padding: 0 8px;
+  @include field-box;
+  color: $Type-Primary;
+
+  &::placeholder {
+    color: $Type-Disabled;
+  }
+}
+
+// =========================================================
+// Editable lists: database tables and Service request CCs
+// =========================================================
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// The 1px divider sits inside the row's 12px bottom padding, as in Figma
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 11px;
+  border-bottom: 1px solid $Divider;
+}
+
+.settings-row__main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.settings-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 13px;
+  height: 16px;
+  color: $Grey80;
+  cursor: grab;
+  @include transition(color);
+
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  svg {
+    width: auto;
+    font-size: 0.875rem;
+  }
+}
+
+.settings-name,
+.settings-email {
+  @include text-body;
+  margin: 0;
+  color: $Type-Primary;
+  @include transition(color);
+}
+
+// A row that can be dragged is picked up by its name as well as by the grip, so the name gets
+// the same cursor, and over either one the icon and the name both react
+[draggable='true'] .settings-name {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+[draggable='true']:has(.settings-grip:hover, .settings-name:hover) {
+  .settings-grip {
+    color: $Type-Primary;
+  }
+
+  .settings-name {
+    color: $Type-Secondary;
+  }
+}
+
+.settings-actions {
+  display: flex;
+  gap: 6px;
+}
+
+// Plain 32px icon boxes with grey icons (Figma: not the circular icon button)
+.settings-action-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: $Grey80;
+
+  svg {
+    font-size: 0.875rem;
+  }
+}
+
+.settings-add-fields {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+// =========================================================
+// Report fields
+// =========================================================
+
+.report-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.report-field-group {
+  display: flex;
+  align-items: flex-start;
+}
+
+.report-field-category {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 164px;
+  height: 40px;
+  @include text-small-body-bold;
+  color: $Type-Primary;
+}
+
+.report-field-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// Figma: "Form / checklist item"
+.report-field-item {
+  @include text-small-body;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 259px;
+  height: 40px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: $Type-Primary;
+  cursor: pointer;
+  @include transition(background-color, border-color, color);
+
+  &--selected {
+    border-color: $Focus;
+    background: $Blue10;
+    color: $BC-Blue;
+  }
+
+  // Figma: "Form / checklist item" hover (unselected items only)
+  &:not(&--selected):hover {
+    background: $Grey10;
+    color: $Type-Secondary;
+
+    input {
+      border-color: $Grey100;
+    }
+  }
+
+  input {
+    @include focus-ring;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1px solid $Input-border;
+    border-radius: 2px;
+    background: $White;
+    appearance: none;
+    cursor: pointer;
+
+    &:checked {
+      border-color: $BC-Blue;
+      background: $BC-Blue url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.5l2.5 2.5 4.5-5' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat;
+    }
+  }
+}
+
+// =========================================================
+// Default messaging
+// =========================================================
+
+.default-messaging {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1001px;
+  padding-bottom: 4px;
+}
+
+.default-messaging__row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.default-messaging__label {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 287px;
+  height: 40px;
+  @include text-small-body-bold;
+  color: $Type-Secondary;
+}
+
+.default-messaging__field {
+  @include text-body;
+  @include focus-ring;
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 8px 12px;
+  @include field-box;
+  font-family: inherit;
+  line-height: 1.5;
+  color: $Type-Primary;
+
+  &--long {
+    height: 248px;
+    resize: vertical;
+  }
+}
+
+// =========================================================
+// Camera order: one group per highway
+// =========================================================
+
+.camera-order-group {
+  padding-bottom: 12px;
+  border-bottom: 1px solid $Divider;
+  @include transition(padding-bottom);
+  transition-duration: $Motion-slow;
+  transition-timing-function: $Ease-standard;
+
+  &--open {
+    padding-bottom: 4px;
+  }
+}
+
+.camera-order-group-header {
+  @include text-body;
+  @include focus-ring;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $Type-Primary;
+  cursor: pointer;
+
+  svg {
+    width: auto;
+    font-size: 0.875rem;
+    color: $Grey80;
+  }
+}
+
+.camera-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 28px;
+}
+
+.camera-order-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 7px;
+  border-bottom: 1px solid $Divider;
+
+  &:last-child {
+    border-bottom: 0;
+    padding-bottom: 8px;
+  }
+}
+
