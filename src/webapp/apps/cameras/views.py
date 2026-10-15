@@ -675,6 +675,20 @@ class CameraViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(original)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(detail=False, methods=["get"], url_path="drivebc-webcam")
+    def drivebc_webcam(self, request):
+        url = "https://www.drivebc.ca/api/webcams/"
+
+        try:
+            resp = requests.get(url, timeout=(3, 10))
+            resp.raise_for_status()
+            return Response(resp.json())
+        except requests.RequestException:
+            logger.warning("Failed to fetch DriveBC webcams")
+            return Response(
+                {"detail": "Failed to fetch DriveBC webcam data."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
 
 class CameraHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CameraHistorySerializer

@@ -568,7 +568,7 @@ export default function Cameras() {
 
   const loadDriveBCWebcams = async () => {
     const response = await fetch(
-      `/drivebc-api/api/webcams/`
+      `/api/cameras/drivebc-webcam/`
     );
       if (!response.ok) {
         throw new Error(

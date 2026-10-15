@@ -485,7 +485,9 @@ export default function CameraDetails({ onBack }) {
   }, []);
 
   const loadDriveBCWebcam = async (id) => {
-    const response = await fetch(`/drivebc-api/api/webcams/${id}/`);
+    const response = await fetch(
+        `/api/cameras/${cameraId}/drivebc-webcam/?view=${id}`
+    );
     if (!response.ok) {
       throw new Error(`Failed to load DriveBC webcam ${id}: ${response.status}`);
     }
