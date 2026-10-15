@@ -82,6 +82,7 @@ jobs:
           OPEN511_API_URL: http://open511-mock:8080
           OPEN511_API_KEY: test-key
           DRIVEBC_TIMELAPSE_API_ROOT: http://timelapse-mock:8080
+          FIELD_ENCRYPTION_KEYS: LP6QwS5cP5mGwz9nWNlY1XIUXezcDc8krpBTKDwpsSE=
         run: |
           coverage run manage.py test --noinput
           coverage report
