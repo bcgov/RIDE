@@ -1,5 +1,25 @@
+# ==========================================
+# STAGE: Compile patched America/Vancouver
+# TEMPORARY STAGE: This is to support the PCT timezone code for Vancouver, BC. This is a temporary stage until the IANA timezone database is updated to include this change.
+# ==========================================
+FROM alpine:3.24 AS tzbuild
+RUN apk add --no-cache build-base curl
+WORKDIR /tz
+
+RUN curl -fsSLO https://data.iana.org/time-zones/releases/tzcode2026e.tar.gz \
+ && curl -fsSLO https://data.iana.org/time-zones/releases/tzdata2026e.tar.gz \
+ && tar -xzf tzcode2026e.tar.gz \
+ && tar -xzf tzdata2026e.tar.gz \
+ && make zic
+
+RUN sed -i '/^Zone America\/Vancouver/,/^Zone America\/Dawson_Creek/ s/^\([[:space:]]*-7:00[[:space:]]*-[[:space:]]*\)MST/\1PCT/' northamerica \
+ && sed -n '/^Zone America\/Vancouver/,/^Zone America\/Dawson_Creek/p' northamerica | grep -q 'PCT' \
+ && ./zic -b fat -d /out -L /dev/null northamerica
+# ==========================================
+
+
 # Use an official Python runtime as a parent image
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # Install Python Package Libraries
 RUN apt-get update \
@@ -11,6 +31,10 @@ RUN apt-get update \
       ca-certificates \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# --- Temporary timezone patch for Vancouver, BC --- 
+COPY --from=tzbuild /out/America/Vancouver /usr/share/zoneinfo/America/Vancouver
+# --- End Temporary timezone patch for Vancouver, BC ---
 
 # Adding webapp directory to make absolute filepaths consistent across services
 WORKDIR /app/webapp
