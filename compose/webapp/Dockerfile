@@ -25,7 +25,7 @@ RUN ./zic -b fat -d /out -L /dev/null northamerica
 
 
 # Use an official Python runtime as a parent image
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # Install Python Package Libraries
 RUN apt-get update \
@@ -37,6 +37,11 @@ RUN apt-get update \
       ca-certificates \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# --- Temporary timezone patch for Vancouver and Edmonton Timezones ---
+COPY --from=tzbuild /out/America/Vancouver /usr/share/zoneinfo/America/Vancouver
+COPY --from=tzbuild /out/America/Edmonton  /usr/share/zoneinfo/America/Edmonton
+# --- End Temporary timezone patch for Vancouver and Edmonton Timezones ---
 
 # Adding webapp directory to make absolute filepaths consistent across services
 WORKDIR /app/webapp
