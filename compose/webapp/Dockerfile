@@ -38,6 +38,11 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# --- Temporary timezone patch for Vancouver and Edmonton Timezones ---
+COPY --from=tzbuild /out/America/Vancouver /usr/share/zoneinfo/America/Vancouver
+COPY --from=tzbuild /out/America/Edmonton  /usr/share/zoneinfo/America/Edmonton
+# --- End Temporary timezone patch for Vancouver and Edmonton Timezones ---
+
 # Adding webapp directory to make absolute filepaths consistent across services
 WORKDIR /app/webapp
 
