@@ -6,6 +6,7 @@ django-debug-toolbar==5.1.0
 django-environ==0.12.0
 djangorestframework==3.17.2
 djangorestframework_gis
+gitPython==3.2.1
 gunicorn==23.0.0
 psycopg[binary]
 requests==2.32.3

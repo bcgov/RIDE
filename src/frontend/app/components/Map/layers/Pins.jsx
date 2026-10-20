@@ -86,7 +86,7 @@ function transform_prop_value(value) {
   *
   * `snapped` optional: pass when caller already computed it (e.g. guarded drag).
   */
-export async function applyPinLocationUpdate(e, point, dispatch, snapped, search) {
+export async function applyPinLocationUpdate(e, point, dispatch, snapped, search, setAlertContext) {
   const snappedCoord = snapped ?? getSnapped(e.coordinate, e.pixel, e.map);
   const [ lng, lat ] = g2ll(snappedCoord);
   const timezone = await get(`${API_HOST}/api/timezone`, { lat, lng });
@@ -106,6 +106,10 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
   updateRoute(e.map);
   point.getGeometry().setCoordinates(snappedCoord);
   point.dra = await getDRA(snappedCoord, point, e.map);
+
+  if (!point.dra.properties) {
+    setAlertContext('No snappable road found.')
+  }
   const props = point.dra.properties;
 
   let aliases = [
@@ -186,7 +190,7 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
 
   const search = event.location[point.get('style')].search;
   point.unset('dragStartCoordinate', true);
-  applyPinLocationUpdate(e, point, dispatch, snapped, search);
+  applyPinLocationUpdate(e, point, dispatch, snapped, search, setAlertContext,);
 };
 
 
