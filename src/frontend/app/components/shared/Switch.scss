@@ -1,0 +1,44 @@
+@use "../../styles/variables.scss" as *;
+@use "../../styles/mixins.scss" as *;
+
+// Figma: "Form / Switcher", Medium
+.ride-switch {
+  @include focus-ring;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 14px;
+  padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  box-sizing: border-box;
+  background: $Grey50;
+  cursor: pointer;
+  @include transition(background-color);
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: $White;
+    @include transition(transform);
+  }
+
+  &[aria-checked='true'] {
+    background: $BC-Blue;
+
+    .ride-switch__dot {
+      transform: translateX(14px);
+    }
+
+    &:hover:not(:disabled) {
+      background: $BtnHover-Primary;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

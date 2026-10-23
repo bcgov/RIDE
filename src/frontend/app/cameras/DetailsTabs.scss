@@ -1,0 +1,619 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// =========================================================
+// Shared form styles
+// =========================================================
+
+// Shared form styles for the Basics, Setup, Views and Logs tabs of the details panel.
+// Scoped to the panel so they keep the same specificity as before they were split out.
+.camera-details-container .form-pane {
+  .tab-content {
+    flex-grow: 1;
+    padding: 20px 16px 24px;
+
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--form-section-gap, 16px);
+      margin-bottom: 24px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .section-title {
+        display: block;
+        margin: 0;
+        @include text-label-bold;
+        color: $Grey80;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0;
+
+      label {
+        @include text-label-regular;
+        font-weight: 400;
+        color: $Type-Secondary;
+      }
+
+      input:not([type='checkbox']):not([type='radio']),
+      select,
+      textarea {
+        @include text-small-body;
+        @include focus-ring;
+        width: 100%;
+        height: 32px;
+        padding: 0 var(--field-padding-right, 8px) 0 8px;
+        @include field-box;
+        font-family: inherit;
+        color: $Type-Primary;
+      }
+
+      textarea {
+        height: 112px;
+        padding: 8px;
+        resize: vertical;
+      }
+
+      // Figma: 14px chevron in a 20px box, 8px from the right edge
+      select {
+        padding-right: 36px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232d2d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+        background-repeat: no-repeat;
+        background-position: right 6px center;
+        background-size: 24px 24px;
+        appearance: none;
+        cursor: pointer;
+      }
+    }
+
+    .form-row {
+      display: grid;
+      gap: 16px;
+
+      &.two-col {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      &.three-col {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    // Inputs with a trailing icon (calendar, password eye)
+    .input-with-icon {
+      --field-padding-right: 36px; // room for the icon
+      position: relative;
+
+      .input-icon {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        color: $Type-Primary;
+        pointer-events: none;
+      }
+
+      .icon-btn-toggle {
+        position: absolute;
+        top: 50%;
+        right: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        border: none;
+        background: none;
+        transform: translateY(-50%);
+        color: $Type-Primary;
+        cursor: pointer;
+        @include transition(color);
+
+        &:hover {
+          color: $Type-Secondary;
+        }
+      }
+    }
+  }
+}
+
+// =========================================================
+// Setup
+// =========================================================
+
+.setup-tab {
+  // Figma: rows and the section title are 12px apart on this tab (16px on Basics)
+  --form-section-gap: 12px;
+
+  font-family: inherit;
+
+  // Figma: "Form / Text field" (Camera ID) and "Form / Switcher"
+  .setup-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+
+    .camera-id-group {
+      .field-label-sm {
+        display: block;
+        @include text-label-regular;
+        color: $Type-Primary;
+      }
+
+      .camera-id-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.5;
+        color: $Type-Primary;
+      }
+    }
+
+    .toggle-label-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      cursor: pointer;
+      color: $Type-Secondary;
+      @include text-small-body;
+    }
+  }
+}
+
+.link-style {
+  color: $ViewDetailsText;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// =========================================================
+// Views
+// =========================================================
+
+// One card per camera view; collapsed (off) views are just the header row
+.views-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Figma: "Form / Checkbox" row (switch, name, edit, badge)
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 40px;
+}
+
+.view-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.direction-title {
+  @include text-body;
+  margin: 0;
+  font-weight: 700;
+  color: $Type-Primary;
+}
+
+// Figma: the fields sit 9px below the header and 9px apart
+.view-body-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.badge-default {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background-color: $Focus;
+  @include text-small-body-bold;
+  color: $White;
+}
+
+// Figma: filled grey pill on top of the tertiary button
+.btn-make-default {
+  min-height: 0;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: $Grey20;
+  @include text-small-body-bold;
+  letter-spacing: 0;
+  color: $Grey80;
+}
+
+.direction-title-input {
+  @include text-small-body;
+  @include focus-ring;
+  flex: 0 1 auto;
+  width: 160px;
+  min-width: 80px;
+  height: 32px;
+  padding: 0 8px;
+  @include field-box;
+  color: $Type-Primary;
+}
+
+.view-header-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+// =========================================================
+// Notes
+// =========================================================
+
+// Figma: Notes tab. An "Entries" header, then one block per note.
+.notes-card-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.notes-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: $Grey100;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.note-item {
+  animation: ride-fade-in $Motion-base $Ease-out backwards;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+}
+
+.note-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  @include text-label-regular;
+}
+
+.note-item .author-name {
+  font-weight: 700;
+  color: $Type-Secondary;
+}
+
+.updated-time {
+  color: $Grey80;
+}
+
+// The note text and its "Edit note" link sit 8px apart
+.note-comment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.note-content {
+  width: 100%;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: $Type-Primary;
+  white-space: pre-wrap;
+}
+
+.add-note-form,
+.edit-note-form {
+  margin-bottom: 8px;
+
+  textarea {
+    @include text-small-body;
+    @include focus-ring;
+    width: 100%;
+    padding: 8px;
+    @include field-box;
+    font-family: inherit;
+    color: $Type-Primary;
+    resize: vertical;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.notes-empty {
+  @include text-small-body;
+  margin: 0;
+  color: $Type-Secondary;
+}
+
+// =========================================================
+// Logs
+// =========================================================
+
+// Figma: Logs tab. A date field, the "Errors only" chip, then one row per log.
+.logs-tab {
+  font-family: inherit;
+
+  .filter-actions {
+    margin-top: 12px;
+  }
+
+  // Figma: the chip is blue while the filter is on
+  .btn-pill {
+    @include focus-ring;
+    display: inline-flex;
+    align-items: center;
+    height: 27px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 8px;
+    background: $Grey20;
+    @include text-small-body-bold;
+    color: $Grey80;
+    cursor: pointer;
+
+    &.active {
+      background: $Focus;
+      color: $White;
+    }
+  }
+
+  // Rows run 4px closer to the right edge than the rest of the tab (Figma: 16px left, 12px right)
+  .logs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 16px -4px 0 0;
+
+    .log-item {
+      animation: ride-fade-in $Motion-base $Ease-out backwards;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 12px 8px 11px;
+      border-bottom: 1px solid $Divider;
+
+      .log-time {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        width: 130px;
+        min-height: 21px;
+        @include text-label-bold;
+        color: $Grey80;
+      }
+
+      .log-details {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .log-message {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: $Type-Primary;
+      }
+
+      .success-icon,
+      .error-icon {
+        width: 13.333px; // Figma's icon box
+        font-size: 0.75rem;
+      }
+
+      .success-icon {
+        color: $Type-Secondary;
+      }
+
+      .error-icon {
+        color: $Error;
+      }
+
+      &--error .log-message {
+        color: $Red-dark;
+      }
+    }
+  }
+
+  .no-logs {
+    @include text-small-body;
+    margin: 16px 0 0;
+    color: $Type-Secondary;
+  }
+
+  .logs-skeleton {
+    margin-top: 16px;
+  }
+}
+
+.input-with-icon {
+  .react-datepicker-wrapper,
+  .react-datepicker__input-container {
+    display: block;
+    width: 100%;
+  }
+}
+
+// =========================================================
+// History
+// =========================================================
+
+// Figma: History tab. Cards sit 12px from the panel edges instead of 16px.
+.camera-details-container .form-pane .tab-content.history-tab {
+  padding: 20px 12px 12px;
+}
+
+.history-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-card {
+  border: 1px solid $Divider;
+  border-radius: 8px;
+  overflow: hidden;
+  background: $White;
+}
+
+.history-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: $Grey20;
+
+  .ride-btn--outlined {
+    background: $Grey10;
+  }
+
+  // The chevron points up while the entry is open and turns over as it closes
+  svg {
+    @include transition(transform);
+    transition-duration: $Motion-slow;
+    transition-timing-function: $Ease-standard;
+  }
+
+  [aria-expanded='false'] svg {
+    transform: rotate(180deg);
+  }
+}
+
+.timestamp-title {
+  @include text-label;
+  font-weight: 700;
+  color: $Type-Primary;
+}
+
+.history-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 12px 12px; // the 8px under the header and the 12px at the bottom close with the body
+}
+
+.history-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-label {
+  display: block;
+  @include text-label-regular;
+  color: $Type-Secondary;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.4286;
+  color: $Type-Primary;
+}
+
+.action-icon {
+  width: 19px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: $Type-Secondary;
+}
+
+.value-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 20px;
+}
+
+.chip {
+  display: block;
+  padding: 0 4px;
+  border-radius: 4px;
+  @include text-small-body;
+}
+
+.chip-new {
+  background: $Green20;
+  color: $Green-text;
+}
+
+.chip-old {
+  background: $Surface-major;
+  color: $Red-dark;
+  text-decoration: line-through;
+}
+
+// Figma: view changes use the lighter green
+.history-section--views .chip-new {
+  background: $Green10;
+}
+
+.history-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  line-height: 1.3333;
+  letter-spacing: 0.3px;
+  color: $Type-Secondary;
+
+  svg {
+    width: auto;
+    font-size: 0.625rem;
+  }
+}

@@ -1,0 +1,69 @@
+@use "../styles/variables.scss" as *;
+@use "../styles/mixins.scss" as *;
+
+// Figma: "Modal - Camera service request"
+.service-request-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recipient-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.recipient-label {
+  @include text-small-body-bold;
+  color: $Type-Secondary;
+}
+
+.recipient-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+// Toggle for a recipient: solid blue when included, grey when not
+.recipient-chip {
+  @include text-small-body;
+  @include focus-ring;
+  min-height: 27px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: $Grey20;
+  font-weight: 700;
+  line-height: 1.5;
+  color: $Grey80;
+  opacity: 0.9;
+  cursor: pointer;
+  @include transition(background-color, color, opacity);
+
+  &:hover {
+    background: $Grey30;
+  }
+
+  &--selected {
+    background: $Focus;
+    color: $White;
+    opacity: 1;
+
+    &:hover {
+      background: $Blue80;
+    }
+  }
+}
+
+.ride-dialog .service-request-subject {
+  @include text-body;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.ride-dialog textarea.service-request-body {
+  @include text-body;
+  min-height: 288px;
+  padding: 8px 12px;
+}

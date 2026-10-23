@@ -1,0 +1,194 @@
+@use "../../styles/variables.scss" as *;
+@use "../../styles/mixins.scss" as *;
+
+// Figma: "Modal - Delete USER" / "Modal - Edit RIDE User"
+.ride-dialog {
+  width: 768px;
+  margin: auto; // centers the modal <dialog>; the global reset zeroes its default margin
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  overflow-y: auto;
+  background: $White;
+  box-shadow: 0 4.8px 14.4px rgba($Black, 0.18), 0 25.6px 57.6px rgba($Black, 0.22);
+  color: $Type-Secondary;
+
+  &:focus {
+    outline: none;
+  }
+
+  &[open] {
+    animation: ride-dialog-in $Motion-slow $Ease-out backwards;
+  }
+
+  &::backdrop {
+    background: rgba($Black, 0.2);
+    animation: ride-fade-in $Motion-slow $Ease-out backwards;
+  }
+
+  // Faster out than in
+  &.is-closing {
+    animation: ride-dialog-out $Motion-base $Ease-in forwards;
+
+    &::backdrop {
+      animation: ride-fade-out $Motion-base $Ease-in forwards;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+  }
+
+  // Circled icon, the same style as the sidepanel header icon
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: 2px solid $BC-Blue;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: $BC-Blue;
+
+    svg {
+      width: auto;
+      font-size: 0.6875rem;
+    }
+  }
+
+  &__title {
+    @include text-body;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-weight: 700;
+    color: $BC-Blue;
+  }
+
+  &__close {
+    @include focus-ring;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: $BC-Blue;
+    cursor: pointer;
+    @include transition(background-color);
+
+    &:hover {
+      background: $BtnHover-Tertiary;
+    }
+
+    svg {
+      width: auto;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 12px 20px 30px;
+  }
+
+  &--message &__content {
+    gap: 32px;
+  }
+
+  // Text of a message dialog
+  &__text {
+    @include text-body;
+    margin: 0;
+    color: $Type-Secondary;
+  }
+
+  a {
+    color: $Type-Link;
+
+    &:hover {
+      color: $Type-LinkHover;
+    }
+  }
+
+  // Figma: "Basic details" section heading and its bold value
+  &__section-title {
+    @include text-label-bold;
+    margin: 0;
+    color: $Grey80;
+  }
+
+  &__value {
+    @include text-small-body-bold;
+    margin: 0;
+  }
+
+  // Label above a control
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__label {
+    @include text-label-regular;
+    color: $Type-Secondary;
+  }
+
+  // Figma: "Form / Field (Text and Dropdowns)"
+  &__input {
+    @include text-small-body;
+    @include focus-ring;
+    min-height: 32px;
+    padding: 6px 8px;
+    @include field-box;
+    font-family: inherit;
+    color: $Type-Primary;
+
+    &::placeholder {
+      color: $Type-Disabled;
+    }
+
+    &:disabled {
+      background: $Grey10;
+      color: $Type-Disabled;
+    }
+  }
+
+  textarea#{&}__input {
+    resize: vertical;
+  }
+
+  // Figma: primary or danger button, then a plain Cancel, with the icon after the label
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+}
+
+@keyframes ride-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes ride-dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
