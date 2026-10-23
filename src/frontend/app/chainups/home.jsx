@@ -18,6 +18,8 @@ import Preview from "../events/Preview.jsx";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faCalendar, faUser, faCheck, faToggleOn, faToggleOff, faEye } from '@fortawesome/pro-regular-svg-icons';
 
+import { TZ_SWITCH } from '../shared';
+
 // Styling
 import './home.scss';
 
@@ -235,20 +237,22 @@ export default function Home() {
 
     const dateObj = new Date(date);
 
-    const dateFormatted = dateObj.toLocaleDateString('en-US', {
+    const dateFormatted = dateObj.toLocaleDateString('en-CA', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
 
-    const timeFormatted = dateObj.toLocaleTimeString('en-US', {
+    const abbrev = dateObj >= TZ_SWITCH ? 'PCT': 'PST';
+
+    const timeFormatted = dateObj.toLocaleTimeString('en-CA', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-      timeZone: 'America/Los_Angeles',
+      timeZone: 'America/Vancouver',
       timeZoneName: 'short'
-    });
+    }).replace(/[A-Z]{3,6}/, abbrev);
 
     const expired = !user && new Date() > dateObj;
 
