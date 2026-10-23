@@ -1,12 +1,20 @@
 import { format } from 'date-fns';
 import { tz, TZDate } from '@date-fns/tz';
 
+export const TZ_SWITCH = new Date(2026, 10, 1);
 
 export function getTz(datetime, timeZone) {
   if (!datetime) { return undefined; }
   datetime = new Date(datetime);
-  const dtf = new Intl.DateTimeFormat('en-CA', { timeZone, timeZoneName: 'short' })
   if (isNaN(datetime.valueOf())) { return undefined; }
+  if (datetime >= TZ_SWITCH) {
+    if (timeZone === 'America/Vancouver') {
+      return 'PCT';
+    } else if (timeZone === 'America/Edmonton') {
+      return 'MDT';
+    }
+  }
+  const dtf = new Intl.DateTimeFormat('en-CA', { timeZone, timeZoneName: 'short' });
   return dtf.format(datetime).split(' ').pop();
 }
 
