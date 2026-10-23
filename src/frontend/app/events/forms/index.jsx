@@ -112,8 +112,7 @@ export function getInitialEvent(eventType = 'Incident') {
     restrictions: [],
     conditions: [],
     timing: {
-      nextUpdate: getLater('Minor'),
-      nextUpdateTZ: 'PST',
+      nextUpdate: eventType === 'ROAD_CONDITION' ? getNextUpdate() : getLater('Minor'), // DBC22-4451
       nextUpdateIsDefault: true,
       endTime: null,
       endTimeTZ: null,

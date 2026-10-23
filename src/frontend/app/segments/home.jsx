@@ -1,5 +1,5 @@
 // React
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 
 // Navigation
 import { useNavigate } from "react-router";
@@ -27,6 +27,7 @@ import './home.scss';
 import '../components/shared/checkbox.scss'
 import RIDECheckBoxes from "../components/shared/checkboxes.jsx";
 import RcsForm, { getInitialRc } from "./forms.jsx";
+import { TZ_SWITCH } from '../shared';
 
 export function meta() {
   return [
@@ -358,21 +359,23 @@ export default function Home() {
     const dateObj = new Date(date);
 
     // Day, Month Day, Year
-    const dateFormatted = dateObj.toLocaleDateString('en-US', {
+    const dateFormatted = dateObj.toLocaleDateString('en-CA', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     }); // e.g., "Tue, Jan 6, 2026"
 
+    const abbrev = dateObj >= TZ_SWITCH ? 'PCT': 'PDT';
+
     // Hour:Minute am/pm TZ
-    const timeFormatted = dateObj.toLocaleTimeString('en-US', {
+    const timeFormatted = dateObj.toLocaleTimeString('en-CA', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-      timeZone: 'America/Los_Angeles',
+      timeZone: 'America/Vancouver',
       timeZoneName: 'short'
-    }).replace('GMT', 'PST'); // e.g., "4:28 pm PST"
+    }).replace(/[CMP][DS]T/, abbrev); // e.g., "4:28 pm PST"
 
     const expired = !user && new Date() > dateObj;
 
