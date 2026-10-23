@@ -12,6 +12,8 @@ const SKIP_WORDS = [
   'as', 'at', 'by', 'for', 'in', 'of', 'off', 'on', 'per', 'to', 'up', 'via',
 ]
 
+export const TZ_SWITCH = new Date(2026, 10, 1);
+
 function titleCaseWord(word) {
   word = word.toLowerCase();
   if (SKIP_WORDS.includes(word)) { return word; }

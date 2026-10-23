@@ -1,19 +1,23 @@
 // React
-import 'react';
+import { useEffect, useState } from 'react';
 
 // External imports
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from '@fortawesome/pro-regular-svg-icons';
 import { format } from 'date-fns';
 
+import { API_HOST } from '../env';
+import { get } from '../shared/helpers';
+import { getTz } from './forms/shared';
+
 // Styling
 import './Dms.scss';
 
-const formatDate = (date) => {
-  if (!date) return '';
+const formatDate = (date, timezone) => {
+  if (!date || !timezone) return '';
   date = new Date(date);
-  const tz = date.toLocaleString(['en-CA'], { timeZoneName: 'short' }).slice(-3);
-  return format(date, `E, MMM do, y, h:mm a '${tz}'`);
+  const abbrev = getTz(date, timezone);
+  return format(date, `E, MMM do, y, h:mm a '${abbrev}'`);
 }
 
 import dmsEastIconStatic from './icons/dms-east-static.png';
@@ -47,6 +51,17 @@ function Message({ message, index }) {
 
 
 export default function DmsPreview({ sign, close }) {
+  const [ timezone, setTimezone ] = useState();
+
+  useEffect(() => {
+    if (timezone) { return; }
+    const location = {
+      lng: sign.location.coordinates[0],
+      lat: sign.location.coordinates[1],
+    }
+    get(`${API_HOST}/api/timezone`, location).then(data => setTimezone(data.timezone));
+  }, [timezone]);
+
   return (
     <div className={`preview sign`}>
 
@@ -66,7 +81,7 @@ export default function DmsPreview({ sign, close }) {
 
       <div className="body">
         <h3>{sign.name}</h3>
-        <div className='last-updated'>{formatDate(sign.updated_datetime_utc)}</div>
+        <div className='last-updated'>{formatDate(sign.updated_datetime_utc, timezone)}</div>
         <Message message={sign.message_display_1} index={1} />
         <Message message={sign.message_display_2} index={2} />
         <Message message={sign.message_display_3} index={3} />

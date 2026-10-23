@@ -4,17 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp, faChevronDown } from '@fortawesome/pro-regular-svg-icons';
 
 import { format } from 'date-fns';
-
+import { getTz } from '../forms/shared';
 import funcs from './preprocessors';
 
 const formatDateTime = (date) => date ? format(new Date(date), 'EEE, MMM d, y h:mm aaa') : '';
-
-function getTz(datetime) {
-  if (!datetime) { return undefined; }
-  datetime = new Date(datetime);
-  if (isNaN(datetime.valueOf())) { return undefined; }
-  return datetime.toLocaleString(['en-CA'], { timeZoneName: 'short' }).slice(-3);
-}
 
 const GROUPING = {
   start: 'location',
@@ -93,7 +86,7 @@ function group(data) {
 }
 
 
-export default function Version({ event, later, isSelected, onClick }) {
+export default function Version({ event, isSelected, onClick }) {
 
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -135,7 +128,8 @@ export default function Version({ event, later, isSelected, onClick }) {
           v{ event.version }
         </div>
         <div className="timestamp">
-          {formatDateTime(new Date(event.last_updated))}&nbsp;{getTz(event.last_updated)}<br/>
+          {formatDateTime(new Date(event.last_updated))}&nbsp;
+          {getTz(event.last_updated, event.location.start.timezone)}<br/>
           {event.user.first_name}&nbsp;{event.user.last_name}
         </div>
         { items.length > 0 &&
