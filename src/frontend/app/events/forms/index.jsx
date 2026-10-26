@@ -33,7 +33,7 @@ import { clearPins } from '../../components/Map/layers/Pins';
 import { getCookie } from '../shared';
 import { API_HOST, CLEARING_TIMEOUT } from '../../env';
 import { AuthContext } from '../../contexts';
-import { patch, getPendingNextUpdate } from '../../shared/helpers';
+import { patch, getNextUpdate, getPendingNextUpdate } from '../../shared/helpers';
 import Tabs from '../../shared/Tabs';
 import History from '../History/History';
 
@@ -112,7 +112,7 @@ export function getInitialEvent(eventType = 'Incident') {
     restrictions: [],
     conditions: [],
     timing: {
-      nextUpdate: getLater('Minor'),
+      nextUpdate: eventType === 'ROAD_CONDITION' ? getNextUpdate() : getLater('Minor'), // DBC22-4451
       nextUpdateTZ: 'PST',
       nextUpdateIsDefault: true,
       endTime: null,
