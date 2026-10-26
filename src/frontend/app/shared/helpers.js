@@ -192,12 +192,16 @@ export function getNextUpdate(timeToCheck) {
   const candidates = HOURS.map((hour) => new Date(year, month, date, hour));
   candidates.push(new Date(year, month, date + 1, HOURS[0]));
 
-  if (now < springCutoff || now >= fallCutoff) { // in winter season
+  // current date in winter season
+  if (now < springCutoff || now >= fallCutoff) {
     let next = candidates.find((hour) => (hour - HALF_HOUR) > now);
 
+    // proposed time also in winter season
     if (next < springCutoff || next > fallCutoff) {
       nextUpdate = next;
     }
+
+  // edge case for Sept 30, use nextUpdate if it's after Oct 1 5:00 AM
   } else if (nextUpdate > fallCutoff && nextUpdate > candidates[3]) {
     nextUpdate = candidates[3];
   }
