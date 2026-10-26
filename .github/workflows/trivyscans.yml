@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
-        env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
         with:
           image-ref: 'ghcr.io/bcgov/ride-webapp:latest-dev'
           format: 'sarif'
@@ -41,8 +39,6 @@ jobs:
     steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
-        env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
         with:
           image-ref: 'ghcr.io/bcgov/ride-static:latest-dev'
           format: 'sarif'
@@ -63,8 +59,6 @@ jobs:
     steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
-        env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
         with:
           image-ref: 'ghcr.io/bcgov/ride-standbycheck:latest'
           format: 'sarif'
@@ -85,8 +79,6 @@ jobs:
     steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
-        env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
         with:
           image-ref: 'ghcr.io/bcgov/ride-redis:latest'
           format: 'sarif'
