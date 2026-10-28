@@ -13,11 +13,13 @@ RUN curl -fsSLO https://data.iana.org/time-zones/releases/tzcode2026e.tar.gz \
  && tar -xzf tzdata2026e.tar.gz \
  && make zic
 
-RUN sed -i '/^Zone America\/Vancouver/,/^Zone America\/Dawson_Creek/ s/^\([[:space:]]*-7:00[[:space:]]*-[[:space:]]*\)MST/\1PCT/' northamerica \
- && sed -n '/^Zone America\/Vancouver/,/^Zone America\/Dawson_Creek/p' northamerica | grep -q 'PCT'
+# Patch America/Vancouver: Leave PDT intact for pre-Nov 1, change final UTC-7 rule from MST to PCT
+RUN sed -i '/^Zone America\/Vancouver/,/^Zone America\/Dawson_Creek/ s/MST/PCT/g' northamerica \
+ && grep -q 'PCT' northamerica
 
-RUN sed -i '/^Zone America\/Edmonton/,/^Zone America\/Vancouver/ s/^\([[:space:]]*-6:00[[:space:]]*-[[:space:]]*\)CST/\1MDT/' northamerica \
- && sed -n '/^Zone America\/Edmonton/,/^Zone America\/Vancouver/p' northamerica | grep -qE '^[[:space:]]*-6:00[[:space:]]+-[[:space:]]+MDT'
+# Patch America/Edmonton: Change final UTC-6 rule from CST to MDT
+RUN sed -i '/^Zone America\/Edmonton/,/^# British Columbia/ s/CST/MDT/g' northamerica \
+ && grep -q 'MDT' northamerica
 
 RUN ./zic -b fat -d /out -L /dev/null northamerica
 
@@ -36,17 +38,17 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# --- Temporary timezone patch for Vancouver and Edmonton Timezones --- 
-COPY --from=tzbuild /out/America/Vancouver /usr/share/zoneinfo/America/Vancouver
-COPY --from=tzbuild /out/America/Edmonton  /usr/share/zoneinfo/America/Edmonton
-# --- End Temporary timezone patch for Vancouver and Edmonton Timezones --- 
-
 # Adding webapp directory to make absolute filepaths consistent across services
 WORKDIR /app/webapp
 
 # Install Python dependencies
 COPY ./src/webapp/requirements /app/webapp/requirements
 RUN pip install --no-cache-dir -r requirements/base.txt
+
+# --- Temporary timezone patch for Vancouver and Edmonton Timezones --- 
+COPY --from=tzbuild /out/America/Vancouver /usr/share/zoneinfo/America/Vancouver
+COPY --from=tzbuild /out/America/Edmonton  /usr/share/zoneinfo/America/Edmonton
+# --- End Temporary timezone patch for Vancouver and Edmonton Timezones --- 
 
 COPY ./compose/webapp/entrypoint /
 RUN sed -i 's/\r$//g' /entrypoint && chmod +x /entrypoint
