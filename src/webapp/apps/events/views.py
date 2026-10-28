@@ -229,62 +229,68 @@ class RoadConditions(Events):
             )
 
         updated_events = []
-        try:
-            with transaction.atomic():
-                for seg_pk in segPks:
-                    try:
-                        segment = Segment.objects.get(uuid=seg_pk)
+        errors = []
+        for seg_pk in segPks:
+            try:
+                with transaction.atomic():
+                    segment = Segment.objects.get(uuid=seg_pk)
 
-                        existing_event = Event.objects.filter(segment=segment, event_type=EventType.ROAD_CONDITION, latest=True, status='Active').first()
+                    existing_event = Event.objects.filter(segment=segment, event_type=EventType.ROAD_CONDITION, latest=True, status='Active').first()
 
-                        # Convert segment geometry to GeoJSON format
-                        geometry_geojson = None
-                        if segment.geometry:
-                            # Create GeoJSON GeometryCollection with the segment's LineString
-                            geometry_geojson = {
-                                'type': 'GeometryCollection',
-                                'geometries': [
-                                    json.loads(segment.geometry.json)  # Convert LineString to GeoJSON
-                                ]
-                            }
-
-                        default_event_data = {
-                            'id': existing_event.id if existing_event else None,
-                            'conditions': event_data.get('conditions', []),
-                            'segment': seg_pk,
-                            'geometry': geometry_geojson,
-                            'location': {
-                                'start': {'coords': segment.primary_point.coords},
-                                'end': {'coords': segment.secondary_point.coords} if segment.secondary_point else None
-                            },
-                            'status': 'Active',
-                            'meta': {},  # Ensure meta is always a dict
+                    # Convert segment geometry to GeoJSON format
+                    geometry_geojson = None
+                    if segment.geometry:
+                        # Create GeoJSON GeometryCollection with the segment's LineString
+                        geometry_geojson = {
+                            'type': 'GeometryCollection',
+                            'geometries': [
+                                json.loads(segment.geometry.json)  # Convert LineString to GeoJSON
+                            ]
                         }
 
-                        merged_data = {**event_data, **default_event_data}
+                    default_event_data = {
+                        'id': existing_event.id if existing_event else None,
+                        'conditions': event_data.get('conditions', []),
+                        'segment': seg_pk,
+                        'geometry': geometry_geojson,
+                        'location': {
+                            'start': {'coords': segment.primary_point.coords},
+                            'end': {'coords': segment.secondary_point.coords} if segment.secondary_point else None
+                        },
+                        'status': 'Active',
+                        'meta': {},  # Ensure meta is always a dict
+                    }
 
-                        # Use RcSerializer to validate and save
-                        # The serializer will handle user via CurrentUserDefault() and meta via default
-                        serializer = RcSerializer(
-                            instance=existing_event,
-                            data=merged_data,
-                            context={'request': request}
-                        )
+                    merged_data = {**event_data, **default_event_data}
 
-                        if serializer.is_valid():
-                            event = serializer.save()
-                            updated_events.append(RcSerializer(event, context={'request': request}).data)
-                        else:
-                            # Log validation errors for debugging
-                            print(f"Validation errors for segment {seg_pk}: {serializer.errors}")
-                            continue
+                    # Use RcSerializer to validate and save
+                    # The serializer will handle user via CurrentUserDefault() and meta via default
+                    serializer = RcSerializer(
+                        instance=existing_event,
+                        data=merged_data,
+                        context={'request': request}
+                    )
 
-                    except Segment.DoesNotExist:
-                        # Skip segments that don't exist
+                    if serializer.is_valid():
+                        event = serializer.save()
+                        updated_events.append(RcSerializer(event, context={'request': request}).data)
+                    else:
+                        # Log validation errors for debugging
+                        print(f"Validation errors for segment {seg_pk}: {serializer.errors}")
                         continue
-        except ValidationError as exc:
-            # Roll back the whole batch and surface the Open511 sync error to the frontend
-            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+
+            except Segment.DoesNotExist:
+                # Skip segments that don't exist
+                continue
+
+            except ValidationError as exc:
+                errors.append(exc.detail)
+
+        if errors:
+            return Response(
+                {'open511': [msg for e in errors for msg in e.get('open511', [e])], 'data': updated_events},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         return Response({'status': status.HTTP_202_ACCEPTED, 'data': updated_events}, status=status.HTTP_202_ACCEPTED)
 
