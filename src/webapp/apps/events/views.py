@@ -459,11 +459,19 @@ class Closures(APIView):
     def get(self, request):
 
         tlids = set()
+        urls = {}
+
         for event in Event.current.filter(impacts__contains=[{"closed": True}]):
-            tlids |= set(event.tlids)
+            for tlid in event.tlids:
+                if tlid not in urls:
+                    urls[tlid] = set()
+                urls[tlid].add(f'{request.scheme}://{request.META['HTTP_HOST']}/api/events/{event.id}')
+                tlids.add(tlid)
+
         closures = [{"RESTRICTION_TYPE": "ROAD_CLOSURE",
                      "NETWORK_SEGMENT_ID": tlid,
                      "RESTRICTION_AZIMUTH": -1,
+                     "EVENTS": [url for url in urls[tlid]]
                     } for tlid in tlids]
         return Response(closures)
 
