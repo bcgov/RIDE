@@ -1,3 +1,29 @@
+# ==========================================
+# STAGE: Compile patched America/Vancouver and America/Edmonton timezone data
+# TEMPORARY STAGE: This is to support the PCT timezone code for America/Vancouver and MDT for America/Edmonton.
+# This is hopefully a temporary patch until the IANA timezone database is updated to include this timezone code.
+# ==========================================
+FROM alpine:3.24 AS tzbuild
+RUN apk add --no-cache build-base curl
+WORKDIR /tz
+
+RUN curl -fsSLO https://data.iana.org/time-zones/releases/tzcode2026e.tar.gz \
+ && curl -fsSLO https://data.iana.org/time-zones/releases/tzdata2026e.tar.gz \
+ && tar -xzf tzcode2026e.tar.gz \
+ && tar -xzf tzdata2026e.tar.gz \
+ && make zic
+
+# Patch America/Vancouver: Leave PDT intact for pre-Nov 1, change final UTC-7 rule from MST to PCT
+RUN sed -i '/^Zone America\/Vancouver/,/^Zone America\/Dawson_Creek/ s/MST/PCT/g' northamerica \
+ && grep -q 'PCT' northamerica
+
+# Patch America/Edmonton: Change final UTC-6 rule from CST to MDT
+RUN sed -i '/^Zone America\/Edmonton/,/^# British Columbia/ s/CST/MDT/g' northamerica \
+ && grep -q 'MDT' northamerica
+
+RUN ./zic -b fat -d /out -L /dev/null northamerica
+
+
 # Use an official Python runtime as a parent image
 FROM python:3.13-slim
 
@@ -18,6 +44,11 @@ WORKDIR /app/webapp
 # Install Python dependencies
 COPY ./src/webapp/requirements /app/webapp/requirements
 RUN pip install --no-cache-dir -r requirements/base.txt
+
+# --- Temporary timezone patch for Vancouver and Edmonton Timezones ---
+COPY --from=tzbuild /out/America/Vancouver /usr/share/zoneinfo/America/Vancouver
+COPY --from=tzbuild /out/America/Edmonton  /usr/share/zoneinfo/America/Edmonton
+# --- End Temporary timezone patch for Vancouver and Edmonton Timezones ---
 
 COPY ./compose/webapp/entrypoint /
 RUN sed -i 's/\r$//g' /entrypoint && chmod +x /entrypoint
