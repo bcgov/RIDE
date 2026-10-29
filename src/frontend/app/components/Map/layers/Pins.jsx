@@ -107,8 +107,8 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
   point.getGeometry().setCoordinates(snappedCoord);
   point.dra = await getDRA(snappedCoord, point, e.map);
 
-  if (!point.dra.properties) {
-    setAlertContext('No snappable road found.')
+  if (!point.dra.properties && setAlertContext) {
+    setAlertContext({ message: 'No snappable road found.' })
   }
   const props = point.dra.properties;
 
