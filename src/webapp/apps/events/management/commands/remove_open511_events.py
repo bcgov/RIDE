@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
 
+    def add_arguments(self, parser):
+        parser.add_argument('eids', nargs='+')
+
     def handle(self, *args, **options):
 
         def get_event_payload(eid):
@@ -22,9 +25,7 @@ class Command(BaseCommand):
                 "last_publish_userid": "RIDE_RAY_LOCAL",
             }
 
-        eids = [
-            # Enter event ids to manually remove here
-        ]
+        eids = options['eids']
         event_payload = {
             "events": [get_event_payload(eid) for eid in eids]
         }
