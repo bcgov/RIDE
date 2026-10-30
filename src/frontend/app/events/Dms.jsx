@@ -84,7 +84,6 @@ export default function DmsPreview({ sign, close }) {
         <div className='last-updated'>{formatDate(sign.updated_datetime_utc, timezone)}</div>
         <Message message={sign.message_display_1} index={1} />
         <Message message={sign.message_display_2} index={2} />
-        <Message message={sign.message_display_3} index={3} />
       </div>
 
       { sign.id &&
