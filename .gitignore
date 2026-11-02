@@ -37,3 +37,6 @@ db.sqlite3
 *.mdc
 
 *.ipynb
+
+# Makefile stamps
+.make/
