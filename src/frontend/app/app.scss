@@ -30,6 +30,25 @@ body {
       &.active {
         font-weight: bold;
       }
+
+      &.logo {
+        position: relative;
+        div.lozenge {
+          background: $Warning;
+          color: $Info;
+          font-size: 9px;
+          line-height: 0.75rem;
+          font-weight: bold;
+          text-transform: uppercase;
+          position: absolute;
+          top: 0px;
+          left: 56px;
+          vertical-align: middle;
+          border-radius: 6px;
+          height: 12px;
+          padding: 0px 5px 0 4px;
+        }
+      }
     }
 
     &.env-dev, &.env-test, &.env-uat {

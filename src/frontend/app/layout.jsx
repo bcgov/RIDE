@@ -27,6 +27,14 @@ function getInitialDebuggingContext() {
 let callingSession = false;
 let sessionStateKnown = false;
 
+function getEnv() {
+  if (globalThis.location.host.startsWith('localhost')) {
+    return <div className="lozenge">local</div>
+  } else if (['dev', 'test', 'uat'].includes(ENVIRONMENT)) {
+    return <div className="lozenge">{ENVIRONMENT}</div>
+  }
+}
+
 export default function Layout() {
   /* Setup */
   // Routing
@@ -124,7 +132,10 @@ export default function Layout() {
   return (
     <>
       <header className={`env-${ENVIRONMENT}`}>
-        <NavLink to="/"><Logo /></NavLink>
+        <NavLink to="/" className="logo">
+          <Logo />
+          { getEnv() }
+        </NavLink>
 
         {authContext.username &&
           <>
