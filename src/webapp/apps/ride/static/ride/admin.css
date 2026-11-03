@@ -1,0 +1,4 @@
+/* DBC22-7748: Edge renders unfocused checked option text white on #ffc */
+form .aligned select option:checked {
+    color: var(--body-fg);
+}
