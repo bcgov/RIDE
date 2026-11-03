@@ -51,6 +51,7 @@ export const slice = createSlice({
   name: 'events',
 
   initialState: eventsAdapter.getInitialState({
+    byId: {},
     status: 'idle',
     error: null
   }),
@@ -64,6 +65,10 @@ export const slice = createSlice({
       })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
+        state.byId = action.payload.reduce((acc, curr) => {
+          acc[curr.id.split('-')[1]] = curr.id + 'v' + curr.version;
+          return acc;
+        }, {})
         eventsAdapter.setAll(state, action.payload);
       })
       .addCase(refreshThunk.rejected, (state, action) => {
