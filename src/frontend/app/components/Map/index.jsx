@@ -1,17 +1,10 @@
 import { useContext, useCallback, useEffect, useRef, useState } from 'react';
+import { useStore } from 'react-redux';
 import { components } from 'react-select';
 import AsyncSelect from 'react-select/async';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import {
-  faArrowRotateRight,
-  faBuilding,
-  faCity,
-  faInputText,
-  faMagnifyingGlass,
-  faPlus,
-  faXmark
-} from '@fortawesome/pro-regular-svg-icons';
+import { faCity } from '@fortawesome/pro-regular-svg-icons';
 import {
   faArchway,
   faRoad,
@@ -27,6 +20,8 @@ import { get } from '../../shared/helpers';
 
 import { API_HOST, GEOCODER_CLIENT_ID, GEOCODER_HOST, ROUTABLE_LOCATIONS_HOST } from '../../env';
 
+import { getIconAndStroke } from '../../events/icons';
+import { selectFeature } from './helpers';
 import './map.scss';
 
 const Input = (props) => <components.Input {...props} isHidden={false} />;
@@ -92,6 +87,8 @@ function getIcon(data) {
   } else if (data.source === 'geocoder') {
     const sub = data.matchPrecision === 'STREET' ? 'street' : 'default';
     return OPTION_ICON['geocoder'][sub];
+  } else if (data.source === 'tickets') {
+    return data.icon;
   }
   return OPTION_ICON[data.source];
 }
@@ -161,14 +158,8 @@ function sanitizeForILikePrefix(value) {
 }
 
 export function getRoutableLocations(addressInput) {
-  // return empty promise if address input is less than 2 characters
-  const trimmed = (addressInput || "").trim();
-  if (trimmed.length < 2) {
-    return Promise.resolve({ type: "FeatureCollection", features: [] });
-  }
-
   // escape CQL string and sanitize for ILike prefix
-  const literal = escapeCqlString(sanitizeForILikePrefix(trimmed));
+  const literal = escapeCqlString(sanitizeForILikePrefix(addressInput));
   return get(
     `${ROUTABLE_LOCATIONS_HOST}public/ows`,
     {
@@ -190,9 +181,27 @@ export function getRoutableLocations(addressInput) {
   })));
 }
 
-async function getLocations(addressInput) {
+async function getLocations(addressInput, store) {
   addressInput = addressInput.trim();
-  if (addressInput.length < 3) { return []; }
+  if (addressInput.length < 3) { return ; }
+  if (Number(addressInput) && addressInput.length > 5) {
+    const state = store.getState();
+    const id = state.events.byId[addressInput]
+    const event = state.events.entities[id];
+
+    if (event) {
+      const [icon] = getIconAndStroke(event, 'active');
+
+      return [{
+        value: event.id,
+        label: event.id,
+        location: event.location.start.coords,
+        source: 'tickets',
+        icon: <img src={icon} />,
+      }];
+    }
+    return [];
+  }
 
   const geocoderPromise = getGeocoderLocations(addressInput);
   const routablePromise = getRoutableLocations(addressInput);
@@ -216,7 +225,7 @@ async function getLocations(addressInput) {
 }
 
 
-export default function Map({ children, event, clickHandler }) {
+export default function Map({ children, event, clickHandler, dispatch }) {
 
   let creatingMap = false;
 
@@ -224,6 +233,8 @@ export default function Map({ children, event, clickHandler }) {
   const searchRef = useRef();
   const eventRef = useRef();
   eventRef.current = event;
+
+  const store = useStore();
 
   const { map, setMap } = useContext(MapContext);
   const debuggingIsOn = useContext(DebuggingContext);
@@ -277,7 +288,7 @@ export default function Map({ children, event, clickHandler }) {
             }
           }}
           blurInputOnSelect={true}
-          loadOptions={getLocations}
+          loadOptions={(input) => getLocations(input, store)}
           placeholder="Search location"
           openMenuOnFocus={false}
           menuIsOpen={true}
@@ -303,8 +314,15 @@ export default function Map({ children, event, clickHandler }) {
             if (e?.location) {
               const coordinate = ll2g(e.location);
               map.getView().animate({ center: coordinate, duration: 500, zoom: 12 });
-              map.location.getGeometry().setCoordinates(coordinate);
-              setSearchInput(e.label);
+              if (e.source !== 'tickets') {
+                map.location.getGeometry().setCoordinates(coordinate);
+                setSearchInput(e.label);
+              } else {
+                const feature = map.get('events').getSource().get(e.label);
+                selectFeature(map, feature);
+                dispatch({ type: 'reset form', value: feature.get('raw'), showPreview: true, showForm: false });
+                setSearchInput('');
+              }
             }
           }}
         />
