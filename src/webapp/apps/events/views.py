@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.views import APIView
@@ -461,7 +462,10 @@ class Closures(APIView):
         tlids = set()
         urls = {}
 
-        for event in Event.current.filter(impacts__contains=[{"closed": True}]):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        # Any incidents, and planned events that have started
+        for event in Event.current.filter(Q(start_time=None) | Q(start_time__lte=now),
+                                          impacts__contains=[{"closed": True}]):
             for tlid in event.tlids:
                 if tlid not in urls:
                     urls[tlid] = set()

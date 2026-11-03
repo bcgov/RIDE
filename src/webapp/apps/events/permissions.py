@@ -71,6 +71,8 @@ class EventServiceAreaPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_superuser:
             return True
+        elif request.user.is_anonymous:
+            return False
 
         # For detail actions (update/partial_update), defer to
         # has_object_permission so the saved instance's start location is used
