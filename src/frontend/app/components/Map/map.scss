@@ -79,7 +79,9 @@
 
       .option-icon {
         flex: 0;
-        margin-right: 1rem;
+        margin-right: 0.5rem;
+        min-width: 1.5rem;
+        text-align: center;
       }
 
       .option-label {
