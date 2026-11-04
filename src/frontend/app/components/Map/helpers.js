@@ -466,10 +466,9 @@ export function getDRA(coords, point, map) {
         }
       });
       if (closest) {
-        point.set('dra', feature.properties);
         return {properties: feature.properties, closest };
       }
-      return {};
+      return {}; // no acceptable road found
     });
 }
 

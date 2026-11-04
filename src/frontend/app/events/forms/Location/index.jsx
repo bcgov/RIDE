@@ -1,5 +1,8 @@
 import 'react';
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRightArrowLeft } from '@fortawesome/pro-regular-svg-icons';
+
 import Tabs from '../../../shared/Tabs';
 import Tooltip from '../../Tooltip';
 
@@ -31,7 +34,7 @@ export default function Location({ errors, event, dispatch, goToFunc, map }) {
           </svg>
         </Tooltip>
       </div>
-      {/* { end?.name &&
+      { end?.name &&
         <div>
 
           <button
@@ -43,10 +46,10 @@ export default function Location({ errors, event, dispatch, goToFunc, map }) {
             Swap pins
           </button>
         </div>
-      } */}
+      }
     </div>
 
-    <Tabs hideSingleTabHandle={true}>
+    <Tabs hideSingleTabHandle={true} errors={{ start: start.name === 'error', end: end?.name === 'error' }}>
       <Tabs.Tab name='start' label='Start location'>
         <Point point={start} dispatch={dispatch} goToFunc={goToFunc} subkey='start' map={map} />
       </Tabs.Tab>
@@ -57,25 +60,5 @@ export default function Location({ errors, event, dispatch, goToFunc, map }) {
         </Tabs.Tab>
       }
     </Tabs>
-
-          {/* { errors['End location'] && !end?.name &&
-            <div className="toggleable">
-              <div className="toggle">
-                <Tooltip text="Center end pin">
-                  <img
-                    src={pinEnd}
-                    style={{ width: '20px' }}
-                    onClick={(e) => goToFunc(end?.coords)}
-                  />
-                </Tooltip>
-              </div>
-
-              <div className="title error">
-                <p>{errors['End location']}</p>
-              </div>
-            </div>
-          } */}
-
-
   </>;
 }

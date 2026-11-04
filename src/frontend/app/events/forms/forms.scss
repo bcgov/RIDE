@@ -348,6 +348,12 @@
               .tooltip {
                 margin: 0.25rem 0 0 0.5rem;
               }
+
+              .error {
+                font-size: 1rem;
+                color: $Error;
+                padding-right: 1rem;
+              }
             }
 
             &.landmarks {
