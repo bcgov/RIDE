@@ -3,7 +3,7 @@ import { createContext, useState } from 'react';
 import './Tabs.scss';
 
 function Tab({ children }) {
-  return <div className={`tab-control`}>{children}</div>;
+  return <div className='tab-control'>{children}</div>;
 }
 
 const getDefault = (children) => {
@@ -16,7 +16,7 @@ const getDefault = (children) => {
 
 export const TabContext = createContext('');
 
-export default function Tabs({ children, onChange, hideSingleTabHandle }) {
+export default function Tabs({ children, onChange, hideSingleTabHandle, errors }) {
   const [currentTab, setCurrentTab] = useState(getDefault(children));
 
   let tabs = Array.isArray(children) ? children : [children];
@@ -36,7 +36,7 @@ export default function Tabs({ children, onChange, hideSingleTabHandle }) {
                 <button
                   type="button"
                   key={`${name}-handle`}
-                  className={`tab-handle ${currentTab === name ? 'active' : ''}`}
+                  className={`tab-handle ${currentTab === name ? 'active' : ''} ${(errors || {})[name] ? 'error' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (currentTab !== name) {

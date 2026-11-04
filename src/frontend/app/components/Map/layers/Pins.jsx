@@ -86,7 +86,8 @@ function transform_prop_value(value) {
   *
   * `snapped` optional: pass when caller already computed it (e.g. guarded drag).
   */
-export async function applyPinLocationUpdate(e, point, dispatch, snapped, search, setAlertContext) {
+export async function applyPinLocationUpdate(e, point, dispatch, snapped, search) {
+  point.set('dra', null);
   const snappedCoord = snapped ?? getSnapped(e.coordinate, e.pixel, e.map);
   const [ lng, lat ] = g2ll(snappedCoord);
   const timezone = await get(`${API_HOST}/api/timezone`, { lat, lng });
@@ -103,31 +104,29 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
 
   dispatch({ type: point.action, value: location, });
 
-  updateRoute(e.map);
   point.getGeometry().setCoordinates(snappedCoord);
-  point.dra = await getDRA(snappedCoord, point, e.map);
+  const { properties, closest } = await getDRA(snappedCoord, point, e.map);
+  point.set('dra', properties);
 
-  if (!point.dra.properties && setAlertContext) {
-    setAlertContext({ message: 'No snappable road found.' })
-  }
-  const props = point.dra.properties;
+  updateRoute(e.map);
 
   let aliases = [
-    props?.ROAD_NAME_FULL,
-    props?.ROAD_NAME_ALIAS1,
-    props?.ROAD_NAME_ALIAS2,
-    props?.ROAD_NAME_ALIAS3,
-    props?.ROAD_NAME_ALIAS4,
+    properties?.ROAD_NAME_FULL,
+    properties?.ROAD_NAME_ALIAS1,
+    properties?.ROAD_NAME_ALIAS2,
+    properties?.ROAD_NAME_ALIAS3,
+    properties?.ROAD_NAME_ALIAS4,
   ].filter(Boolean);
 
   // Prioritize Highway name with number
-  const routeNumber = props?.HIGHWAY_ROUTE_NUMBER?.split('+')[0];
-  let name = (routeNumber && props?.ROAD_CLASS !== 'ramp') ? `Highway ${routeNumber}` : props?.ROAD_NAME_FULL;
+  const routeNumber = properties?.HIGHWAY_ROUTE_NUMBER?.split('+')[0];
+  let name = (routeNumber && properties?.ROAD_CLASS !== 'ramp') ? `Highway ${routeNumber}` : properties?.ROAD_NAME_FULL;
+  if (!name) { name = 'error'; }
 
   aliases = aliases.filter((alias) => alias !== name);
 
   Object.assign(location, {
-    ... props,
+    ... properties,
     ... timezone,
     name,
     alias: aliases[0],
@@ -135,25 +134,26 @@ export async function applyPinLocationUpdate(e, point, dispatch, snapped, search
     pending: false,
     nearbyPending: true
   });
+
+  // apply road abbreviation expansions
   location = Object.fromEntries(
     Object.entries(location).map(([key, val]) => [key, transform_prop_value(val)])
   );
 
   dispatch({ type: point.action, value: location, });
 
-  if (point.dra.closest) {
-    const coords = ll2g(point.dra.closest.geometry.coordinates);
+  if (closest) {
+    const coords = ll2g(closest.geometry.coordinates);
     point.getGeometry().setCoordinates(coords);
   }
 
-  if (point.dra.properties) {
+  if (properties) {
     getNearby(point.action, location, dispatch);
     if (search) {
       getNearby(point.action, location, dispatch, search);
     }
   }
 }
-
 
 function canSetStartAtCoordinate(map, coordinate, authContext) {
   if (authContext?.is_approver) { return true; }
@@ -190,7 +190,7 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
 
   const search = event.location[point.get('style')].search;
   point.unset('dragStartCoordinate', true);
-  applyPinLocationUpdate(e, point, dispatch, snapped, search, setAlertContext,);
+  applyPinLocationUpdate(e, point, dispatch, snapped, search);
 };
 
 
@@ -201,7 +201,8 @@ export const guardedEndHandler = async (e, point, dispatch, authContext, setAler
  */
 export const updateRoute = async (map) => {
   let route = [], tlids = [], route2 = [], route3 = [];
-  if (map.start && map.end) {
+
+  if (map.start && map.end && map.start.get('dra') && map.end.get('dra')) {
     const startCoordinates = g2ll(map.start.getGeometry().getCoordinates());
     const endCoordinates = g2ll(map.end.getGeometry().getCoordinates());
     const results = await getRoute(startCoordinates, endCoordinates);
@@ -221,6 +222,7 @@ export const updateRoute = async (map) => {
       route3 = results3.route.map((pair) => ll2g(pair));
     }
   }
+
   map.route.set('tlids', tlids);
   map.route.getGeometry().setCoordinates(route);
   map.route2.getGeometry().setCoordinates(route2);
