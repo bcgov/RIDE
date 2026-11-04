@@ -102,6 +102,10 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
     return <p className={'event-name'}>{headerText}</p>;
   }
 
+  const startError = start.name === 'error';
+  const endError = end.name === 'error';
+  const hasError = startError || endError;
+
   // Main component
   return (
     <div className={`preview ${displayed.details.severity.startsWith("Major") ? 'major' : 'minor'} ${displayed.status.toLowerCase()} ${displayed.is_closure ? 'closure' : ''} ${isChainup ? 'chainup' : ''} ${cleared ? 'cleared' : ''}`}>
@@ -145,11 +149,16 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
       </div>
 
       <div className="body">
-        {!segments && !isChainup &&
+        { hasError && <h3 className='direction error'>
+            {startError && !endError && 'Start pin must be on a valid road'}
+            {!startError && endError && 'End pin must be on a valid road'}
+            {startError && endError && 'Start and end pins must be on valid roads'}
+          </h3>}
+        {!segments && !isChainup && !hasError &&
           <h3 className="direction">
             {start.name}
             {isLinear && end.name !== start.name && <>&nbsp;to {end.name}</>}
-            {!isRoadCondition && ` ${displayed.details?.direction}`}
+            {!isRoadCondition && !startError && ` ${displayed.details?.direction}`}
           </h3>
         }
 
@@ -165,7 +174,7 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
           </div>
         }
 
-        { start.useAlias && !isRoadCondition &&
+        { start.useAlias && !isRoadCondition && !startError &&
           <p className="direction">
             {start.alias}
             {end.alias && end.useAlias && end.alias !== start.alias &&

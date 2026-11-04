@@ -187,6 +187,8 @@ function isIntersection(location) {
   if (INTERSECTION_LETTERS.includes(location.class?.charAt(0))) { return true; }
 }
 
+const ERROR = 'Events can not be created on non-Ministry roads or off of these roads. This event can not be published until the pin is moved to a valid road.';
+
 export default function Point({ point, dispatch, goToFunc, subkey, map }) {
   const [other, setOther] = useState('');
   const [suggestionSearch, setSuggestionSearch] = useState('');
@@ -256,11 +258,32 @@ export default function Point({ point, dispatch, goToFunc, subkey, map }) {
     </>
   }
 
+  const hasError = point.name === 'error';
+
+  if (hasError) {
+    return (
+      <div className="toggleable">
+        <div className="toggled">
+          <div className='road-name'>
+            <div className='error'>{ ERROR }</div>
+            <Tooltip text={`Center ${subkey} pin`}>
+              <img
+                src={PINS[subkey]}
+                style={{ width: '20px' }}
+                onClick={() => goToFunc(point?.coords)}
+              />
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="toggleable">
       <div className="toggled">
         <div className='road-name'>
-          <div>{ point?.name || 'no road found' }</div>
+          <div className={hasError ? 'error' : ''}>{ hasError ? ERROR : point.name }</div>
           <Tooltip text={`Center ${subkey} pin`}>
             <img
               src={PINS[subkey]}

@@ -52,7 +52,13 @@
     }
   }
 
-  h3, h5 { font-weight: normal; }
+  h3, h5 {
+    font-weight: normal;
+
+    &.error {
+      color: $Error;
+    }
+  }
 
   &.minor {
     .header {

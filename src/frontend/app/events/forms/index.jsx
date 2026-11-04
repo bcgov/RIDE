@@ -198,24 +198,32 @@ export class EventForm extends Component {
         coordinates: form.location.start.coords,
       }];
 
+      if (form.location.start?.name === 'error') {
+        err['Start location'] = 'Start pin must be on a valid road';
+      }
+
       if (form.location.end?.name) {
 
-        geometries.push({
-          type: "Point",
-          coordinates: form.location.end.coords,
-        });
-        let route = map.route.getGeometry().getCoordinates();
-        if (route.length === 0) {
-          route = event?.geometry?.geometries[2]?.coordinates;
+        if (form.location.end?.name === 'error') {
+          err['End location'] = 'End pin must be on a valid road';
         } else {
-          route = route.map((pair) => g2ll(pair));
-        }
-        form.tlids = new Set((map.route.get('tlids') || []));
+          geometries.push({
+            type: "Point",
+            coordinates: form.location.end.coords,
+          });
+          let route = map.route.getGeometry().getCoordinates();
+          if (route.length === 0) {
+            route = event?.geometry?.geometries[2]?.coordinates;
+          } else {
+            route = route.map((pair) => g2ll(pair));
+          }
+          form.tlids = new Set((map.route.get('tlids') || []));
 
-        geometries.push({
-          type: "Linestring",
-          coordinates: route,
-        });
+          geometries.push({
+            type: "Linestring",
+            coordinates: route,
+          });
+        }
       } else if (form.type !== 'Road condition' && form.type === 'ROAD_CONDITION' && !form.segment) {
         err['End location'] = 'An end location is required';
       } else {
