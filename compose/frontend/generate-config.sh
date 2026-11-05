@@ -50,14 +50,14 @@ rm "${SHARED_CONFIG}/config_snippet.html"
 
 cp /etc/nginx/conf.d/default.conf "${SHARED_CONFIG}/default.conf"
 cp /etc/nginx/conf.d/security_headers.conf "${SHARED_CONFIG}/security_headers.conf"
+cp /etc/nginx/conf.d/security_headers_admin.conf "${SHARED_CONFIG}/security_headers_admin.conf"
 
 # --- Handle Debug Route ---
 if [ "$SHOW_DEBUG_TOOLBAR" = "True" ]; then
-    echo "Debug toolbar is enabled; Enabling __debug__ route."
-    # This changes the prefix match to a regex match including __debug__
-    sed -i 's|location \^~ /admin {|location ~ ^/(admin\|__debug__) {|' "${SHARED_CONFIG}/default.conf"
+    echo "Debug toolbar is enabled; Enabling __debug__ route along with admin and static routes."
+    sed -i 's|location ~ \^/(admin\|static) {|location ~ ^/(admin\|static\|__debug__) {|' "${SHARED_CONFIG}/default.conf"
 else
-    echo "Debug toolbar is not enabled; not adding the debug toolbar route."
+    echo "Debug toolbar is not enabled; retaining admin and static routes."
 fi
 
 # Update the environment placeholder in the copied config
