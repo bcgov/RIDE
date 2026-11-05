@@ -20,6 +20,12 @@ class RIDEUserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
         }
 
+    def to_internal_value(self, data):
+        # DBC22-6339 staff must match superuser for IsAdmin permission to work
+        if 'is_superuser' in data:
+            data['is_staff'] = data['is_superuser']
+        return super().to_internal_value(data)
+
     def _get_social_account(self, obj):
         # prefetch_related makes .all() use the cache, .first() does not
         accounts = obj.socialaccount_set.all()
