@@ -325,7 +325,7 @@ export default function PinsLayer({ event, dispatch }) {
           isVisible: true,
           canDrag: true,
         });
-        map.start.dra = { properties: evt.location.start }
+        map.start.set('dra', evt.location.start)
         map.pins.getSource().addFeature(map.start);
       }
       map.start.set('isPreview', !!event.preview);
@@ -347,7 +347,7 @@ export default function PinsLayer({ event, dispatch }) {
           isVisible: true,
           canDrag: true,
         });
-        map.end.dra = { properties: evt.location.end }
+        map.end.set('dra', evt.location.end);
         map.pins.getSource().addFeature(map.end);
       }
 
