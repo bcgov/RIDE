@@ -33,13 +33,17 @@ import { selectAllServiceAreaBoundaries } from '../../../slices/serviceAreaBound
 export function addEvent(event, map, dispatch, visibleLayers) {
   event = structuredClone(event);
   const source = map.get('events').getSource();
-  const existing = source.get(event.id);
+  const eventOnMap = source.get(event.id);
 
-  if (existing) {
-    if (event.version <= existing.get('version')) { return; }
+  const inFuture = new Date(event.timing.startTime) > new Date();
+  if (eventOnMap) {
+    if (event.version <= eventOnMap.get('version') &&
+        (!eventOnMap.get('inFuture') || inFuture)) {
+      return; // no update to make to existing feature
+    }
 
     source.unset(event.id, true);
-    source.removeFeature(existing);
+    source.removeFeature(eventOnMap);
   }
 
   let coords = event.location.start.coords;
@@ -73,6 +77,7 @@ export function addEvent(event, map, dispatch, visibleLayers) {
     raw: event,
     version: event.version,
     geometry: new GeometryCollection([new Point(mid || start)]),
+    inFuture,
   });
   feature.setId(event.id);
 
