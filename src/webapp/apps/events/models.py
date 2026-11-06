@@ -311,8 +311,11 @@ class Event(VersionedModel):
     def _build_polygon(self):
         # Build and store buffered polygon around road conditions to avoid recomputing
         if self.event_type == EventType.ROAD_CONDITION and self.geometry:
-            ring = self.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2).coords[0]
-            return [list(point) for point in ring]
+            polygon = self.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2)
+            polygon = polygon.transform(3005, clone=True).simplify(50, preserve_topology=True)
+            polygon.transform(4326)
+            ring = polygon.coords[0]
+            return [[round(coordinate, 5) for coordinate in point] for point in ring]
 
         return None
 
