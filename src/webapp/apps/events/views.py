@@ -167,6 +167,14 @@ class RoadConditions(Events):
     )
     serializer_class = RcSerializer
 
+    def get_queryset(self):
+        # Defer unused fields in list page for performance
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            return queryset.defer('geometry', 'polygon', 'description', 'ivr')
+
+        return queryset
+
     @action(detail=False, methods=['post'], url_path='clear')
     def clear_rcs(self, request):
         event_pks = request.data.get('eventPks', [])
