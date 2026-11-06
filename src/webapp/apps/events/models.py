@@ -150,10 +150,10 @@ def desc(schedule, short_days=False):
     return final
 
 
-def _round_coords(coords):
-    if isinstance(coords, float):
-        return round(coords, 4)
-    return [_round_coords(c) for c in coords]
+def _round_coords(coords, decimals=5):
+    if isinstance(coords, (int, float)):
+        return round(coords, decimals)
+    return [_round_coords(c, decimals) for c in coords]
 
 
 def schedule_diff(a, b):
@@ -296,6 +296,8 @@ class Event(VersionedModel):
                     end['coords'] = list(self.segment.secondary_point.coords)
                     self.end = end
 
+            self._simplify_coords()
+
             # Update route projection for sorting
             self.route_projection = get_route_projection(self)
 
@@ -314,13 +316,35 @@ class Event(VersionedModel):
             if not skip_sync:
                 sync_open511_data(self)
 
+    def _simplify_coords(self):
+        # lines ~10m, all coords to 5 places (~1m)
+        for field in ('start', 'end'):
+            location = getattr(self, field)
+            if location and location.get('coords'):
+                setattr(self, field, {**location, 'coords': _round_coords(location['coords'])})
+
+        if not self.geometry:
+            return
+
+        geometries = []
+        for geometry in self.geometry:
+            if geometry.geom_type == 'LineString' and geometry.num_points > 2:
+                geometry = geometry.simplify(.0001)
+
+            if geometry.geom_type in ('Point', 'LineString'):
+                geometry = type(geometry)(_round_coords(geometry.coords), srid=geometry.srid)
+
+            geometries.append(geometry)
+
+        self.geometry = GeometryCollection(*geometries, srid=self.geometry.srid)
+
     def _build_polygon(self):
         # Build and store buffered polygon around road conditions to avoid recomputing
         if self.event_type == EventType.ROAD_CONDITION and self.geometry:
             # simplify (~50m) and round to 4 places for performance
             polygon = self.geometry.buffer_with_style(.01, end_cap_style=2, join_style=2)
             ring = polygon.simplify(.0005, preserve_topology=True).coords[0]
-            return [_round_coords(point) for point in ring]
+            return [_round_coords(point, 4) for point in ring]
 
         return None
 

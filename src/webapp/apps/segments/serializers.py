@@ -34,8 +34,16 @@ class ChainUpSerializer(serializers.ModelSerializer):
     first_reported = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
 
+    @cached_property
+    def _first_versions(self):
+        # Map all first versions to avoid N+1 query
+        return {
+            chainup.id: chainup
+            for chainup in ChainUp.objects.filter(version=0).select_related('user').defer('geometry')
+        }
+
     def get_first_reported(self, obj):
-        first_version = obj if obj.version == 0 else ChainUp.objects.get(id=obj.id, version=0)
+        first_version = obj if obj.version == 0 else self._first_versions[obj.id]
         return {
             'user': UserSerializer(first_version.user).data if first_version.user else None,
             'date': first_version.created,
