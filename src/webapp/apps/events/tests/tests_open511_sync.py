@@ -182,6 +182,8 @@ class TestOpen511Sync(TestCase):
         expected = self._normalize(self.post_payload)
         for evt, event in zip(expected["events"], (e1, e2)):
             evt["schedule"] = build_open511_schedule(event)
+            # geometry simplified/rounded on save
+            evt["geography"]["coordinates"] = json.loads(json.dumps(event.geometry[0].coords))
         assert self._normalize(payload) == expected
 
     def test_payload_uses_username_from_social_account_claims(self):
