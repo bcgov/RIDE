@@ -213,7 +213,9 @@ class EventSerializer(KeyMoveSerializer):
             if instance.segment:
                 obj['location']['start']['name'] = transform_road_abbreviations(instance.segment.name)
 
-            obj['polygon'] = instance.polygon
+            # check necessary for deferral in viewset to work
+            if 'polygon' not in instance.get_deferred_fields():
+                obj['polygon'] = instance.polygon
 
         else:
             # Only serialize polygon/segment for road conditions
@@ -407,8 +409,20 @@ class RcSerializer(EventSerializer):
 
     first_reported = serializers.SerializerMethodField()
 
+    # unused on bulk rcs page
+    description = None
+    ivr = None
+
+    # build one cached map for the whole list for performance
+    @cached_property
+    def _first_approved_by_id(self):
+        instances = self.parent.instance if self.parent is not None else [self.instance]
+        events = Event.objects.filter(approved=True, id__in={e.id for e in instances})\
+            .select_related('user').order_by('id', 'version').distinct('id')
+        return {e.id: e for e in events}
+
     def get_first_reported(self, obj):
-        first_approved_event = Event.objects.filter(approved=True, id=obj.id).order_by('version').first()
+        first_approved_event = self._first_approved_by_id[obj.id]
         return {
             'user': UserSerializer(first_approved_event.user).data,
             'date': first_approved_event.created,
@@ -417,6 +431,8 @@ class RcSerializer(EventSerializer):
     def to_representation(self, instance):
         """Override to normalize conditions to {id, label} objects."""
         obj = super().to_representation(instance)
+        # DBC22-7773: polygon unused on bulk rcs page; set by EventSerializer
+        obj.pop('polygon', None)
 
         conditions = obj.get('conditions') or []
         if conditions:
@@ -450,7 +466,12 @@ class RcSerializer(EventSerializer):
 
     class Meta:
         model = Event
-        fields = "__all__"
+        # unused fields on bulk rcs page
+        exclude = ['description', 'ivr', 'polygon']
+
+        # write-only in RcSerializer
+        extra_kwargs = {'geometry': {'write_only': True}}
+
         keys_to_move = {
             '__orig__': 'meta.source',
             'type': 'event_type',
