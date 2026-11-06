@@ -132,7 +132,20 @@ class Events(viewsets.ModelViewSet):
 
     @action(detail=False)
     def relevant(self, request):
-        queryset = Event.relevant.all()
+        # cleared bulk rcs/chainups never shown on map page
+        queryset = Event.relevant.exclude(
+            event_type__in=[EventType.ROAD_CONDITION, EventType.CHAIN_UP],
+            from_bulk=True,
+            status='Inactive',
+        ).select_related(
+            'user',
+            'segment',
+            'chainup',
+            'chainup__user',
+        ).defer(
+            'segment__geometry',
+            'chainup__geometry',
+        )
         serializer = EventSerializer(queryset, many=True)
         return Response(serializer.data)
 

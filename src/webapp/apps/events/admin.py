@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django.contrib import admin, messages
-from django.db.models import Q
 from django.utils import timezone
 
 from .enums import EventType
@@ -118,11 +117,10 @@ def create_dummy_inactive_event(modeladmin, request, queryset):
     )
 
 
-@admin.action(description='Rebuild live road condition polygons (rounded/simplified)')
+@admin.action(description='Rebuild relevant road condition polygons (rounded/simplified)')
 def rebuild_rc_polygons(modeladmin, request, queryset):
     events = list(
-        Event.objects.filter(event_type=EventType.ROAD_CONDITION, status='Active')
-        .filter(Q(latest=True) | Q(latest_approved=True))
+        Event.relevant.filter(event_type=EventType.ROAD_CONDITION)
         .only('pk', 'event_type', 'geometry')
     )
     for event in events:
@@ -137,6 +135,22 @@ def rebuild_rc_polygons(modeladmin, request, queryset):
     )
 
 
+@admin.action(description='Simplify relevant event coordinates (lines ~10m, 5 places)')
+def simplify_event_coords(modeladmin, request, queryset):
+    events = list(Event.relevant.only('pk', 'event_type', 'geometry', 'start', 'end'))
+    for event in events:
+        event._simplify_coords()
+        event.polygon = event._build_polygon()
+
+    # bulk_update bypasses save
+    Event.objects.bulk_update(events, ['geometry', 'start', 'end', 'polygon'], batch_size=500)
+    modeladmin.message_user(
+        request,
+        f'Simplified coordinates for {len(events)} relevant events.',
+        level=messages.SUCCESS,
+    )
+
+
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_filter = (
@@ -147,4 +161,4 @@ class EventAdmin(admin.ModelAdmin):
     )
     list_display = ('id', 'event_type', 'status', 'user', 'latest', 'approved', 'latest_approved')
     search_fields = ['id']
-    actions = [create_dummy_inactive_event, rebuild_rc_polygons]
+    actions = [create_dummy_inactive_event, rebuild_rc_polygons, simplify_event_coords]
