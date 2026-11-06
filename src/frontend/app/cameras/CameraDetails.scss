@@ -167,6 +167,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
         width: 100%;
         max-height: 820px;
         overflow: hidden;
@@ -180,7 +181,8 @@
 
         .image-placeholder {
           width: 100%;
-          height: 100%;
+          height: auto;
+          aspect-ratio: 800 / 468;
           color: $Grey70;
         }
       }
