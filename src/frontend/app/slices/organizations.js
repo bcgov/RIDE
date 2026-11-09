@@ -55,6 +55,7 @@ const deleteThunk = createAsyncThunk(
 );
 
 const selectStatus = (state) => state.organizations.status;
+const selectError = (state) => state.organizations.error;
 const writeStatus = (state) => state.organizations.writeStatus;
 
 export const slice = createSlice({
@@ -85,6 +86,7 @@ export const slice = createSlice({
       .addCase(refreshThunk.pending, (state) => { state.status = 'pending'; })
       .addCase(refreshThunk.fulfilled, (state, action) => {
         state.status = 'idle';
+        state.error = null;
         adapter.setAll(state, action.payload);
       })
       .addCase(refreshThunk.rejected, (state, action) => {
@@ -100,6 +102,8 @@ export const {
   selectIds: selectOrganizationIds,
 } = adapter.getSelectors((state) => state.organizations);
 export {
+  selectStatus as selectOrganizationsStatus,
+  selectError as selectOrganizationsError,
   refreshThunk as refreshOrganizations,
   addOrUpdateThunk as addOrUpdateOrganization,
   deleteThunk as deleteOrganization,

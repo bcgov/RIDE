@@ -1,11 +1,56 @@
-<p>A new user has registered in RIDE:</p>
+{% extends 'email/base.html' %}
+{# DBC22-6697: new user access request to RIDE admins (RIDE Figma 9984:14090) #}
 
-<p>Name: {{ name }}<br />
-Email: {{ email }}<br />
-Self-selected organization: {{ organization }}<br />
-
-<p>If this is a valid RIDE user, please
-<a href="{{ url }}">add
- this user to the correct organization</a>
-to allow them to use RIDE.</p>
-
+{% block content %}
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:14px; line-height:20px; color:#000000">
+                  <tr>
+                    <td style="padding-bottom:30px">
+                      <img src="cid:ride-logo" alt="British Columbia: Route Information and Data Entry" width="144" height="40" style="width:144px; height:40px; display:block" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom:20px">Hello RIDE Admin,</td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom:20px">
+                      You are receiving this email because a user has registered a new account and as part of that has requested access to an Organization:
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom:20px">
+                      <ul style="margin:0; padding-left:21px">
+                        <li>Name: {{ name }}</li>
+                        <li>E-mail: {{ email }}</li>
+                        <li>Self selected Organization: {{ organization }}</li>
+                        <li>Organization&rsquo;s authoritative contact: {{ contact_name }}</li>
+                        <li>Organization&rsquo;s contact IDIR/BCeID: {{ contact_id }}</li>
+                      </ul>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom:20px">
+                      Once you&rsquo;ve vetted the new user, you can use the
+                      <a href="{{ users_url }}" target="_blank" rel="noopener noreferrer" style="color:#000000; text-decoration:underline">RIDE user management</a>
+                      page to give this user access or click here:
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom:20px">
+                      <!-- Icon and label in their own cells: mail clients (e.g. Apple Mail) drop margin and vertical-align on inline images -->
+                      <table role="presentation" cellspacing="0" cellpadding="0" border="0" bgcolor="#2D2D2D" style="border-radius:4px; background-color:#2D2D2D">
+                        <tr>
+                          <td valign="middle" style="padding:6px 8px 6px 8px; line-height:0; font-size:0">
+                            <a href="{{ grant_url }}" target="_blank" rel="noopener noreferrer" style="display:block; text-decoration:none"><img src="cid:circle-check" alt="" width="14" height="14" style="display:block; width:14px; height:14px; border:0" /></a>
+                          </td>
+                          <td valign="middle" style="padding:6px 8px 6px 0">
+                            <a href="{{ grant_url }}" target="_blank" rel="noopener noreferrer" style="display:block; font-size:14px; line-height:21px; font-weight:700; color:#FFFFFF; text-decoration:none; white-space:nowrap">Grant permission</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Thank you!</td>
+                  </tr>
+                </table>
+{% endblock %}

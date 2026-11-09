@@ -1,9 +1,16 @@
-A new user has registered in RIDE:
+{% autoescape off %}Hello RIDE Admin,
 
-Name: {{ name }}
-Email: {{ email }}
-Self-selected organization: {{ organization }}
+You are receiving this email because a user has registered a new account and as part of that has requested access to an Organization:
 
-If this is a valid RIDE user, please add this use to the correct organization to allow them to use RIDE.
+- Name: {{ name }}
+- E-mail: {{ email }}
+- Self selected Organization: {{ organization }}
+- Organization’s authoritative contact: {{ contact_name }}
+- Organization’s contact IDIR/BCeID: {{ contact_id }}
 
-{{ url }}
+Once you’ve vetted the new user, you can use the RIDE user management page to give this user access ({{ users_url }}) or grant permission here:
+
+{{ grant_url }}
+
+Thank you!
+{% endautoescape %}
