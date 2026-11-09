@@ -266,11 +266,6 @@ def clean_str(value, max_length=None):
         value = value[:max_length]
     return value
 
-
-# def normalize_key(value):
-#     """Normalised serial/MAC used to join Cams_Live to Cam_Maintenance."""
-#     return clean_str(value).upper()
-
 def normalize_key(value):
     """
     Join key for Cams_Live.Cam_MaintenanceSN <-> Cam_Maintenance.Serial_MAC.
