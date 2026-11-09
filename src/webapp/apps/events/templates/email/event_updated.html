@@ -1,0 +1,6 @@
+{# DBC22-7322: from DBC event_updated.html; RIDE sends one event per email #}
+{% extends 'email/notification_base.html' %}
+
+{% block cards %}
+  {% include 'email/event_card.html' %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% spaceless %}{# DBC22-7322: intro line per notification (RIDE Figma 8195:53944); plain=True for the plain text email #}
+{% if kind == 'new' %}The following {% if plain %}new event{% else %}<b>new event</b>{% endif %} has been {% if plain %}published{% else %}<b>published</b>{% endif %} to DriveBC:
+{% elif kind == 'updated' %}The following {% if plain %}existing event{% else %}<b>existing event</b>{% endif %} has been {% if plain %}updated{% else %}<b>updated</b>{% endif %}:
+{% elif kind == 'reconfirmed' %}The following road condition has been {% if plain %}reconfirmed{% else %}<b>reconfirmed</b>{% endif %}:
+{% elif kind == 'cleared' %}The following event has been marked as {% if plain %}cleared{% else %}<b>cleared</b>{% endif %}:
+{% elif kind == 'approvalRequested' %}The following {% if plain %}{{ phrase }}{% else %}<b>{{ phrase }}</b>{% endif %} event {% if plain %}requires approval{% else %}<b>requires approval</b>{% endif %} before being updated on DriveBC:
+{% elif kind == 'approvedPublished' %}The following {% if plain %}new event{% else %}<b>new event</b>{% endif %} has been {% if plain %}approved and published{% else %}<b>approved and published</b>{% endif %} to DriveBC:
+{% elif kind == 'updateApproved' %}The following {% if plain %}updated event{% else %}<b>updated event</b>{% endif %} has been {% if plain %}approved and published{% else %}<b>approved and published</b>{% endif %} on DriveBC:
+{% elif kind == 'clearingApproved' %}The following {% if plain %}cleared event{% else %}<b>cleared event</b>{% endif %} has been {% if plain %}approved and updated{% else %}<b>approved and updated</b>{% endif %} on DriveBC:
+{% elif kind == 'dueSoon' %}The following {% if plain %}event{% else %}<b>event</b>{% endif %} is {% if plain %}due to be updated{% else %}<b>due to be updated</b>{% endif %} in the next 15 minutes on DriveBC:
+{% elif kind == 'overdue' %}The following {% if plain %}event{% else %}<b>event</b>{% endif %} is past its Next Update time and is now {% if plain %}Overdue{% else %}<b>Overdue</b>{% endif %} on DriveBC:
+{% endif %}{% endspaceless %}

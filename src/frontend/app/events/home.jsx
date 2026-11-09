@@ -2,8 +2,8 @@
 import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 // Navigation
-import { useNavigate } from 'react-router';
-import { useSelector } from 'react-redux';
+import { useNavigate, useSearchParams } from 'react-router';
+import { shallowEqual, useSelector } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 
 // OpenLayers
@@ -29,7 +29,8 @@ import Preview from './Preview';
 import Queue from './Queue';
 import Events from './Events';
 
-import { memoizedPending } from '../slices/events';
+import { memoizedPending, selectAllEvents, selectEventsLoaded } from '../slices/events';
+import { rememberReturnPath } from '../shared/helpers';
 import { selectAllServiceAreaBoundaries } from '../slices/serviceAreaBoundaries';
 
 // Styling
@@ -42,9 +43,12 @@ export function meta() {
 }
 
 
+const NO_EVENTS = [];
+
 export default function Home() {
   /* Navigation */
   const navigate = useNavigate();
+  const [ searchParams, setSearchParams ] = useSearchParams();
 
   /* Hooks */
   // Contexts
@@ -54,6 +58,7 @@ export default function Home() {
   // Refs
   const mapRef = useRef();
   const modalRef = useRef();
+  const linkedEventId = useRef(searchParams.get('event'));  // DBC22-7322: "View on RIDE" links
 
   // States
   const [ map, setMap ] = useState(null);
@@ -67,6 +72,13 @@ export default function Home() {
   // Selectors
   const visibleLayers = useSelector(state => state.visibleLayers);
   const serviceAreaBoundaries = useSelector(selectAllServiceAreaBoundaries);
+  // DBC22-7322: only the linked event's versions, and only until it's opened,
+  // so polls don't re-render the page
+  const linkedVersions = useSelector(
+    (state) => linkedEventId.current ? selectAllEvents(state).filter((e) => e.id === linkedEventId.current) : NO_EVENTS,
+    shallowEqual,
+  );
+  const eventsLoaded = useSelector(selectEventsLoaded);
   const pending = createSelector(
     [memoizedPending],
     (events) => events.filter((event) => (authContext.service_areas || []).includes(event.service_area)),
@@ -78,8 +90,8 @@ export default function Home() {
 
     if (authContext.loginStateKnown) {
       if (!authContext.username) {
-        // Redirect to landing page if not logged in
-        // TODO: redirect back to this page after login, not required since this is the only page
+        // Redirect to landing page if not logged in, returning here after login
+        rememberReturnPath();
         navigate('/');
 
       } else if (authContext.request_organization) {
@@ -107,6 +119,41 @@ export default function Home() {
       map.getView().animate({ center: getCenter(extent), duration: 300 });
     }
   }
+
+  // DBC22-7322: open the event linked from a notification email
+  useEffect(() => {
+    const id = linkedEventId.current;
+    if (!id || !map || !authContext.username || !eventsLoaded) { return; }
+
+    linkedEventId.current = null;
+    setSearchParams((params) => { params.delete('event'); return params; }, { replace: true });
+
+    const versions = linkedVersions;
+    const linked = versions.find((e) => e.latest) || versions[0];
+    if (!linked) {
+      setAlertContext({ message: `Event ${id} is no longer shown in RIDE. It may have been cleared.` });
+      return;
+    }
+
+    const canReview = authContext.is_approver || authContext.is_superuser;
+    if (linked.type === 'CHAIN_UP' && canReview) {
+      navigate('/chainups/');
+      return;
+    }
+
+    // Same as editing from the events list or reviewing from the queue; like
+    // the map menu, cleared events and events outside the user's service
+    // areas (which the API won't let them save) open preview only
+    const isPending = linked.latest && !linked.latest_approved;
+    const activeOrPending = linked.status === 'Active' || !linked.approved;
+    // The form only shows for users with an organization (hasOrganization)
+    const userAreas = authContext.service_areas || [];
+    const inUserAreas = userAreas.length > 0 && (authContext.is_superuser || userAreas.includes(linked.service_area));
+    const showForm = linked.type !== 'CHAIN_UP' && inUserAreas && activeOrPending && (!isPending || canReview);
+    centerMap(linked.location.start.coords);
+    dispatch({ type: 'reset form', value: linked, showPreview: true, showForm });
+    selectFeature(map, map.get('events')?.getSource().get(linked.id));
+  }, [map, linkedVersions, eventsLoaded, authContext]);
 
   const cancel = () => {
     clearPins(map);
