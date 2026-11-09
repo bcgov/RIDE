@@ -1,4 +1,5 @@
 import logging
+import re
 
 from datetime import datetime, timezone
 from functools import cached_property
@@ -7,13 +8,17 @@ from django.contrib.gis.geos import Point
 
 from rest_framework import fields, serializers
 from rest_framework.serializers import ModelSerializer
+from rest_framework_gis.fields import GeometryField
 
 from config.settings import EVENT_PREFIX
+from .enums import EventSeverity, EventType
+from .helpers import get_linestring_from_collection, parse_direction_from_text, parse_ride_iso_datetime
 from .models import Event, Note, TrafficImpact, Condition
 from .permissions import get_user_service_areas
 from apps.organizations.models import ServiceArea
 from apps.segments.models import Segment, ChainUp
 from apps.segments.serializers import SegmentSerializer, ChainUpSerializer
+from apps.shared import tz_finder
 from apps.shared.helpers import transform_road_abbreviations
 from apps.shared.serializers import HistorySerializer, KeyMoveSerializer, UserSerializer, VersionSerializer
 
@@ -490,3 +495,174 @@ class RcSerializer(EventSerializer):
             'timing.schedules': 'schedules',
             'external.url': 'link',
         }
+
+
+# --- DBC22-7326: email notifications ---------------------------------------
+# Ported from DBC DBC22-6954 @ dd9770a3: apps/feed/serializers.py
+# RIDEEventSerializer and apps/event/ride.py RIDEChainupSerializer.  They map
+# RIDE's API representation of an event (EventSerializer) to the fields
+# DriveBC shows, so notification emails match DriveBC.
+
+def get_drivebc_route_at(point):
+    ''' route_at for a start or end point - was "route-designator" but now "name" '''
+
+    route_name = point.get('name', '')
+    route_alias = point.get('alias')
+
+    # DBC22-6838: skip highway-number aliases, e.g. "Highway 3 And 95"
+    if route_alias and re.match(r'(highway|hwy)\s*\d', route_alias, re.I):
+        route_alias = None
+
+    return route_name + ', ' + route_alias if route_alias else route_name
+
+
+def get_point_timezone(point, default):
+    ''' Time zone at a point's coordinates '''
+
+    coords = point.get('coords')
+    return (tz_finder.timezone_at(lng=coords[0], lat=coords[1]) or default) if coords else default
+
+
+def add_nearby_description(fields, location_key, nearby_locs):
+    ''' Add a point's nearby places to the location description and closest landmark '''
+
+    if not nearby_locs:
+        return
+
+    location_description = fields['location_description']
+    location_description += 'Starts: ' if location_key == 'start' else '<br><br>Ends: '
+
+    for loc in nearby_locs:
+        if not fields['closest_landmark'] and (loc.get('name') or loc.get('phrase')):
+            fields['closest_landmark'] = loc.get('name') or loc.get('phrase')
+
+        location_description += '<br>' + loc.get('phrase', '')
+
+    fields['location_description'] = location_description
+
+
+def get_drivebc_location_fields(locations_data):
+    '''
+    route_at, closest_landmark, location_description and timezone (default
+    Vancouver) from an event's start and end points.  The time zone comes
+    from the start; route_at from the last point.
+    '''
+
+    fields = {
+        'route_at': '',
+        'closest_landmark': '',
+        'location_description': '',
+        'timezone': 'America/Vancouver',
+    }
+
+    for location_key in ('start', 'end'):
+        start_or_end = locations_data.get(location_key, {})
+        if not start_or_end:
+            continue
+
+        if location_key == 'start':
+            fields['timezone'] = get_point_timezone(start_or_end, fields['timezone'])
+
+        fields['route_at'] = get_drivebc_route_at(start_or_end)
+        add_nearby_description(fields, location_key, start_or_end.get('nearby', []))
+
+    return fields
+
+
+class DriveBCEventSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    closed = serializers.BooleanField(default=False)
+    highway_segment_names = serializers.CharField(allow_blank=True)
+    location_description = serializers.CharField(allow_blank=True)
+    closest_landmark = serializers.CharField(allow_blank=True)
+    next_update = serializers.DateTimeField(allow_null=True)
+    start_point_linear_reference = serializers.FloatField(allow_null=True)
+    route_at = serializers.CharField(allow_blank=True)
+    timezone = serializers.CharField(allow_blank=True)
+
+    def to_internal_value(self, data):
+        # closed
+        data["closed"] = any(impact.get('closed') for impact in data.get("impacts", []))
+
+        # highway_segment_names
+        segment = data.get("segment", None)
+        data['highway_segment_names'] = segment.get('name') if segment else ''
+
+        if segment:  # Bulk road conditions
+            data.update(get_drivebc_location_fields({}))
+            data["location_description"] = segment.get('description') or ''
+
+        else:  # All other non-chainup events
+            data.update(get_drivebc_location_fields(data.get("location", {})))
+
+        # next_update
+        timing = data.get("timing", {})
+        data["next_update"] = timing.get('nextUpdate')
+
+        # start_point_linear_reference
+        data["start_point_linear_reference"] = data.get('route_projection', 0)
+
+        return super().to_internal_value(data)
+
+
+class DriveBCChainupSerializer(DriveBCEventSerializer):
+    """Maps RIDE CHAIN_UP API payloads into DriveBC event fields."""
+    highway_segment_names = serializers.CharField(allow_blank=True)
+    location_description = serializers.CharField(allow_blank=True)
+
+    schedule = serializers.JSONField()
+    description = serializers.CharField(max_length=1024)
+    event_type = serializers.CharField(max_length=32)
+    severity = serializers.CharField(max_length=32)
+    direction = serializers.CharField(max_length=32)
+    location = GeometryField()
+    route_from = serializers.CharField(max_length=128)
+    route_to = serializers.CharField(
+        max_length=128, required=False, allow_blank=True, default=''
+    )
+    first_created = serializers.DateTimeField()
+    last_updated = serializers.DateTimeField()
+
+    def to_internal_value(self, data):
+        payload = {}
+
+        line = get_linestring_from_collection(data.get('geometry'))
+        if line is None:
+            raise serializers.ValidationError(
+                {'geometry': 'Expected a LineString or GeometryCollection containing a LineString.'}
+            )
+
+        payload['id'] = data.get('id')
+        payload['location'] = line
+        payload['schedule'] = {"intervals": []}
+
+        payload['event_type'] = EventType.CHAIN_UP
+        payload['severity'] = EventSeverity.MINOR \
+            if data.get('details', {}).get('severity') == 'Minor' else EventSeverity.MAJOR
+        payload['first_created'] = parse_ride_iso_datetime(data.get('created'))
+        payload['last_updated'] = parse_ride_iso_datetime(data.get('last_updated'))
+
+        # Parsed from chainup description
+        chainup = data.get('chainup') or {}
+        description = chainup.get('description') or ''
+        name = chainup.get('name') or ''
+        highway, _, highway_description = description.partition(', ')
+        payload['description'] = 'Commercial chain up in effect ' + highway_description + '.'
+        payload['route_from'] = name
+        payload['route_to'] = ''  # Unused on FE
+
+        # RIDE hardcodes details.direction to empty/NONE for chain-ups; direction
+        # is encoded in route_from (e.g. "Highway 20, Westbound, Heckman Pass ...").
+        payload['direction'] = parse_direction_from_text(payload['route_from'])
+
+        res = super().to_internal_value(payload)
+        res['route_at'] = highway
+
+        # Override these fields
+        res["highway_segment_names"] = name
+        res["location_description"] = description
+
+        # RIDE: chain-ups have a next update too
+        res['next_update'] = parse_ride_iso_datetime((data.get('timing') or {}).get('nextUpdate'))
+
+        return res

@@ -75,6 +75,9 @@ INSTALLED_APPS = [
 
     "huey.contrib.djhuey",
 
+    # DBC22-7326: log sent emails, as DBC does
+    'email_log',
+
     'apps.ride',
     'apps.events',
     'apps.lki',
@@ -186,4 +189,5 @@ LOGIN_URL = (('http://localhost:8000/' if 'localhost' in FRONTEND_BASE_URL else 
 EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND')
 EMAIL_HOST = env('DJANGO_EMAIL_HOST')
 EMAIL_PORT = env('DJANGO_EMAIL_PORT')
-DEFAULT_FROM_EMAIL = 'DoNotReply@gov.bc.ca'
+EMAIL_TIMEOUT = env.int('DJANGO_EMAIL_TIMEOUT', default=30)  # DBC22-7326: so an SMTP outage can't stall tasks
+DEFAULT_FROM_EMAIL = 'DoNotReply_RIDE@gov.bc.ca'

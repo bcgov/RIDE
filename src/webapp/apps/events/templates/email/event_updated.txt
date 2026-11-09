@@ -1,0 +1,13 @@
+{% autoescape off %}{% if kind == 'new' %}The following new event has been published to DriveBC:{% elif kind == 'updated' %}The following existing event has been updated:{% elif kind == 'reconfirmed' %}The following road condition has been reconfirmed:{% elif kind == 'cleared' %}The following event has been marked as cleared:{% elif kind == 'approvalRequested' %}The following {{ phrase }} event requires approval before being updated on DriveBC:{% elif kind == 'approvedPublished' %}The following new event has been approved and published to DriveBC:{% elif kind == 'updateApproved' %}The following updated event has been approved and published on DriveBC:{% elif kind == 'clearingApproved' %}The following cleared event has been approved and updated on DriveBC:{% elif kind == 'dueSoon' %}The following event is due to be updated in the next 15 minutes on DriveBC:{% elif kind == 'overdue' %}The following event is past its Next Update time and is now Overdue on DriveBC:{% endif %}
+
+{{ event.ride.description }}
+
+Reference ID: {{ event.id }}
+View on RIDE: {{ fe_base_url }}events/?event={{ event.id }}
+
+You are receiving this email because you are setup in RIDE as receiving notifications for the {{ area_label }} service area.
+
+Notifications are managed on the Notification Settings page found in your RIDE account. If you have questions or concerns please contact {{ support_email }}.
+
+Your RIDE team
+{% endautoescape %}

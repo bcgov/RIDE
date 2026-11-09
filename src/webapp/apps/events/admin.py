@@ -4,7 +4,7 @@ from django.contrib import admin, messages
 from django.utils import timezone
 
 from .enums import EventType
-from .models import Condition, Event, TrafficImpact
+from .models import Condition, Event, EventReminderNotification, QueuedEventNotification, TrafficImpact
 from .serializers import EventSerializer
 from ..users.models import get_task_user
 
@@ -175,3 +175,25 @@ class TrafficImpactAdmin(admin.ModelAdmin):
 class ConditionAdmin(admin.ModelAdmin):
     list_display = ('id', 'label', 'order')
     search_fields = ['id', 'label']
+
+
+# DBC22-7326: mirrors DBC's QueuedEventNotificationAdmin
+@admin.action(description="Send all queued event notifications")
+def send_all_queued_event_notifications(modeladmin, request, queryset):
+    from .tasks import send_queued_event_notifications
+    send_queued_event_notifications()
+
+
+@admin.register(QueuedEventNotification)
+class QueuedEventNotificationAdmin(admin.ModelAdmin):
+    readonly_fields = ('id', 'created', 'last_updated')
+    list_display = ('id', 'event_uuid', 'created')
+    actions = [send_all_queued_event_notifications]
+
+
+@admin.register(EventReminderNotification)
+class EventReminderNotificationAdmin(admin.ModelAdmin):
+    readonly_fields = ('id', 'created', 'last_updated')
+    list_display = ('id', 'event_id', 'kind', 'next_update', 'last_sent', 'count', 'stopped')
+    list_filter = ['kind', 'stopped']
+    search_fields = ['event_id']
