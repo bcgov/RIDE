@@ -219,6 +219,8 @@ MONTH_NAMES = {
     "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12,
 }
 
+MAC_HEX_RE = re.compile(r"^[0-9A-F]{12}$")
+
 
 def to_int_or_none(value):
     try:
@@ -265,9 +267,29 @@ def clean_str(value, max_length=None):
     return value
 
 
+# def normalize_key(value):
+#     """Normalised serial/MAC used to join Cams_Live to Cam_Maintenance."""
+#     return clean_str(value).upper()
+
 def normalize_key(value):
-    """Normalised serial/MAC used to join Cams_Live to Cam_Maintenance."""
-    return clean_str(value).upper()
+    """
+    Join key for Cams_Live.Cam_MaintenanceSN <-> Cam_Maintenance.Serial_MAC.
+    Uppercase and drop everything except letters/digits, so
+    '00:40:8c:7d:d4:76', '00-40-8C-7D-D4-76' and '00408C7DD476' all match.
+    """
+    return re.sub(r"[^0-9A-Za-z]", "", clean_str(value)).upper()
+
+
+def normalize_mac(value):
+    """
+    '00408C7DD476' / '00-40-8c-7d-d4-76' / '0040.8c7d.d476' -> '00:40:8C:7D:D4:76'.
+    Returns None if the value isn't a valid 12-hex-digit MAC (e.g. it's a real
+    serial number, since the legacy column is called Serial_MAC).
+    """
+    raw = re.sub(r"[\s:\-.]", "", clean_str(value)).upper()
+    if not MAC_HEX_RE.match(raw):
+        return None
+    return ":".join(raw[i:i + 2] for i in range(0, 12, 2))
 
 
 def get_or_create_named(model, name):
@@ -323,6 +345,8 @@ class Command(BaseCommand):
         dry_run = options["dry_run"]
         limit = options["limit"]
         self.invalid_ips = []
+        self.invalid_macs = []
+
 
         conn = get_legacy_connection()
         try:
@@ -401,6 +425,8 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f"  invalid maintenance IP, legacy ID {legacy_id}: {raw!r}"))
         if self.invalid_ips:
             self.stdout.write(f"{len(self.invalid_ips)} maintenance IPs were invalid and left blank")
+        if self.invalid_macs:
+            self.stdout.write(f"{len(self.invalid_macs)} MAC addresses were invalid and left blank")
 
     @staticmethod
     def _load_lookup(conn, query):
@@ -700,6 +726,20 @@ class Command(BaseCommand):
             "electrical_contractor": self._get_electrical_contractor(row, cams_extra_map),
         }
 
+    def _get_mac_address(self, row, maintenance_map):
+        """MAC from Cam_Maintenance.Serial_MAC (matched via Cam_MaintenanceSN),
+        falling back to the Cam_MaintenanceSN on Cams_Live. Blank if the value
+        isn't a valid MAC."""
+        maintenance = maintenance_map.get(normalize_key(row.get("Cam_MaintenanceSN"))) or {}
+        raw = clean_str(maintenance.get("Serial_MAC")) or clean_str(row.get("Cam_MaintenanceSN"))
+        if not raw:
+            return ""
+        mac = normalize_mac(raw)
+        if mac is None:
+            self.invalid_macs.append((row.get("ID"), raw))
+            return ""
+        return mac
+
     def _build_camera(self, row, is_enabled, region_map, road_map,
                       business_area_map, maintenance_map, cams_extra_map):
         return Camera(
@@ -717,7 +757,7 @@ class Command(BaseCommand):
             locations_geo_longitude=to_float_or_none(row.get("Cam_LocationsGeo_Longitude")),
             locations_elevation=to_float_or_none(row.get("Cam_LocationsElevation")),
             weather_station=clean_str(row.get("Cam_LocationsWeather_Station"), 255),
-            mac_address=clean_str(row.get("Cam_MaintenanceModem_ESN"), 50),
+            mac_address=self._get_mac_address(row, maintenance_map),
             admin_user=clean_str(row.get("Cam_InternetOn_Demand_Username"), 20),
             admin_password=clean_str(row.get("Cam_InternetOn_Demand_Password"), 20),
             serial_number=clean_str(row.get("Cam_MaintenanceSN"), 50),
