@@ -15,6 +15,7 @@ from config.adapter import get_oidc_claims
 
 
 class RIDEUserSerializer(serializers.ModelSerializer):
+    email_subscription = serializers.SerializerMethodField()  # DBC22-7325
     social_username = serializers.SerializerMethodField()
     social_provider = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
@@ -39,6 +40,14 @@ class RIDEUserSerializer(serializers.ModelSerializer):
         accounts = obj.socialaccount_set.all()
         return accounts[0] if accounts else None
 
+    def get_email_subscription(self, obj):
+        ''' DBC22-7325: the user's notification settings, read only '''
+
+        try:
+            return EmailSubscriptionSerializer(obj.email_subscription).data
+        except EmailSubscription.DoesNotExist:
+            return {'id': None, **get_notifications_off()}
+
     def get_social_username(self, obj):
         social_account = self._get_social_account(obj)
         if not social_account:
@@ -58,14 +67,8 @@ class RIDEUserSerializer(serializers.ModelSerializer):
         return obj.is_approver
 
     def get_service_areas(self, obj):
-        user_orgs = obj.organizations.all()
-        user_areas = (
-            ServiceArea.objects.filter(organizations__in=user_orgs)
-            .exclude(parent=None)
-            .distinct()
-        )
-
-        return list(user_areas.values_list('id', flat=True))
+        # uses prefetched organizations__service_areas where available
+        return sorted(get_user_notification_area_ids(obj))
 
     def get_request_organization(self, obj):
         '''
@@ -81,18 +84,52 @@ class RIDEUserSerializer(serializers.ModelSerializer):
         )
 
 
+class SessionUserSerializer(RIDEUserSerializer):
+    ''' DBC22-7325: the signed-in user; notification settings load from their own endpoint '''
+
+    email_subscription = None
+
+
 class RIDEGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = "__all__"
 
 
-def get_user_notification_areas(user):
-    ''' Service areas a user may receive notifications for: their organizations' areas '''
+def get_notifications_off():
+    ''' Settings with notifications off; nothing else is remembered (DBC22-7324) '''
 
-    return ServiceArea.objects.filter(
-        organizations__in=user.organizations.all()
-    ).exclude(parent=None).distinct()
+    return {
+        'notification': False,
+        'notification_areas': [],
+        'notification_types': [],
+        'notification_severities': [],
+        'notification_statuses': [],
+        'notification_creator': NotificationCreator.ALL,
+    }
+
+
+def get_user_notification_area_ids(user):
+    '''
+    IDs of the service areas a user may receive notifications for: their
+    organizations' service areas, excluding districts.  Uses prefetched
+    organizations__service_areas where available.
+    '''
+
+    prefetched = 'organizations' in getattr(user, '_prefetched_objects_cache', {}) and all(
+        'service_areas' in getattr(organization, '_prefetched_objects_cache', {})
+        for organization in user.organizations.all()
+    )
+    if not prefetched:
+        return set(ServiceArea.objects.filter(organizations__users=user, parent__isnull=False)
+                   .values_list('id', flat=True))
+
+    return {
+        area.id
+        for organization in user.organizations.all()
+        for area in organization.service_areas.all()
+        if area.parent_id is not None
+    }
 
 
 def get_notification_setting_errors(user, areas, types, severities, statuses):
@@ -155,7 +192,7 @@ class EmailSubscriptionSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
 
         # Drop areas the user no longer has through their organizations
-        allowed = set(get_user_notification_areas(instance.user).values_list('id', flat=True))
+        allowed = get_user_notification_area_ids(instance.user)
         data['notification_areas'] = [area for area in data['notification_areas'] if area in allowed]
         return data
 
@@ -175,18 +212,11 @@ class EmailSubscriptionSerializer(serializers.ModelSerializer):
 
         # Notifications off: nothing to remember (DBC22-7324)
         if not self._current(attrs, 'notification', False):
-            attrs.update({
-                'notification': False,
-                'notification_areas': [],
-                'notification_types': [],
-                'notification_severities': [],
-                'notification_statuses': [],
-                'notification_creator': NotificationCreator.ALL,
-            })
+            attrs.update(get_notifications_off())
             return attrs
 
         # Silently drop areas outside the user's organizations, e.g. stale ids
-        allowed = set(get_user_notification_areas(user).values_list('id', flat=True))
+        allowed = get_user_notification_area_ids(user)
         areas = [area for area in self._current(attrs, 'notification_areas', []) if area.id in allowed]
         types = self._current(attrs, 'notification_types', [])
         severities = self._current(attrs, 'notification_severities', [])
