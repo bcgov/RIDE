@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
@@ -424,3 +425,210 @@ class TestNotificationQueue(NotificationTestCase):
         self.assertEqual(notification_event.display_category, EventDisplayCategory.MINOR_DELAYS)
         self.assertEqual(notification_event.event_sub_type, 'OBSTRUCTION')  # situation 105, as DBC
         self.assertEqual(notification_event.timezone, 'America/Vancouver')
+
+
+@override_settings(DRIVEBC_BASE_URL='https://www.drivebc.ca/', FRONTEND_BASE_URL='https://ride.example/')
+class TestNotificationEmails(NotificationTestCase):
+    ''' DBC22-7322: email content, ported DBC card adjusted to the RIDE Figma '''
+
+    def send(self):
+        mail.outbox.clear()
+        tasks.send_queued_event_notifications()
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        return email, email.alternatives[0][0]
+
+    def test_new_event(self):
+        event = self.make_event(severity='Major', additional='Bring snacks', link='https://example.com/info',
+                                impacts=[{'id': 1, 'label': 'Both lanes closed', 'closed': False}])
+        email, html = self.send()
+
+        self.assertIn('The following <b>new event</b> has been <b>published</b> to DriveBC:', html)
+        self.assertIn('Major incident', html)
+        self.assertIn('Obstruction', html)  # DriveBC sub type for situation 105
+        self.assertIn('Northbound on Highway 97', html.replace('\u200c', '').replace('\xa0', ' '))  # no_autolink
+        self.assertIn('30 km South of Quesnel', html)
+        self.assertIn('Both lanes closed', html)
+        self.assertIn('Bring snacks', html)
+        self.assertIn('href="https://example.com/info"', html)
+        self.assertIn('Jul 15, 2025 at 12:30 pm', html)  # next update as DriveBC shows it, Pacific time
+        self.assertIn(f'Reference ID: {event.id}', html)
+        self.assertIn('More information on DriveBC', html)
+        self.assertIn(f'href="https://ride.example/events/?event={event.id}"', html)
+        self.assertIn(f'View on RIDE: https://ride.example/events/?event={event.id}', email.body)
+        self.assertIn(f'https://www.drivebc.ca/?type=event&amp;display_category=majorEvents&amp;id={event.id}', html)
+        self.assertIn('notifications for the 01 - South Island service area', html)
+        self.assertIn('href="https://ride.example/notifications/"', html)
+        self.assertNotIn('strikethrough', html)  # no legend without changes
+        self.assertNotIn('Close', html)
+
+        # only the images the email shows, related to the HTML so mail apps don't list them as attachments
+        content_ids = {attachment['Content-ID'] for attachment in email.attachments}
+        self.assertTrue({'<bclogo>', '<incident-major>', '<map-pin>', '<impact-do-not-enter>'} <= content_ids)
+        self.assertNotIn('<restriction-triangle>', content_ids)  # no restrictions
+        self.assertEqual({f'<{cid}>' for cid in re.findall(r'cid:([\w.-]+)', html)}, content_ids)
+        self.assertEqual(email.message().get_content_subtype(), 'related')
+        self.assertIn('The following new event has been published to DriveBC:', email.body)
+
+    def test_updated_event_highlights_changes(self):
+        event = self.make_event(additional='Old details',
+                                impacts=[{'id': 1, 'label': 'Blasting', 'closed': False}])
+        tasks.send_queued_event_notifications()
+        self.save_version(event, self.submitter, additional='New details',
+                          impacts=[{'id': 2, 'label': 'Single lane alternating', 'closed': False}])
+        email, html = self.send()
+
+        self.assertIn('The following <b>existing event</b> has been <b>updated</b>:', html)
+        self.assertIn('New details', html)
+        self.assertIn('Old details', html)
+        self.assertIn('line-through">Blasting', html)
+        self.assertIn('Single lane alternating', html)
+        self.assertIn('green highlight', html)  # legend
+        self.assertTrue(email.subject.endswith('Update to minor incident in 01 - South Island'))
+
+    def test_cleared_event(self):
+        event = self.make_event(additional='As published')
+        tasks.send_queued_event_notifications()
+        self.save_version(event, self.submitter, status='Inactive', additional='Changed when clearing')
+        email, html = self.send()
+
+        self.assertIn('The following event has been marked as <b>cleared</b>:', html)
+        self.assertIn('This minor incident has been cleared.', html)
+        self.assertIn('As published', html)  # shows the published event
+        self.assertNotIn('More information on DriveBC', html)
+        self.assertIn('View on RIDE', html)
+
+    def test_approval_requested(self):
+        self.subscribe(self.approver)
+        event = self.make_event(severity='Major', user=self.approver, additional='Before')
+        tasks.send_queued_event_notifications()
+        self.save_version(event, self.submitter, approved=False, additional='After')
+
+        mail.outbox.clear()
+        tasks.send_queued_event_notifications()
+        self.assertEqual([email.to for email in mail.outbox], [['approver@gov.bc.ca']])
+        html = mail.outbox[0].alternatives[0][0]
+        self.assertIn('The following <b>updated</b> event <b>requires approval</b> before being updated', html)
+        self.assertIn('line-through', html)
+
+    def test_new_event_requiring_approval_has_no_drivebc_link(self):
+        self.subscribe(self.approver)
+        self.make_event(severity='Major', approved=False)
+
+        tasks.send_queued_event_notifications()
+        html = mail.outbox[0].alternatives[0][0]
+        self.assertIn('The following <b>new</b> event <b>requires approval</b>', html)
+        self.assertNotIn('More information on DriveBC', html)
+
+    def test_update_approval_request_links_to_published_version(self):
+        from django.utils.html import escape
+        from apps.events.helpers import build_event_site_link
+
+        self.subscribe(self.approver)
+        event = self.make_event(user=self.approver)
+        tasks.send_queued_event_notifications()
+        mail.outbox.clear()
+
+        self.save_version(event, self.submitter, approved=False, severity='Major')
+        tasks.send_queued_event_notifications()
+        html = mail.outbox[0].alternatives[0][0]
+        published = tasks.get_notification_event(Event.objects.get(uuid=event.uuid))
+        self.assertIn('requires approval', html)
+        self.assertIn(escape(build_event_site_link(published)), html)
+        self.assertIn('minorEvents', build_event_site_link(published))
+
+    def test_reactivation_requiring_approval_has_no_drivebc_link(self):
+        self.subscribe(self.approver)
+        event = self.make_event(severity='Major', user=self.approver)
+        cleared = self.save_version(event, self.approver, status='Inactive')
+        tasks.send_queued_event_notifications()
+        mail.outbox.clear()
+
+        self.save_version(cleared, self.submitter, status='Active', approved=False)
+        tasks.send_queued_event_notifications()
+        html = mail.outbox[0].alternatives[0][0]
+        self.assertIn('requires approval', html)
+        self.assertNotIn('More information on DriveBC', html)
+
+    def test_cid_in_event_text_is_not_an_image(self):
+        self.make_event(additional='Spill of acid:sulfuric')
+        with self.assertNoLogs('apps.shared.helpers', level='ERROR'):
+            email, html = self.send()
+        self.assertIn('acid:sulfuric', html)
+        self.assertNotIn('<sulfuric>', {part['Content-ID'] for part in email.attachments})
+
+    def test_road_condition(self):
+        self.make_event(event_type='ROAD_CONDITION', direction='Both directions',
+                        conditions=[{'id': 901, 'label': 'Snow packed'}])
+        email, html = self.send()
+
+        self.assertIn('Road condition', html)
+        self.assertNotIn('>Conditions<', html)  # no conditions section, as DBC
+        self.assertIn('<img src="cid:road"', html)
+
+
+class TestAdminTestEmails(NotificationTestCase):
+    ''' DBC22-7322: admin actions that email the admin a version's notification '''
+
+    def run_action(self, action, queryset):
+        from unittest.mock import MagicMock
+        from types import SimpleNamespace
+
+        modeladmin = MagicMock()
+        mail.outbox.clear()
+        action(modeladmin, SimpleNamespace(user=self.approver), queryset)
+        return modeladmin.message_user.call_args
+
+    def test_sends_to_the_admin(self):
+        from apps.events import admin
+
+        event = self.make_event(severity='Major')
+        call = self.run_action(admin.send_me_new_notification, Event.objects.filter(uuid=event.uuid))
+
+        self.assertEqual([email.to for email in mail.outbox], [['approver@gov.bc.ca']])
+        self.assertIn('Sent 1 notification email(s)', call.args[1])
+
+    def test_nothing_to_send_is_a_warning(self):
+        from django.contrib import messages
+        from apps.events import admin
+
+        event = self.make_event()
+        unchanged = self.save_version(event, self.submitter)
+        call = self.run_action(admin.send_me_version_notification, Event.objects.filter(uuid=unchanged.uuid))
+
+        self.assertEqual(mail.outbox, [])
+        self.assertEqual(call.kwargs['level'], messages.WARNING)
+
+    def test_send_errors_are_reported(self):
+        from django.contrib import messages
+        from apps.events import admin
+
+        event = self.make_event()
+        with patch('apps.events.tasks.send_event_notification', side_effect=RuntimeError('bad data')):
+            call = self.run_action(admin.send_me_new_notification, Event.objects.filter(uuid=event.uuid))
+
+        self.assertEqual(call.kwargs['level'], messages.ERROR)
+        self.assertIn(event.id, call.args[1])
+
+    def test_unbuildable_email_is_reported(self):
+        from django.contrib import messages
+        from apps.events import admin
+
+        event = self.make_event()
+        with patch('apps.events.tasks.get_notification_event', return_value=None):
+            call = self.run_action(admin.send_me_new_notification, Event.objects.filter(uuid=event.uuid))
+
+        self.assertEqual(call.kwargs['level'], messages.ERROR)
+        self.assertIn(event.id, call.args[1])
+
+    def test_kill_switch(self):
+        from django.contrib import messages
+        from apps.events import admin
+
+        event = self.make_event()
+        with patch('apps.events.admin._is_notification_disabled', return_value=True):
+            call = self.run_action(admin.send_me_new_notification, Event.objects.filter(uuid=event.uuid))
+
+        self.assertEqual(mail.outbox, [])
+        self.assertEqual(call.kwargs['level'], messages.ERROR)
+        self.assertIn('DISABLE_EVENT_NOTIFICATIONS', call.args[1])

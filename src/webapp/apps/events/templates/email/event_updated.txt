@@ -1,13 +1,19 @@
-{% autoescape off %}{% if kind == 'new' %}The following new event has been published to DriveBC:{% elif kind == 'updated' %}The following existing event has been updated:{% elif kind == 'reconfirmed' %}The following road condition has been reconfirmed:{% elif kind == 'cleared' %}The following event has been marked as cleared:{% elif kind == 'approvalRequested' %}The following {{ phrase }} event requires approval before being updated on DriveBC:{% elif kind == 'approvedPublished' %}The following new event has been approved and published to DriveBC:{% elif kind == 'updateApproved' %}The following updated event has been approved and published on DriveBC:{% elif kind == 'clearingApproved' %}The following cleared event has been approved and updated on DriveBC:{% elif kind == 'dueSoon' %}The following event is due to be updated in the next 15 minutes on DriveBC:{% elif kind == 'overdue' %}The following event is past its Next Update time and is now Overdue on DriveBC:{% endif %}
+{% load event_extras tz %}{% autoescape off %}{% include 'email/event_intro.html' with plain=True %}
 
+{{ event|event_label|capfirst }}{% if event.event_sub_type %} - {{ event|sub_type_label }}{% endif %}
+{% with heading=event|event_title %}{{ heading.title }}{% endwith %}
 {{ event.ride.description }}
 
+{% timezone 'America/Vancouver' %}Last update: {{ event.last_updated|date:'M j, Y \a\t g:i a'|cut:'.' }}{% if event.next_update %}
+Next update: {{ event.next_update|date:'M j, Y \a\t g:i a'|cut:'.' }}{% endif %}{% endtimezone %}
+
 Reference ID: {{ event.id }}
-View on RIDE: {{ fe_base_url }}events/?event={{ event.id }}
+{% if event.site_link %}More information on DriveBC: {{ event.site_link }}
+{% endif %}View on RIDE: {{ event.ride_link }}
 
 You are receiving this email because you are setup in RIDE as receiving notifications for the {{ area_label }} service area.
 
-Notifications are managed on the Notification Settings page found in your RIDE account. If you have questions or concerns please contact {{ support_email }}.
+Notifications are managed on the Notification Settings page found in your RIDE account ({{ fe_base_url }}{{ settings_path }}). If you have questions or concerns please contact {{ support_email }}.
 
 Your RIDE team
 {% endautoescape %}
