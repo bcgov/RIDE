@@ -5,6 +5,17 @@ import { useDispatch } from 'react-redux';
 // Internal imports
 import { AlertContext } from "../../contexts";
 import { updateUser } from "../../slices/users";
+import {
+  CREATOR_OPTIONS,
+  EVENT_TYPE_OPTIONS,
+  SEVERITY_EVENT_TYPES,
+  SEVERITY_OPTIONS,
+  STATUS_OPTIONS,
+  getOptionNames,
+} from "../../notifications/constants";
+
+// DBC22-7325: creator choices as an admin reads them for another user
+const CREATOR_SUMMARIES = CREATOR_OPTIONS.map((option) => ({ id: option.id, name: option.adminName }));
 
 // Styling
 import './editUser.scss';
@@ -13,7 +24,7 @@ import RIDEDropdown from "../../components/shared/dropdown.jsx";
 export default function EditUserForm(props) {
   /* Setup */
   // Props
-  const { user, orgs, submitting, setSubmitting, setOpen } = props
+  const { user, orgs, areas = [], submitting, setSubmitting, setOpen } = props
 
   // Context
   const { setAlertContext } = useContext(AlertContext);
@@ -70,7 +81,6 @@ export default function EditUserForm(props) {
   // Main component
   const userOrg = Array.isArray(user.organizations) && user.organizations.length ?
     orgs.find(org => org.id === user.organizations[0]) : null;
-
   return (
     <div className="edit-user-form">
       <div className={'user-info'}>
@@ -114,6 +124,78 @@ export default function EditUserForm(props) {
           value={user.is_superuser ? 'Yes' : 'No'}
           handler={(value) => setIsSuperuser(value === 'Yes')} />
       </div>
+
+      {/* DBC22-7325: the user's notification settings, read only */}
+      <NotificationSummary user={user} areas={areas} />
+    </div>
+  );
+}
+
+// DBC22-7325: why a user with notifications turned on receives none, as the sender decides it
+function getNotOnReason(user, subscription, statuses) {
+  if (!user.is_active) { return 'account disabled'; }
+  if (!user.email) { return 'no email address'; }
+  if (!subscription.notification_areas?.length) { return 'no service areas'; }
+  if (!subscription.notification_types?.length) { return 'no event types'; }
+  if (!statuses.length) { return 'no event statuses that apply'; }
+
+  const onlySeverityTypes = subscription.notification_types.every((type) => SEVERITY_EVENT_TYPES.includes(type));
+  if (onlySeverityTypes && !subscription.notification_severities?.length) { return 'no event severities'; }
+
+  return null;
+}
+
+// DBC22-7325: a user's notification settings, read only
+function NotificationSummary({ user, areas }) {
+  const subscription = user.email_subscription;
+  const statuses = (subscription?.notification_statuses || [])
+    .filter((status) => user.is_approver || status !== 'approvalPending');  // approval requests go to approvers only
+  const notOnReason = subscription?.notification ? getNotOnReason(user, subscription, statuses) : null;
+  const receives = subscription?.notification && !notOnReason;
+
+  const severityApplies = subscription?.notification_types?.some((type) => SEVERITY_EVENT_TYPES.includes(type));
+  const severities = severityApplies
+    ? getOptionNames(SEVERITY_OPTIONS, subscription.notification_severities) || 'None'
+    : 'Not applicable to the selected event types';
+
+  return (
+    <div className={'notifications'}>
+      <div className={'header'}>Notifications</div>
+
+      <div className={'row'}>
+        <div className={'label'}>Email notifications:</div>
+        <div>{receives ? 'Yes' : 'No'}{notOnReason && ` (turned on, but ${notOnReason})`}</div>
+      </div>
+
+      {receives &&
+        <>
+          <div className={'row'}>
+            <div className={'label'}>Service areas:</div>
+            <div>{getOptionNames(areas.map((area) => ({ id: area.id, name: area.label })),
+              subscription.notification_areas)}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event types:</div>
+            <div>{getOptionNames(EVENT_TYPE_OPTIONS, subscription.notification_types)}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event severities:</div>
+            <div>{severities}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event statuses:</div>
+            <div>{getOptionNames(STATUS_OPTIONS, statuses)}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event creator:</div>
+            <div>{getOptionNames(CREATOR_SUMMARIES, [subscription.notification_creator])}</div>
+          </div>
+        </>
+      }
     </div>
   );
 }

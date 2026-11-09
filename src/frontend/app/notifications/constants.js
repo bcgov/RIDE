@@ -26,11 +26,18 @@ export const STATUS_OPTIONS = [
   { id: 'approved', name: 'Approved' },
 ];
 
+// adminName: as an admin reads another user's settings (DBC22-7325)
 export const CREATOR_OPTIONS = [
-  { id: 'all', name: 'All events' },
-  { id: 'organization', name: 'Only events created by my organization' },
-  { id: 'me', name: 'Only events created by me' },
+  { id: 'all', name: 'All events', adminName: 'All events' },
+  { id: 'organization', name: 'Only events created by my organization',
+    adminName: "Only events created by the user's organization" },
+  { id: 'me', name: 'Only events created by me', adminName: 'Only events created by the user' },
 ];
+
+// Comma separated option names for ids, e.g. for read-only summaries
+export function getOptionNames(options, ids) {
+  return options.filter((option) => (ids || []).includes(option.id)).map((option) => option.name).join(', ');
+}
 
 // Event types that severity applies to
 export const SEVERITY_EVENT_TYPES = ['incidents', 'plannedEvents'];
