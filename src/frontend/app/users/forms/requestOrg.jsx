@@ -1,11 +1,11 @@
-import { useContext, useRef } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/pro-solid-svg-icons';
 
 import { API_HOST } from '../../env';
-import { post } from '../../shared/helpers';
+import { post, ServerError } from '../../shared/helpers';
 import { AlertContext } from "../../contexts";
 import { selectAllOrganizations } from '../../slices/organizations';
 import './requestOrg.scss';
@@ -15,22 +15,28 @@ export default function requestOrg({ setRequestingOrg }) {
 
   const select = useRef()
   const organizations = useSelector(selectAllOrganizations);
+  const [ submitting, setSubmitting ] = useState(false);  // DBC22-6697: sending the email can take a while
 
   const submitForm = () => {
+    if (submitting) { return; }
+
     const organization = select.current.value;
     if (!organization) {
       setAlertContext({ type: 'failure', message: "You must select an organization to continue" });
       return;
     }
 
+    setSubmitting(true);
     post(`${API_HOST}/api/users/request`, {
       type: 'ADD_TO_ORGANIZATION', organization,
     }).then(() => {
       setRequestingOrg(false);
       setAlertContext({ type: 'success', message: 'Request submitted' });
     }).catch((err) => {
-      setAlertContext({ type: 'failure', message: err.message });
-    })
+      // DBC22-6697: e.g. the email to RIDE admins couldn't be sent; nothing was saved
+      const message = err instanceof ServerError ? 'Your request could not be sent. Please try again.' : err.message;
+      setAlertContext({ type: 'failure', message });
+    }).finally(() => setSubmitting(false));
   }
 
   return (
@@ -57,6 +63,7 @@ export default function requestOrg({ setRequestingOrg }) {
         <button
           type="button"
           className='primary'
+          disabled={submitting}
           onClick={() => submitForm()}
         ><FontAwesomeIcon icon={faCheck} /> Submit</button>
       </div>

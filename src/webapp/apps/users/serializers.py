@@ -21,6 +21,7 @@ class RIDEUserSerializer(serializers.ModelSerializer):
     is_approver = serializers.SerializerMethodField()
     service_areas = serializers.SerializerMethodField()
     request_organization = serializers.SerializerMethodField()
+    requested_organization = serializers.SerializerMethodField()  # DBC22-6697
 
     class Meta:
         model = RIDEUser
@@ -76,12 +77,25 @@ class RIDEUserSerializer(serializers.ModelSerializer):
         added to an organization (thus prompting the user on the frontend)
         '''
 
-        return (
-            obj.organizations.count() == 0 and
-            obj.request_set.filter(
-                request_type=Request.RequestTypes.ADD_TO_ORG
-            ).count() == 0
-        )
+        return not obj.organizations.all() and self._add_to_organization_request(obj) is None
+
+    def get_requested_organization(self, obj):
+        '''
+        DBC22-6697: ID of the organization the user asked to join, for granting
+        it from the access request email; None without a request.  The Users
+        screen checks the organization still exists
+        '''
+
+        request = self._add_to_organization_request(obj)
+        return request.details.get('organization') if request else None
+
+    def _add_to_organization_request(self, obj):
+        # uses prefetched request_set where available; kept on the user, as
+        # request_organization and requested_organization both need it
+        if not hasattr(obj, '_add_to_organization_request'):
+            obj._add_to_organization_request = next((request for request in obj.request_set.all()
+                                                     if request.request_type == Request.RequestTypes.ADD_TO_ORG), None)
+        return obj._add_to_organization_request
 
 
 class SessionUserSerializer(RIDEUserSerializer):
