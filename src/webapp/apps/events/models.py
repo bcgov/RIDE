@@ -89,6 +89,10 @@ def _is_running_tests():
 def _is_sync_disabled():
     return _is_running_tests() or settings.DISABLE_OPEN511_SYNC
 
+def _is_notification_disabled():
+    ''' DBC22-7326: kill switch for event notification emails; off in tests '''
+    return _is_running_tests() or settings.DISABLE_EVENT_NOTIFICATIONS
+
 def parse_time(time):
     '''
     Return a time string of '17:04' as '5:04 pm'.  Return None on any input
@@ -255,6 +259,10 @@ class Event(VersionedModel):
         to `False` for all the other approved instances in the history.
         '''
 
+        # VersionedModel.save() inserts a new row (new uuid) for each version,
+        # and returns early without saving when nothing changed
+        previous_uuid = self.uuid
+
         with transaction.atomic():
             self.latest_approved = self.approved
             if self.approved:
@@ -308,6 +316,12 @@ class Event(VersionedModel):
 
             super().save(*args, **kwargs)
 
+            # DBC22-7326: queue notification emails for each new version.  Same
+            # transaction as the save, so a rolled back save never notifies.
+            inserted = self.uuid != previous_uuid  # force_update keeps the uuid
+            if inserted and not self.deleted and not _is_notification_disabled():
+                QueuedEventNotification.objects.create(event_uuid=self.uuid)
+
             # Do not sync if chain-up or sync disabled or forced update
             skip_sync = (_is_sync_disabled()
                          or self.event_type == EventType.CHAIN_UP
@@ -356,6 +370,11 @@ class Event(VersionedModel):
     def __str__(self):
         return f'{self.id} v{self.version}'
 
+    def get_creator_id(self):
+        ''' The user who created the event, i.e., saved its first version '''
+
+        return Event.objects.filter(id=self.id, version=0).values_list('user_id', flat=True).first()
+
     def _update_tlids(self):
         # if the model has no TLIDs, populate the tlids field with the start
         # TLID, and if there's an end location, the end TLID and the route TLIDs
@@ -388,6 +407,40 @@ class Event(VersionedModel):
 
         self.tlids = list(tlids)
         self.save(force_update=True)
+
+
+class QueuedEventNotification(BaseModel):
+    '''
+    DBC22-7326: an event version waiting for notification emails.
+
+    Mirrors DBC's QueuedEventNotification, drained by a periodic task, but
+    holds one row per event version and is never batched: each row becomes
+    individual emails to each matching subscriber.
+    '''
+
+    event_uuid = models.UUIDField(unique=True)
+
+
+class EventReminderNotification(BaseModel):
+    '''
+    DBC22-7326: due-soon and overdue reminders sent for an event.
+
+    One row per event ID, kind and next update time, so a new next update
+    starts a new series.  Rows are created before sending to avoid duplicates.
+    '''
+
+    event_id = models.CharField(max_length=20)
+    kind = models.CharField(max_length=20)
+    next_update = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)  # at first send; a change stops overdue reminders
+    last_sent = models.DateTimeField()
+    count = models.PositiveIntegerField(default=1)
+    stopped = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['event_id', 'kind', 'next_update'], name='event_reminder_unique'),
+        ]
 
 
 class Note(VersionedModel):

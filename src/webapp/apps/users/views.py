@@ -2,11 +2,12 @@ from django.conf import settings
 from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMultiAlternatives
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
-from rest_framework import permissions, status
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -14,8 +15,8 @@ from rest_framework.response import Response
 
 from apps.organizations.models import Organization
 
-from .models import RIDEUser, Request
-from .serializers import RIDEUserSerializer, RIDEGroupSerializer
+from .models import EmailSubscription, RIDEUser, Request
+from .serializers import EmailSubscriptionSerializer, RIDEUserSerializer, RIDEGroupSerializer
 
 
 class RIDEUserAPIView(ModelViewSet):
@@ -142,6 +143,62 @@ class RIDEGroupAPIView(ModelViewSet):
     serializer_class = RIDEGroupSerializer
     permission_classes = [permissions.IsAdminUser]
     # permission_classes = [permissions.AllowAny]   # For development
+
+
+class EmailSubscriptionViewset(viewsets.ModelViewSet):
+    r'''
+    DBC22-7326: this viewset provides for reading and updating the email
+    notification settings of the authenticated user, mirroring DBC's
+    EmailSubscriptionViewset.  Unauthenticated users will receive a 403
+    response.  A user has at most one subscription.
+
+    **GET /api/users/email-subscriptions**
+
+    Returns a list containing the user's subscription, if they have one.
+
+    **POST /api/users/email-subscriptions**
+
+    Creates the subscription for the user.
+
+        {
+            "notification": <boolean>,
+            "notification_areas": <list of service area IDs>,
+            "notification_types": <list of event type codes>,
+            "notification_severities": <list of severity codes>,
+            "notification_statuses": <list of status codes>,
+            "notification_creator": <"all" | "organization" | "me">
+        }
+
+    **PUT /api/users/email-subscriptions/*<id\>***
+
+    Updates the subscription identified by *<id\>*.  Requires entire object to be sent.
+
+    **PATCH /api/users/email-subscriptions/*<id\>***
+
+    Updates the subscription identified by *<id\>*.  Partial update is allowed.
+    '''
+
+    queryset = EmailSubscription.objects.all()
+    serializer_class = EmailSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options']
+
+    def get_queryset(self):
+        return EmailSubscription.objects.filter(user=self.request.user).prefetch_related('notification_areas')
+
+    def create(self, request, *args, **kwargs):
+        duplicate = Response({'code': 'duplicate_subscription'}, status=status.HTTP_400_BAD_REQUEST)
+        if EmailSubscription.objects.filter(user=request.user).exists():
+            return duplicate
+
+        try:
+            with transaction.atomic():
+                return super().create(request, *args, **kwargs)
+        except IntegrityError:  # created by a simultaneous request
+            return duplicate
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class session(APIView):
