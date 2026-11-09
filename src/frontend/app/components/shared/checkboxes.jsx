@@ -14,7 +14,7 @@ import './checkbox.scss'
 export default function RIDECheckBoxes(props) {
   /* Setup */
   // Props
-  const { label, itemsList, extraClasses, itemsState, setItemsState } = props;
+  const { label, itemsList, extraClasses, itemsState, setItemsState, disabled } = props;
 
   /* Rendering */
   // Main Component
@@ -32,6 +32,7 @@ export default function RIDECheckBoxes(props) {
             <Checkbox
               className="checkbox-container"
               checked={isChecked}
+              disabled={disabled}
               onChange={(checked) => setItemsState(() => {
                 if (checked) {
                   return [...itemsState, item.id];

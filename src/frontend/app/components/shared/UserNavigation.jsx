@@ -4,10 +4,11 @@ import { getCookie } from "../../shared/helpers";
 import { handleFormSubmit } from "../../shared/handlers";
 
 // External imports
+import { NavLink } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleUser, faUserShield } from '@fortawesome/pro-solid-svg-icons';
-import { Menu, MenuButton, MenuItems } from '@headlessui/react'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 
 // Styling
 import './dropdown.scss';
@@ -32,6 +33,13 @@ export default function UserNavigation(props) {
         <div id="user-menu-header">
           <FontAwesomeIcon id="user-icon" icon={faCircleUser} />
           <p id="user-email">{authContext.email}</p>
+
+          {/* DBC22-7324: link to the user's notification settings */}
+          { authContext.service_areas?.length > 0 &&
+            <MenuItem>
+              <NavLink className="notification-settings-link" to="/notifications/">Notification settings</NavLink>
+            </MenuItem>
+          }
 
           <form id="signout-link" className="nav-link" method='post' action={`${API_HOST}/accounts/logout/`} onSubmit={handleFormSubmit}>
             <input type='hidden' name='csrfmiddlewaretoken' value={getCookie('csrftoken')} />
