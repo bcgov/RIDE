@@ -1179,7 +1179,7 @@ export function ViewsTab({
       )}
 
       {views.map((view) => {
-        const { id, orientation, direction, is_on, image_url, description, ptz_view_id } = view;
+        const { id, orientation, direction, is_on, path_to_view_image, description, ptz_view_id } = view;
         const isEditing = editingId === id;
 
         // Resolve title string safely
@@ -1264,9 +1264,9 @@ export function ViewsTab({
                   <input
                     type="text"
                     id={`view-path-${id}`}
-                    value={image_url || ''}
+                    value={path_to_view_image || ''}
                     onChange={(e) =>
-                      handleFieldChange(id, 'image_url', e.target.value)
+                      handleFieldChange(id, 'path_to_view_image', e.target.value)
                     }
                   />
                 </div>

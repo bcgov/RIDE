@@ -12,6 +12,7 @@ class CameraViewSerializer(serializers.ModelSerializer):
             'description',
             'orientation',
             'image_url',
+            'path_to_view_image',
             'display_order',
             'is_on',
             'is_default',

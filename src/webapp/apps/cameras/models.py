@@ -364,6 +364,11 @@ class CameraView(models.Model):
         blank=True,
     )
 
+    path_to_view_image = models.URLField(
+            null=True,
+            blank=True,
+        )
+
     drivebc_webcam_id = models.PositiveIntegerField(
         null=True,
         blank=True,

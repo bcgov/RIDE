@@ -441,7 +441,7 @@ export default function CameraDetails({ onBack }) {
     return views.map((view, index) => ({
       id: getViewId(view.id),
       orientation: view.orientation ? view.orientation.toUpperCase() : '',
-      image_url: view.image_url,
+      path_to_view_image: view.path_to_view_image,
       description: view.description,
       is_on: view.is_on,
       is_default: view.is_default,
@@ -800,7 +800,7 @@ export default function CameraDetails({ onBack }) {
         .map((view) => ({
           id: String(view.id),
           orientation: view.orientation || '',
-          image_url: view.image_url || '',
+          path_to_view_image: view.path_to_view_image || '',
           description: view.description || '',
           is_on: view.is_on ?? true,
           is_default: view.is_default ?? false,
