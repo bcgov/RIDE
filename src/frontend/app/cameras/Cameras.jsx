@@ -868,7 +868,6 @@ export default function Cameras() {
     setCameraType('');
     setCommunicationType('');
     setPowerSource('');
-    setSearch('');
   };
 
   // Context Menu State
