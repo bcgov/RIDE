@@ -1038,7 +1038,7 @@ function DefaultMessagingView({ messaging }) {
                 </label>
                 <textarea
                   id="disabled-long-description"
-                  className="default-messaging__field"
+                  className="default-messaging__field default-messaging__field--long"
                   value={defaultMessaging.disabled_long_description}
                   onChange={(event) => updateField('disabled_long_description', event.target.value)}
                 />
