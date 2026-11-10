@@ -4,7 +4,7 @@ from django.contrib import admin, messages
 from django.utils import timezone
 
 from .enums import EventType
-from .models import Event
+from .models import Condition, Event, TrafficImpact
 from .serializers import EventSerializer
 from ..users.models import get_task_user
 
@@ -162,3 +162,16 @@ class EventAdmin(admin.ModelAdmin):
     list_display = ('id', 'event_type', 'status', 'user', 'latest', 'approved', 'latest_approved')
     search_fields = ['id']
     actions = [create_dummy_inactive_event, rebuild_rc_polygons, simplify_event_coords]
+
+
+@admin.register(TrafficImpact)
+class TrafficImpactAdmin(admin.ModelAdmin):
+    list_filter = ('closed',)
+    list_display = ('id', 'label', 'order', 'closed')
+    search_fields = ['id', 'label']
+
+
+@admin.register(Condition)
+class ConditionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'label', 'order')
+    search_fields = ['id', 'label']
