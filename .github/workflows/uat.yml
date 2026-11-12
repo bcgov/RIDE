@@ -94,7 +94,7 @@ jobs:
             needs_fontawesome: false
           - name: Static
             image_name: ${{ github.repository }}-static
-            dockerfile: ./compose/frontend/StaticBuild
+            dockerfile: ./compose/frontend_caddy/Dockerfile
             build_args: |
               DEBUG_BUILD=false
               SOURCEMAP=false

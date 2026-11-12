@@ -1,0 +1,249 @@
+# to do
+# Get the metrics into sysdig for both caddy and caching
+# Do one last pass to see if anything else is missing from nginx in caddy.
+# Switch log level for caching
+
+# Other to-do
+# Remove caching on the backend
+# Work through scenarios where redis may be down. Technically it should fall back to the backend but it also relies on Redis.
+# See if we can use cache headers
+
+{
+    admin localhost:2019
+    auto_https off
+    http_port 3000
+    metrics
+    servers {
+        trusted_proxies static 10.0.0.0/8
+    }
+
+    cache {
+        allowed_http_verbs GET HEAD PURGE # nots sure if this is actually needed.
+
+        ttl 15s
+        stale 1m
+        api {
+            souin
+            prometheus # Need to see how we can get this into Sysdig if we also want regular metrics. 
+        }
+
+        regex {
+            exclude ^/api/session/.*
+        }
+        key {
+            disable_host
+            disable_method
+            headers X-Cache-Encoding
+        }
+        redis {
+            url {$ENVIRONMENT}-ride-redis:6379
+        }
+        log_level debug
+    }
+}
+
+# Snippet for Public Security Headers
+(public_security_headers) {
+    header @publicPaths {
+        defer # test that this works as expected.
+
+        -Cross-Origin-Opener-Policy # remove the header from django response
+        -Referrer-Policy # remove the header from django response
+        -X-Content-Type-Options # remove the header from django response
+
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Permissions-Policy "geolocation=(self), fullscreen=*"
+        X-Content-Type-Options "nosniff"
+        Cross-Origin-Opener-Policy "same-origin-allow-popups"
+        Cross-Origin-Resource-Policy "cross-origin"
+		Cross-Origin-Embedder-Policy "credentialless"
+        Referrer-Policy "no-referrer-when-downgrade"
+        Content-Security-Policy "default-src 'self' https://*.arcgis.com https://*.gov.bc.ca; script-src 'nonce-{CSP_NONCE}' 'strict-dynamic'; style-src 'self' 'unsafe-inline' https://*.arcgis.com; font-src 'self'; connect-src 'self' https://*.gov.bc.ca https://*.arcgis.com; img-src 'self' data: https://*.arcgis.com https://*.arcgisonline.com; worker-src 'self' blob:; object-src 'none'; form-action 'self' https://*.drivebc.ca https://*.gov.bc.ca https://*.loginproxy.gov.bc.ca https://login.microsoftonline.com https://*.microsoftonline.com; base-uri 'self'; frame-ancestors 'self';"
+		X-Robots-Tag "noindex";
+    }
+}
+
+# Snippet for Admin/CMS Security Headers
+(admin_security_headers) {
+    header @adminPaths {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Permissions-Policy "geolocation=(self), fullscreen=*"
+        X-Content-Type-Options "nosniff"
+        X-Robots-Tag "noindex"
+        Cross-Origin-Opener-Policy "same-origin"
+        Cross-Origin-Resource-Policy "same-origin"
+        Cross-Origin-Embedder-Policy "credentialless"
+        Content-Security-Policy "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; img-src * data: blob:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src *; frame-ancestors 'self';"
+    }
+}
+
+# Main Application
+ride.th.gov.bc.ca:3000, :3000 {
+    root * /usr/share/caddy/html
+
+    # 1. Define matchers for Public vs Admin boundaries
+    @adminPaths path /admin* /static* /healthcheck*
+    @publicPaths not path /admin* /static* /healthcheck*
+
+    # 2. Import matched security headers
+    import public_security_headers
+    import admin_security_headers
+
+    # Prometheus Metrics (Restricted)
+    handle /metrics { # Check to see if this is restricted to admin endpoint already. If so, we can remove this and just use the admin endpoint for metrics.
+        @allowed remote_ip 10.0.0.0/8 127.0.0.1
+        metrics @allowed
+        error 404
+    }
+
+    # Logging
+    log_append cache_status           {http.response.header.Cache-Status}
+    log_append sent_http_content_type {http.response.header.Content-Type}
+    log_append http_user_agent        {http.request.header.User-Agent}
+    log_append http_referer           {http.request.header.Referer}
+    log_append upstream_time_ms       {rp.upstream.duration_ms}
+    log {
+        output stdout
+        format filter {
+            wrap json {
+                time_format iso8601
+            }
+            fields {
+                request>headers delete
+                resp_headers delete
+                user_id delete
+            }
+        }
+    }  
+
+    # Health Check
+    handle /healthz {
+        log_skip
+        respond "healthy\n" 200
+    }
+
+    # IP-Restricted Admin & Debug
+    @debugPath {
+        expression `{env.SHOW_DEBUG_TOOLBAR} == "True"`
+        path /__debug__*
+    }
+
+    handle @adminPaths { 
+        @blocked not client_ip 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 127.0.0.1
+        abort @blocked
+        reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
+    }
+
+    handle @debugPath {
+        @blocked not client_ip 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 127.0.0.1
+        abort @blocked
+        reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
+    }
+
+    handle /api/users/* {
+        reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
+    }
+
+    handle /session* {
+        reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
+    }
+
+    handle /accounts/* {
+        reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
+    }
+
+    # Proxy DriveBC DMS requests and answer browser preflight requests locally.
+    handle_path /drivebc-api/dms/* {
+        @dmsCorsOrigin header_regexp Origin `^https?://(([a-zA-Z0-9-]+\.)*gov\.bc\.ca|localhost(:[0-9]+)?)$`
+        header @dmsCorsOrigin {
+            Access-Control-Allow-Origin {http.request.header.Origin}
+            Access-Control-Allow-Credentials true
+            Access-Control-Allow-Methods "GET, POST, OPTIONS"
+            Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+        }
+
+        @dmsPreflight method OPTIONS
+        handle @dmsPreflight {
+            header @dmsCorsOrigin {
+                Access-Control-Max-Age 1728000
+                Content-Type "text/plain; charset=utf-8"
+            }
+            respond "" 204
+        }
+
+        rewrite * /api/dms{path}
+        reverse_proxy https://www.drivebc.ca {
+            header_up Host www.drivebc.ca
+            header_up X-Real-IP {remote_host}
+
+            header_down -Strict-Transport-Security
+            header_down -Permissions-Policy
+            header_down -X-Content-Type-Options
+            header_down -Content-Security-Policy
+            header_down -Cross-Origin-Opener-Policy
+            header_down -Cross-Origin-Embedder-Policy
+            header_down -Cross-Origin-Resource-Policy
+            header_down -X-Robots-Tag
+
+            transport http {
+                dial_timeout 10s
+                response_header_timeout 30s
+            }
+        }
+    }
+
+    # --- GENERAL CACHED API ROUTE ---
+    handle /api/* {
+        @rss query format=rss
+        error @rss 404
+
+        # Keep credential-bearing requests out of cache and preserve their auth headers.
+        @bypass {
+            expression `{http.request.header.Cachebypass} != "" || {http.request.header.Cookie} != "" || {http.request.header.Authorization} != ""`
+        }
+
+        handle @bypass {
+            encode zstd gzip
+            reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
+        }
+
+        route {
+            map {header.Accept-Encoding} {cache_encoding} {
+                ~(?i)\bzstd\b        zstd
+                ~(?i)\b(br|brotli)\b   br
+                ~(?i)\bgzip\b        gzip
+                default              identity
+            }
+            request_header -Cache-Control
+            request_header -Pragma
+            request_header -Cookie
+            request_header X-Cache-Encoding {cache_encoding}
+
+            cache
+
+            header {
+                -Vary
+                -Set-Cookie
+                Vary "Accept-Encoding"
+            }
+
+            encode zstd gzip
+            reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
+        }
+    }
+
+    # --- STATIC ASSETS & SPA ROUTING ---
+    @uncachedFiles path /index.html
+    header @uncachedFiles Cache-Control "no-cache, must-revalidate, max-age=0"
+
+    @staticAssets path *.css *.js *.woff2 *.svg *.png *.jpg
+    header @staticAssets Cache-Control "public, max-age=31536000, immutable"
+
+    handle {
+        encode zstd gzip
+        file_server {
+            precompressed br zstd gzip
+        }
+        try_files {path} {path}/ /index.html
+    }
+}
