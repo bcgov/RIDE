@@ -34,6 +34,11 @@ export function Layout({ children }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Fonts: declared once here, not in the app's stylesheets, and the two weights the
+            app uses are fetched right away so text does not start in a fallback font */}
+        <link rel="preload" href="/fonts/bc-sans/BCSans-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/bc-sans/BCSans-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="/fonts/fonts.css" />
         <Meta />
         <Links />
       </head>

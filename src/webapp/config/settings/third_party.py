@@ -88,7 +88,8 @@ if os.name == 'nt':
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-    ]
+    ],
+    'DEFAULT_PERMISSION_CLASSES': ["rest_framework.permissions.IsAuthenticated"],
 }
 
 ROUTE_PLANNER_API_URL = env('ROUTE_PLANNER_API_URL', default='')
