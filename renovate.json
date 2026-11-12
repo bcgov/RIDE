@@ -1,0 +1,35 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>bcgov/renovate-config#2026.10.29"
+  ],
+  "hostRules": [
+    {
+      "hostType": "npm",
+      "matchHost": "npm.fontawesome.com",
+      "token": "{{ secrets.FONTAWESOME_PACKAGE_TOKEN }}"
+    }
+  ],
+  "helm-values": {
+    "managerFilePatterns": [
+      "/(^|/)values.*\\.yaml$/"
+    ]
+  },
+  "pip_requirements": {
+    "managerFilePatterns": [
+      "/^src\\/webapp\\/requirements\\/base\\.txt$/"
+    ]
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["registry.redhat.io/**"],
+      "enabled": false
+    },
+    {
+      "description": "Disable automerge for major updates",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ]
+}
