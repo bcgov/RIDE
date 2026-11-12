@@ -183,6 +183,8 @@ export default function CameraDetails({ onBack }) {
 
   const [connectionTypes, setConnectionTypes] = useState([]);
   const [cameraTypes, setCameraTypes] = useState([]);
+  const nameInputRef = useRef(null);
+
 
   // Reads either `data.<key>.id` or the flat `data.<key>_id`
   const relId = (data, key) => data[key]?.id ?? data[`${key}_id`] ?? '';
@@ -739,6 +741,13 @@ export default function CameraDetails({ onBack }) {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  useEffect(() => {
+    if (isEditingName) {
+      nameInputRef.current?.focus();
+      nameInputRef.current?.select();
+    }
+  }, [isEditingName]);
+
   const cameraHierarchy = useMemo(() => {
     const hierarchy = {};
 
@@ -1013,6 +1022,7 @@ export default function CameraDetails({ onBack }) {
             <div className="title-section">
               {isEditingName ? (
                 <input
+                  ref={nameInputRef}
                   type="text"
                   className="camera-name-input"
                   value={basicsData.title}
