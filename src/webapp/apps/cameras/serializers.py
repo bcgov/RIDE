@@ -27,6 +27,7 @@ class CameraViewSerializer(serializers.ModelSerializer):
             'maintenance_ip_address',
             'ptz_view_id',
         ]
+        read_only_fields = ['drivebc_webcam_id']
 
 class RoadSerializer(serializers.ModelSerializer):
     class Meta:

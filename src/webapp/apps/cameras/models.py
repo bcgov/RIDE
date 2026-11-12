@@ -3,8 +3,19 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.exceptions import ValidationError
 import re
-
 from .fields import EncryptedTextField
+from django.db import connection, transaction
+from django.db.models import Max
+
+WEBCAM_ID_LOCK_KEY = 482001  # any constant int, used only for this lock
+
+def next_drivebc_webcam_id():
+    """Highest existing drivebc_webcam_id + 1. Must run inside a transaction."""
+    with connection.cursor() as cursor:
+        # Held until the outermost transaction commits, so concurrent saves queue up
+        cursor.execute("SELECT pg_advisory_xact_lock(%s)", [WEBCAM_ID_LOCK_KEY])
+    current_max = CameraView.objects.aggregate(m=Max('drivebc_webcam_id'))['m'] or 0
+    return current_max + 1
 
 
 class BaseLookupModel(models.Model):
@@ -373,6 +384,7 @@ class CameraView(models.Model):
         null=True,
         blank=True,
         db_index=True,
+        unique=True,
     )
 
     image_name = models.CharField(
@@ -414,17 +426,35 @@ class CameraView(models.Model):
     isnew = models.BooleanField(default=False)
 
 
-    def save(self, *args, **kwargs):
-        if self.image_url:
-            match = re.search(
-                r'/(\d+)\.jpg(?:\?.*)?$',
-                self.image_url
-            )
+    # def save(self, *args, **kwargs):
+    #     if self.image_url:
+    #         match = re.search(
+    #             r'/(\d+)\.jpg(?:\?.*)?$',
+    #             self.image_url
+    #         )
 
+    #         if match:
+    #             self.drivebc_webcam_id = int(match.group(1))
+
+    #     super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # Existing behaviour: legacy views carry the webcam id in their image URL
+        if self.image_url:
+            match = re.search(r'/(\d+)\.jpg(?:\?.*)?$', self.image_url)
             if match:
                 self.drivebc_webcam_id = int(match.group(1))
 
-        super().save(*args, **kwargs)
+        # New: a view that is on and still has no id gets the next one
+        if self.is_on and self.drivebc_webcam_id is None:
+            with transaction.atomic():
+                self.drivebc_webcam_id = next_drivebc_webcam_id()
+                update_fields = kwargs.get('update_fields')
+                if update_fields is not None:
+                    kwargs['update_fields'] = {*update_fields, 'drivebc_webcam_id'}
+                return super().save(*args, **kwargs)
+
+        return super().save(*args, **kwargs)
 
 class CameraNote(models.Model):
     camera = models.ForeignKey(

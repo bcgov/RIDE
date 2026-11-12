@@ -526,6 +526,7 @@ export default function CameraDetails({ onBack }) {
 
       const savedCamera = await response.json();
       setCamera(savedCamera);
+      const savedViews = mapViews(savedCamera.views);
 
       // Clear the typed password and show the "password set" placeholder
       const savedSetup = {
@@ -539,9 +540,10 @@ export default function CameraDetails({ onBack }) {
         hasImageUserPassword: savedCamera.has_image_user_password ?? false,
       };
       setSetupData(savedSetup);
+      setViewsData(savedViews);
 
       if (onBack) onBack(savedCamera);
-      setSavedSnapshot(JSON.stringify({ basics: basicsData, setup: savedSetup, views: viewsData }));
+      setSavedSnapshot(JSON.stringify({ basics: basicsData, setup: savedSetup, views: savedViews }));
       setToast({ message: 'Changes saved', variant: 'success' });
     } catch (error) {
       console.error(error);

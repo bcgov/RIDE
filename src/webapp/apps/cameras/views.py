@@ -702,6 +702,8 @@ class CameraViewSet(viewsets.ModelViewSet):
             view.pk = None
             view.id = None
             view.camera = original
+            view.drivebc_webcam_id = None
+            view.image_url = None
             view.save()
 
         create_camera_history(
