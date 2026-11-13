@@ -19,3 +19,4 @@ deployment:
     djangoSecret: drivebc-django
     volumes:
       claimName: django-app-images
+  redisHost: ""

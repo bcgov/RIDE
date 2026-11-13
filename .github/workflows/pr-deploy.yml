@@ -1,11 +1,266 @@
-name: PR Deploy Placeholder
+name: 1a. Build & Deploy to PR Branch
+# This workflow builds an emphemeral PR environment for the RIDE application. It is triggered on pull requests to the main branch.
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
+concurrency:
+  group: pr-env-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  packages: write
+
 jobs:
-  hello:
+  setup:
     runs-on: ubuntu-latest
+    name: Setup Job to define outputs
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    outputs:
+      environment_name: dev            # reuse the dev GitHub environment for vars/secrets
+      helm_release_name: pr-${{ github.event.pull_request.number }}-ride
+      db_release_name: pr-${{ github.event.pull_request.number }}-ride-db
+      image_registry: ghcr.io
+      openshift_gold_url: https://pr-${{ github.event.pull_request.number }}-ride.apps.gold.devops.gov.bc.ca
+      custom_tag: type=raw,value=pr-${{ github.event.pull_request.number }}
+      tag_for_helm: sha-${{ github.sha }}
     steps:
-      - name: Say hello
-        run: echo "Hello, world!"
+      - name: Set outputs
+        run: echo "This step is required to set job outputs."
+
+  build-and-push:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    name: Build & Push ${{ matrix.name }} Image
+    environment: ${{ needs.setup.outputs.environment_name }}
+    outputs:
+      tag: ${{ steps.meta.outputs.tags }}
+    strategy:
+      matrix:
+        include:
+          - name: Webapp
+            image_name: ${{ github.repository }}-webapp
+            dockerfile: ./compose/webapp/Dockerfile
+            build_args: |
+              DEBUG_BUILD=false
+            needs_fontawesome: false
+          - name: Static
+            image_name: ${{ github.repository }}-static
+            dockerfile: ./compose/frontend/StaticBuild
+            build_args: |
+              DEBUG_BUILD=true
+              SOURCEMAP=true
+            needs_fontawesome: true
+          - name: Redis
+            image_name: ${{ github.repository }}-redis
+            dockerfile: ./compose/redis/Dockerfile
+            build_args: |
+              DEBUG_BUILD=false
+            needs_fontawesome: false
+
+
+### EVERYTHING PAST THIS POINT SHOULD BE THE SAME IN DEV, TEST AND UAT WORKFLOWS ###            
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
+        with:
+          registry: ${{ needs.setup.outputs.image_registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+        with:
+          images: ${{ needs.setup.outputs.image_registry }}/${{ matrix.image_name }}
+          tags: |
+            type=sha,format=long
+            ${{ needs.setup.outputs.custom_tag }}
+            
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+  
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ matrix.build_args }}
+          secrets: |
+            ${{ matrix.needs_fontawesome && format('FONTAWESOME_PACKAGE_TOKEN={0}', secrets.FONTAWESOME_PACKAGE_TOKEN) || '' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  update-openshift-gold:
+    needs: [setup, build-and-push]
+    runs-on:
+        group: Larger Runners - OpenShift Static-IP
+    name: Deploy to Gold. Tag ${{ needs.setup.outputs.tag_for_helm }}
+    environment:
+      name: ${{ needs.setup.outputs.environment_name }}
+      url: ${{ needs.setup.outputs.openshift_gold_url }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - name: OC Setup
+      uses: ./.github/actions/oc-setup
+      with:
+        server: ${{ vars.OPENSHIFT_GOLD_SERVER }}
+        token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+        namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+    - name: Check whether PR database exists
+      id: check-db
+      env:
+        PR: ${{ github.event.pull_request.number }}
+      run: |
+        DB_CLUSTER="$(oc get postgrescluster "pr-${PR}-ride-db-crunchy" --ignore-not-found -o name)"
+        if [ -n "$DB_CLUSTER" ]; then
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Deploy PR database (Crunchy clone)
+      if: steps.check-db.outputs.exists == 'false'
+      env:
+        PR: ${{ github.event.pull_request.number }}
+        DB_RELEASE: ${{ needs.setup.outputs.db_release_name }}
+      run: |
+        helm dep update ./infrastructure/crunchy-postgres
+        helm upgrade --install "$DB_RELEASE" \
+          -f ./infrastructure/crunchy-postgres/values-pr.yaml \
+          ./infrastructure/crunchy-postgres \
+          --set nameOverride="pr-${PR}-ride-db" \
+          --set-string global.config.dbName="pr-${PR}-ride-db" \
+          --set crunchy.clone.bucket='${{ secrets.CRUNCHY_S3_BUCKET }}' \
+          --set crunchy.clone.endpoint='${{ secrets.CRUNCHY_S3_ENDPOINT }}' \
+          --set-json "networkPolicy.ingressFromSelectors=[{\"app.kubernetes.io/instance\":\"${DB_RELEASE}\"},{\"app.kubernetes.io/name\":\"pr-${PR}-ride-webapp\"}]"
+
+    - name: Wait for database
+      if: steps.check-db.outputs.exists == 'false'
+      env:
+        PR: ${{ github.event.pull_request.number }}
+      run: |
+        oc wait postgrescluster/pr-${PR}-ride-db-crunchy \
+          --for=jsonpath='{.status.instances[0].readyReplicas}'=1 \
+          --timeout=15m
+
+    - name: Rename cloned database and transfer ownership
+      if: steps.check-db.outputs.exists == 'false'
+      env:
+        PR: ${{ github.event.pull_request.number }}
+        DB_CLUSTER: pr-${{ github.event.pull_request.number }}-ride-db-crunchy
+      run: |
+        set -euo pipefail
+
+        SOURCE_DB="dev-ride-db"
+        TARGET_DB="pr-${PR}-ride-db"
+        DB_POD=$(oc get pods \
+          -l "postgres-operator.crunchydata.com/cluster=${DB_CLUSTER},postgres-operator.crunchydata.com/role=master" \
+          -o jsonpath='{.items[0].metadata.name}')
+        if [ -z "$DB_POD" ]; then
+          echo "No primary pod found for ${DB_CLUSTER}" >&2
+          exit 1
+        fi
+
+        psql_admin() {
+          oc exec "$DB_POD" -- psql -X -v ON_ERROR_STOP=1 "$@"
+        }
+
+        SOURCE_QUERY="SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = '${SOURCE_DB}')"
+        TARGET_QUERY="SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = '${TARGET_DB}')"
+        SOURCE_EXISTS=$(psql_admin -d postgres -Atc "$SOURCE_QUERY")
+        TARGET_EXISTS=$(psql_admin -d postgres -Atc "$TARGET_QUERY")
+
+        if [ "$SOURCE_EXISTS" = "t" ]; then
+          if [ "$TARGET_EXISTS" = "t" ]; then
+            OWNER_QUERY="SELECT pg_get_userbyid(datdba) FROM pg_database WHERE datname = '${TARGET_DB}'"
+            TARGET_OWNER=$(psql_admin -d postgres -Atc "$OWNER_QUERY")
+            if [ "$TARGET_OWNER" != "postgres" ]; then
+              echo "Refusing to replace ${TARGET_DB}: owner is ${TARGET_OWNER}, not postgres" >&2
+              exit 1
+            fi
+
+            OBJECTS_QUERY="SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname NOT IN ('pg_catalog', 'information_schema') AND n.nspname NOT LIKE 'pg_toast%' AND c.relkind IN ('r', 'p', 'v', 'm', 'S', 'f') AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.classid = 'pg_class'::regclass AND d.objid = c.oid AND d.deptype = 'e')"
+            TARGET_OBJECTS=$(psql_admin -d "$TARGET_DB" -Atc "$OBJECTS_QUERY")
+            if [ "$TARGET_OBJECTS" != "0" ]; then
+              echo "Refusing to replace non-empty database ${TARGET_DB}" >&2
+              exit 1
+            fi
+
+            psql_admin -d postgres -c "DROP DATABASE \"${TARGET_DB}\" WITH (FORCE)"
+          fi
+
+          psql_admin -d postgres -c \
+            "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${SOURCE_DB}' AND pid <> pg_backend_pid()"
+          psql_admin -d postgres -c \
+            "ALTER DATABASE \"${SOURCE_DB}\" RENAME TO \"${TARGET_DB}\""
+        elif [ "$TARGET_EXISTS" != "t" ]; then
+          echo "Neither ${SOURCE_DB} nor ${TARGET_DB} exists in ${DB_CLUSTER}" >&2
+          exit 1
+        fi
+
+        psql_admin -d postgres -c \
+          "ALTER DATABASE \"${TARGET_DB}\" OWNER TO \"${TARGET_DB}\""
+        psql_admin -d "$TARGET_DB" -c \
+          "REASSIGN OWNED BY \"${SOURCE_DB}\" TO \"${TARGET_DB}\""
+        psql_admin -d "$TARGET_DB" -c \
+          "ALTER SCHEMA public OWNER TO \"${TARGET_DB}\""
+
+    - name: Deploy PR application
+      env:
+        PR: ${{ github.event.pull_request.number }}
+        PR_RELEASE: ${{ needs.setup.outputs.helm_release_name }}
+        PR_DB_SECRET: pr-${{ github.event.pull_request.number }}-ride-db-crunchy-pguser-pr-${{ github.event.pull_request.number }}-ride-db
+      run: |
+        helm dependency update ./infrastructure/main
+        helm upgrade --install "$PR_RELEASE" \
+          -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml \
+          ./infrastructure/main \
+          --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" \
+          --set global.branch="${{ github.head_ref }}" \
+          --set global.host="pr-${PR}-ride.apps.gold.devops.gov.bc.ca" \
+          --set-string webapp.nameOverride="${PR_RELEASE}-webapp" \
+          --set-string webapp.fullnameOverride="${PR_RELEASE}-webapp" \
+          --set-string static.nameOverride="${PR_RELEASE}-static" \
+          --set-string static.fullnameOverride="${PR_RELEASE}-static" \
+          --set-string static.route.host="${PR_RELEASE}.apps.gold.devops.gov.bc.ca" \
+          --set static.route.vanityurl=false \
+          --set-string static.deployment.env.variables.VITE_API_HOST_OVERRIDE="https://${PR_RELEASE}.apps.gold.devops.gov.bc.ca" \
+          --set-string static.deployment.env.variables.WEBAPP_SERVICE_OVERRIDE="${PR_RELEASE}-webapp" \
+          --set-string redis.nameOverride="${PR_RELEASE}-redis" \
+          --set-string redis.fullnameOverride="${PR_RELEASE}-redis" \
+          --set-string redis.serviceAccountName="dev-ride-redis" \
+          --set-string webapp.deployment.redisHost="${PR_RELEASE}-redis" \
+          --set-string tasks.nameOverride="${PR_RELEASE}-tasks" \
+          --set-string tasks.fullnameOverride="${PR_RELEASE}-tasks" \
+          --set-string tasks.deployment.redisHost="${PR_RELEASE}-redis" \
+          --set-string webapp.deployment.env.postgresSecret="$PR_DB_SECRET" \
+          --set-string tasks.deployment.env.postgresSecret="$PR_DB_SECRET" \
+          --wait --timeout 10m
+
+    - name: Post preview URL to PR
+      if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PR: ${{ github.event.pull_request.number }}
+        PREVIEW_URL: ${{ needs.setup.outputs.openshift_gold_url }}
+      run: |
+        gh pr comment "$PR" \
+          --body "Preview environment: ${PREVIEW_URL}" \
+          --edit-last \
+          --create-if-none
