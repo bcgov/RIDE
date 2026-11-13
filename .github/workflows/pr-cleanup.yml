@@ -1,0 +1,80 @@
+name: Cleanup PR Environment
+# Tears down the ephemeral PR environment when a PR is closed or merged.
+
+on:
+  pull_request:
+    types: [closed]
+
+# Same group as the deploy workflow, so cleanup waits for any in-flight deploy
+# instead of racing it. cancel-in-progress is false so the cleanup is never cancelled.
+concurrency:
+  group: pr-env-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write # needed to delete PR images from GHCR
+
+env:
+  PR: ${{ github.event.pull_request.number }}
+
+jobs:
+  teardown:
+    name: Remove PR ${{ github.event.pull_request.number }} environment
+    # Fork PRs never got an environment, so there is nothing to remove
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on:
+      group: Larger Runners - OpenShift Static-IP
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: OC Setup
+        uses: ./.github/actions/oc-setup
+        with:
+          server: ${{ vars.OPENSHIFT_GOLD_SERVER }}
+          token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+          namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+      # App first, then the database it depends on
+      - name: Uninstall application release
+        run: |
+          helm uninstall "pr-${PR}-ride" --wait --timeout 5m \
+            || echo "Release pr-${PR}-ride not found, skipping"
+
+      - name: Uninstall database release
+        run: |
+          helm uninstall "pr-${PR}-ride-db" --wait --timeout 5m \
+            || echo "Release pr-${PR}-ride-db not found, skipping"
+
+      # PVCs, secrets and backup repos created by the operator can outlive the release
+      - name: Remove leftover database resources
+        run: |
+          oc delete postgrescluster "pr-${PR}-ride-db" --ignore-not-found --wait=false
+          oc delete pvc -l "postgres-operator.crunchydata.com/cluster=pr-${PR}-ride-db" --ignore-not-found
+          oc delete pvc -l "app.kubernetes.io/instance=pr-${PR}-ride" --ignore-not-found
+          oc delete secret -l "postgres-operator.crunchydata.com/cluster=pr-${PR}-ride-db" --ignore-not-found
+
+      - name: Confirm nothing is left
+        run: |
+          echo "Remaining resources labelled for this PR:"
+          oc get all,pvc,secret,route \
+            -l "app.kubernetes.io/instance in (pr-${PR}-ride, pr-${PR}-ride-db)" || true
+
+      # Delete the GHCR image versions tagged pr-N (the sha tag lives on the same version)
+      - name: Delete PR images from GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          for pkg in webapp static redis; do
+            name="${REPO}-${pkg}"
+            ids=$(gh api --paginate "/orgs/${OWNER}/packages/container/${name}/versions" \
+              --jq ".[] | select(.metadata.container.tags | index(\"pr-${PR}\")) | .id" || true)
+            for id in $ids; do
+              echo "Deleting ${name} version ${id}"
+              gh api -X DELETE "/orgs/${OWNER}/packages/container/${name}/versions/${id}" || true
+            done
+          done
