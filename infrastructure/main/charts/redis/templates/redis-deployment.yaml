@@ -18,7 +18,7 @@ spec:
       labels:
         {{- include "app.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ template "app.fullname" . }}
+      serviceAccountName: {{ .Values.serviceAccountName | default (include "app.fullname" .) }}
       volumes:
         - name: redis-1
       containers:
