@@ -55,7 +55,7 @@ static:
     repository: ghcr.io/bcgov/ride-static
 
   prometheus:
-    enabled: false # Static content does not expose application metrics.
+    enabled: true # Static content does not expose application metrics.
 
   vault:
     secretName: dev-static  # This is the name of the secret in vault that contains the environment variables for the app
