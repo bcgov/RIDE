@@ -23,7 +23,12 @@ Add these variables like this:
 
 
 # Workflows
-### 1. Build & Deploy to Dev
+### 1a. Build & Deploy to PR Branch
+- **What:** Generates new images when a PR gets created and updated into an ephenaral environment which is a clone of dev
+- **Trigger:** When a PR gets created or updated
+- **Image Tags:** `pr-###` and `sha`
+
+### 1b. Build & Deploy to Dev
 - **What:** Generates a new image from the code in `main` and deploys to Gold/GoldDR
 - **Trigger:** Manual or on push to `main` branch
 - **Image Tags:** `latest`, `latest-dev`, and `sha` 
@@ -57,5 +62,9 @@ Add these variables like this:
 ### Weekly Trivy Image Scans
 - **Purpose:** To identify any `HIGH` or `CRITICAL` vulnerabilities in the images. Results are uploaded to the Github Security Tab
 - **Trigger:** Automatic on Sundays at 2am
+
+### Cleanup PR
+- **Purpose:** To automatically cleanup the environment that was created by the PR
+- **Trigger:** The closure of a PR.
 
 
