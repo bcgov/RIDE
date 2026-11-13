@@ -73,6 +73,7 @@ static:
       variables:
         ENVIRONMENT: 'dev' # Set to dev, test, uat, prod
         SHOW_DEBUG_TOOLBAR: 'True' # Creates the route for the debug toolbar. Set to False for UAT and Prod
+        ADMIN_IP_ALLOWLIST: '142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 127.0.0.1'
         MAINTENANCE_MODE: 'False'
         SHOW_DEBUG_CONTROL: 'True' # Set to False for UAT and Prod. This is used to show the debug control button in the webapp
 

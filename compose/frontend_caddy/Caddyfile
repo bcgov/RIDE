@@ -1,13 +1,3 @@
-# to do
-# Get the metrics into sysdig for both caddy and caching
-# Do one last pass to see if anything else is missing from nginx in caddy.
-# Switch log level for caching
-
-# Other to-do
-# Remove caching on the backend
-# Work through scenarios where redis may be down. Technically it should fall back to the backend but it also relies on Redis.
-# See if we can use cache headers
-
 {
     admin localhost:2019
     auto_https off
@@ -38,7 +28,7 @@
         redis {
             url {$ENVIRONMENT}-ride-redis:6379
         }
-        log_level debug
+        log_level info
     }
 }
 
@@ -81,20 +71,12 @@
 ride.th.gov.bc.ca:3000, :3000 {
     root * /usr/share/caddy/html
 
-    # 1. Define matchers for Public vs Admin boundaries
     @adminPaths path /admin* /static* /healthcheck*
     @publicPaths not path /admin* /static* /healthcheck*
 
-    # 2. Import matched security headers
     import public_security_headers
     import admin_security_headers
 
-    # Prometheus Metrics (Restricted)
-    handle /metrics { # Check to see if this is restricted to admin endpoint already. If so, we can remove this and just use the admin endpoint for metrics.
-        @allowed remote_ip 10.0.0.0/8 127.0.0.1
-        metrics @allowed
-        error 404
-    }
 
     # Logging
     log_append cache_status           {http.response.header.Cache-Status}
@@ -129,13 +111,13 @@ ride.th.gov.bc.ca:3000, :3000 {
     }
 
     handle @adminPaths { 
-        @blocked not client_ip 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 127.0.0.1
+        @blocked not client_ip {$ADMIN_IP_ALLOWLIST}
         abort @blocked
         reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
     }
 
     handle @debugPath {
-        @blocked not client_ip 142.34.53.0/24 142.22.0.0/15 142.24.0.0/13 142.32.0.0/13 208.181.128.46/32 127.0.0.1
+        @blocked not client_ip {$ADMIN_IP_ALLOWLIST}
         abort @blocked
         reverse_proxy {env.ENVIRONMENT}-ride-webapp:80
     }
