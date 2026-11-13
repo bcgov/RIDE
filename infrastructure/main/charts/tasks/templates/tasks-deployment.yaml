@@ -49,7 +49,7 @@ spec:
             - sh
             - '-c'
           args:
-            - . /vault/secrets/secrets.env && /start_tasks_openshift.sh
+            - . /vault/secrets/secrets.env && {{ if .Values.deployment.redisHost }}export REDIS_HOST={{ .Values.deployment.redisHost | quote }} && {{ end }}/start_tasks_openshift.sh
           env:
             - name: DEPLOYMENT_TAG
               value: {{ $deploymentTag | quote }}

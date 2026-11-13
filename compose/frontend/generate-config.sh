@@ -3,6 +3,9 @@ set -e
 
 . /vault/secrets/secrets.env
 
+VITE_API_HOST="${VITE_API_HOST_OVERRIDE:-$VITE_API_HOST}"
+WEBAPP_SERVICE="${WEBAPP_SERVICE_OVERRIDE:-${ENVIRONMENT}-ride-webapp}"
+
 SHARED_CONFIG="/shared-config"
 
 CSP_NONCE=$(head -c 18 /dev/urandom | base64)
@@ -60,9 +63,9 @@ else
     echo "Debug toolbar is not enabled; not adding the debug toolbar route."
 fi
 
-# Update the environment placeholder in the copied config
-echo "Setting the Environment for connecting to the backend to '$ENVIRONMENT'"
-sed -i "s~{ENVIRONMENT}~$ENVIRONMENT~g" "${SHARED_CONFIG}/default.conf"
+# Set the backend service in the copied config
+echo "Setting the backend service to '$WEBAPP_SERVICE'"
+sed -i "s~{WEBAPP_SERVICE}~$WEBAPP_SERVICE~g" "${SHARED_CONFIG}/default.conf"
 
 echo "Setting CSP nonce"
 sed -i "s~{CSP_NONCE}~$CSP_NONCE~g" "${SHARED_CONFIG}/security_headers.conf"
