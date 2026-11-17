@@ -8,7 +8,6 @@ import { updateUser } from "../../slices/users";
 import {
   CREATOR_OPTIONS,
   EVENT_TYPE_OPTIONS,
-  SEVERITY_EVENT_TYPES,
   SEVERITY_OPTIONS,
   STATUS_OPTIONS,
   getOptionNames,
@@ -131,32 +130,13 @@ export default function EditUserForm(props) {
   );
 }
 
-// DBC22-7325: why a user with notifications turned on receives none, as the sender decides it
-function getNotOnReason(user, subscription, statuses) {
-  if (!user.is_active) { return 'account disabled'; }
-  if (!user.email) { return 'no email address'; }
-  if (!subscription.notification_areas?.length) { return 'no service areas'; }
-  if (!subscription.notification_types?.length) { return 'no event types'; }
-  if (!statuses.length) { return 'no event statuses that apply'; }
-
-  const onlySeverityTypes = subscription.notification_types.every((type) => SEVERITY_EVENT_TYPES.includes(type));
-  if (onlySeverityTypes && !subscription.notification_severities?.length) { return 'no event severities'; }
-
-  return null;
-}
-
-// DBC22-7325: a user's notification settings, read only
+// DBC22-7325: a user's saved notification settings, read only
 function NotificationSummary({ user, areas }) {
   const subscription = user.email_subscription;
-  const statuses = (subscription?.notification_statuses || [])
-    .filter((status) => user.is_approver || status !== 'approvalPending');  // approval requests go to approvers only
-  const notOnReason = subscription?.notification ? getNotOnReason(user, subscription, statuses) : null;
-  const receives = subscription?.notification && !notOnReason;
+  const on = !!subscription?.notification;
 
-  const severityApplies = subscription?.notification_types?.some((type) => SEVERITY_EVENT_TYPES.includes(type));
-  const severities = severityApplies
-    ? getOptionNames(SEVERITY_OPTIONS, subscription.notification_severities) || 'None'
-    : 'Not applicable to the selected event types';
+  // Comma separated names of the saved options, or None
+  const names = (options, ids) => getOptionNames(options, ids) || 'None';
 
   return (
     <div className={'notifications'}>
@@ -164,35 +144,35 @@ function NotificationSummary({ user, areas }) {
 
       <div className={'row'}>
         <div className={'label'}>Email notifications:</div>
-        <div>{receives ? 'Yes' : 'No'}{notOnReason && ` (turned on, but ${notOnReason})`}</div>
+        <div>{on ? 'Yes' : 'No'}</div>
       </div>
 
-      {receives &&
+      {on &&
         <>
           <div className={'row'}>
             <div className={'label'}>Service areas:</div>
-            <div>{getOptionNames(areas.map((area) => ({ id: area.id, name: area.label })),
+            <div>{names(areas.map((area) => ({ id: area.id, name: area.label })),
               subscription.notification_areas)}</div>
           </div>
 
           <div className={'row'}>
             <div className={'label'}>Event types:</div>
-            <div>{getOptionNames(EVENT_TYPE_OPTIONS, subscription.notification_types)}</div>
+            <div>{names(EVENT_TYPE_OPTIONS, subscription.notification_types)}</div>
           </div>
 
           <div className={'row'}>
             <div className={'label'}>Event severities:</div>
-            <div>{severities}</div>
+            <div>{names(SEVERITY_OPTIONS, subscription.notification_severities)}</div>
           </div>
 
           <div className={'row'}>
             <div className={'label'}>Event statuses:</div>
-            <div>{getOptionNames(STATUS_OPTIONS, statuses)}</div>
+            <div>{names(STATUS_OPTIONS, subscription.notification_statuses)}</div>
           </div>
 
           <div className={'row'}>
             <div className={'label'}>Event creator:</div>
-            <div>{getOptionNames(CREATOR_SUMMARIES, [subscription.notification_creator])}</div>
+            <div>{names(CREATOR_SUMMARIES, [subscription.notification_creator])}</div>
           </div>
         </>
       }
