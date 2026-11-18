@@ -14,5 +14,5 @@ whitenoise==6.12.0
 kubernetes==36.0.3
 huey==3.5.4
 redis==8.1.0
-timezonefinder==8.3.0
+timezonefinder==9.2.0
 django-prometheus==2.5.0
