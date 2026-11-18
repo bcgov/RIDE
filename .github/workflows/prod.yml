@@ -55,7 +55,7 @@ jobs:
             image_name: bcgov/ride-static
     steps:
     - name: Add Tag
-      uses: shrink/actions-docker-registry-tag@v5
+      uses: shrink/actions-docker-registry-tag@e6aaef25c595b6e0edd18bf4c7dbfea3abd43299 # v5
       with:
         registry: ${{ needs.setup.outputs.image_registry }}
         repository: ${{ matrix.image_name }}
@@ -73,7 +73,7 @@ jobs:
       url: ${{ needs.setup.outputs.openshift_gold_url }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
     - name: OC Setup
       uses: ./.github/actions/oc-setup
@@ -98,7 +98,7 @@ jobs:
       url: ${{ needs.setup.outputs.openshift_golddr_url }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
     - name: OC Setup
       uses: ./.github/actions/oc-setup
