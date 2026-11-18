@@ -4,7 +4,7 @@ django-allauth[socialaccount]==65.19.4
 django-cors-headers==4.7.0
 django-debug-toolbar==5.1.0
 django-environ==0.12.0
-djangorestframework==3.17.2
+djangorestframework==3.18.2
 djangorestframework_gis
 gitPython==3.2.1
 gunicorn==23.0.0
