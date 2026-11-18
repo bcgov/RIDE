@@ -25,7 +25,7 @@ RUN ./zic -b fat -d /out -L /dev/null northamerica
 
 
 # Use an official Python runtime as a parent image
-FROM python:3.14-slim
+FROM python:3.15-slim
 
 # Install Python Package Libraries
 RUN apt-get update \
