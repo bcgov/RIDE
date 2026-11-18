@@ -9,7 +9,7 @@ djangorestframework_gis
 gitPython==3.2.1
 gunicorn==23.0.0
 psycopg[binary]
-requests==2.32.3
+requests==2.33.0
 whitenoise==6.11.0
 kubernetes==36.0.1
 huey==3.0.3
