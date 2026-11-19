@@ -1,4 +1,10 @@
+from email.mime.image import MIMEImage
+from functools import cache
+from pathlib import Path
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 ROAD_ABBREVIATIONS = {
     r"\bHwy\b": "Highway",
@@ -65,3 +71,51 @@ def transform_road_abbreviations(input):
         s = re.sub(pattern, full_name, s)
 
     return s
+
+
+# DBC22-7322: email images, from DBC apps/shared/helpers.py
+EMAIL_IMAGES_DIR = Path(__file__).resolve().parents[2] / 'static' / 'images'
+
+
+@cache
+def read_email_image(filename):
+    ''' Image bytes, read once per process since every email attaches the same images '''
+
+    return (EMAIL_IMAGES_DIR / filename).read_bytes()
+
+
+# Attach images with Content-ID
+def attach_image_to_email(msg, cid, filename):
+    img = MIMEImage(read_email_image(filename), _subtype="png")
+    img.add_header('Content-ID', f'<{cid}>')
+    img.add_header('X-Attachment-Id', filename)
+    img.add_header('Content-Disposition', 'inline', filename=filename)
+    msg.attach(img)
+
+
+def get_used_email_images(html):
+    '''
+    The images ({cid: file name}) the HTML shows.  Each cid is its image's
+    file name in EMAIL_IMAGES_DIR without ".png"
+    '''
+
+    images = {}
+    # image sources only, so event text can't add attachments
+    for cid in sorted(set(re.findall(r'src="cid:([\w.-]+)"', html))):
+        if (EMAIL_IMAGES_DIR / f'{cid}.png').is_file():
+            images[cid] = f'{cid}.png'
+        else:
+            logger.error(f'Email image {cid}.png not found')
+    return images
+
+
+def attach_email_images(msg, images):
+    '''
+    Attach images ({cid: file name}) as parts related to the HTML.  DBC
+    attaches every image to a multipart/mixed email, which mail apps such as
+    Apple Mail list as attachments under the message.
+    '''
+
+    msg.mixed_subtype = 'related'
+    for cid, filename in images.items():
+        attach_image_to_email(msg, cid, filename)

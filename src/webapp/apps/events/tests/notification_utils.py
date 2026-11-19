@@ -38,7 +38,8 @@ class NotificationTestCase(TestCase):
         super().setUp()
 
         for target in ('apps.events.models._is_notification_disabled',
-                       'apps.events.tasks._is_notification_disabled'):
+                       'apps.events.tasks._is_notification_disabled',
+                       'apps.events.admin._is_notification_disabled'):
             patcher = patch(target, return_value=False)
             patcher.start()
             self.addCleanup(patcher.stop)

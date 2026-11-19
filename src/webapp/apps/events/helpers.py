@@ -291,3 +291,86 @@ def area_label(service_area):
     ''' "01 - South Island", matching the frontend service area labels '''
 
     return f'{service_area.sortingOrder:02} - {service_area.name}' if service_area else ''
+
+
+def format_in_effect_datetime(value, tz):
+    from apps.events.models import TIME_FORMAT  # '%-I' isn't supported on Windows
+
+    dt = value.astimezone(ZoneInfo(tz or 'America/Vancouver'))
+    return dt.strftime(TIME_FORMAT).lower() + f' on {dt:%A}, {dt:%B} {dt.day}, {dt.year}'
+
+
+def get_in_effect_items(event):
+    '''Lines for the "In effect" section; empty for ongoing events with no end or schedule'''
+    # RIDE: schedules described with RIDE's desc(), as in the RIDE event preview
+    from apps.events.models import desc
+
+    start = event.start and event.start > datetime.datetime.now(datetime.timezone.utc)
+    start_text = f'From {format_in_effect_datetime(event.start, event.timezone)}' if start else ''
+    schedules = [desc(schedule) for schedule in event.schedules or []]
+
+    if event.end:
+        end_text = f'until {format_in_effect_datetime(event.end, event.timezone)}'
+    elif start or schedules:
+        end_text = 'until further notice'
+    else:
+        return []
+
+    period = f'{start_text} {end_text}' if start_text else 'U' + end_text[1:]
+    return [period] + schedules
+
+
+def get_traffic_impact_items(event):
+    from apps.events.open511 import get_impact_label
+
+    unit = (event.delay_unit or 'minutes').rstrip('s')
+    delay = [f'Estimated {event.delay_amount} {unit} delay'] if event.delay_amount else []
+    labels = [get_impact_label(impact) for impact in event.impacts or []]
+    return delay + [label for label in labels if label]  # skip impacts without a label
+
+
+def get_restriction_items(event):
+    return [f"{item.get('label', '')} {item.get('text') or ''}".strip() for item in event.restrictions or []]
+
+
+# "For N km" on extents
+def get_location_length(event):
+    if not event.location or event.location.geom_type == 'Point':
+        return ''
+
+    geom = event.location.clone()
+    geom.srid = geom.srid or 4326
+    geom.transform(3005)  # BC Albers, metres
+    km = geom.length / 1000
+    return f'{km:.0f}' if km >= 10 else f'{km:.1f}'
+
+
+# Match DriveBC EventsListPage "View on map" for area notification emails
+_EVENT_VIEW_ZOOM = 11
+
+
+def build_event_site_link(event):
+    '''
+    DriveBC map URL for an event, as DBC builds for area notifications.
+    None when no DriveBC URL is configured.
+    '''
+    from django.conf import settings
+
+    if not settings.DRIVEBC_BASE_URL:
+        return None
+
+    link = (
+        f'{settings.DRIVEBC_BASE_URL}?type=event'
+        f'&display_category={event.display_category}&id={event.id}'
+    )
+
+    location = getattr(event, 'location', None)
+    if location is not None and not location.empty:
+        if location.geom_type == 'Point':
+            pan_lon, pan_lat = location.x, location.y
+        else:
+            centroid = location.centroid
+            pan_lon, pan_lat = centroid.x, centroid.y
+        link += f'&pan={pan_lon},{pan_lat}&zoom={_EVENT_VIEW_ZOOM}'
+
+    return link

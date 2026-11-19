@@ -5,6 +5,30 @@ export function getCookie(key) {
   return '';
 }
 
+// DBC22-7322: return to a deep link (e.g., "View on RIDE" in a notification
+// email) after signing in, since login always returns to the landing page
+const RETURN_PATH_KEY = 'ride-return-path';
+
+const RETURN_PATH_TTL = 30 * 60 * 1000;  // an unused path is ignored after 30 minutes
+
+export function rememberReturnPath() {
+  sessionStorage.setItem(RETURN_PATH_KEY, JSON.stringify({
+    path: globalThis.location.pathname + globalThis.location.search,
+    at: Date.now(),
+  }));
+}
+
+export function takeReturnPath() {
+  const stored = sessionStorage.getItem(RETURN_PATH_KEY);
+  sessionStorage.removeItem(RETURN_PATH_KEY);
+  try {
+    const { path, at } = JSON.parse(stored) || {};
+    return Date.now() - at < RETURN_PATH_TTL ? path : null;
+  } catch {
+    return null;
+  }
+}
+
 class CustomError extends Error {
   constructor(message) {
     super(message);
