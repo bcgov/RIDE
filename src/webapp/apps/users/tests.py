@@ -311,3 +311,144 @@ class TestSession(TestCase):
         prefetched = get_user_model().objects.prefetch_related('organizations__service_areas').get(pk=self.user.pk)
         with self.assertNumQueries(0):
             self.assertEqual(get_user_notification_area_ids(prefetched), {self.area.id})
+
+
+class TestAccessRequest(TestCase):
+    ''' DBC22-6697: access request email and granting the requested organization '''
+
+    def setUp(self):
+        from apps.organizations.models import Organization
+
+        self.org = Organization.objects.create(name='Org A', contact_name='Pat Contact', contact_id='PCONTACT')
+        self.user = get_user_model().objects.create_user(
+            username='newuser', email='new@gov.bc.ca', first_name='New', last_name='User')
+        self.client.force_login(self.user)
+
+    def request_access(self, organization=None):
+        return self.client.post('/api/users/request', {
+            'type': 'ADD_TO_ORGANIZATION', 'organization': (organization or self.org).id,
+        }, content_type='application/json')
+
+    def users(self):
+        admin, _ = get_user_model().objects.get_or_create(username='admin', is_staff=True, is_superuser=True)
+        self.client.force_login(admin)
+        return {user['username']: user for user in self.client.get('/api/users').json()}
+
+    def test_email(self):
+        from django.conf import settings
+        from django.core import mail
+
+        self.assertEqual(self.request_access().status_code, 201)
+
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0]
+        self.assertEqual(msg.subject, 'A RIDE user has requested to be added to an organization')
+        self.assertEqual(msg.from_email, settings.RIDE_NOTIFICATION_FROM_EMAIL_SENDER)
+        self.assertEqual(msg.to, settings.ACCESS_REQUEST_RECEIVERS)
+
+        html = msg.alternatives[0][0]
+        grant_url = f'{settings.FRONTEND_BASE_URL}users/?grant={self.user.id}'
+        users_url = f'{settings.FRONTEND_BASE_URL}users/?user={self.user.id}'
+        for body in (msg.body, html):
+            self.assertIn(grant_url, body)
+            self.assertIn(users_url, body)
+            self.assertIn('New User', body)
+            self.assertIn('new@gov.bc.ca', body)
+            self.assertIn('Org A', body)
+            self.assertIn('Pat Contact', body)
+            self.assertIn('PCONTACT', body)
+        self.assertIn('Grant permission', html)
+
+        # logo, button icon and footer images are inline, not attachments
+        self.assertEqual(msg.mixed_subtype, 'related')
+        cids = {part['Content-ID'] for part in msg.attachments}
+        self.assertTrue({'<ride-logo>', '<circle-check>', '<bclogo>'} <= cids)
+
+    def test_missing_contact(self):
+        from apps.organizations.models import Organization
+        from django.core import mail
+
+        self.request_access(Organization.objects.create(name='Org B'))
+        self.assertIn('Organization’s authoritative contact: Not provided', mail.outbox[0].body)
+
+    def test_requested_organization(self):
+        self.request_access()
+
+        user = self.users()['newuser']
+        self.assertEqual(user['requested_organization'], self.org.id)
+        self.assertFalse(user['request_organization'])
+
+    def test_granting_resolves_the_request(self):
+        self.request_access()
+        self.users()  # signs in as the admin
+        response = self.client.patch(f'/api/users/{self.user.id}', {'organizations': [self.org.id]},
+                                     content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json()['requested_organization'])
+
+        user = self.users()['newuser']
+        self.assertIsNone(user['requested_organization'])  # old Grant links do nothing
+
+        # removed from the organization later: asked to request access again
+        self.client.patch(f'/api/users/{self.user.id}', {'organizations': []}, content_type='application/json')
+        self.assertTrue(self.users()['newuser']['request_organization'])
+
+    def test_assigning_elsewhere_resolves_the_request(self):
+        from apps.users.models import Request
+
+        self.request_access()
+        self.org.users.add(self.user)  # e.g. Django admin or an import
+        self.assertFalse(Request.objects.filter(user=self.user).exists())
+
+    def test_user_with_an_organization_cannot_request(self):
+        from django.core import mail
+        from apps.users.models import Request
+
+        self.user.organizations.add(self.org)
+        response = self.request_access()
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Request.objects.filter(user=self.user).exists())
+        self.assertEqual(mail.outbox, [])
+
+    def test_name_falls_back_to_email(self):
+        from django.core import mail
+
+        self.user.first_name = self.user.last_name = ''
+        self.user.save()
+        self.request_access()
+        self.assertIn('Name: new@gov.bc.ca', mail.outbox[0].body)
+
+    def test_no_requested_organization(self):
+        user = self.users()['newuser']
+        self.assertIsNone(user['requested_organization'])
+        self.assertTrue(user['request_organization'])
+
+    def test_failed_email_keeps_no_request(self):
+        from unittest.mock import patch
+        from apps.users.models import Request
+
+        with patch('django.core.mail.backends.locmem.EmailBackend.send_messages', side_effect=ConnectionRefusedError):
+            response = self.request_access()
+        self.assertEqual(response.status_code, 503)
+        self.assertIn('try again', response.json()['detail'])
+        self.assertFalse(Request.objects.filter(user=self.user).exists())
+
+        # so the user can ask again
+        self.assertEqual(self.request_access().status_code, 201)
+
+    def test_no_extra_queries_per_request(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        from apps.users.models import Request
+
+        requesters = [get_user_model().objects.create_user(username=username) for username in ('one', 'two')]
+        self.users()  # create the admin first
+        with CaptureQueriesContext(connection) as no_requests:
+            self.users()
+
+        for requester in requesters:
+            Request.objects.create(user=requester, details={'organization': self.org.id})
+        with CaptureQueriesContext(connection) as two_requests:
+            self.users()
+
+        self.assertEqual(len(no_requests), len(two_requests))

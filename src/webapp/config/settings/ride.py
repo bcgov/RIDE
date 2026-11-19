@@ -48,7 +48,6 @@ RIDE_ORGS_STRING = env('RIDE_ORGS_STRING', default="")
 
 EVENT_PREFIX = env('EVENT_PREFIX', default='RIDE')
 
-RIDE_FROM_EMAIL_DEFAULT = env('RIDE_FROM_EMAIL_DEFAULT', default='DoNotReply_RIDE@gov.bc.ca')
 ACCESS_REQUEST_RECEIVERS = env('ACCESS_REQUEST_RECEIVERS', default='ride.support@gov.bc.ca').split(';')
 
 # DBC22-7326: event notification emails (mirrors DBC DRIVEBC_FROM_EMAIL_*)
