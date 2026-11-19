@@ -1,4 +1,5 @@
 @use "../../styles/variables.scss" as *;
+@use "./button-mixins" as *;
 @use "tailwindcss";
 
 .modal-root {
@@ -79,35 +80,15 @@
             margin: .75rem;
 
             button {
-              display: flex;
-              cursor: pointer;
-              align-items: center;
-              border-radius: 0.25rem;
-              padding: .4rem .5rem;
-              font-size: 0.875rem;
-              font-weight: 700;
-              transition: background 0.2s;
-
-              svg {
-                margin-right: .5rem;
-              }
+              @include action-button;
             }
 
             .modal-deactivate-btn {
-              background: $Type-Primary;
-              color: #fff;
-
-              &:hover {
-                background: $Type-Secondary;
-              }
+              @extend %primary-button;
             }
 
             .modal-cancel-btn {
-              color: $Grey80;
-
-              &:hover {
-                background: $Grey20;
-              }
+              @extend %cancel-button;
             }
           }
         }

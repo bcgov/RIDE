@@ -127,6 +127,25 @@
         text-align: center;
       }
 
+      // DBC22-7324: styled as the sign out link; resets the page <header>'s
+      // link spacing, active weight and environment colour. A class, as
+      // headlessui's MenuItem replaces its child's id
+      .notification-settings-link {
+        align-self: center;
+        margin: 0.5rem 0 0;
+        font-size: 14px;
+        font-weight: 400;
+        color: $Type-Link;
+
+        &:hover, &[data-focus] {
+          text-decoration: underline;
+        }
+      }
+
+      .notification-settings-link + #signout-link {
+        margin-top: 0.5rem;
+      }
+
       #signout-link {
         text-align: center;
         margin: 1rem 0;

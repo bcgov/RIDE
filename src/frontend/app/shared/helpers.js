@@ -51,8 +51,9 @@ export class UniqueNameError extends CustomError {
 }
 
 export class NetworkError extends CustomError {
-  constructor(message = "Network error") {
+  constructor(message = "Network error", data = null) {
     super(message);
+    this.data = data;  // the response body, e.g. field validation errors
   }
 }
 
@@ -140,7 +141,7 @@ const request = (url, params={}, headers={}, include_credentials=true, method="G
       const apiMessage = open511
         ? `Sync to Open511 failed: ${[].concat(open511).join('\n')}`
         : responseData?.detail;
-      throw new NetworkError(apiMessage);
+      throw new NetworkError(apiMessage, responseData);
     } else if (statusCode.startsWith('5')) {
       throw new ServerError();
     }

@@ -1,0 +1,22 @@
+@use "./button-mixins" as *;
+
+// DBC22-7324: page action buttons, styled as RIDEModal's actions
+%disabled-while-saving {
+  &:disabled {
+    opacity: .6;
+    cursor: default;
+    pointer-events: none;  // no hover colour while saving
+  }
+}
+
+.ride-primary-btn {
+  @include action-button;
+  @extend %primary-button;
+  @extend %disabled-while-saving;
+}
+
+.ride-cancel-btn {
+  @include action-button;
+  @extend %cancel-button;
+  @extend %disabled-while-saving;
+}
