@@ -3,6 +3,9 @@
   "extends": [
     "github>bcgov/renovate-config#2026.10.29"
   ],
+  "constraints": {
+    "npm": "<12"
+  },
   "hostRules": [
     {
       "hostType": "npm",
@@ -30,6 +33,12 @@
       "description": "Disable automerge for major updates",
       "matchUpdateTypes": ["major"],
       "automerge": false
+    },
+    {
+      "description": "Hold npm at 11 until npm/cli#9800 is fixed",
+      "matchDepNames": ["npm"],
+      "matchManagers": ["npm"],
+      "enabled": false
     }
   ]
 }
