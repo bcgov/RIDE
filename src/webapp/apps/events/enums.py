@@ -333,3 +333,150 @@ EVENT_SUBTYPE_GROUPS = {
         Situation.SPECIAL_EVENT,
     ],
 }
+
+
+# DBC22-7326: email notifications.  Ported from DBC apps/event/enums.py
+# (DBC22-6954 @ dd9770a3) so the ported DBC helpers, filters and templates read
+# the same codes.  RIDE's EventType values already match DBC's EVENT_TYPE.
+
+class EventSeverity:
+    MAJOR = "MAJOR"
+    MINOR = "MINOR"
+
+
+class EventDirection:
+    NORTH = "N"
+    EAST = "E"
+    SOUTH = "S"
+    WEST = "W"
+    BOTH = "BOTH"
+    NONE = "NONE"
+
+
+EVENT_DIRECTION_DISPLAY = {
+    EventDirection.NORTH: "Northbound",
+    EventDirection.EAST: "Eastbound",
+    EventDirection.SOUTH: "Southbound",
+    EventDirection.WEST: "Westbound",
+    EventDirection.BOTH: "Both directions",
+    EventDirection.NONE: "Both directions"
+}
+
+
+class EventDisplayCategory:
+    ADVISORY = 'advisories'
+    CLOSURE = 'closures'
+    MAJOR_DELAYS = 'majorEvents'
+    MINOR_DELAYS = 'minorEvents'
+    FUTURE_DELAYS = 'futureEvents'
+    ROAD_CONDITION = 'roadConditions'
+    CHAIN_UP = 'chainUps'
+
+
+# Fields highlighted in emails when changed; item sections diffed in item_changes
+EVENT_HIGHLIGHT_FIELDS = ['location_description', 'closest_landmark', 'next_update', 'additional']
+
+
+# Codes stored on users.EmailSubscription, camelCase like DBC's notification_types
+
+class NotificationEventType:
+    INCIDENTS = 'incidents'
+    PLANNED_EVENTS = 'plannedEvents'
+    ROAD_CONDITIONS = 'roadConditions'
+    CHAIN_UPS = 'chainUps'
+
+
+# RIDE Event.event_type value -> notification event type code
+NOTIFICATION_EVENT_TYPE_MAP = {
+    'Incident': NotificationEventType.INCIDENTS,
+    'Planned event': NotificationEventType.PLANNED_EVENTS,
+    EventType.ROAD_CONDITION: NotificationEventType.ROAD_CONDITIONS,
+    EventType.CHAIN_UP: NotificationEventType.CHAIN_UPS,
+}
+
+
+class NotificationSeverity:
+    # Reuses DBC display category values
+    CLOSURES = EventDisplayCategory.CLOSURE
+    MAJOR = EventDisplayCategory.MAJOR_DELAYS
+    MINOR = EventDisplayCategory.MINOR_DELAYS
+
+
+class NotificationStatus:
+    OVERDUE = 'overdue'
+    UPDATE_DUE_SOON = 'updateDueSoon'
+    NEW = 'new'
+    UPDATED = 'updated'
+    CLEARED = 'cleared'
+    RECONFIRMED = 'reconfirmed'
+    APPROVAL_PENDING = 'approvalPending'
+    APPROVED = 'approved'
+
+
+class NotificationCreator:
+    ALL = 'all'
+    ORGANIZATION = 'organization'
+    ME = 'me'
+
+
+NOTIFICATION_EVENT_TYPES = [
+    NotificationEventType.INCIDENTS, NotificationEventType.PLANNED_EVENTS,
+    NotificationEventType.ROAD_CONDITIONS, NotificationEventType.CHAIN_UPS,
+]
+NOTIFICATION_SEVERITIES = [
+    NotificationSeverity.CLOSURES, NotificationSeverity.MAJOR, NotificationSeverity.MINOR,
+]
+NOTIFICATION_STATUSES = [
+    NotificationStatus.OVERDUE, NotificationStatus.UPDATE_DUE_SOON, NotificationStatus.NEW,
+    NotificationStatus.UPDATED, NotificationStatus.CLEARED, NotificationStatus.RECONFIRMED,
+    NotificationStatus.APPROVAL_PENDING, NotificationStatus.APPROVED,
+]
+NOTIFICATION_CREATORS = [
+    NotificationCreator.ALL, NotificationCreator.ORGANIZATION, NotificationCreator.ME,
+]
+
+
+class NotificationKind:
+    ''' What happened to the event; drives subject, intro text and status filter '''
+
+    NEW = 'new'
+    UPDATED = 'updated'
+    RECONFIRMED = 'reconfirmed'
+    CLEARED = 'cleared'
+    APPROVAL_REQUESTED = 'approvalRequested'
+    APPROVED_PUBLISHED = 'approvedPublished'
+    UPDATE_APPROVED = 'updateApproved'
+    CLEARING_APPROVED = 'clearingApproved'
+    DUE_SOON = 'dueSoon'
+    OVERDUE = 'overdue'
+
+
+# Status filters each kind of notification matches.  Approval outcomes also
+# match their underlying status so users following new/updated/cleared events
+# still hear about ones that needed approval.
+NOTIFICATION_KIND_STATUSES = {
+    NotificationKind.NEW: {NotificationStatus.NEW},
+    NotificationKind.UPDATED: {NotificationStatus.UPDATED},
+    NotificationKind.RECONFIRMED: {NotificationStatus.RECONFIRMED},
+    NotificationKind.CLEARED: {NotificationStatus.CLEARED},
+    NotificationKind.APPROVAL_REQUESTED: {NotificationStatus.APPROVAL_PENDING},
+    NotificationKind.APPROVED_PUBLISHED: {NotificationStatus.APPROVED, NotificationStatus.NEW},
+    NotificationKind.UPDATE_APPROVED: {NotificationStatus.APPROVED, NotificationStatus.UPDATED},
+    NotificationKind.CLEARING_APPROVED: {NotificationStatus.APPROVED, NotificationStatus.CLEARED},
+    NotificationKind.DUE_SOON: {NotificationStatus.UPDATE_DUE_SOON},
+    NotificationKind.OVERDUE: {NotificationStatus.OVERDUE},
+}
+
+# Subjects follow "(RIDE-12345) <subject>"; {label} is get_event_subject_label
+NOTIFICATION_SUBJECTS = {
+    NotificationKind.NEW: 'New {label} in {area}',
+    NotificationKind.UPDATED: 'Update to {label} in {area}',
+    NotificationKind.RECONFIRMED: 'Reconfirmed Road Condition in {area}',
+    NotificationKind.CLEARED: 'Cleared {label} in {area}',
+    NotificationKind.APPROVAL_REQUESTED: 'Approval requested for {label} in {area}',
+    NotificationKind.APPROVED_PUBLISHED: 'Approved and published {label} in {area}',
+    NotificationKind.UPDATE_APPROVED: 'Approved and updated {label} in {area}',
+    NotificationKind.CLEARING_APPROVED: 'Approved and updated {label} in {area}',
+    NotificationKind.DUE_SOON: 'Updated required for {label} in {area}',
+    NotificationKind.OVERDUE: 'Overdue {label} in {area}',
+}
