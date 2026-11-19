@@ -26,6 +26,7 @@ import {
   refreshTrafficImpacts,
 } from './slices';
 
+import "./tailwind.css";
 import "./app.scss";
 
 export function Layout({ children }) {
