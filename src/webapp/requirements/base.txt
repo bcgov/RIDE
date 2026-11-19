@@ -7,7 +7,7 @@ django-environ==0.14.0
 djangorestframework==3.18.3
 djangorestframework_gis
 gitPython==3.2.1
-gunicorn==23.0.0
+gunicorn==27.0.0
 psycopg[binary]
 requests==2.34.2
 whitenoise==6.12.0
