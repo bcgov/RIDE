@@ -11,7 +11,7 @@ gunicorn==23.0.0
 psycopg[binary]
 requests==2.34.2
 whitenoise==6.12.0
-kubernetes==36.0.3
+kubernetes==37.0.2
 huey==3.5.4
 redis==8.1.0
 timezonefinder==9.2.0
