@@ -395,7 +395,7 @@ export default function Home() {
                     <div className={'user-btn'}><FontAwesomeIcon icon={faEdit} /> <span>Edit</span></div>
                   }>
 
-                  <EditUserForm user={user} orgs={orgs} />
+                  <EditUserForm user={user} orgs={orgs} areas={serviceAreas} />
                 </RIDEModal>
 
                 { user.is_active &&
@@ -424,7 +424,7 @@ export default function Home() {
                     </div>
                   }>
 
-                  <EditUserForm user={user} orgs={orgs} />
+                  <EditUserForm user={user} orgs={orgs} areas={serviceAreas} />
                 </RIDEModal>
 
               </div>
