@@ -37,3 +37,29 @@ class Request(BaseModel):
     user = models.ForeignKey(RIDEUser, on_delete=models.CASCADE)
     request_type = models.CharField(choices=RequestTypes, default=RequestTypes.ADD_TO_ORG)
     details = models.JSONField(default=dict)
+
+
+class EmailSubscription(BaseModel):
+    '''
+    DBC22-7326: a user's RIDE email notification settings.
+
+    Mirrors DBC's authentication.EmailSubscription (notification flag plus
+    JSON lists of codes), but RIDE has one subscription per user covering
+    several service areas rather than one per area.  Codes are defined in
+    apps.events.enums (NotificationEventType, NotificationSeverity,
+    NotificationStatus and NotificationCreator).
+    '''
+
+    user = models.OneToOneField(RIDEUser, on_delete=models.CASCADE,
+                                related_name='email_subscription')
+
+    notification = models.BooleanField(default=False, blank=True)  # Whether to notify user at all
+    notification_areas = models.ManyToManyField('organizations.ServiceArea', blank=True,
+                                                related_name='email_subscriptions')
+    notification_types = models.JSONField(default=list, blank=True)  # list of event type codes
+    notification_severities = models.JSONField(default=list, blank=True)  # list of severity codes
+    notification_statuses = models.JSONField(default=list, blank=True)  # list of status codes
+    notification_creator = models.CharField(max_length=20, default='all', blank=True)
+
+    def __str__(self):
+        return f'{self.user} notifications {"on" if self.notification else "off"}'
