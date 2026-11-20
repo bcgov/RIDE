@@ -73,7 +73,7 @@ manage: backend ## Run any management command: make manage cmd="event RIDE-123 -
 seed: backend ## Add sample organizations, users and events: make seed args="--clear --seed 1"
 	$(COMPOSE) exec webapp python manage.py seed_data $(args)
 
-tasks: backend ## Run the Huey worker: auto-clearing and notification emails (starts Redis; Ctrl-C stops the worker)
+tasks: backend ## Run the Huey worker, which clears events at their end time (starts Redis; Ctrl-C stops the worker)
 	@# docker-compose.yml has no Redis, so run one on the stack's network as `redis`
 	@docker container inspect ride-redis >/dev/null 2>&1 || \
 		docker run -d --rm --name ride-redis --network $(NETWORK) --network-alias redis redis:8-alpine
