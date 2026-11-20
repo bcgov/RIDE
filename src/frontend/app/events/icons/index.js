@@ -132,6 +132,21 @@ import chainupInactiveStatic from './chainup-inactive-static.svg';
 import chainupInactiveHover from './chainup-inactive-hover.svg';
 import chainupInactiveActive from './chainup-inactive-active.svg';
 
+const chainupDirectionIcons = import.meta.glob('./chainup-*-*.png', { eager: true, import: 'default' });
+
+const DIRECTION_KEYS = {
+  NORTHBOUND: 'north',
+  SOUTHBOUND: 'south',
+  EASTBOUND: 'east',
+  WESTBOUND: 'west',
+};
+
+export const CHAINUP_ICON_SCALE = 0.25;
+
+export function getChainupDirectionIcon(direction, state='static') {
+  return chainupDirectionIcons[`./chainup-${DIRECTION_KEYS[direction] || 'both'}-${state}.png`];
+}
+
 import roadconditionActiveStatic from './roadcondition-default-static.svg';
 import roadconditionActiveHover from './roadcondition-default-hover.svg';
 import roadconditionActiveActive from './roadcondition-default-active.svg';
@@ -803,6 +818,13 @@ export function getIconAndStroke(event, state='static', includePending=true) {
       return [
         icons[type][severity][tense][closure][status][state],
         strokes[severity][status][state],
+      ];
+    } else if (type === 'chainup' && status === 'active') {
+      // third value: map icon scale for 96px PNGs
+      return [
+        getChainupDirectionIcon(event.chainup?.direction, state),
+        strokes[severity][state],
+        CHAINUP_ICON_SCALE,
       ];
     } else { // road conditions, chain ups
       return [

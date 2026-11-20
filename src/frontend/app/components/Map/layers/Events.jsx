@@ -65,8 +65,8 @@ export function addEvent(event, map, dispatch, visibleLayers) {
 
   const styles = {};
   ['static', 'hover', 'active'].forEach((state) => {
-    const [icon, stroke] = getIconAndStroke(event, state);
-    styles[state] = [new Style({ image: new Icon({ src: icon }), ...stroke, })];
+    const [icon, stroke, scale] = getIconAndStroke(event, state);
+    styles[state] = [new Style({ image: new Icon({ src: icon, scale }), ...stroke, })];
   });
 
   // capture initial value so that later changes are are handled correctly
