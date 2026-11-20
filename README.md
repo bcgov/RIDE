@@ -329,6 +329,15 @@ sample events still go out once the Huey worker runs.
 | `--email-scenarios` | Email `--user` one notification of each kind |
 | `--scheduled-scenario [MINUTES]` | Test the timed emails, running the notification tasks for MINUTES (default 50) |
 
+To let testers sign in as admins with their own IDIRs, list the IDIRs in
+`RIDE_ADMIN_IDIRS`, separated by commas, for example `JSMITH,ABROWN`. Each run
+makes them superusers. An IDIR that has already signed in keeps its user. One
+that hasn't gets an `idir__` user with no password, which `config/adapter.py`
+links to that IDIR when the person first signs in, so nobody else can use it.
+They join the same sample organizations as `--user`, as approvers.
+Set this only for PR previews and local stacks. When it's unset the step does
+nothing.
+
 `--clear` deletes every organization, not only sample ones, so it also removes
 any organizations loaded from `RIDE_ORGS_STRING`. Each run is a single
 transaction, so a failed run leaves nothing behind.
@@ -419,6 +428,7 @@ root `.env`; in OpenShift they are injected from Vault into
 | `DRIVEBC_BASE_URL` | no | Public DriveBC site for View on DriveBC links. The links are left out when empty |
 | `ACCESS_REQUEST_RECEIVERS` | no | Semicolon-separated recipients for access requests. Default `ride.support@gov.bc.ca` |
 | `RIDE_USERS_STRING`, `RIDE_ORGS_STRING` | no | Pipe-delimited input for `import_dit_users` |
+| `RIDE_ADMIN_IDIRS` | no | Comma-separated IDIRs that `seed_data` makes superusers (see [Sample data](#sample-data)). PR previews and local stacks only |
 | `TASKS_BACKEND` | no | Django tasks backend. Default is the Huey backend |
 | `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD` | compose only | Superuser created by the start script |
 | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | compose only | Initialise the local Postgres container |

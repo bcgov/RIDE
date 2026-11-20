@@ -6,6 +6,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
+from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -38,6 +40,7 @@ from apps.events.serializers import ChainUpEventSerializer, EventSerializer, RcS
 from apps.organizations.models import Organization, ServiceArea
 from apps.segments.models import ChainUp, Segment
 from apps.users.models import EmailSubscription, Request
+from config.adapter import get_oidc_claims
 
 # (category, situation ids) by event type; from PHRASES in
 # frontend/app/events/references.js, without ferry situations
@@ -240,6 +243,8 @@ class Command(BaseCommand):
                                  '--user\'s notifications for everything in their areas.')
 
     def handle(self, *args, **options):
+        admins = self.grant_admins()
+
         if options['scheduled_scenario'] is not None:
             random.seed(options['seed'])
             self.scheduled_scenario(self.get_user(options['user']), options['scheduled_scenario'])
@@ -293,7 +298,7 @@ class Command(BaseCommand):
                 self.clear()
 
             if organization_count:
-                organizations, outsider = self.create_organizations(organization_count, user, user_orgs)
+                organizations, outsider = self.create_organizations(organization_count, user, user_orgs, admins)
                 self.create_organization_events(organizations, outsider, user, segments, impacts, count, pending)
             else:
                 organizations, outsider = [], None
@@ -305,6 +310,53 @@ class Command(BaseCommand):
 
         if options['email_scenarios']:
             self.email_scenarios(user)
+
+    def grant_admins(self):
+        '''
+        Make each IDIR in RIDE_ADMIN_IDIRS a superuser, so testers on a PR
+        preview or a local stack can sign in as admins.  An IDIR that hasn't
+        signed in yet gets an idir__ user with no password, which
+        config.adapter links to that IDIR on first sign-in, so only that
+        person can use it.
+
+        Returns the users.
+        '''
+
+        idirs = {}
+        for idir in settings.RIDE_ADMIN_IDIRS:
+            idir = idir.strip()
+            if idir:
+                idirs.setdefault(idir.lower(), idir)
+        if not idirs:
+            return []
+
+        # Users who already signed in with one of the IDIRs, whatever their username
+        signed_in = {}
+        for account in SocialAccount.objects.select_related('user').order_by('id'):
+            idir = (get_oidc_claims(account).get('idir_username') or '').lower()
+            if idir in idirs:
+                signed_in.setdefault(idir, account.user)
+
+        users = get_user_model().objects
+        admins = []
+        for key, idir in idirs.items():
+            username = f'idir__{idir}'
+            user = signed_in.get(key) or users.filter(username__iexact=username).first()
+            if user is None:
+                user = users.create_user(username=username)  # no password
+                action = 'Created admin'
+            else:
+                action = 'Made admin' if not (user.is_staff and user.is_superuser) else 'Already admin'
+
+            user.is_staff = True
+            user.is_superuser = True
+            user.save(update_fields=['is_staff', 'is_superuser'])
+            self.stdout.write(f'{action}: {user.username} (IDIR {idir})')
+            if not user.is_active:
+                self.stderr.write(f'{user.username} is inactive, so can\'t sign in until reactivated')
+            admins.append(user)
+
+        return admins
 
     def get_user(self, username):
         users = get_user_model().objects
@@ -378,12 +430,13 @@ class Command(BaseCommand):
             f'Deleted {events} events ({versions} versions), {organizations} organizations, '
             f'{request_count} requests to join an organization and {users} sample users'))
 
-    def create_organizations(self, count, user, user_orgs):
+    def create_organizations(self, count, user, user_orgs, admins=()):
         '''
         Create count organizations, each with a run of neighbouring service
         areas that no other organization has (the rest stay unassigned), an
-        approver and submitters.  The user joins user_orgs of them.  Also
-        creates a superuser in no organization.
+        approver and submitters.  The user and admins (from RIDE_ADMIN_IDIRS)
+        join the same user_orgs of them.  Also creates a superuser in no
+        organization.
 
         Returns ([{'organization', 'areas', 'approvers', 'submitters'}], superuser).
         '''
@@ -440,9 +493,11 @@ class Command(BaseCommand):
                                for _ in range(SUBMITTERS_PER_ORGANIZATION)],
             })
 
-        for entry in random.sample(organizations, user_orgs):
-            user.organizations.add(entry['organization'])
-            entry['approvers' if user.is_approver else 'submitters'].append(user)
+        joined = random.sample(organizations, user_orgs)
+        for member in [user] + [admin for admin in admins if admin != user]:
+            for entry in joined:
+                member.organizations.add(entry['organization'])
+                entry['approvers' if member.is_approver else 'submitters'].append(member)
 
         # like ministry staff, who can edit events anywhere
         outsider = self.create_sample_user(usernames)
