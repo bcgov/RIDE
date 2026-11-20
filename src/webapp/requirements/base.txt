@@ -1,6 +1,6 @@
 dictdiffer==0.10.0
 django==5.2.19
-django-allauth[socialaccount]==65.22.0
+django-allauth[socialaccount]==65.22.1
 django-cors-headers==4.9.0
 django-debug-toolbar==8.0.0
 django-environ==0.14.0
