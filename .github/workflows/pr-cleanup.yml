@@ -13,7 +13,6 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write # needed to delete PR images from GHCR
 
 env:
   PR: ${{ github.event.pull_request.number }}
@@ -40,21 +39,20 @@ jobs:
       # App first, then the database it depends on
       - name: Uninstall application release
         run: |
-          helm uninstall "pr-${PR}-ride" --wait --timeout 5m \
-            || echo "Release pr-${PR}-ride not found, skipping"
+          RELEASE="$(helm list --all --short --filter "^pr-${PR}-ride$")"
+          if [ -n "$RELEASE" ]; then
+            helm uninstall "$RELEASE" --wait --timeout 5m
+          else
+            echo "Release pr-${PR}-ride not found, skipping"
+          fi
 
       - name: Remove PR database
         run: |
-          oc delete deployment "pr-${PR}-ride-db" \
-            --ignore-not-found --wait
-          oc delete service "pr-${PR}-ride-db" \
-            networkpolicy "pr-${PR}-ride-db" \
-            pvc "pr-${PR}-ride-db-data" \
-            secret "pr-${PR}-ride-db-connection" \
-            configmap "pr-${PR}-ride-db-seeded" \
+          oc delete \
+            "deployment/pr-${PR}-ride-db" \
+            "service/pr-${PR}-ride-db" \
+            "networkpolicy/pr-${PR}-ride-db" \
+            "pvc/pr-${PR}-ride-db-data" \
+            "secret/pr-${PR}-ride-db-connection" \
             --ignore-not-found --wait
 
-      - name: Uninstall legacy database release
-        run: |
-          helm uninstall "pr-${PR}-ride-db" --wait --timeout 5m \
-            || echo "Release pr-${PR}-ride-db not found, skipping"
