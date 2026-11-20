@@ -198,7 +198,7 @@ External services the application talks to:
    KEYCLOAK_SECRET=
 
    # Needed by the first migrate; see Reference data below
-   ROUTE_PLANNER_API_URL=https://router.api.gov.bc.ca
+   ROUTE_PLANNER_API_URL=https://router.api.gov.bc.ca/
    ROUTE_PLANNER_API_KEY=
 
    # Frontend (Vite)
@@ -274,8 +274,10 @@ needed.
 The first `migrate` on an empty database calls the BC Route Planner to build
 highway geometries, in the events app's migration 0016. It needs a valid
 `ROUTE_PLANNER_API_URL` and `ROUTE_PLANNER_API_KEY`, or that migration fails
-and later migrations do not run. The command appends `/directions.json` to the
-URL, so set the base URL without a trailing path. Tests skip this call.
+and later migrations do not run. Set the base URL with a trailing slash, such
+as `https://router.api.gov.bc.ca/`, and nothing after it. The TLID lookup in
+`events/models.py` appends `route.json` directly, so without the slash it
+requests `https://router.api.gov.bc.caroute.json`. Tests skip this call.
 
 The `districts`, `service_areas`, `load_lki_data` and `load_dit_data` commands
 rebuild those datasets from the original source files when fixtures need to be
