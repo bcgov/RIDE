@@ -1,12 +1,16 @@
+import logging
 from datetime import timedelta
 
 from django.contrib import admin, messages
 from django.utils import timezone
 
-from .enums import EventType
-from .models import Condition, Event, EventReminderNotification, QueuedEventNotification, TrafficImpact
+from .enums import NotificationKind, EventType
+from .models import (Condition, Event, EventReminderNotification, QueuedEventNotification, TrafficImpact,
+                     _is_notification_disabled)
 from .serializers import EventSerializer
 from ..users.models import get_task_user
+
+logger = logging.getLogger(__name__)
 
 
 class YesNoFilter(admin.SimpleListFilter):
@@ -151,6 +155,87 @@ def simplify_event_coords(modeladmin, request, queryset):
     )
 
 
+# DBC22-7322: admin actions to email yourself notifications, as in DBC22-6954
+def _send_test_notification(event, kind, user):
+    ''' Email user one version's notification; returns emails sent, None if it sends none '''
+    from .tasks import get_notification_status, get_published_baseline, send_event_notification
+
+    phrase = 'updated'
+    if kind is None:  # whatever this version would send
+        result = get_notification_status(event)
+        if not result:
+            return None
+        kind, baseline, phrase = result
+    else:
+        # Cleared shows the selected version, not the one before it
+        baseline = event if kind == NotificationKind.CLEARED else get_published_baseline(event)
+
+    sent = send_event_notification(event, kind, baseline, phrase, recipients=[user])
+    if not sent:
+        raise ValueError('no email was sent: it could not be built (e.g. invalid event data) or the send failed')
+    return sent
+
+
+def _report_test_notifications(modeladmin, request, sent, failed):
+    if failed:
+        modeladmin.message_user(request, f'Sent {sent} notification email(s) to {request.user.email}; '
+                                         f'could not send for {", ".join(failed)} (see the logs).',
+                                level=messages.ERROR)
+    elif sent:
+        modeladmin.message_user(request, f'Sent {sent} notification email(s) to {request.user.email}')
+    else:
+        modeladmin.message_user(request, 'No notification emails were sent: no selected version sends one.',
+                                level=messages.WARNING)
+
+
+def _send_test_notifications(modeladmin, request, queryset, kind=None):
+    if not request.user.email:
+        modeladmin.message_user(request, 'Add an email address to your user to receive notifications.',
+                                level=messages.ERROR)
+        return
+
+    if _is_notification_disabled():
+        modeladmin.message_user(request, 'Event notifications are turned off (DISABLE_EVENT_NOTIFICATIONS).',
+                                level=messages.ERROR)
+        return
+
+    sent = 0
+    failed = []
+    for event in queryset.select_related('user', 'service_area', 'segment', 'chainup'):
+        try:
+            sent += _send_test_notification(event, kind, request.user) or 0
+        except Exception:
+            logger.exception(f'Failed to email a test notification for {event}')
+            failed.append(f'{event.id} v{event.version}')
+
+    _report_test_notifications(modeladmin, request, sent, failed)
+
+
+@admin.action(description="Email me this version's notification")
+def send_me_version_notification(modeladmin, request, queryset):
+    _send_test_notifications(modeladmin, request, queryset)
+
+
+@admin.action(description="Email me a 'New' notification")
+def send_me_new_notification(modeladmin, request, queryset):
+    _send_test_notifications(modeladmin, request, queryset, NotificationKind.NEW)
+
+
+@admin.action(description="Email me an 'Updated' notification (vs last published version)")
+def send_me_updated_notification(modeladmin, request, queryset):
+    _send_test_notifications(modeladmin, request, queryset, NotificationKind.UPDATED)
+
+
+@admin.action(description="Email me a 'Cleared' notification")
+def send_me_cleared_notification(modeladmin, request, queryset):
+    _send_test_notifications(modeladmin, request, queryset, NotificationKind.CLEARED)
+
+
+@admin.action(description="Email me an 'Overdue' notification")
+def send_me_overdue_notification(modeladmin, request, queryset):
+    _send_test_notifications(modeladmin, request, queryset, NotificationKind.OVERDUE)
+
+
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_filter = (
@@ -161,7 +246,11 @@ class EventAdmin(admin.ModelAdmin):
     )
     list_display = ('id', 'event_type', 'status', 'user', 'latest', 'approved', 'latest_approved')
     search_fields = ['id']
-    actions = [create_dummy_inactive_event, rebuild_rc_polygons, simplify_event_coords]
+    actions = [
+        create_dummy_inactive_event, rebuild_rc_polygons, simplify_event_coords,
+        send_me_version_notification, send_me_new_notification, send_me_updated_notification,
+        send_me_cleared_notification, send_me_overdue_notification,
+    ]
 
 
 @admin.register(TrafficImpact)
