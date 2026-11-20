@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 
 from apps.organizations.models import ServiceArea
+from apps.segments.enums import Direction
 from apps.shared.models import BaseModel, VersionedModel
 from config import settings
 
@@ -41,4 +42,5 @@ class Segment(SegmentBase):
 
 class ChainUp(SegmentBase):
     area = models.ForeignKey(ServiceArea, on_delete=models.CASCADE)
+    direction = models.CharField(max_length=10, choices=Direction.choices, null=True, blank=True)
 

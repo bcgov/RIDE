@@ -152,6 +152,10 @@ export default function Layout() {
             { showChainUpsLink &&
               <NavLink to="/chainups/">Chain-Ups</NavLink>
             }
+
+            { showChainUpsLink &&
+              <NavLink to="/mapsetup/">Map setup</NavLink>
+            }
           </>
         }
 

@@ -225,7 +225,7 @@ async function getLocations(addressInput, store) {
 }
 
 
-export default function Map({ children, event, clickHandler, dispatch }) {
+export default function Map({ children, event, clickHandler, dispatch, hideSearch = false }) {
 
   let creatingMap = false;
 
@@ -277,7 +277,7 @@ export default function Map({ children, event, clickHandler, dispatch }) {
 
   return (
     <div ref={elementRef} className="map-container">
-      <div className="geosearch">
+      { !hideSearch && <div className="geosearch">
         <AsyncSelect
           ref={searchRef}
           inputValue={searchInput}
@@ -326,7 +326,7 @@ export default function Map({ children, event, clickHandler, dispatch }) {
             }
           }}
         />
-      </div>
+      </div> }
       <button
         type="button"
         className="toggle"

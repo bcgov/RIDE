@@ -1,0 +1,52 @@
+@use "../styles/variables.scss" as *;
+
+.mapsetup-home {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .toolbar {
+    display: flex;
+    background: $Grey20;
+    padding: .5rem;
+    margin: 16px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+
+    .left {
+      display: flex;
+      align-items: center;
+    }
+
+    // open menus rightward; default right-aligned menu clips at left edge
+    .open-right .ride-dropdown-menu {
+      left: 1rem;
+      right: auto;
+      transform-origin: top left;
+    }
+  }
+
+  .map-container {
+    position: relative;
+  }
+
+  .chainup-tooltip {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    background: #000000;
+    color: $White;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: nowrap;
+    margin: 12px;
+    align-items: flex-start; // lines shrink to text width
+    cursor: default;
+    user-select: text;
+
+    > * {
+      cursor: text;
+    }
+  }
+}
