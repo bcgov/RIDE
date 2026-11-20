@@ -30,7 +30,7 @@ RUN apk add --no-cache gzip && \
 ############################################
 # Runtime: nginx serving built assets      #
 ############################################
-FROM nginxinc/nginx-unprivileged:stable-alpine
+FROM nginx/nginx-unprivileged:stable-alpine
 
 ARG DEBUG_BUILD=false
 
