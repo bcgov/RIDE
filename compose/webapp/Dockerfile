@@ -38,6 +38,18 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# --- Temporary timezone patch for Vancouver and Edmonton Timezones --- 
+COPY --from=tzbuild /out/America/Vancouver /usr/share/zoneinfo/America/Vancouver
+COPY --from=tzbuild /out/America/Edmonton  /usr/share/zoneinfo/America/Edmonton
+# --- End Temporary timezone patch for Vancouver and Edmonton Timezones --- 
+
+ RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft-prod.gpg \
+ && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list \
+ && apt-get update \
+ && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
 # Adding webapp directory to make absolute filepaths consistent across services
 WORKDIR /app/webapp
 
@@ -70,6 +82,7 @@ RUN sed -i 's/\r$//g' /start_tasks_openshift.sh && chmod +x /start_tasks_openshi
 
 # Add the rest of the code
 COPY ./src/webapp /app/webapp
+
 COPY ./compose/webapp/.vimrc /
 COPY ./compose/webapp/.vimrc /root
 
