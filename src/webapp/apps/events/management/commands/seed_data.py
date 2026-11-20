@@ -2,9 +2,7 @@ import copy
 import json
 import math
 import random
-import time
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
 
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
@@ -14,32 +12,22 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import GeometryCollection, LineString, Point
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.db.models import ProtectedError, Q
+from django.db.models import ProtectedError
 from django.test import override_settings
-from email_log.models import Email
 from rest_framework.test import APIRequestFactory
 
-from apps.events import tasks
-from apps.events.enums import (
-    NotificationCreator,
-    NOTIFICATION_EVENT_TYPES,
-    NOTIFICATION_SEVERITIES,
-    NOTIFICATION_STATUSES,
-)
-from apps.events.helpers import area_label, get_chainup_next_update, get_default_next_update
+from apps.events.helpers import get_chainup_next_update, get_default_next_update
 from apps.events.models import (
     Condition,
     Event,
-    EventReminderNotification,
     Note,
-    QueuedEventNotification,
     RouteGeometry,
     TrafficImpact,
 )
 from apps.events.serializers import ChainUpEventSerializer, EventSerializer, RcSerializer
 from apps.organizations.models import Organization, ServiceArea
 from apps.segments.models import ChainUp, Segment
-from apps.users.models import EmailSubscription, Request
+from apps.users.models import Request
 from config.adapter import get_oidc_claims
 
 # (category, situation ids) by event type; from PHRASES in
@@ -77,7 +65,6 @@ UPDATE_NOTES = [
 # Sample organizations and their users.  --clear deletes users whose
 # username starts with the prefix; they have no password, so can't sign in.
 SAMPLE_USER_PREFIX = 'sample_'
-PACIFIC = ZoneInfo('America/Vancouver')  # times the scheduled scenario prints
 SUBMITTERS_PER_ORGANIZATION = 2
 ORGANIZATION_SUFFIXES = ['Road Services', 'Roads', 'Highways', 'Contracting', 'Maintenance', 'Roadworks']
 ORGANIZATION_NAME_LENGTH = 30  # the organization form's limit
@@ -95,6 +82,12 @@ USER_PENDING = 3
 USER_BULK = 3  # road conditions and chain-ups, by --user, another member and the outsider
 
 LOCATION_ATTEMPTS = 20
+
+
+def area_label(service_area):
+    ''' "01 - South Island", matching the frontend service area labels '''
+
+    return f'{service_area.sortingOrder:02} - {service_area.name}' if service_area else ''
 
 
 def iso(dt):
@@ -221,39 +214,11 @@ class Command(BaseCommand):
         parser.add_argument('--clear', action='store_true',
                             help='First delete every event, every organization, requests to join one and '
                                  f'the sample users (usernames starting {SAMPLE_USER_PREFIX})')
-        parser.add_argument('--notify', action='store_true',
-                            help='Queue notification emails for the new events.  Off by default, so the '
-                                 'notification task does not email every sample event; due soon and '
-                                 'overdue reminders still go out once it runs.')
         parser.add_argument('--sync', action='store_true',
                             help='Sync created events to Open511 (off by default)')
-        parser.add_argument('--email-scenarios', action='store_true',
-                            help='Email --user one notification of each kind (new, updated, cleared, '
-                                 'each approval step, closures, planned events, road conditions, '
-                                 'chain-ups and reminders), by making those changes in their sample '
-                                 'organizations through the real notification queue.  Turns on '
-                                 '--user\'s notifications for everything in their areas.  Uses the '
-                                 'existing sample data, or seeds it first with --clear.')
-        parser.add_argument('--scheduled-scenario', type=int, nargs='?', const=50, default=None,
-                            metavar='MINUTES',
-                            help='Create events whose scheduled emails (update due soon, overdue and the '
-                                 'clear at end time) come due in the next few minutes, then run the '
-                                 'notification tasks every minute for MINUTES (default 50), as Huey '
-                                 'does, for those events and any saved while it runs.  Turns on '
-                                 '--user\'s notifications for everything in their areas.')
 
     def handle(self, *args, **options):
         admins = self.grant_admins()
-
-        if options['scheduled_scenario'] is not None:
-            random.seed(options['seed'])
-            self.scheduled_scenario(self.get_user(options['user']), options['scheduled_scenario'])
-            return
-
-        if options['email_scenarios'] and not options['clear']:
-            random.seed(options['seed'])
-            self.email_scenarios(self.get_user(options['user']))
-            return
 
         count = options['count']
         if count < 1:
@@ -289,10 +254,9 @@ class Command(BaseCommand):
         impacts = list(TrafficImpact.objects.filter(deleted=False)
                                             .values('id', 'label', 'closed'))
 
-        overrides = {'DISABLE_OPEN511_SYNC': not options['sync']}
-        if not options['notify']:
-            overrides['DISABLE_EVENT_NOTIFICATIONS'] = True
-
+        # DISABLE_EVENT_NOTIFICATIONS keeps sample events from emailing anyone
+        # once notifications are on main; until then nothing reads it
+        overrides = {'DISABLE_OPEN511_SYNC': not options['sync'], 'DISABLE_EVENT_NOTIFICATIONS': True}
         with override_settings(**overrides), transaction.atomic():
             if options['clear']:
                 self.clear()
@@ -307,9 +271,6 @@ class Command(BaseCommand):
 
             self.create_road_conditions(organizations, outsider, user, segments, options['road_conditions'])
             self.create_chain_ups(organizations, outsider, user, options['chain_ups'])
-
-        if options['email_scenarios']:
-            self.email_scenarios(user)
 
     def grant_admins(self):
         '''
@@ -417,8 +378,6 @@ class Command(BaseCommand):
 
         Note.objects.all().delete()
         Event.objects.all().delete()
-        QueuedEventNotification.objects.all().delete()
-        EventReminderNotification.objects.all().delete()
         Organization.objects.all().delete()
         requests.delete()  # they name an organization that no longer exists
         try:
@@ -581,16 +540,6 @@ class Command(BaseCommand):
         unassigned = ServiceArea.objects.filter(parent__isnull=False, organizations__isnull=True)
         self.stdout.write(f'No organization: {", ".join(area_label(area) for area in unassigned) or "none"}')
 
-        # notifications need the area in both the settings and the user's organizations
-        subscription = EmailSubscription.objects.filter(user=user, notification=True).first()
-        if subscription:
-            area_ids = {area.id for entry in joined for area in entry['areas']}
-            lost = subscription.notification_areas.exclude(id__in=area_ids)
-            if lost.exists():
-                self.stdout.write(self.style.WARNING(
-                    f'{user.username}\'s notification settings include areas outside their organizations, '
-                    f'which get no emails: {", ".join(area_label(area) for area in lost)}.  Save '
-                    'Notification settings again to choose from the new areas.'))
         self.stdout.write('')
 
     def area_lines(self, areas, segments):
@@ -994,364 +943,3 @@ class Command(BaseCommand):
         end = location_point('end', segment, last.coords)
         geometry = GeometryCollection(Point(first.coords), Point(last.coords), path)
         return start, end, json.loads(geometry.json)
-
-    # --email-scenarios ----------------------------------------------------
-
-    def email_scenarios(self, user):
-        '''
-        Email the user one notification of each kind, by making the changes
-        that send them in their sample organizations, as sample members,
-        then sending what the notification queue holds as its task does
-        '''
-
-        if not user.email:
-            raise CommandError(f'{user.username} has no email address to send the scenarios to')
-        if not user.is_approver:
-            raise CommandError(f'{user.username} is not an approver, so would not get approval requests')
-
-        context = self.scenario_context(user)
-        self.subscribe_to_everything(user)
-
-        with override_settings(DISABLE_OPEN511_SYNC=True, DISABLE_EVENT_NOTIFICATIONS=False):
-            results = self.run_scenarios(context)
-
-        self.stdout.write('')
-        for label, subject in results:
-            self.stdout.write(f'{label:<42}  {subject or self.style.ERROR("not sent")}')
-        sent = sum(1 for _, subject in results if subject)
-        style = self.style.SUCCESS if sent == len(results) else self.style.WARNING
-        self.stdout.write(style(f'Sent {sent} of {len(results)} scenario emails to {user.email}'))
-
-    def scenario_context(self, user):
-        '''
-        The user's first sample organization with an approver, a submitter
-        and segments in an area, and a chain-up in one of the user's areas
-        that is switched off, with an approver of its organization
-        '''
-
-        segments = self.get_segments()
-        sample = {'username__startswith': SAMPLE_USER_PREFIX}
-        context = None
-        for organization in user.organizations.order_by('name'):
-            members = organization.users.filter(**sample, is_superuser=False)
-            approvers = [member for member in members if member.is_approver]
-            submitters = [member for member in members if not member.is_approver]
-            areas = list(organization.service_areas.filter(parent__isnull=False).exclude(geometry=None))
-            lines = self.area_lines(areas, segments)
-            area = next((area for area in areas if lines[area.id]), None)
-            if approvers and submitters and area:
-                context = {'segments': segments, 'area': area, 'lines': lines[area.id],
-                           'approver': approvers[0], 'submitter': submitters[0]}
-                break
-
-        if context is None:
-            raise CommandError(f'{user.username} is in no sample organization with an approver, a submitter '
-                               'and segments; run seed_data --clear first.')
-
-        active = set(Event.objects.filter(event_type='CHAIN_UP', latest=True, status='Active')
-                                  .values_list('chainup_id', flat=True))
-        user_areas = ServiceArea.objects.filter(organizations__users=user)
-        chain_ups = []
-        for chain_up in ChainUp.current.filter(geometry__isnull=False, area__in=user_areas).order_by('id'):
-            approvers = [member for member in chain_up.area.organizations.get().users.filter(**sample)
-                         if member.is_approver and not member.is_superuser]
-            if approvers:
-                chain_ups.append((chain_up.pk in active, chain_up, approvers[0]))
-
-        # one switched off, or else switch one off quietly, as the Chain-ups page does
-        if chain_ups:
-            switched_on, chain_up, approver = min(chain_ups, key=lambda item: item[0])
-            if switched_on:
-                self.switch_off_chain_up(chain_up, approver)
-            context.update(chain_up=chain_up, chain_up_approver=approver)
-
-        return context
-
-    def switch_off_chain_up(self, chain_up, approver):
-        event = Event.objects.get(chainup=chain_up, event_type='CHAIN_UP', latest=True, status='Active')
-        data = self.bulk_event_data('CHAIN_UP', chain_up, get_chainup_next_update())
-        data.update(id=event.id, chainup=str(chain_up.uuid), status='Inactive')
-        data['timing']['nextUpdate'] = None
-        with override_settings(DISABLE_OPEN511_SYNC=True, DISABLE_EVENT_NOTIFICATIONS=True):
-            self.save_event(0, data, approver, event, serializer_class=ChainUpEventSerializer, name=chain_up.name)
-
-    def subscribe_to_everything(self, user):
-        subscription, _ = EmailSubscription.objects.get_or_create(user=user)
-        subscription.notification = True
-        subscription.notification_types = list(NOTIFICATION_EVENT_TYPES)
-        subscription.notification_severities = list(NOTIFICATION_SEVERITIES)
-        subscription.notification_statuses = list(NOTIFICATION_STATUSES)
-        subscription.notification_creator = NotificationCreator.ALL
-        subscription.save()
-
-        areas = ServiceArea.objects.filter(organizations__users=user, parent__isnull=False).distinct()
-        subscription.notification_areas.set(areas)
-        self.stdout.write(self.style.WARNING(
-            f'Turned on {user.username}\'s notifications for everything in {areas.count()} areas'))
-
-    def scenario_event(self, context, **changes):
-        '''
-        Data for a major incident by the approver in the scenario area, with
-        top level and nested changes
-        '''
-
-        now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-        data = self.random_event(self.area_location(context['area'], context['lines']), [], major=True)
-        data.update(type='Incident', status='Active', impacts=[], restrictions=[], additional='',
-                    delays={'amount': 0, 'unit': 'minutes'})
-        data['details'].update(direction='Northbound', severity='Major', category='Hazard', situation=105)
-        data['timing'] = {'startTime': None, 'endTime': None, 'ongoing': False, 'schedules': [],
-                          'nextUpdate': iso(now + timedelta(hours=3)), 'nextUpdateIsDefault': False}
-        for key, value in changes.items():
-            if isinstance(value, dict) and isinstance(data.get(key), dict):
-                data[key].update(value)
-            else:
-                data[key] = value
-        return data
-
-    def run_scenarios(self, context):
-        '''
-        Make each change and send its email.  Returns [(label, subject or
-        None)].  A send Google refuses is retried once.
-        '''
-
-        approver, submitter = context['approver'], context['submitter']
-        impacts = {impact.label: {'id': impact.id, 'label': impact.label, 'closed': impact.closed}
-                   for impact in TrafficImpact.objects.filter(deleted=False)}
-        lane = impacts.get('Lane blocked') or next(i for i in impacts.values() if not i['closed'])
-        left_lane = impacts.get('Left lane closed') or lane
-        closed = impacts.get('Closed') or next(i for i in impacts.values() if i['closed'])
-        now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-        results = []
-
-        def latest(event):
-            return Event.objects.get(id=event.id, latest=True)
-
-        def save(data, creator, instance=None, **kwargs):
-            return self.save_event(len(results), copy.deepcopy(data), creator, instance, **kwargs)
-
-        def deliver(label, event):
-            # as the notification task, then once more if the send failed
-            outbox = Email.objects.count()
-            sent = tasks.send_queued_event_notifications()
-            if not sent:
-                result = tasks.get_notification_status(latest(event))
-                sent = tasks.send_event_notification(latest(event), *result) if result else 0
-            email = Email.objects.order_by('-pk').first() if Email.objects.count() > outbox else None
-            results.append((label, email.subject if sent and email else None))
-
-        def remind(label, event):
-            sent = tasks.send_event_reminder(latest(event), now, datetime.now(timezone.utc))
-            email = Email.objects.order_by('-pk').first()
-            results.append((label, email.subject if sent and email else None))
-
-        # an approver publishes, updates and clears a major incident
-        data = self.scenario_event(
-            context, impacts=[lane], delays={'amount': 20, 'unit': 'minutes'},
-            restrictions=[{'id': 1, 'label': 'Speed limit reduced to', 'text': '50 km/h'}],
-            additional='Crews are clearing a vehicle incident. Expect delays.',
-            external={'url': 'https://www.drivebc.ca/'})
-        incident = save(data, approver)
-        deliver('New', incident)
-
-        data.update(impacts=[left_lane], delays={'amount': 45, 'unit': 'minutes'},
-                    additional='Crews are clearing a vehicle incident. Use an alternate route.')
-        data['timing']['nextUpdate'] = iso(now + timedelta(hours=4))
-        save(data, approver, latest(incident))
-        deliver('Updated (changes highlighted)', incident)
-
-        data['status'] = 'Inactive'
-        save(data, approver, latest(incident))
-        deliver('Cleared', incident)
-
-        # a submitter's new event, update and clear, each approved
-        data = self.scenario_event(context, impacts=[lane],
-                                   additional='Vehicle incident blocking the northbound lane.')
-        pending = save(data, submitter)
-        deliver('Approval requested (new)', pending)
-        save(data, approver, latest(pending))
-        deliver('Approved and published', pending)
-
-        data.update(impacts=[left_lane], additional='Both northbound lanes are now blocked.')
-        save(data, submitter, latest(pending))
-        deliver('Approval requested (updated)', pending)
-        save(data, approver, latest(pending))
-        deliver('Update approved', pending)
-
-        data['status'] = 'Inactive'
-        save(data, submitter, latest(pending))
-        deliver('Approval requested (cleared)', pending)
-        save(data, approver, latest(pending))
-        deliver('Clearing approved', pending)
-
-        # closures and a planned event
-        event = save(self.scenario_event(context, impacts=[closed], details={'direction': 'Both directions'},
-                                         additional='Highway closed in both directions for a collision.'),
-                     approver)
-        deliver('New closure', event)
-
-        planned = {'type': 'Planned event', 'details': {'category': 'Construction', 'situation': 10},
-                   'timing': {'startTime': iso(now + timedelta(days=3)), 'endTime': iso(now + timedelta(days=4)),
-                              'nextUpdate': None}}
-        event = save(self.scenario_event(context, **copy.deepcopy(planned), impacts=[closed],
-                                         additional='Closed for bridge work.'), approver)
-        deliver('New future closure', event)
-
-        planned['timing'].update(startTime=iso(now + timedelta(days=2)), endTime=iso(now + timedelta(days=9)))
-        planned['details']['severity'] = 'Minor'
-        minor = impacts.get('Expect minor delays') or lane
-        event = save(self.scenario_event(context, **planned, impacts=[minor],
-                                         additional='Paving operations. Expect delays of up to 20 minutes.'),
-                     approver)
-        deliver('New planned event (In effect)', event)
-
-        # a road condition, then reconfirmed, as the Road Conditions page does
-        active = set(Event.objects.filter(event_type='ROAD_CONDITION', latest=True, status='Active')
-                                  .values_list('segment_id', flat=True))
-        area_segments = {str(segment_id) for segment_id in context['area'].segments}
-        segment = next((segment for segment in context['segments']
-                        if segment.id in area_segments and segment.pk not in active
-                        and start_area_id({'coords': segment.primary_point.coords}) == context['area'].id), None)
-        if segment:
-            data = self.bulk_event_data('ROAD_CONDITION', segment, get_default_next_update())
-            data['segment'] = str(segment.uuid)
-            data['conditions'] = [{'id': 4, 'label': 'Compact snow'}, {'id': 25, 'label': 'Slippery sections'}]
-            road = save(data, approver, serializer_class=RcSerializer, name=segment.name)
-            deliver('New road condition', road)
-
-            road = latest(road)
-            road.next_update = road.next_update + timedelta(days=1)
-            road.user = approver
-            road.meta = {'source': 'confirm_rcs'}
-            road.save()
-            deliver('Reconfirmed road condition', road)
-        else:
-            results += [('New road condition', None), ('Reconfirmed road condition', None)]
-            self.stdout.write(self.style.WARNING(f'No segment free for a road condition in '
-                                                 f'{area_label(context["area"])}'))
-
-        # a chain-up switched on, as the Chain-ups page does
-        chain_up = context.get('chain_up')
-        if chain_up:
-            data = self.bulk_event_data('CHAIN_UP', chain_up, get_chainup_next_update())
-            data['chainup'] = str(chain_up.uuid)
-            event = save(data, context['chain_up_approver'], serializer_class=ChainUpEventSerializer,
-                         name=chain_up.name)
-            deliver('New commercial chain-up', event)
-        else:
-            results.append(('New commercial chain-up', None))
-            self.stdout.write(self.style.WARNING('No chain-up in your areas is switched off'))
-
-        # reminders, for events created without their own New emails
-        with override_settings(DISABLE_EVENT_NOTIFICATIONS=True):
-            minor_incident = {'details': {'severity': 'Minor'}, 'impacts': [lane]}
-            soon = save(self.scenario_event(context, **copy.deepcopy(minor_incident),
-                                            timing={'nextUpdate': iso(now + timedelta(minutes=10))}), approver)
-            late = save(self.scenario_event(context, **copy.deepcopy(minor_incident)), approver)
-        Event.objects.filter(uuid=latest(late).uuid).update(next_update=now - timedelta(minutes=5))
-        remind('Update due soon', soon)
-        remind('Overdue', late)
-
-        return results
-
-    # --scheduled-scenario -------------------------------------------------
-
-    def scheduled_scenario(self, user, minutes):
-        '''
-        Create three incidents whose scheduled emails come due soon, then run
-        the end time, queue and reminder tasks once a minute as Huey does.
-        Huey doesn't run locally, and its tasks unscoped would also remind
-        the user about every overdue sample event, so they only run for
-        these events and any saved while this runs.
-        '''
-
-        if not user.email:
-            raise CommandError(f'{user.username} has no email address to send the scenario to')
-
-        context = self.scenario_context(user)
-        self.subscribe_to_everything(user)
-        approver = context['approver']
-        start = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-
-        def at(offset):
-            return iso(start + timedelta(minutes=offset))
-
-        def local(offset):
-            return (start + timedelta(minutes=offset)).astimezone(PACIFIC).strftime('%H:%M')
-
-        scenario = [
-            ('next update in 5 minutes', 'Scheduled scenario: next update in 5 minutes.',
-             {'nextUpdate': at(5)},
-             [(0, 'Update due soon'), (5, 'Overdue'), (20, 'Overdue again'), (35, 'Overdue again')]),
-            ('next update in 20 minutes', 'Scheduled scenario: next update in 20 minutes.',
-             {'nextUpdate': at(20)},
-             [(5, 'Update due soon'), (20, 'Overdue'), (35, 'Overdue again')]),
-            ('ends in 10 minutes', 'Scheduled scenario: ends in 10 minutes.',
-             {'nextUpdate': at(180), 'endTime': at(10)},
-             [(9, 'Cleared, by the end time task')]),
-        ]
-
-        with override_settings(DISABLE_OPEN511_SYNC=True, DISABLE_EVENT_NOTIFICATIONS=False):
-            events = []
-            for index, (name, additional, timing, _) in enumerate(scenario):
-                data = self.scenario_event(context, details={'severity': 'Minor'}, impacts=[],
-                                           additional=additional, timing=timing)
-                events.append(self.save_event(index, data, approver, name=name))
-
-            self.stdout.write('')
-            self.stdout.write(f'Emails to {user.email}, each a minute or so after the time shown:')
-            self.stdout.write(f'  {local(0)}  New, for each event')
-            for event, (name, _, _, expected) in zip(events, scenario):
-                for offset, label in expected:
-                    if offset < minutes:
-                        self.stdout.write(f'  {local(offset)}  {label}: {event.id} ({name})')
-            self.stdout.write('Overdue repeats every 15 minutes until the event gets a new next update or end '
-                              'time, or is cleared.  Saves made in RIDE meanwhile are emailed too.')
-            self.stdout.write(f'Running until {local(minutes)}; Ctrl-C stops it.')
-            self.stdout.write('')
-
-            try:
-                self.run_scheduled_tasks({event.id for event in events}, start, minutes)
-            except KeyboardInterrupt:
-                self.stdout.write('Stopped')
-
-    def run_scheduled_tasks(self, ids, start, minutes):
-        ''' Run the notification tasks for these events, and any saved since start, once a minute '''
-
-        last_email = Email.objects.order_by('-pk').values_list('pk', flat=True).first() or 0
-        end = start + timedelta(minutes=minutes)
-
-        while True:
-            current_time = datetime.now(timezone.utc)
-            if current_time >= end:
-                break
-            now = current_time.replace(second=0, microsecond=0)
-            events = Event.current.filter(Q(id__in=ids) | Q(created__gte=start), status='Active')
-
-            try:
-                # check_end_time
-                for event in events.filter(end_time__lte=current_time + timedelta(minutes=1)):
-                    event.status = 'Inactive'
-                    event.user = tasks.get_task_user()
-                    event.last_inactivated = event.end_time
-                    event.save()
-
-                tasks.send_queued_event_notifications()
-
-                # send_event_reminder_notifications
-                for event in events.filter(next_update__lte=current_time + tasks.REMINDER_INTERVAL,
-                                           service_area__isnull=False) \
-                                   .select_related('user', 'service_area', 'segment', 'chainup'):
-                    tasks.send_event_reminder(event, now, current_time)
-            except Exception as error:  # keep running, as Huey would
-                self.stdout.write(self.style.ERROR(f'{now.astimezone(PACIFIC):%H:%M}  {error!r}'))
-
-            for email in Email.objects.filter(pk__gt=last_email).order_by('pk'):
-                last_email = email.pk
-                status = 'sent' if email.ok else self.style.ERROR('not sent')
-                self.stdout.write(f'{email.date_sent.astimezone(PACIFIC):%H:%M}  {status}  {email.subject}')
-
-            # just after the next minute
-            time.sleep(max(1, 61 - datetime.now(timezone.utc).second))
-
-        self.stdout.write(f'Finished at {end.astimezone(PACIFIC):%H:%M}')
