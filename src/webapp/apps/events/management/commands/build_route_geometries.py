@@ -35,7 +35,7 @@ def build_route_geometries():
         # Go through each route and create a geometry
         for route in routes:
             payload = {
-                "points": route,
+                "points": ','.join(str(point) for point in route),
             }
 
             response = requests.get(
