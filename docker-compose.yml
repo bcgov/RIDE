@@ -21,6 +21,7 @@ services:
       dockerfile: ./compose/webapp/Dockerfile
       args:
         DEBUG_BUILD: true
+        INCLUDE_SEED_DATA: true
 
     volumes:
       - ./src/webapp:/app/webapp
