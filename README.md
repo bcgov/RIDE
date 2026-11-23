@@ -4,8 +4,9 @@ RIDE is the data entry application behind [DriveBC](https://www.drivebc.ca)
 ([bcgov/DriveBC.ca](https://github.com/bcgov/DriveBC.ca)). Ministry of
 Transportation and Transit staff and highway maintenance contractors use it to
 record incidents, construction, road conditions and chain-up requirements on
-BC highways. Once an event is approved, RIDE pushes it to DriveBC's Open511
-API, and it shows up on the public DriveBC map and feeds.
+BC highways. Once an event is approved it shows up on the public DriveBC map,
+which reads events straight from RIDE's API. RIDE also publishes approved
+events to the province's Open511 API.
 
 RIDE replaces the old DIT application. Some management commands and the login
 adapter still say DIT when they mean data or user accounts imported from it.
@@ -36,9 +37,9 @@ adapter still say DIT when they mean data or user accounts imported from it.
   automatically. Major events and closures from users without the approver
   permission wait as pending until an approver accepts them.
 - A background task clears events when their end time passes.
-- Saving an approved event creates or updates it in DriveBC's Open511 API in
-  the same transaction. If the sync fails, the save is rolled back and the
-  user sees the validation error.
+- Saving an approved event creates or updates it in the Open511 API in the
+  same transaction. If the sync fails, the save is rolled back and the user
+  sees the validation error.
 - Users belong to organizations, and organizations cover maintenance service
   areas. A user can only create or edit events that start inside one of their
   service areas.
@@ -66,10 +67,10 @@ adapter still say DIT when they mean data or user accounts imported from it.
                   └──────────┬───────────┘  and /drivebc-api/dms/ to DriveBC
                              │
                   ┌──────────▼───────────┐      ┌──────────────┐
-                  │ webapp (gunicorn)    │ ───► │ PostGIS      │
-                  │ Django + DRF         │      └──────────────┘
+  DriveBC ──────► │ webapp (gunicorn)    │ ───► │ PostGIS      │
+  (reads events)  │ Django + DRF         │      └──────────────┘
                   │ port 8000            │ ───► Keycloak (OIDC)
-                  └──────────┬───────────┘ ───► DriveBC Open511 API
+                  └──────────┬───────────┘ ───► Open511 API
                              │                ───► BC Route Planner
                   ┌──────────▼───────────┐
                   │ tasks (huey)         │ ◄──► Redis
@@ -88,11 +89,14 @@ adapter still say DIT when they mean data or user accounts imported from it.
 Outside services RIDE talks to:
 
 - Keycloak (BC Gov SSO), for IDIR and BCeID sign-in
-- the DriveBC Open511 API, to publish approved events
+- the Open511 API, to publish approved events
 - the DriveBC DMS API, through nginx, for dynamic message sign panels
 - the BC Route Planner, for route geometries and network segment (TLID) lookups
 - the BC Geocoder and a vector base map, which the browser calls directly
 - an SMTP server, for access request emails
+
+DriveBC goes the other way. Its backend fetches events from RIDE's
+`GET /api/events/relevant`, so that endpoint has to stay public.
 
 ## Repository layout
 
@@ -401,7 +405,7 @@ start script runs.
 | `SHOW_DEBUG_TOOLBAR` | no | Turn on django-debug-toolbar. Default `False` |
 | `ENABLE_DEBUG_LOGGING` | no | Write the `debug` logger to `debug.log` |
 | `EVENT_PREFIX` | no | Prefix for generated event IDs. Default `RIDE` |
-| `OPEN511_API_URL`, `OPEN511_API_KEY` | no | DriveBC Open511 endpoint. The sync is skipped, with a warning, when they're unset |
+| `OPEN511_API_URL`, `OPEN511_API_KEY` | no | Open511 events endpoint that approved events are published to. The sync is skipped, with a warning, when they're unset |
 | `DISABLE_OPEN511_SYNC` | no | Skip publishing altogether. Default `False`, and always skipped under test |
 | `ROUTE_PLANNER_API_URL`, `ROUTE_PLANNER_API_KEY` | no | BC Route Planner, for TLIDs and route geometries. The URL needs a trailing slash |
 | `RIDE_FROM_EMAIL_DEFAULT` | no | Sender for access request emails. Default `DoNotReply@gov.bc.ca` |
@@ -479,6 +483,10 @@ the fields that changed. Chain-up events aren't published. The
 `ride_open511_sync_successes` and `ride_open511_sync_failures` Prometheus
 counters track how it's going.
 
+DriveBC doesn't read Open511 anymore. Since DBC22-7577 it takes every event,
+chain-ups included, from `/api/events/relevant`. A failed Open511 sync still
+rolls the save back, though, so the sync has to keep working.
+
 ### Background tasks
 
 There's one periodic Huey task, in `apps/events/tasks.py`:
@@ -534,7 +542,7 @@ approver or an admin.
 | Path | Description |
 |------|-------------|
 | `GET /session` | The current user, or `{"username": null}` plus a CSRF cookie |
-| `/api/events` | Events CRUD, plus `GET /api/events/relevant`, `GET /api/events/<id>/history`, `GET /api/events/<id>/diffs` and `POST /api/events/description` (previews the generated description). `relevant` leaves out cleared bulk road conditions and chain-ups. Creating or editing needs a signed-in user whose service areas include the start point |
+| `/api/events` | Events CRUD, plus `GET /api/events/relevant`, `GET /api/events/<id>/history`, `GET /api/events/<id>/diffs` and `POST /api/events/description` (previews the generated description). `relevant` leaves out cleared bulk road conditions and chain-ups, and it's what DriveBC reads. Creating or editing needs a signed-in user whose service areas include the start point |
 | `/api/events/pending` | Pending versions awaiting approval. Needs a signed-in user |
 | `GET /api/events/closures` | Closed network segments in On Route API format, for incidents and for planned events that have started. Public |
 | `/api/rcs` | Road conditions, plus `POST /api/rcs/clear`, `/api/rcs/confirm` and `/api/rcs/bulk_update` |
