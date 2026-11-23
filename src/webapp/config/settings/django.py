@@ -73,8 +73,6 @@ INSTALLED_APPS = [
 
     'debug_toolbar',
 
-    "huey.contrib.djhuey",
-
     'apps.ride',
     'apps.events',
     'apps.lki',
@@ -84,6 +82,9 @@ INSTALLED_APPS = [
 
     'django.contrib.admin',
 ]
+
+if env.bool('RUNNING_HUEY', default=False):
+    INSTALLED_APPS.append('huey.contrib.djhuey')
 
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
