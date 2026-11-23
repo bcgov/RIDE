@@ -1,10 +1,12 @@
 # Generated manually for DBC22-7018
-from django.core.management import call_command
 from django.db import migrations
+
+from apps.segments.management.commands.update_segment_names import update_segment_names
 
 
 def expand_abbreviations(apps, schema_editor):
-    call_command('update_segment_names')
+    # historical models to avoid loading columns that don't exist until later
+    update_segment_names((apps.get_model('segments', 'Segment'), apps.get_model('segments', 'ChainUp')))
 
 
 def noop(apps, schema_editor):

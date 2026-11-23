@@ -4,8 +4,8 @@ from apps.segments.models import ChainUp, Segment
 from apps.shared.helpers import transform_road_abbreviations
 
 
-def update_segment_names():
-    for model in (Segment, ChainUp):
+def update_segment_names(models=(Segment, ChainUp)):
+    for model in models:
         for obj in model.objects.all():
             transformed_name = transform_road_abbreviations(obj.name)
             transformed_description = transform_road_abbreviations(obj.description)
