@@ -70,6 +70,15 @@ RUN sed -i 's/\r$//g' /start_tasks_openshift.sh && chmod +x /start_tasks_openshi
 
 # Add the rest of the code
 COPY ./src/webapp /app/webapp
+
+# seed_data fills a database with sample data. Only dev and PR preview builds
+# pass INCLUDE_SEED_DATA=true; test and UAT images leave it out, and prod
+# deploys the UAT image, so prod never has the command
+ARG INCLUDE_SEED_DATA=false
+RUN if [ "$INCLUDE_SEED_DATA" != "true" ]; then \
+      rm -f apps/events/management/commands/seed_data.py \
+            apps/events/tests/test_seed_data.py; \
+    fi
 COPY ./compose/webapp/.vimrc /
 COPY ./compose/webapp/.vimrc /root
 
