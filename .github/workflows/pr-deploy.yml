@@ -124,21 +124,23 @@ jobs:
       run: |
         DB_NAME="pr-${PR}-ride-db"
         DB_SECRET="${DB_NAME}-connection"
-        DB_SECRET_EXISTS="$(oc get secret "$DB_SECRET" --ignore-not-found -o name)"
-        if [ -z "$DB_SECRET_EXISTS" ]; then
-          DB_PASSWORD="$(openssl rand -hex 32)"
-          oc create secret generic "$DB_SECRET" \
-            --from-literal=host="$DB_NAME" \
-            --from-literal=port=5432 \
-            --from-literal=user=ride \
-            --from-literal=password="$DB_PASSWORD" \
-            --from-literal=dbname="$DB_NAME" \
-            --from-literal=POSTGRES_USER=ride \
-            --from-literal=POSTGRES_PASSWORD="$DB_PASSWORD" \
-            --from-literal=POSTGRES_DB="$DB_NAME"
-        fi
+        DB_DEPLOYMENT_EXISTS="$(oc get deployment "$DB_NAME" --ignore-not-found -o name)"
+        if [ -z "$DB_DEPLOYMENT_EXISTS" ]; then
+          DB_SECRET_EXISTS="$(oc get secret "$DB_SECRET" --ignore-not-found -o name)"
+          if [ -z "$DB_SECRET_EXISTS" ]; then
+            DB_PASSWORD="$(openssl rand -hex 32)"
+            oc create secret generic "$DB_SECRET" \
+              --from-literal=host="$DB_NAME" \
+              --from-literal=port=5432 \
+              --from-literal=user=ride \
+              --from-literal=password="$DB_PASSWORD" \
+              --from-literal=dbname="$DB_NAME" \
+              --from-literal=POSTGRES_USER=ride \
+              --from-literal=POSTGRES_PASSWORD="$DB_PASSWORD" \
+              --from-literal=POSTGRES_DB="$DB_NAME"
+          fi
 
-        oc apply -f - <<EOF
+          oc apply -f - <<EOF
         apiVersion: v1
         kind: PersistentVolumeClaim
         metadata:
@@ -245,6 +247,14 @@ jobs:
           policyTypes:
             - Ingress
         EOF
+        else
+          echo "Database deployment ${DB_NAME} already exists; skipping database deployment"
+          DB_SECRET_EXISTS="$(oc get secret "$DB_SECRET" --ignore-not-found -o name)"
+          if [ -z "$DB_SECRET_EXISTS" ]; then
+            echo "Database secret ${DB_SECRET} is missing; cannot deploy the application" >&2
+            exit 1
+          fi
+        fi
 
         oc rollout status "deployment/${DB_NAME}" --timeout=5m
 
