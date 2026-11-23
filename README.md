@@ -80,7 +80,7 @@ adapter still say DIT when they mean data or user accounts imported from it.
 
 | Component | Technology | Notes |
 |-----------|------------|-------|
-| Frontend | React 19, React Router 7 (SPA mode), Vite 8, Redux Toolkit, OpenLayers 10, Tailwind CSS 4, Sass, Font Awesome Pro | Built to static files and served by nginx when deployed. Runtime settings are written into `index.html` when the pod starts. |
+| Frontend | React 19, React Router 8 (SPA mode), Vite 8, Redux Toolkit, OpenLayers 10, Tailwind CSS 4, Sass, Font Awesome Pro | Built to static files and served by nginx when deployed. Runtime settings are written into `index.html` when the pod starts. |
 | Backend | Python 3.14, Django 5.2, Django REST Framework, GeoDjango, django-allauth (OpenID Connect), gunicorn, WhiteNoise, django-prometheus | A JSON API using session auth, plus the Django admin. |
 | Task worker | Huey with a Redis broker | Same image as the webapp, started with a different script. Only one replica runs Huey at a time, picked by a Kubernetes Lease. |
 | Database | PostgreSQL with PostGIS | The Crunchy Postgres operator in OpenShift, the `postgis/postgis` image locally. |
@@ -223,7 +223,8 @@ DriveBC goes the other way. Its backend fetches events from RIDE's
    The webapp waits for Postgres, runs migrations, collects static files and
    creates the superuser from the `DJANGO_SUPERUSER_*` variables, then starts
    gunicorn with auto-reload. The frontend runs the Vite dev server with hot
-   reloading. `make logs` follows the output.
+   reloading. `make logs` follows the output, though gunicorn writes its own
+   log to `/tmp/gunicorn.log` inside the webapp container.
 
 3. Run `make` on its own to list the other targets. The ones you'll use most:
 
@@ -359,14 +360,18 @@ container.
 ### Tests
 
 Backend tests use Django's test runner against the PostGIS database. Open511
-publishing and the Route Planner call are skipped under test.
+publishing and the Route Planner call are skipped under test, and so are the
+LKI landmark and crossroad fixtures, which are large and the tests don't
+need. The migrations skip them whenever the database name starts with
+`test_`.
 
 ```bash
 make test
 ```
 
 `make coverage` runs the same suite with coverage, the way the
-`Unit tests/Code Coverage` workflow does on every pull request. SonarCloud is
+`Unit tests/Code Coverage` workflow does on every pull request and every push
+to `main`. SonarCloud is
 set up in `sonar-project.properties`.
 
 There are no frontend unit tests. `make lint` runs ESLint with
@@ -402,7 +407,7 @@ start script runs.
 | `KEYCLOAK_URL`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_SECRET` | yes | OpenID Connect provider for IDIR and BCeID |
 | `FRONTEND_BASE_URL` | no | Where to go after login and logout. Default `http://localhost:5173/` |
 | `ALLOW_LOCAL_ACCOUNTS` | no | Allow Django username and password accounts. Default `False` |
-| `SHOW_DEBUG_TOOLBAR` | no | Turn on django-debug-toolbar. Default `False` |
+| `SHOW_DEBUG_TOOLBAR` | no | Turn on django-debug-toolbar. It's read as text, so any value turns it on, even `False`. Leave it empty to keep it off. Running the tests with it on fails with `KeyError: 'djdt'` |
 | `ENABLE_DEBUG_LOGGING` | no | Write the `debug` logger to `debug.log` |
 | `EVENT_PREFIX` | no | Prefix for generated event IDs. Default `RIDE` |
 | `OPEN511_API_URL`, `OPEN511_API_KEY` | no | Open511 events endpoint that approved events are published to. The sync is skipped, with a warning, when they're unset |
