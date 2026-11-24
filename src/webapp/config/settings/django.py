@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.organizations',
     'apps.segments',
+    'apps.shared',
 
     'django.contrib.admin',
 ]
