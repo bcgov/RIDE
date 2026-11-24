@@ -13,6 +13,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
 from apps.organizations.models import Organization
+from apps.shared.models import SiteSettings
 
 from .models import RIDEUser, Request
 from .serializers import RIDEUserSerializer, RIDEGroupSerializer
@@ -146,12 +147,14 @@ class RIDEGroupAPIView(ModelViewSet):
 
 class session(APIView):
     def get(self, request, format=None):
+        flags = SiteSettings.objects.values('enable_map_setup').first() or {}
+
         if request.user.is_authenticated:
             serializer = RIDEUserSerializer(request.user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({**serializer.data, **flags}, status=status.HTTP_200_OK)
 
         else:
-            response = JsonResponse({"username": None})
+            response = JsonResponse({"username": None, **flags})
 
         response.set_cookie('csrftoken', get_token(request, ))
         return response

@@ -66,7 +66,8 @@ export default function Home() {
 
     if (!authContext.username) {
       navigate('/');
-    } else if (!authContext.is_approver) {
+
+    } else if (!authContext.is_approver || !authContext.enable_map_setup) {
       navigate('/events/');
     }
   }, [authContext]);
