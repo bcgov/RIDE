@@ -26,3 +26,7 @@ export const ENVIRONMENT = `${getEnv('ENVIRONMENT')}`;
 // enough for redux-devtools to work with the store
 export const ELIDE_SERVICE_AREA_GEOMETRIES = `${getEnv('ELIDE_SERVICE_AREA_GEOMETRIES')}`;
 export const ROUTABLE_LOCATIONS_HOST = `${getEnv('ROUTABLE_LOCATIONS_HOST', '')}`;
+export const GBA_URL = `${getEnv('GBA_URL')}`;
+export const GBA_CLIENT_ID = `${getEnv('GBA_CLIENT_ID')}`;
+
+

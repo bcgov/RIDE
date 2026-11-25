@@ -413,7 +413,6 @@ export function getDRA(coords, point, map) {
     outputFormat: 'application/json',
     count: 200,
     srsName: 'EPSG:4326',
-    // cql_filter: `ROAD_SURFACE = 'paved' AND INTERSECTS(GEOMETRY, POLYGON((${actual.join(', ')})))`,
     cql_filter: `INTERSECTS(GEOMETRY, POLYGON((${actual.join(', ')})))`,
   });
   const point2 = turf.point(g2ll(coords));
