@@ -73,8 +73,6 @@ INSTALLED_APPS = [
 
     'debug_toolbar',
 
-    "huey.contrib.djhuey",
-
     # DBC22-7326: log sent emails, as DBC does
     'email_log',
 
@@ -84,9 +82,13 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.organizations',
     'apps.segments',
+    'apps.shared',
 
     'django.contrib.admin',
 ]
+
+if env.bool('RUNNING_HUEY', default=False):
+    INSTALLED_APPS.append('huey.contrib.djhuey')
 
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware',

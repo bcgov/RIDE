@@ -18,6 +18,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
 from apps.organizations.models import Organization, ServiceArea
+from apps.shared.models import SiteSettings
 
 from apps.shared.helpers import attach_email_images, get_used_email_images
 
@@ -213,13 +214,15 @@ class EmailSubscriptionViewset(viewsets.ModelViewSet):
 
 class session(APIView):
     def get(self, request, format=None):
+        flags = SiteSettings.objects.values('enable_map_setup').first() or {}
+
         if request.user.is_authenticated:
             # service areas come from one id query, see get_user_notification_area_ids
             serializer = SessionUserSerializer(request.user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({**serializer.data, **flags}, status=status.HTTP_200_OK)
 
         else:
-            response = JsonResponse({"username": None})
+            response = JsonResponse({"username": None, **flags})
 
         response.set_cookie('csrftoken', get_token(request, ))
         return response
