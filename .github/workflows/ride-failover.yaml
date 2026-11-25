@@ -17,6 +17,9 @@ on:
         - Scale up RIDE in Gold
         - Scale up RIDE in Gold DR
 
+permissions:
+  contents: read
+
 jobs:
   scale-down-gold:
     if: ${{ github.event.inputs.step == 'Scale down RIDE in Gold' }}

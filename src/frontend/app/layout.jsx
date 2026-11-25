@@ -102,6 +102,7 @@ export default function Layout() {
             ret.is_approver = data.is_approver;
             ret.service_areas = Array.isArray(data.service_areas) ? data.service_areas : [];
             ret.request_organization = data.request_organization;
+            ret.enable_map_setup = data.enable_map_setup;
           }
           setAuthContext((prior) => {
             if (ret.loginStateKnown != prior.loginStateKnown) { return ret; }
@@ -110,6 +111,7 @@ export default function Layout() {
             if (ret.is_superuser != prior.is_superuser) { return ret; }
             if (ret.is_approver != prior.is_approver) { return ret; }
             if (ret.request_organization != prior.request_organization) { return ret; }
+            if (ret.enable_map_setup != prior.enable_map_setup) { return ret; }
             if ((ret.service_areas || []).join(',') != (prior.service_areas || []).join(',')) { return ret; }
             return prior;
           });
@@ -153,7 +155,7 @@ export default function Layout() {
               <NavLink to="/chainups/">Chain-Ups</NavLink>
             }
 
-            { showChainUpsLink &&
+            { showChainUpsLink && authContext.enable_map_setup &&
               <NavLink to="/mapsetup/">Map setup</NavLink>
             }
           </>
