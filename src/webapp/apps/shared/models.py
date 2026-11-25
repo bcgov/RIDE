@@ -339,3 +339,17 @@ class VersionedModel(models.Model):
 
     def get_current(self):
         return self if self.latest else type(self).current.get(id=self.id)
+
+
+class SiteSettings(models.Model):
+    enable_map_setup = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'site settings'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # single row
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return 'Site settings'

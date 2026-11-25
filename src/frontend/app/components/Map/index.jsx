@@ -127,8 +127,8 @@ async function getLandmarks(address) {
 
 async function getGeocoderLocations(addressInput) {
   return get(`${GEOCODER_HOST}/addresses.json`, {
-      minScore: 50,
-      maxResults: 15,
+      minScore: 65,
+      maxResults: 7,
       echo: 'false',
       brief: true,
       autoComplete: true,

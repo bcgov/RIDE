@@ -46,6 +46,10 @@ if env('ENABLE_DEBUG_LOGGING', default=False):
 RIDE_USERS_STRING = env('RIDE_USERS_STRING', default="")
 RIDE_ORGS_STRING = env('RIDE_ORGS_STRING', default="")
 
+# IDIRs that seed_data makes superusers, for PR previews and local testing.
+# Leave unset everywhere else.
+RIDE_ADMIN_IDIRS = env.list('RIDE_ADMIN_IDIRS', default=[])
+
 EVENT_PREFIX = env('EVENT_PREFIX', default='RIDE')
 
 RIDE_FROM_EMAIL_DEFAULT = env('RIDE_FROM_EMAIL_DEFAULT', default='DoNotReply_RIDE@gov.bc.ca')
