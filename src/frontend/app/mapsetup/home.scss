@@ -19,7 +19,6 @@
       align-items: center;
     }
 
-    // open menus rightward; default right-aligned menu clips at left edge
     .open-right .ride-dropdown-menu {
       left: 1rem;
       right: auto;
@@ -47,6 +46,151 @@
 
     > * {
       cursor: text;
+    }
+
+    ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+      color: inherit; // global ul color is dark
+    }
+  }
+
+  .context-menu {
+    padding: 10px;
+    margin-left: 24px;
+
+    .context-option {
+      font-size: 12px;
+      line-height: 24px;
+      font-weight: 700;
+    }
+  }
+
+  .modal-root.confirm-delete .modal-dialog .modal-outer .modal-center .modal-panel {
+    width: 320px;
+
+    .modal-content .modal-header .modal-title-container .modal-title {
+      font-size: 1rem;
+      padding: 1rem;
+    }
+  }
+
+  .edit-chainup {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 522px;
+    z-index: 2;
+    overflow-y: auto;
+    background: $Grey20;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: $Type-Primary;
+
+    .header {
+      background: $White;
+      padding: 12px;
+      font-size: 24px;
+      line-height: 36px;
+    }
+
+    .card {
+      margin: 0 8px;
+      padding: 12px 16px 16px;
+      background: $White;
+      border: 1px solid #000000;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 16px;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    label, .ride-textinput-label {
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .field, .field .ride-textinput-container {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+
+    .ride-dropdown {
+      .ride-dropdown-label { display: none; }
+      .ride-dropdown-button { width: 100%; height: auto; padding: 4px 12px; font-size: 16px; }
+      .ride-dropdown-menu { left: 0; right: 0; width: auto; }
+    }
+
+    // validation, as in the event form
+    .error {
+      label, .ride-textinput-label { color: red; font-weight: bold; }
+      .ride-textinput-input, .ride-dropdown-button, .loading-select { border-color: red; }
+    }
+
+    .error-message {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: red;
+    }
+
+    .loading-select {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 12px;
+      background: $Grey10;
+      border: 1px solid #000000;
+      border-radius: 4px;
+      color: $Grey70;
+
+      .spinner-container { width: auto; height: auto; }
+      .spinner-icon { width: 20px; height: 20px; }
+    }
+
+    .ride-textinput-input {
+      padding: 4px 12px;
+      background: $Grey10;
+      border: 1px solid #000000;
+      border-radius: 4px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background: $White;
+      box-shadow: 0 6.4px 14.4px rgba(0, 0, 0, 0.13), 0 1.2px 3.6px rgba(0, 0, 0, 0.1);
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .update {
+        background: $Type-Primary;
+        color: $White;
+
+        &:disabled { opacity: 0.5; }
+      }
+
+      .cancel { color: #605E5C; }
     }
   }
 }

@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.contrib import admin, messages
+from django.db import transaction
 from django.utils import timezone
 
 from .enums import EventType
@@ -87,6 +88,7 @@ class LatestApprovedFilter(YesNoFilter):
 
 
 @admin.action(description='Create dummy inactive event (advance ID sequence)')
+@transaction.atomic
 def create_dummy_inactive_event(modeladmin, request, queryset):
     # Ignore selection; Django still requires at least one row checked.
     event_id = EventSerializer().get_id()

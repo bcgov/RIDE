@@ -31,6 +31,14 @@ function applyFilter(map, filter) {
   });
 }
 
+export function chainupFeature(cu) {
+  return new RideFeature({
+    styles: styles[cu.direction] || styles.BOTH,
+    geometry: new Point(ll2g(cu.primary_point.coordinates)),
+    raw: cu,
+  });
+}
+
 export default function SetupChainUpsLayer({ filter, visible = true }) {
   const { map } = useContext(MapContext);
   const filterRef = useRef(); // features load async; apply latest filter then
@@ -45,16 +53,15 @@ export default function SetupChainUpsLayer({ filter, visible = true }) {
       source,
       style: layerStyle,
     });
+
     layer.listenForHover = true;
+    layer.canDragFeatures = true;
+
     map.addLayer(layer);
     map.set('chainups', layer);
 
     getChainUps().then((chainups) => {
-      source.addFeatures(chainups.map((cu) => new RideFeature({
-        styles: styles[cu.direction] || styles.BOTH,
-        geometry: new Point(ll2g(cu.primary_point.coordinates)),
-        raw: cu,
-      })));
+      source.addFeatures(chainups.map(chainupFeature));
       applyFilter(map, filterRef.current);
     });
   }, [map]);

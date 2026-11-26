@@ -56,6 +56,12 @@ class ChainUpSerializer(serializers.ModelSerializer):
         model = ChainUp
         exclude = ["geometry"]
 
+        # required fields that are filled in by the view on create
+        extra_kwargs = {
+            field: {'required': False}
+            for field in ['id', 'route', 'sorting_order', 'primary_mp', 'secondary_mp', 'secondary_point']
+        }
+
 
 class RouteSerializer(serializers.ModelSerializer):
     sort_key = serializers.SerializerMethodField()

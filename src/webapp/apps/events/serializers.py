@@ -34,6 +34,7 @@ class NoteSerializer(VersionSerializer):
         return validated
 
     def get_id(self):
+        Note.lock_ids()
         e = Note.objects.distinct('id').order_by('-id').first()
         if e is None:
             return '100000'
@@ -289,6 +290,7 @@ class EventSerializer(KeyMoveSerializer):
         return super().create(validated_data)
 
     def get_id(self):
+        Event.lock_ids()
         event = Event.objects.distinct('id').order_by('-id').first()
         if event is None:
             return f'{EVENT_PREFIX}-100000'
