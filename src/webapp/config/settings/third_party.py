@@ -84,18 +84,8 @@ OPEN511_API_URL = env('OPEN511_API_URL', default='')
 OPEN511_API_KEY = env('OPEN511_API_KEY', default='')
 DISABLE_OPEN511_SYNC = env.bool('DISABLE_OPEN511_SYNC', default=False)
 
-HUEY = {
-    "connection": {
-        "host": env("REDIS_HOST"),
-        "port": env("REDIS_PORT"),
-    },
-    "immediate": False,
-    "consumer": {
-        "flush_locks": True,
-        "workers": 4,
-        "worker_type": "thread",
-    }
-}
+# DBC22-7326: kill switch for event notification emails
+DISABLE_EVENT_NOTIFICATIONS = env.bool('DISABLE_EVENT_NOTIFICATIONS', default=False)
 
 TASKS_BACKEND = env('TASKS_BACKEND', default='huey.contrib.djhuey.tasks_backend.HueyBackend')
 TASKS = {

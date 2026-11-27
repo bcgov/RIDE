@@ -52,5 +52,16 @@ RIDE_ADMIN_IDIRS = env.list('RIDE_ADMIN_IDIRS', default=[])
 
 EVENT_PREFIX = env('EVENT_PREFIX', default='RIDE')
 
-RIDE_FROM_EMAIL_DEFAULT = env('RIDE_FROM_EMAIL_DEFAULT', default='DoNotReply@gov.bc.ca')
+RIDE_FROM_EMAIL_DEFAULT = env('RIDE_FROM_EMAIL_DEFAULT', default='DoNotReply_RIDE@gov.bc.ca')
 ACCESS_REQUEST_RECEIVERS = env('ACCESS_REQUEST_RECEIVERS', default='ride.support@gov.bc.ca').split(';')
+
+# DBC22-7326: event notification emails (mirrors DBC DRIVEBC_FROM_EMAIL_*)
+RIDE_NOTIFICATION_FROM_EMAIL_DEFAULT = env('RIDE_NOTIFICATION_FROM_EMAIL_DEFAULT', default='DoNotReply_RIDE@gov.bc.ca')
+RIDE_NOTIFICATION_FROM_EMAIL_SENDER = f'DriveBC RIDE <{RIDE_NOTIFICATION_FROM_EMAIL_DEFAULT}>'
+RIDE_NOTIFICATION_ADDRESS_BOOK_EMAIL = env('RIDE_NOTIFICATION_ADDRESS_BOOK_EMAIL',
+                                           default=RIDE_NOTIFICATION_FROM_EMAIL_DEFAULT)
+RIDE_NOTIFICATION_SUBJECT_PREFIX = env('RIDE_NOTIFICATION_SUBJECT_PREFIX', default='')  # e.g. '[DEV] '
+RIDE_SUPPORT_EMAIL = env('RIDE_SUPPORT_EMAIL', default='ride.support@gov.bc.ca')
+
+# Public DriveBC site for "View on DriveBC" links; omitted from emails when empty
+DRIVEBC_BASE_URL = env('DRIVEBC_BASE_URL', default='')
