@@ -165,13 +165,14 @@ jobs:
         PR: ${{ github.event.pull_request.number }}
         PR_RELEASE: ${{ needs.setup.outputs.helm_release_name }}
         PR_DB_SECRET: pr-${{ github.event.pull_request.number }}-ride-db-connection
+        BRANCH: ${{ github.head_ref }}
       run: |
         helm dependency update ./infrastructure/main
         helm upgrade --install "$PR_RELEASE" \
           -f ./infrastructure/main/values-${{ needs.setup.outputs.environment_name }}.yaml \
           ./infrastructure/main \
           --set global.image.tag="${{ needs.setup.outputs.tag_for_helm }}" \
-          --set global.branch="${{ github.head_ref }}" \
+          --set-string global.branch="$BRANCH" \
           --set global.host="pr-${PR}-ride.apps.gold.devops.gov.bc.ca" \
           --set-string webapp.nameOverride="${PR_RELEASE}-webapp" \
           --set-string webapp.fullnameOverride="${PR_RELEASE}-webapp" \
