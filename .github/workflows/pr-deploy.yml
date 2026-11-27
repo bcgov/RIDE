@@ -195,6 +195,7 @@ jobs:
           --set-string redis.fullnameOverride="${PR_RELEASE}-redis" \
           --set-string redis.serviceAccountName="dev-ride-redis" \
           --set-string webapp.deployment.redisHost="${PR_RELEASE}-redis" \
+          --set-string webapp.deployment.frontendBaseUrl="https://${PR_RELEASE}.apps.gold.devops.gov.bc.ca/" \
           --set-string tasks.nameOverride="${PR_RELEASE}-tasks" \
           --set-string tasks.fullnameOverride="${PR_RELEASE}-tasks" \
           --set-string tasks.deployment.redisHost="${PR_RELEASE}-redis" \
