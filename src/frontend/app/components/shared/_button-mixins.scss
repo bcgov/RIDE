@@ -1,0 +1,37 @@
+@use "../../styles/variables.scss" as *;
+
+// DBC22-7324: RIDEModal's action buttons, shared with pages (see buttons.scss).
+// The colours are placeholders, used with @extend, so their &:hover has a
+// selector to attach to.
+
+@mixin action-button {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  border-radius: 0.25rem;
+  padding: .4rem .5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background 0.2s;
+
+  svg {
+    margin-right: .5rem;
+  }
+}
+
+%primary-button {
+  background: $Type-Primary;
+  color: #fff;
+
+  &:hover {
+    background: $Type-Secondary;
+  }
+}
+
+%cancel-button {
+  color: $Grey80;
+
+  &:hover {
+    background: $Grey20;
+  }
+}

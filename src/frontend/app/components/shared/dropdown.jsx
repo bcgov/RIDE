@@ -13,7 +13,7 @@ import './dropdown.scss';
 export default function RIDEDropdown(props) {
   /* Setup */
   // Props
-  const { label, extraClasses, items, handler, value } = props;
+  const { label, extraClasses, items, handler, value, disabled } = props;
 
   /* Hooks */
   // States
@@ -50,7 +50,7 @@ export default function RIDEDropdown(props) {
     <Menu as="div" className={`ride-dropdown ${extraClasses || ''}`}>
       <p className={'ride-dropdown-label'}>{label}</p>
 
-      <MenuButton disabled={!items?.length} className="ride-dropdown-button">
+      <MenuButton disabled={disabled || !items?.length} className="ride-dropdown-button">
         <span className={'selected-text'}>{getDisplayText(selected)}</span>
         <FontAwesomeIcon icon={faChevronDown} aria-hidden="true" className="ride-dropdown-icon" />
       </MenuButton>

@@ -1,0 +1,114 @@
+@use "../styles/variables.scss" as *;
+@use "../components/shared/buttons.scss";
+
+// DBC22-7324: Notification settings page (RIDE Figma 8195:54163)
+.notification-settings {
+  padding: 1.25rem 2rem;
+  height: 100%;
+  overflow-y: auto;  // main doesn't scroll
+
+  h3 {
+    font-weight: 400;  // Figma's regular H4
+  }
+
+  &-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    font-size: .875rem;
+  }
+
+  &-row {
+    display: flex;
+    align-items: center;
+  }
+
+  // label column, also for the shared checkbox and dropdown labels
+  &-label,
+  .ride-checkboxes-label,
+  .ride-dropdown-label {
+    flex: none;
+    width: 164px;
+    margin-right: 0;
+    font-size: .875rem;
+    font-weight: 400;
+  }
+
+  &-email {
+    font-weight: 700;
+
+    &-hint {
+      margin-left: 1rem;
+    }
+  }
+
+  &-hint {
+    display: block;
+    color: $Grey70;
+  }
+
+  &-error {
+    margin: -.75rem 0 0 164px;
+    font-size: .75rem;
+    color: $Error;
+  }
+
+  // RIDEDropdown, in its default style
+  .notification-settings-field {
+    width: fit-content;
+    align-items: flex-start;
+
+    .ride-dropdown-label {
+      padding-top: .3rem;
+      text-wrap: wrap;
+    }
+  }
+
+  .notification-settings-toggle {
+    .ride-dropdown-button, .ride-dropdown-menu {
+      width: 305px;
+    }
+  }
+
+  .notification-settings-creator {
+    .ride-dropdown-button, .ride-dropdown-menu {
+      width: 417px;
+    }
+  }
+
+  // RIDECheckBoxes, with every item shown
+  .notification-settings-checklist {
+    margin-bottom: 0;
+
+    .ride-checkboxes-label {
+      padding-top: .2rem;
+    }
+
+    .ride-checkboxes-items {
+      flex: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      height: auto;
+      overflow: visible;
+    }
+
+    .checkbox-container {
+      font-size: 1rem;
+
+      .checkbox {
+        margin-left: 0;
+      }
+    }
+  }
+
+  &-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 572px;
+    max-width: 100%;
+    margin-top: 2rem;
+  }
+}

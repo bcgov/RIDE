@@ -19,5 +19,6 @@ export default [
       index("./chainups/home.jsx"),
     ]),
     route("mapsetup", "./mapsetup/home.jsx"),
+    route("notifications", "./notifications/home.jsx"),
   ]),
 ];
