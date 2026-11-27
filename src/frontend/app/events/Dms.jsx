@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 // External imports
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { faXmark } from '@fortawesome/pro-solid-svg-icons';
 import { format } from 'date-fns';
 
 import { API_HOST } from '../env';
@@ -37,9 +37,9 @@ function Message({ message, index }) {
   const status = message.trim() ? 'Active' : 'No message';
   const lines = message.split('\n');
   return (
-    <div className='message'>
-      <div className='message-title'>
-        <h5>Display {index}</h5>
+    <div className="message display-item">
+      <div className="message-title display-header">
+        <span className="display-label">Display {index}</span>
         <div className={`status ${status}`}>{status}</div>
       </div>
       <div className='blackboard'>
@@ -65,25 +65,29 @@ export default function DmsPreview({ sign, close }) {
   return (
     <div className={`preview sign`}>
 
-      <div className='header'>
-        <div style={{padding: '1rem'}}>
-          <div className='icons'>
+      <div className="preview__title">
+        <div className="preview__title__name">
+          <div className="icons">
             <img src={DIRECTION[sign.roadway_direction]} />
-            <p>Dynamic message sign</p>
-            <button
-              className="close"
-              type='button'
-              onClick={close}
-            ><FontAwesomeIcon icon={faXmark} /></button>
+          </div>
+          <div className="name-div">
+            <p className="name">Dynamic message sign</p>
           </div>
         </div>
+          <button
+            className="close"
+            type='button'
+            onClick={close}
+          ><FontAwesomeIcon icon={faXmark} /></button>
       </div>
 
-      <div className="body">
-        <h3>{sign.name}</h3>
+      <div className="preview__content">
+        <h3 className="direction">{sign.name}</h3>
         <div className='last-updated'>{formatDate(sign.updated_datetime_utc, timezone)}</div>
-        <Message message={sign.message_display_1} index={1} />
-        <Message message={sign.message_display_2} index={2} />
+        <div className='dms-container'>
+          <Message message={sign.message_display_1} index={1} />
+          <Message message={sign.message_display_2} index={2} />
+        </div>
       </div>
 
       { sign.id &&

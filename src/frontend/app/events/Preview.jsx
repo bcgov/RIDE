@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 
 // External imports
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { faXmark } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleExclamation, faRoadCircleCheck } from '@fortawesome/pro-regular-svg-icons';
 import { format } from 'date-fns';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -40,17 +41,38 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
   const cleared = displayed.status === 'Inactive' && (!displayed.approved || lastUpdated > Date.now() - 60000 * 15);  // TODO: time window move to env variable
 
-  const icon = getPlainIcon(displayed, 'active');
+  const icon = getPlainIcon(displayed, 'static');
 
-  let banner = [];
-  if (displayed.version !== event.version) {
-    banner.push(`Version ${displayed.version} at ${inEffectUntilFormat(displayed.last_updated)}`);
-  }
-  if (displayed.approved === false) {
-    banner.push('Event awaiting approval');
-  }
+  const statusItems = [
+    displayed.approved === false && {
+      key: 'awaiting',
+      label: 'Awaiting approval',
+      className: 'banner__status--awaiting',
+      icon: faCircleExclamation,
+    },
+    displayed.status === 'Inactive' && {
+      key: 'cleared',
+      label: 'Cleared',
+      className: 'banner__status--cleared',
+      icon: faRoadCircleCheck,
+    },
+  ].filter(Boolean);
 
-  banner = banner.length > 0 ? <>{banner.map((item) => <p key={item}>{item}</p>)}</> : null;
+  const versionText = displayed.version !== event.version
+    ? `Version ${displayed.version} at ${inEffectUntilFormat(displayed.last_updated)}`
+    : null;
+
+  const banner = (versionText || statusItems.length > 0) ? (
+    <>
+      {versionText && <p>{versionText}</p>}
+      {statusItems.map(({ key, label, className, icon: statusIcon }) => (
+        <div key={key} className={`banner__status ${className}`}>
+          <FontAwesomeIcon icon={statusIcon} />
+          <p>{label}</p>
+        </div>
+      ))}
+    </>
+  ) : null;
 
   // States
   const [selectedSeg, setSelectedSeg] = useState(segments ? segments[0] : null);
@@ -99,7 +121,7 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
       headerText = `${displayed.details.severity} ${displayed.type === 'Incident' ? 'incident' : 'delay'}`
     }
 
-    return <p className={'event-name'}>{headerText}</p>;
+    return <p className={'name'}>{headerText}</p>;
   }
 
   const startError = start.name === 'error';
@@ -120,35 +142,36 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
         </div>
       }
 
-      <div className="header">
+      <div className="preview__header">
         { banner && <div className="banner">{ banner }</div> }
-        <div style={{padding: '1rem'}}>
-          <div className="icons">
-            <img src={icon} />
-
-            <button
-              type="button"
-              className="close"
-              onClick={() => {
-                if (displayed.showForm) {
-                  dispatch({ type: 'set', value: { showPreview: false } });
-                } else {
-                  if (mapRef.current) {
-                    selectFeature(mapRef.current, null);
-                  }
-                  dispatch({ type: 'reset form' });
-                }
-              }}
-            ><FontAwesomeIcon icon={faXmark} /></button>
+        <div className="preview__title">
+          <div className="preview__title__name">
+            <div className="icons">
+              <img src={icon} />
+            </div>
+            <div className="name-div">
+                <EventName />
+                <p className="sub-name">{ PHRASES_LOOKUP[displayed.details.situation] }</p> 
+              </div>
           </div>
-
-          <h3>{ PHRASES_LOOKUP[displayed.details.situation] }</h3>
-
-          <EventName />
+          <button
+            type="button"
+            className="close"
+            onClick={() => {
+              if (displayed.showForm) {
+                dispatch({ type: 'set', value: { showPreview: false } });
+              } else {
+                if (mapRef.current) {
+                  selectFeature(mapRef.current, null);
+                }
+                dispatch({ type: 'reset form' });
+              }
+            }}
+          ><FontAwesomeIcon icon={faXmark} /></button>
         </div>
       </div>
 
-      <div className="body">
+      <div className="preview__content">
         { hasError && <h3 className='direction error'>
             {startError && !endError && 'Start pin must be on a valid road'}
             {!startError && endError && 'End pin must be on a valid road'}
@@ -216,7 +239,7 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
             </h3>
 
             <div className="preview__group">
-              <h5>Detailed location</h5>
+              <p className="preview__group__title">Detailed location</p>
               <ul className="preview__group__shadow-box">
                 <li>
                   {event.chainup.description}
@@ -225,7 +248,7 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
             </div>
 
             <div className="preview__group">
-              <h5>Who does this impact?</h5>
+              <p className="preview__group__title">Who does this impact?</p>
               <ul className="preview__group__shadow-box">
                 <li>
                   Chain-up requirements apply to a commercial vehicle with a weight of 11,794 kg or greater
@@ -237,7 +260,7 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         {!isChainup &&
           <div className="preview__group">
-            <h5>Description</h5>
+            <p className="preview__group__title">Description</p>
             <ul className="preview__group__shadow-box">
               <li>
                 {description == null ?
@@ -251,8 +274,8 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         {!isChainup &&
           <div className="preview__group">
-            <h5>IVR</h5>
-            <ul className="preview__group__shadow-box">
+            <p className="preview__group__title">IVR</p>
+            <ul className="preview__group__shadow-box preview__group__shadow-box--trail">
               <li>
                 {ivr == null ?
                   <Skeleton width="100%" height={16} count={4} /> :
@@ -269,8 +292,8 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         { displayed.impacts.length > 0 &&
           <>
-            <h5>Traffic Impacts</h5>
-            <ul>
+            <p className="preview__group__title">Traffic Impacts</p>
+            <ul className="preview__group__shadow-box">
               { displayed.impacts.map((impact, ii) => {
                   return (
                     <li key={'item ' + ii}>
@@ -286,29 +309,30 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         { displayed.type === 'Planned event' &&
           <>
-            <h5>In effect</h5>
-            <div className="additional">
-              <div>
-                { displayed.timing.startTime && `From ${inEffectUntilFormat(displayed.timing.startTime)}`}
+            <p className="preview__group__title">In effect</p>
+            <div className="preview__group__shadow-box">
+              { displayed.timing.startTime && <p>From {inEffectUntilFormat(displayed.timing.startTime)}</p>}
 
-                { displayed.timing.ongoing
-                  ? <p>until further notice</p>
-                  : <p>{` ${displayed.timing.startTime ? 'to' : 'until'} ${inEffectUntilFormat(displayed.timing.endTime)}`}</p>
-                }
-              </div>
+              { displayed.timing.ongoing
+                ? <p>until further notice</p>
+                : <p>{` ${displayed.timing.startTime ? 'to' : 'until'} ${inEffectUntilFormat(displayed.timing.endTime)}`}</p>
+              }
+            </div>
+            { displayed.timing.schedules.length > 0 &&
               <ul className='inner'>
                 { displayed.timing.schedules.map((schedule) => (
                   <li key={schedule.id}>{desc(schedule)}</li>
                 ))}
               </ul>
-            </div>
+            }
+
           </>
         }
 
         { displayed.restrictions.length > 0 &&
           <>
-            <h5>Restrictions</h5>
-            <ul>
+            <p className="preview__group__title">Restrictions</p>
+            <ul className="preview__group__shadow-box">
               { displayed.restrictions.map((restriction, ii) => {
                   return (
                     <li key={'item ' + ii}>
@@ -324,8 +348,8 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         { displayed.delays.amount > 0 &&
           <>
-            <h5>Estimated Delay</h5>
-            <ul>
+            <p className="preview__group__title">Estimated Delay</p>
+            <ul className="preview__group__shadow-box">
               <li>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" color="currentColor"><path d="M528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112C434.9 112 528 205.1 528 320zM64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320zM296 184L296 320C296 328 300 335.5 306.7 340L402.7 404C413.7 411.4 428.6 408.4 436 397.3C443.4 386.2 440.4 371.4 429.3 364L344 307.2L344 184C344 170.7 333.3 160 320 160C306.7 160 296 170.7 296 184z"/></svg>
                 Estimated {displayed.delays.amount} {displayed.delays.unit} delay
@@ -336,8 +360,8 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         {conditions.length > 0 &&
           <div className={'conditions'}>
-            <h5>Conditions</h5>
-            <ul>
+            <p className='preview__group__title'>Conditions</p>
+            <ul className="preview__group__shadow-box">
               {conditions.map((condition, ii) => {
                 return (
                   <li key={'item ' + ii}>
@@ -352,12 +376,12 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         { (displayed.additional || displayed?.external?.url) &&
           <>
-            <h5>{displayed.type === 'ROAD_CONDITION' ? 'Notes' : 'Additional Information'}</h5>
+            <p className='preview__group__title'>{displayed.type === 'ROAD_CONDITION' ? 'Notes' : 'Additional Information'}</p>
             { displayed.additional &&
-              <div className="additional">{displayed.additional}</div>
+              <div className="additional preview__group__shadow-box">{displayed.additional}</div>
             }
             { displayed?.external?.url &&
-              <div className="more-info">
+              <div className="more-info preview__group__shadow-box">
                 <a href={displayed.external.url}>
                   More information
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor"><path d="M352 88C352 101.3 362.7 112 376 112L494.1 112L263.1 343C253.7 352.4 253.7 367.6 263.1 376.9C272.5 386.2 287.7 386.3 297 376.9L528 145.9L528 264C528 277.3 538.7 288 552 288C565.3 288 576 277.3 576 264L576 88C576 74.7 565.3 64 552 64L376 64C362.7 64 352 74.7 352 88zM144 160C99.8 160 64 195.8 64 240L64 496C64 540.2 99.8 576 144 576L400 576C444.2 576 480 540.2 480 496L480 408C480 394.7 469.3 384 456 384C442.7 384 432 394.7 432 408L432 496C432 513.7 417.7 528 400 528L144 528C126.3 528 112 513.7 112 496L112 240C112 222.3 126.3 208 144 208L232 208C245.3 208 256 197.3 256 184C256 170.7 245.3 160 232 160L144 160z"/></svg>
@@ -369,28 +393,30 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
 
         { displayed.type === 'Incident' && displayed.timing.endTime &&
           <>
-            <h5>In effect until</h5>
-            <ul>
+            <p className='preview__group__title'>In effect until</p>
+            <ul className="preview__group__shadow-box">
               <li>{inEffectUntilFormat(displayed.timing.endTime)}</li>
             </ul>
           </>
         }
 
-        <div className="timing">
-          { !isNaN(lastUpdated) &&
-            <div className="time">
-              <strong>{displayed?.status === 'Inactive' ? 'Cleared' : 'Last updated'}</strong><br />
+        { !Number.isNaN(lastUpdated) && displayed?.status !== 'Inactive' &&
+          <>
+            <p className="preview__group__title">Next update</p>
+            <div className="preview__group__shadow-box">
               {formatTimestamp(lastUpdated)}
             </div>
-          }
+          </>
+        }
 
-          { ['Incident', 'ROAD_CONDITION', 'CHAIN_UP'].includes(event.type) && displayed?.status !== 'Inactive' &&
-            <div className="time">
-              <strong>Next update</strong><br />
-              {!isNaN(nextUpdate) && formatTimestamp(nextUpdate)}
+        { ['Incident', 'ROAD_CONDITION', 'CHAIN_UP'].includes(event.type) && displayed?.status !== 'Inactive' &&
+          <>
+            <p className="preview__group__title">Next update</p>
+            <div className="preview__group__shadow-box">
+              {!Number.isNaN(nextUpdate) && formatTimestamp(nextUpdate)}
             </div>
-          }
-        </div>
+          </>
+        }
       </div>
 
       { displayed.id &&
