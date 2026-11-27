@@ -5,6 +5,16 @@ import { useDispatch } from 'react-redux';
 // Internal imports
 import { AlertContext } from "../../contexts";
 import { updateUser } from "../../slices/users";
+import {
+  CREATOR_OPTIONS,
+  EVENT_TYPE_OPTIONS,
+  SEVERITY_OPTIONS,
+  STATUS_OPTIONS,
+  getOptionNames,
+} from "../../notifications/constants";
+
+// DBC22-7325: creator choices as an admin reads them for another user
+const CREATOR_SUMMARIES = CREATOR_OPTIONS.map((option) => ({ id: option.id, name: option.adminName }));
 
 // Styling
 import './editUser.scss';
@@ -13,7 +23,7 @@ import RIDEDropdown from "../../components/shared/dropdown.jsx";
 export default function EditUserForm(props) {
   /* Setup */
   // Props
-  const { user, orgs, submitting, setSubmitting, setOpen } = props
+  const { user, orgs, areas = [], submitting, setSubmitting, setOpen } = props
 
   // Context
   const { setAlertContext } = useContext(AlertContext);
@@ -70,7 +80,6 @@ export default function EditUserForm(props) {
   // Main component
   const userOrg = Array.isArray(user.organizations) && user.organizations.length ?
     orgs.find(org => org.id === user.organizations[0]) : null;
-
   return (
     <div className="edit-user-form">
       <div className={'user-info'}>
@@ -114,6 +123,59 @@ export default function EditUserForm(props) {
           value={user.is_superuser ? 'Yes' : 'No'}
           handler={(value) => setIsSuperuser(value === 'Yes')} />
       </div>
+
+      {/* DBC22-7325: the user's notification settings, read only */}
+      <NotificationSummary user={user} areas={areas} />
+    </div>
+  );
+}
+
+// DBC22-7325: a user's saved notification settings, read only
+function NotificationSummary({ user, areas }) {
+  const subscription = user.email_subscription;
+  const on = !!subscription?.notification;
+
+  // Comma separated names of the saved options, or None
+  const names = (options, ids) => getOptionNames(options, ids) || 'None';
+
+  return (
+    <div className={'notifications'}>
+      <div className={'header'}>Notifications</div>
+
+      <div className={'row'}>
+        <div className={'label'}>Email notifications:</div>
+        <div>{on ? 'Yes' : 'No'}</div>
+      </div>
+
+      {on &&
+        <>
+          <div className={'row'}>
+            <div className={'label'}>Service areas:</div>
+            <div>{names(areas.map((area) => ({ id: area.id, name: area.label })),
+              subscription.notification_areas)}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event types:</div>
+            <div>{names(EVENT_TYPE_OPTIONS, subscription.notification_types)}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event severities:</div>
+            <div>{names(SEVERITY_OPTIONS, subscription.notification_severities)}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event statuses:</div>
+            <div>{names(STATUS_OPTIONS, subscription.notification_statuses)}</div>
+          </div>
+
+          <div className={'row'}>
+            <div className={'label'}>Event creator:</div>
+            <div>{names(CREATOR_SUMMARIES, [subscription.notification_creator])}</div>
+          </div>
+        </>
+      }
     </div>
   );
 }

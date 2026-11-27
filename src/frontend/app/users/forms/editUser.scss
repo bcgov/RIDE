@@ -1,14 +1,14 @@
 @use "../../styles/variables.scss" as *;
 
 .edit-user-form {
-  .user-info, .permissions {
+  .user-info, .permissions, .notifications {
     background: white;
     border: 1px solid black;
     border-radius: .5rem;
     padding: 1rem;
   }
 
-  .user-info {
+  .user-info, .notifications {
     margin-bottom: .5rem;
 
     .row {
@@ -27,11 +27,24 @@
     }
   }
 
-  .permissions {
+  .permissions, .notifications {
     .header {
       font-weight: 700;
       font-size: 1rem;
       margin-bottom: 1rem;
+    }
+  }
+
+  // DBC22-7325: read-only notification settings
+  .notifications {
+    margin-top: .5rem;
+
+    .row {
+      align-items: flex-start;  // long lists wrap
+
+      .label {
+        flex: none;
+      }
     }
   }
 }

@@ -195,3 +195,119 @@ class TestEmailSubscriptions(TestCase):
         response = self.client.post(self.url, self.payload(), content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertIn('notification', response.json())
+
+
+class TestUserEmailSubscriptionSummary(TestCase):
+    ''' DBC22-7325: notification settings in the admin users list '''
+
+    def setUp(self):
+        from apps.organizations.models import Organization, ServiceArea
+        from apps.users.models import EmailSubscription
+
+        self.area = ServiceArea.objects.get(id=8)
+        self.org = Organization.objects.create(name='Org A')
+        self.org.service_areas.set([self.area])
+
+        self.admin = get_user_model().objects.create_user(username='admin', password='pw',
+                                                          is_staff=True, is_superuser=True)
+        self.client.force_login(self.admin)
+
+        self.subscribed = get_user_model().objects.create_user(username='subscribed', email='s@gov.bc.ca')
+        self.subscribed.organizations.set([self.org])
+        subscription = EmailSubscription.objects.create(
+            user=self.subscribed, notification=True, notification_types=['incidents'],
+            notification_severities=['majorEvents'], notification_statuses=['new'], notification_creator='me')
+        subscription.notification_areas.set([self.area])
+
+    def users(self):
+        return {user['username']: user for user in self.client.get('/api/users').json()}
+
+    def test_settings_in_users_list(self):
+        users = self.users()
+
+        self.assertEqual(users['subscribed']['email_subscription']['notification_areas'], [self.area.id])
+        self.assertEqual(users['subscribed']['email_subscription']['notification_creator'], 'me')
+        self.assertFalse(users['admin']['email_subscription']['notification'])
+        self.assertEqual(users['admin']['email_subscription']['notification_areas'], [])
+
+    def test_no_extra_queries_per_subscription(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        from apps.users.models import EmailSubscription
+
+        other = get_user_model().objects.create_user(username='other', email='o@gov.bc.ca')
+        other.organizations.set([self.org])
+
+        with CaptureQueriesContext(connection) as one_subscription:
+            self.users()
+
+        subscription = EmailSubscription.objects.create(user=other, notification=True)
+        subscription.notification_areas.set([self.area])
+        with CaptureQueriesContext(connection) as two_subscriptions:
+            self.users()
+
+        self.assertEqual(len(one_subscription), len(two_subscriptions))
+
+
+class TestSession(TestCase):
+    ''' DBC22-7325: the signed-in user's session data '''
+
+    def setUp(self):
+        from apps.organizations.models import Organization, ServiceArea
+        from apps.users.models import EmailSubscription
+
+        self.area = ServiceArea.objects.get(id=8)
+        self.org = Organization.objects.create(name='Org A')
+        self.org.service_areas.set([self.area])
+
+        self.user = get_user_model().objects.create_user(username='user', email='u@gov.bc.ca')
+        self.user.organizations.set([self.org])
+        subscription = EmailSubscription.objects.create(user=self.user, notification=True,
+                                                        notification_types=['incidents'])
+        subscription.notification_areas.set([self.area])
+        self.client.force_login(self.user)
+
+    def test_session_includes_areas_not_settings(self):
+        data = self.client.get('/session').json()
+
+        self.assertEqual(data['service_areas'], [self.area.id])
+        self.assertNotIn('email_subscription', data)  # loaded from users/email-subscriptions
+
+    def test_session_queries_dont_grow_with_organizations(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        from apps.organizations.models import Organization
+
+        with CaptureQueriesContext(connection) as one_organization:
+            self.client.get('/session')
+
+        other = Organization.objects.create(name='Org B')
+        other.service_areas.set([self.area])
+        self.user.organizations.add(other)
+        with CaptureQueriesContext(connection) as two_organizations:
+            self.client.get('/session')
+
+        self.assertEqual(len(one_organization), len(two_organizations))
+
+    def test_update_unknown_or_malformed_id_is_404(self):
+        admin = get_user_model().objects.create_user(username='admin2', is_staff=True, is_superuser=True)
+        self.client.force_login(admin)
+        for pk in ('999999', 'abc'):
+            response = self.client.patch(f'/api/users/{pk}', {'is_approver': True}, content_type='application/json')
+            self.assertEqual(response.status_code, 404)
+
+    def test_area_ids_without_prefetch_is_one_query(self):
+        from apps.organizations.models import Organization
+        from apps.users.serializers import get_user_notification_area_ids
+
+        other = Organization.objects.create(name='Org B')
+        other.service_areas.set([self.area])
+        self.user.organizations.add(other)
+        user = get_user_model().objects.get(pk=self.user.pk)
+
+        with self.assertNumQueries(1):
+            self.assertEqual(get_user_notification_area_ids(user), {self.area.id})
+
+        prefetched = get_user_model().objects.prefetch_related('organizations__service_areas').get(pk=self.user.pk)
+        with self.assertNumQueries(0):
+            self.assertEqual(get_user_notification_area_ids(prefetched), {self.area.id})

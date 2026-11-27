@@ -3,21 +3,23 @@ from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError, transaction
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
-from apps.organizations.models import Organization
+from apps.organizations.models import Organization, ServiceArea
 from apps.shared.models import SiteSettings
 
 from .models import EmailSubscription, RIDEUser, Request
-from .serializers import EmailSubscriptionSerializer, RIDEUserSerializer, RIDEGroupSerializer
+from .serializers import EmailSubscriptionSerializer, RIDEUserSerializer, RIDEGroupSerializer, SessionUserSerializer
 
 
 class RIDEUserAPIView(ModelViewSet):
@@ -57,18 +59,23 @@ class RIDEUserAPIView(ModelViewSet):
     only those fields with changing values.
     '''
 
-    queryset = RIDEUser.objects.prefetch_related(
+    # DBC22-7325: ids only for service areas, without their geometry
+    queryset = RIDEUser.objects.select_related(
+        'email_subscription',
+    ).prefetch_related(
         'socialaccount_set',
-        'organizations',
+        Prefetch('organizations__service_areas', queryset=ServiceArea.objects.only('id', 'parent_id')),
         'user_permissions__content_type',
         'groups__permissions__content_type',
+        Prefetch('email_subscription__notification_areas', queryset=ServiceArea.objects.only('id')),
     ).all()
     serializer_class = RIDEUserSerializer
     permission_classes = [permissions.IsAdminUser]
     # permission_classes = [permissions.AllowAny]   # For development
 
     def update(self, request, *args, **kwargs):
-        user = self.get_object()
+        # without the list's prefetches; super().update gets the full user
+        user = get_object_or_404(RIDEUser, pk=kwargs[self.lookup_field])
 
         # Approver role handling
         is_approver = request.data.get('is_approver', None)
@@ -92,10 +99,6 @@ class RIDEUserAPIView(ModelViewSet):
         # User inactive, clear organizations
         if not user.is_active:
             user.organizations.clear()
-
-            prefetch_cache = getattr(user, '_prefetched_objects_cache', None)
-            if prefetch_cache is not None:
-                prefetch_cache.pop('organizations', None)
 
             serializer = self.get_serializer(user)
             return Response(serializer.data, status=response.status_code)
@@ -207,7 +210,8 @@ class session(APIView):
         flags = SiteSettings.objects.values('enable_map_setup').first() or {}
 
         if request.user.is_authenticated:
-            serializer = RIDEUserSerializer(request.user)
+            # service areas come from one id query, see get_user_notification_area_ids
+            serializer = SessionUserSerializer(request.user)
             return Response({**serializer.data, **flags}, status=status.HTTP_200_OK)
 
         else:
