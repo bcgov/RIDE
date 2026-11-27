@@ -205,14 +205,23 @@ jobs:
 
           
 
-    - name: Post preview URL to PR
+    - name: Post preview URLs to PR
       if: github.event_name == 'pull_request'
       env:
         GH_TOKEN: ${{ github.token }}
         PR: ${{ github.event.pull_request.number }}
+        PR_RELEASE: ${{ needs.setup.outputs.helm_release_name }}
         PREVIEW_URL: ${{ needs.setup.outputs.openshift_gold_url }}
+        NAMESPACE: ${{ vars.OPENSHIFT_NAMESPACE }}
       run: |
+        CONSOLE="https://console.apps.gold.devops.gov.bc.ca"
+        BODY="$(printf '%s\n' \
+          "OpenShift URLs for the PR Deployment:" \
+          "- App Route: ${PREVIEW_URL}/" \
+          "- Django Admin: ${PREVIEW_URL}/admin/" \
+          "- Pods: ${CONSOLE}/k8s/ns/${NAMESPACE}/pods?name=${PR_RELEASE}" \
+          "- Helm Release: ${CONSOLE}/helm-releases/ns/${NAMESPACE}/release/${PR_RELEASE}")"
         gh pr comment "$PR" \
-          --body "Preview environment: ${PREVIEW_URL}" \
+          --body "$BODY" \
           --edit-last \
           --create-if-none
