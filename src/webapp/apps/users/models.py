@@ -3,6 +3,8 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 
 from ..shared.models import BaseModel
 
@@ -63,3 +65,18 @@ class EmailSubscription(BaseModel):
 
     def __str__(self):
         return f'{self.user} notifications {"on" if self.notification else "off"}'
+
+
+@receiver(m2m_changed, sender=RIDEUser.organizations.through)
+def resolve_access_requests(sender, instance, action, reverse, pk_set, **kwargs):
+    '''
+    DBC22-6697: an access request is done once the user has an organization,
+    however it was assigned (Users screen, Django admin, imports), so old Grant
+    permission links don't reassign it and a user later removed is asked again
+    '''
+
+    if action != 'post_add' or not pk_set:
+        return
+
+    user_ids = pk_set if reverse else [instance.pk]
+    Request.objects.filter(user_id__in=user_ids, request_type=Request.RequestTypes.ADD_TO_ORG).delete()

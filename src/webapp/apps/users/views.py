@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
@@ -18,8 +20,12 @@ from rest_framework.response import Response
 from apps.organizations.models import Organization, ServiceArea
 from apps.shared.models import SiteSettings
 
+from apps.shared.helpers import attach_email_images, get_used_email_images
+
 from .models import EmailSubscription, RIDEUser, Request
 from .serializers import EmailSubscriptionSerializer, RIDEUserSerializer, RIDEGroupSerializer, SessionUserSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class RIDEUserAPIView(ModelViewSet):
@@ -68,6 +74,7 @@ class RIDEUserAPIView(ModelViewSet):
         'user_permissions__content_type',
         'groups__permissions__content_type',
         Prefetch('email_subscription__notification_areas', queryset=ServiceArea.objects.only('id')),
+        'request_set',
     ).all()
     serializer_class = RIDEUserSerializer
     permission_classes = [permissions.IsAdminUser]
@@ -220,6 +227,7 @@ class session(APIView):
         response.set_cookie('csrftoken', get_token(request, ))
         return response
 
+
 @api_view(http_method_names=['POST'])
 def make_request(request):
 
@@ -236,28 +244,52 @@ def make_request(request):
     except (ValueError, Organization.DoesNotExist):
         return Response(status=400, data={ 'detail': 'Organization not found' })
 
-    if Request.objects.filter(user=request.user, request_type=request_type).count() > 0:
-        return Response(status=400, data={ 'detail': 'Request already sent' })
+    # DBC22-6697: one request at a time per user (e.g. a double click)
+    with transaction.atomic():
+        user = RIDEUser.objects.select_for_update().get(pk=request.user.pk)
+        # given one meanwhile; requests are resolved on assignment
+        if user.organizations.exists():
+            return Response(status=400,
+                            data={ 'detail': 'You already belong to an organization. Please reload RIDE.' })
+        if Request.objects.filter(user=request.user, request_type=request_type).exists():
+            return Response(status=400, data={ 'detail': 'Request already sent' })
 
-    Request.objects.create(user=request.user, request_type=request_type,
-                           details={ 'organization': organization.id })
+        access_request = Request.objects.create(user=request.user, request_type=request_type,
+                                                details={ 'organization': organization.id })
 
-    name = f'{request.user.first_name} {request.user.last_name}'
+    # Sent after the request is saved, outside the transaction, so a failed
+    # send is still logged (email_log); the request is then removed so the
+    # user can retry
+    try:
+        send_access_request_email(request.user, organization)
+    except OSError:  # includes smtplib.SMTPException and socket timeouts
+        logger.exception(f'Failed to send the access request email for user {request.user.pk}')
+        access_request.delete()
+        return Response(status=503, data={ 'detail': 'Your request could not be sent. Please try again.' })
+
+    return Response(status=201)
+
+
+def send_access_request_email(user, organization):
+    # DBC22-6697: both links open the RIDE Users screen filtered to this user;
+    # Grant permission also assigns the requested organization (RIDE Figma 9984:14090)
     context = {
-        'name': name,
-        'email': request.user.email,
+        'name': user.get_full_name() or user.email or user.username,
+        'email': user.email,
         'organization': organization.name,
-        'url': f'{settings.FRONTEND_BASE_URL}admin/users/rideuser/{request.user.id}/change/'
+        'contact_name': organization.contact_name or 'Not provided',
+        'contact_id': organization.contact_id or 'Not provided',
+        'grant_url': f'{settings.FRONTEND_BASE_URL}users/?grant={user.id}',
+        'users_url': f'{settings.FRONTEND_BASE_URL}users/?user={user.id}',
     }
     text = render_to_string('email/request_add_to_organization.txt', context)
     html = render_to_string('email/request_add_to_organization.html', context)
     msg = EmailMultiAlternatives(
-        f'{ name } New user registered',
+        'A RIDE user has requested to be added to an organization',
         text,
-        settings.RIDE_FROM_EMAIL_DEFAULT,
+        settings.RIDE_NOTIFICATION_FROM_EMAIL_SENDER,
         settings.ACCESS_REQUEST_RECEIVERS,
     )
     msg.attach_alternative(html, 'text/html')
+    attach_email_images(msg, get_used_email_images(html))
     msg.send()
-
-    return Response(status=201)

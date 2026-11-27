@@ -1,9 +1,9 @@
 // React
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Navigation
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 
 // Internal imports
 import { AlertContext, AuthContext } from "../contexts.js";
@@ -13,9 +13,11 @@ import RIDEModal from "../components/shared/modal";
 import EditUserForm from "./forms/editUser";
 import OrgForm from "./forms/orgForm";
 import Spinner from "../components/shared/spinner.jsx";
+import { rememberReturnPath } from "../shared/helpers";
 
 import {
-  addOrUpdateOrganization, deleteOrganization, selectAllOrganizations,
+  addOrUpdateOrganization, deleteOrganization, selectAllOrganizations, selectOrganizationsError,
+  selectOrganizationsStatus,
 } from '../slices/organizations';
 import { updateUser, refreshUsers, selectAllUsers, userStatus, userError } from '../slices/users';
 import { selectAllServiceAreas } from '../slices/serviceAreas';
@@ -38,6 +40,7 @@ export default function Home() {
   /* Setup */
   // Navigation
   const navigate = useNavigate();
+  const [ searchParams, setSearchParams ] = useSearchParams();
 
   /* Hooks */
   // Context
@@ -49,10 +52,21 @@ export default function Home() {
   const [ sortKey, setSortKey ] = useState('Name');
   const [ selectedOrg, setSelectedOrg ] = useState('All organizations');
   const [ searchText, setSearchText ] = useState('');
+  const [ linkedUserId, setLinkedUserId ] = useState(null);  // DBC22-6697: show only the linked user
+
+  // Refs
+  // DBC22-6697: access request email links; "Grant permission" (?grant=) also assigns the requested organization,
+  // "RIDE user management" (?user=) only shows the user
+  const emailLink = useRef({
+    userId: searchParams.get('grant') || searchParams.get('user'),
+    grant: searchParams.has('grant'),
+  });
 
   // Selectors
   const serviceAreas = useSelector(selectAllServiceAreas);
   const orgs = useSelector(selectAllOrganizations);
+  const orgsStatus = useSelector(selectOrganizationsStatus);
+  const orgsError = useSelector(selectOrganizationsError);
   const users = useSelector(selectAllUsers);
   const status = useSelector(userStatus);
   const err = useSelector(userError);
@@ -64,6 +78,8 @@ export default function Home() {
     if (!authContext?.loginStateKnown) { return; }
 
     if (!authContext.username) {
+      // Redirect to landing page if not logged in, returning here after login
+      rememberReturnPath();
       navigate('/');
 
     // Redirect to first page if not superuser
@@ -78,7 +94,32 @@ export default function Home() {
 
   useEffect(() => {
     filterAndSortUsers();
-  }, [users, orgs, sortKey, selectedOrg, searchText]);
+  }, [users, orgs, sortKey, selectedOrg, searchText, linkedUserId]);
+
+  // DBC22-6697: show the user linked from an access request email, granting their
+  // requested organization.  Runs once: emailLink is cleared before anything else
+  useEffect(() => {
+    const { userId, grant } = emailLink.current;
+    if (!userId || !authContext?.is_superuser || status !== 'fulfilled' || (grant && orgsStatus === 'pending')) {
+      return;
+    }
+
+    emailLink.current = {};
+    setSearchParams((params) => { params.delete('grant'); params.delete('user'); return params; }, { replace: true });
+
+    const user = users.find(u => u.id === Number(userId));
+    if (!user) {
+      setAlertContext({ message: 'The user from this access request could not be found.' });
+      return;
+    }
+
+    // The search box shows why only this user is listed
+    setSearchText(user.email || user.social_username || user.username);
+    setLinkedUserId(user.id);
+    if (grant) {
+      grantRequestedOrg(user);
+    }
+  }, [authContext, status, users, orgsStatus]);
 
   useEffect(() => {
     // Sync selectedOrg with orgs list if it changes
@@ -176,6 +217,12 @@ export default function Home() {
     // Filter users based on selected organization
     let filteredUsers = [...users];
 
+    // DBC22-6697: only the user linked from the email, until the filters change
+    if (linkedUserId) {
+      setProcessedUsers(users.filter(user => user.id === linkedUserId));
+      return;
+    }
+
     // Apply organization filter
     if (selectedOrg !== 'All organizations') {
       filteredUsers = users.filter(user => user.organizations?.[0] === selectedOrg.id);
@@ -200,6 +247,67 @@ export default function Home() {
   }
 
   /* Handlers */
+  const getUserDisplayName = (user) =>
+    `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || user.username;
+
+  const grantRequestedOrg = (user) => {
+    const name = getUserDisplayName(user);
+
+    if (user.organizations?.length) {
+      const orgName = getUserOrganizationName(user);
+      setAlertContext({ message: orgName ? `${name} already belongs to ${orgName}.` : `${name} already belongs to an organization.` });
+      return;
+    }
+
+    if (!user.is_active) {  // the API clears a disabled user's organizations
+      setAlertContext({ message: `${name} is disabled. Enable the user before granting permissions.` });
+      return;
+    }
+
+    if (!user.requested_organization) {
+      setAlertContext({ message: `${name} has no pending request to join an organization.` });
+      return;
+    }
+
+    const org = orgs.find(o => o.id === user.requested_organization);
+    if (!org && orgsError) {  // organizations didn't load, so it may well exist
+      setAlertContext({ message: `Permissions could not be granted to ${name}. Try again from Edit.` });
+      return;
+    }
+
+    if (!org) {
+      setAlertContext({ message: `The organization ${name} asked to join no longer exists.` });
+      return;
+    }
+
+    dispatch(
+      updateUser({ id: user.id, organizations: [org.id] })
+    ).then(result => {
+      if (result.error) {
+        throw result;
+      }
+
+      setAlertContext({
+        type: 'success',
+        message: `User granted permissions to ${org.name} as ${user.is_approver ? 'an Approver' : 'a Submitter'}.`,
+      });
+
+    }).catch(error => {
+      console.error(error);
+      setAlertContext({ message: `Permissions could not be granted to ${name}. Try again from Edit.` });
+    });
+  }
+
+  const searchHandler = (text) => {
+    setLinkedUserId(null);
+    setSearchText(text);
+  }
+
+  const orgFilterHandler = (filter) => {
+    setLinkedUserId(null);
+    setSelectedOrg(filter);
+  }
+
   const enableUserHandler = (user) => {
     setAlertContext();
     return dispatch(
@@ -301,13 +409,13 @@ export default function Home() {
     <div className='users-home'>
       <div className={'toolbar'}>
         <div className={'left'}>
-          <RIDETextInput label={'Search:'} extraClasses={'extra-margin-right'} value={searchText} handler={setSearchText} maxLength={100} />
+          <RIDETextInput label={'Search:'} extraClasses={'extra-margin-right'} value={searchText} handler={searchHandler} maxLength={100} />
 
           <RIDEDropdown
             label={'Organization'}
             extraClasses={'extra-margin-right'}
             items={['All organizations', ...orgs]}
-            handler={(filter) => setSelectedOrg(filter)}
+            handler={orgFilterHandler}
             value={selectedOrg} />
 
           <RIDEDropdown
