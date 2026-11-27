@@ -23,7 +23,22 @@ Add these variables like this:
 
 
 # Workflows
-### 1. Build & Deploy to Dev
+### 1a. Build & Deploy to PR Branch
+- **What:** Generates new images and deploys a same-repository PR into an ephemeral environment with a seeded DB. IDIR Admins are set using the `PR_ADMIN_IDIRS` dev environment variable in GitHub in a `USERNAME,USERNAME` format.
+- **Trigger:** PR creation, updates, marking the PR ready for review, and removing the `No Preview` label. An environment is deployed only when the PR is ready for review (not a draft) and does not have the `No Preview` label:
+
+    | PR state | Preview |
+    | --- | --- |
+    | Draft | No |
+    | Ready for review | Yes |
+    | Ready for review with `No Preview` | No |
+
+    Fork PRs do not get environments.
+- **Comment:** Once deployed, the workflow posts a comment with the app, Django admin, pods and Helm release URLs, and updates the same comment on later deploys.
+- **Cleanup:** Converting the PR to a draft, adding `No Preview`, or closing the PR tears down its environment and deletes the URL comment. Deploy and cleanup runs are serialized per PR; ineligible deploy events do not compete with cleanup.
+- **Image Tags:** `pr-###` and `sha`
+
+### 1b. Build & Deploy to Dev
 - **What:** Generates a new image from the code in `main` and deploys to Gold/GoldDR
 - **Trigger:** Manual or on push to `main` branch
 - **Image Tags:** `latest`, `latest-dev`, and `sha` 
@@ -58,4 +73,7 @@ Add these variables like this:
 - **Purpose:** To identify any `HIGH` or `CRITICAL` vulnerabilities in the images. Results are uploaded to the Github Security Tab
 - **Trigger:** Automatic on Sundays at 2am
 
+### Cleanup PR
+- **Purpose:** Removes the PR application, its temporary database, and the preview URL comment.
+- **Trigger:** When a PR is converted to a draft, when `No Preview` is added, when a PR is closed, or when run manually with a PR number. Manual cleanup does not change the PR's labels or draft status, so a later eligible PR update can deploy the environment again with a clean database.
 

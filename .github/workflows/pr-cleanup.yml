@@ -1,11 +1,96 @@
-name: PR Cleanup Placeholder
+name: Cleanup PR Environment
+# Tears down the PR application and temporary database, and deletes the preview URL comment,
+# when the PR is closed, converted to a draft, or given the `No Preview` label.
+# It can also be run manually with a PR number.
 
 on:
+  pull_request:
+    types: [closed, converted_to_draft, labeled]
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to clean up (ie `239`)
+        required: true
+        type: number
+
+# Same group as the deploy workflow, so cleanup waits for any in-flight deploy
+# instead of racing it. cancel-in-progress is false so the cleanup is never cancelled.
+concurrency:
+  group: pr-env-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  PR: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
 
 jobs:
-  hello:
-    runs-on: ubuntu-latest
+  teardown:
+    name: Remove PR ${{ github.event.pull_request.number || github.event.inputs.pr_number }} environment
+    # Fork PRs never got an environment, so there is nothing to remove
+    # `labeled` fires for every label; only `No Preview` means "tear the preview down".
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       (github.event.action == 'closed' ||
+        github.event.action == 'converted_to_draft' ||
+        (github.event.action == 'labeled' && github.event.label.name == 'No Preview')))
+    runs-on:
+      group: Larger Runners - OpenShift Static-IP
+    environment: dev
     steps:
-      - name: Say hello
-        run: echo "Hello, world!"
+      - name: Validate PR number
+        run: |
+          if [[ ! "$PR" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Invalid PR number: $PR" >&2
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: OC Setup
+        uses: ./.github/actions/oc-setup
+        with:
+          server: ${{ vars.OPENSHIFT_GOLD_SERVER }}
+          token: ${{ secrets.OPENSHIFT_GOLD_TOKEN }}
+          namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+      # App first, then the database it depends on
+      - name: Uninstall application release
+        run: |
+          RELEASE="$(helm list --all --short --filter "^pr-${PR}-ride$")"
+          if [ -n "$RELEASE" ]; then
+            helm uninstall "$RELEASE" --wait --timeout 5m
+          else
+            echo "Release pr-${PR}-ride not found, skipping"
+          fi
+
+      - name: Remove PR database
+        run: |
+          oc delete deployment,service,networkpolicy,pvc,secret \
+            -l "app.kubernetes.io/instance=pr-${PR}-ride-db" \
+            --ignore-not-found --wait
+
+      # Runs only after the teardown succeeds, so the links stay up while anything is still running.
+      - name: Remove preview URL comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Same match as pr-deploy.yml: only this workflow's comments, current or earlier format.
+          COMMENT_IDS="$(gh api --paginate "repos/${REPO}/issues/${PR}/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and ((.body | startswith("OpenShift URLs for the PR Deployment:")) or (.body | startswith("Preview environment:")))) | .id')"
+
+          if [ -z "$COMMENT_IDS" ]; then
+            echo "No preview comment on PR ${PR}"
+            exit 0
+          fi
+
+          for COMMENT_ID in $COMMENT_IDS; do
+            gh api -X DELETE "repos/${REPO}/issues/comments/${COMMENT_ID}"
+            echo "Deleted preview comment ${COMMENT_ID}"
+          done
+
