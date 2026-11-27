@@ -1,16 +1,19 @@
 name: 1a. Build & Deploy to PR Branch
-# Builds a preview environment for same-repository PRs that are not drafts, have the
-# `Ready For Review` label, and do not have the `No Preview` label.
+# Builds a preview environment for same-repository PRs that are ready for review (not drafts)
+# and do not have the `No Preview` label.
 # It provisions a temporary PostGIS database, builds the application, deploys to OpenShift Gold,
-# and posts the preview URL as a PR comment. Adding `No Preview` triggers teardown.
+# and posts the preview URLs as a PR comment. Converting the PR to a draft or adding
+# `No Preview` tears the environment down (see pr-cleanup.yml).
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review, converted_to_draft]
+    # `unlabeled` is only acted on for `No Preview`; other label changes do not affect the preview.
+    types: [opened, synchronize, reopened, ready_for_review, unlabeled]
 
 concurrency:
-  # Ineligible label/draft events must not compete with cleanup for the PR lock.
-  group: pr-env-${{ github.event.pull_request.number || github.ref_name }}${{ (github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.draft || !contains(github.event.pull_request.labels.*.name, 'Ready For Review') || contains(github.event.pull_request.labels.*.name, 'No Preview')) && format('-skip-{0}', github.run_id) || '' }}
+  # Ineligible events (forks, drafts, `No Preview`, other labels being removed) get their own
+  # group, so they neither cancel an in-flight deploy nor compete with cleanup for the PR lock.
+  group: pr-env-${{ github.event.pull_request.number || github.ref_name }}${{ (github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.draft || contains(github.event.pull_request.labels.*.name, 'No Preview') || (github.event.action == 'unlabeled' && github.event.label.name != 'No Preview')) && format('-skip-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -22,7 +25,13 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     name: Setup Job to define outputs
-    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft && contains(github.event.pull_request.labels.*.name, 'Ready For Review') && !contains(github.event.pull_request.labels.*.name, 'No Preview')
+    # Same rule as the concurrency group above: same repository, not a draft, no `No Preview`
+    # label, and not the removal of some other label.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.draft &&
+      !contains(github.event.pull_request.labels.*.name, 'No Preview') &&
+      (github.event.action != 'unlabeled' || github.event.label.name == 'No Preview')
     outputs:
       environment_name: dev            # reuse the dev GitHub environment for vars/secrets
       helm_release_name: pr-${{ github.event.pull_request.number }}-ride
@@ -214,7 +223,9 @@ jobs:
         PR_RELEASE: ${{ needs.setup.outputs.helm_release_name }}
         PREVIEW_URL: ${{ needs.setup.outputs.openshift_gold_url }}
         NAMESPACE: ${{ vars.OPENSHIFT_NAMESPACE }}
+        REPO: ${{ github.repository }}
       run: |
+        # The heading identifies this comment; pr-cleanup.yml matches the same text to delete it.
         CONSOLE="https://console.apps.gold.devops.gov.bc.ca"
         BODY="$(printf '%s\n' \
           "OpenShift URLs for the PR Deployment:" \
@@ -222,7 +233,17 @@ jobs:
           "- Django Admin: ${PREVIEW_URL}/admin/" \
           "- Pods: ${CONSOLE}/k8s/ns/${NAMESPACE}/pods?name=${PR_RELEASE}" \
           "- Helm Release: ${CONSOLE}/helm-releases/ns/${NAMESPACE}/release/${PR_RELEASE}")"
-        gh pr comment "$PR" \
-          --body "$BODY" \
-          --edit-last \
-          --create-if-none
+
+        # Only comments posted by this workflow, so a person quoting the heading is never edited.
+        # "Preview environment:" is the earlier format of this comment.
+        COMMENT_ID="$(gh api --paginate "repos/${REPO}/issues/${PR}/comments" \
+          --jq '.[] | select(.user.login == "github-actions[bot]" and ((.body | startswith("OpenShift URLs for the PR Deployment:")) or (.body | startswith("Preview environment:")))) | .id' \
+          | head -n 1)"
+
+        if [ -n "$COMMENT_ID" ]; then
+          gh api -X PATCH "repos/${REPO}/issues/comments/${COMMENT_ID}" -f body="$BODY" > /dev/null
+          echo "Updated preview comment ${COMMENT_ID}"
+        else
+          gh api -X POST "repos/${REPO}/issues/${PR}/comments" -f body="$BODY" > /dev/null
+          echo "Posted preview comment"
+        fi
