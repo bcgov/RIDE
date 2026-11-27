@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router';
 // Internal imports
 import { ALLOW_LOCAL_ACCOUNTS, API_HOST, DEBUG } from '../env.js';
 import { AuthContext } from '../contexts';
-import { getCookie } from "../shared/helpers";
+import { getCookie, takeReturnPath } from "../shared/helpers";
 import { handleFormSubmit } from "../shared/handlers";
 
 // Styling
@@ -33,8 +33,8 @@ export default function Home() {
     if (!authContext) { return; }
 
     if (authContext.loginStateKnown && authContext.username) {
-      // Redirect to events page if logged in
-      navigate('/events/');
+      // Redirect to the page the user was sent here from, or the events page, if logged in
+      navigate(takeReturnPath() || '/events/');
     }
   }, [authContext]);
 

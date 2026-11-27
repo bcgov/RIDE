@@ -1,17 +1,21 @@
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 from django.conf import settings
+from django.contrib.gis.geos import GEOSGeometry
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.db.models import F, Q
 from django.template.loader import render_to_string
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, lock_task, on_startup, post_execute
 
+from ..shared.helpers import attach_email_images, get_used_email_images
 from ..users.models import EmailSubscription, RIDEUser, get_task_user
 from .enums import (
     EventDisplayCategory,
+    EVENT_HIGHLIGHT_FIELDS,
     EventSeverity,
     NotificationCreator,
     NotificationEventType,
@@ -21,7 +25,13 @@ from .enums import (
     NOTIFICATION_SUBJECTS,
     EventType,
 )
-from .helpers import area_label, get_display_category, get_ride_event_data, get_severity_category
+from .helpers import (
+    area_label,
+    build_event_site_link,
+    get_display_category,
+    get_ride_event_data,
+    get_severity_category,
+)
 from .models import Event, EventReminderNotification, QueuedEventNotification, _is_notification_disabled
 from .serializers import DriveBCChainupSerializer, DriveBCEventSerializer, EventSerializer
 
@@ -100,6 +110,14 @@ def content_changes(event, baseline):
     return changes
 
 
+def get_published_baseline(event):
+    ''' The last approved version before this one, i.e., what DriveBC shows '''
+
+    return Event.objects.filter(
+        id=event.id, approved=True, version__lt=event.version,
+    ).select_related('user', 'service_area', 'segment', 'chainup').order_by('-version').first()
+
+
 def get_notification_status(event):
     '''
     Classify a newly saved event version.
@@ -118,9 +136,7 @@ def get_notification_status(event):
         return None
 
     prior = Event.objects.filter(id=event.id, version=event.version - 1).first() if event.version else None
-    baseline = Event.objects.filter(
-        id=event.id, approved=True, version__lt=event.version,
-    ).order_by('-version').first()
+    baseline = get_published_baseline(event)
 
     if not event.approved:
         return get_approval_request_status(event, prior, baseline)
@@ -258,14 +274,62 @@ def get_notification_event(event):
         fields.setdefault('impacts', [])
         fields.setdefault('restrictions', [])
         fields.setdefault('schedules', [])
+        fields.setdefault('delay_amount', 0)
+        fields.setdefault('delay_unit', 'minutes')
         fields.setdefault('additional', '')
         fields.setdefault('link', '')
         fields.setdefault('event_sub_type', '')  # as DBC's RIDEChainupSerializer
+        fields.setdefault('closest_landmark', '')
+
+    # DBC stores the location as a geometry
+    location = fields.get('location')
+    if isinstance(location, dict):
+        try:
+            fields['location'] = GEOSGeometry(json.dumps(location), srid=4326)
+        except Exception:
+            logger.warning(f'Invalid location for {event}; emailing without length or map position')
+            fields['location'] = None
 
     notification_event = SimpleNamespace(**fields)
+    notification_event.timezone = notification_event.timezone or 'America/Vancouver'
     notification_event.display_category = get_display_category(notification_event)
+
     notification_event.ride = event
     return notification_event
+
+
+def set_notification_fields(event, previous=None, kind=None, published=True, link_event=None):
+    '''
+    Annotate event with email status, previous version and changed fields
+    (DBC).  `published` is whether DriveBC currently shows the event, so a
+    DriveBC link is meaningful; `link_event` is the version DriveBC shows,
+    when that isn't `event` (e.g., for approval requests).
+    '''
+
+    event.notification_status = kind
+    event.previous = previous
+    event.changed = [
+        field for field in EVENT_HIGHLIGHT_FIELDS
+        if event.previous and getattr(event.previous, field) != getattr(event, field)
+    ]
+
+    # No DriveBC page once cleared, or before a new event is published
+    unpublished = not published or kind in (NotificationKind.CLEARED, NotificationKind.CLEARING_APPROVED)
+    event.site_link = None if unpublished else build_event_site_link(link_event or event)
+    event.ride_link = f'{settings.FRONTEND_BASE_URL}events/?event={event.id}'
+    return event
+
+
+def has_highlighted_changes(event):
+    ''' Whether the email shows any changes, so needs the legend '''
+    from .templatetags.event_extras import ITEM_GETTERS, item_changes
+
+    if not getattr(event, 'previous', None):
+        return False
+
+    return bool(event.changed) or any(
+        status for field in ITEM_GETTERS for _, status in item_changes(event, field)
+    )
 
 
 def get_image_type_file_name(event):
@@ -375,7 +439,7 @@ def get_notification_subscriptions(event, kind, notification_event):
     return [subscription.user for subscription in subscriptions.select_related('user').distinct()]
 
 
-def send_event_emails(notification_event, kind, context, recipients):
+def send_event_emails(event, template_name, context, recipients):
     '''
     Send one email per recipient.  Follows DBC's send_event_emails, without
     combining events into one email.
@@ -384,17 +448,24 @@ def send_event_emails(notification_event, kind, context, recipients):
     if _is_notification_disabled() or not recipients:
         return 0
 
-    area = area_label(notification_event.ride.service_area)
+    kind = event.notification_status
+    area = area_label(event.ride.service_area)
     context = {
         **context,
-        'event': notification_event,
+        'event': event,
         'kind': kind,
+        'is_cleared': kind in (NotificationKind.CLEARED, NotificationKind.CLEARING_APPROVED),
+        'has_changes': has_highlighted_changes(event),
         'area_label': area,
         'fe_base_url': settings.FRONTEND_BASE_URL,
+        'settings_path': 'notifications/',
+        'from_email': settings.RIDE_NOTIFICATION_ADDRESS_BOOK_EMAIL,
         'support_email': settings.RIDE_SUPPORT_EMAIL,
     }
-    subject = get_event_subject(notification_event, kind, area)
-    text = render_to_string('email/event_updated.txt', context)
+    subject = get_event_subject(event, kind, area)
+    text = render_to_string(f'email/{template_name}.txt', context)
+    html = render_to_string(f'email/{template_name}.html', context)
+    images = get_used_email_images(html)
 
     # One SMTP session for all recipients
     connection = get_connection()
@@ -407,19 +478,21 @@ def send_event_emails(notification_event, kind, context, recipients):
     failed = False
     try:
         for user in recipients:
-            msg = EmailMultiAlternatives(
-                subject,
-                text,
-                settings.RIDE_NOTIFICATION_FROM_EMAIL_SENDER,
-                [user.email],
-                connection=connection,
-            )
             try:
+                msg = EmailMultiAlternatives(
+                    subject,
+                    text,
+                    settings.RIDE_NOTIFICATION_FROM_EMAIL_SENDER,
+                    [user.email],
+                    connection=connection,
+                )
+                msg.attach_alternative(html, 'text/html')
+                attach_email_images(msg, images)
                 msg.send()
                 sent += 1
             except Exception:
                 failed = True
-                logger.exception(f'Failed to send {kind} notification for {notification_event.id} to user {user.pk}')
+                logger.exception(f'Failed to send {kind} notification for {event.id} to user {user.pk}')
     finally:
         try:
             connection.close()
@@ -434,19 +507,46 @@ def send_event_emails(notification_event, kind, context, recipients):
     return sent
 
 
-def send_event_notification(event, kind, baseline=None, phrase=None):
-    ''' Email subscribers about a classified event version; returns emails sent '''
+# Which version the email shows, and what it's compared with
+SHOWS_BASELINE = (NotificationKind.CLEARED, NotificationKind.CLEARING_APPROVED)
+COMPARES_WITH_BASELINE = (NotificationKind.UPDATED, NotificationKind.UPDATE_APPROVED,
+                          NotificationKind.RECONFIRMED, NotificationKind.APPROVAL_REQUESTED)
 
-    if not EmailSubscription.objects.filter(notification=True, notification_areas=event.service_area_id).exists():
+
+def send_event_notification(event, kind, baseline=None, phrase=None, recipients=None):
+    '''
+    Email subscribers about a classified event version; returns emails sent.
+    Pass recipients to send to them instead of subscribers, e.g. for testing.
+    '''
+
+    # Skip building the email when nobody in the event's area has notifications on
+    if recipients is None and not EmailSubscription.objects.filter(
+            notification=True, notification_areas=event.service_area_id).exists():
         return 0
 
-    notification_event = get_notification_event(event)
+    # Cleared emails show the event as it was published, as DBC does
+    shown = baseline if kind in SHOWS_BASELINE and baseline else event
+    notification_event = get_notification_event(shown)
     if notification_event is None:
         return 0
 
-    recipients = get_notification_subscriptions(event, kind, notification_event)
-    context = {'phrase': phrase, 'baseline': baseline}
-    return send_event_emails(notification_event, kind, context, recipients)
+    approval_request = kind == NotificationKind.APPROVAL_REQUESTED
+    compares = kind in COMPARES_WITH_BASELINE and (not approval_request or phrase == 'updated')
+    baseline_event = get_notification_event(baseline) if baseline and (compares or approval_request) else None
+    previous = baseline_event if compares else None
+
+    # Approval requests for new or reactivated events aren't on DriveBC yet;
+    # for published events, DriveBC still shows the approved version, so the
+    # link is to that (or none if it can't be built)
+    link_event = None
+    published = True
+    if approval_request:
+        published = bool(baseline and baseline.status == 'Active' and baseline_event)
+        link_event = baseline_event
+    set_notification_fields(notification_event, previous, kind, published, link_event)
+    if recipients is None:
+        recipients = get_notification_subscriptions(event, kind, notification_event)
+    return send_event_emails(notification_event, 'event_updated', {'phrase': phrase}, recipients)
 
 
 def send_queued_event_notifications():

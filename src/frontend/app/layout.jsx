@@ -74,10 +74,15 @@ export default function Layout() {
   }, [alertContext]);
 
   useEffect(() => {
-    searchParams.get('inactive') && setAlertContext({
-      message: 'Your account has been disabled. Please contact a RIDE administrator for access.'
-    });
-    setSearchParams({}, { replace: true });
+    if (searchParams.get('inactive')) {
+      setAlertContext({
+        message: 'Your account has been disabled. Please contact a RIDE administrator for access.'
+      });
+
+      // DBC22-7322: keep other params, e.g. ?event= links from notification emails
+      searchParams.delete('inactive');
+      setSearchParams(searchParams, { replace: true });
+    }
   }, []);
 
   /* Helpers */
