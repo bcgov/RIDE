@@ -1,5 +1,5 @@
 import { API_HOST } from '../../env.js';
-import { get, getCookie } from "../helpers.js";
+import { deleteRequest, get, getCookie, patch, post } from "../helpers.js";
 import { getInitialEvent } from "../../events/forms";
 
 const postChainUpEvents = (path, body) =>
@@ -15,6 +15,26 @@ const postChainUpEvents = (path, body) =>
 
 export function getChainUps() {
   return get(`${API_HOST}/api/chainups`, {});
+}
+
+export function getChainUpRoute([lng, lat]) {
+  return get(`${API_HOST}/api/chainups/route`, { lat, lng });
+}
+
+export function createChainUp(data) {
+  return post(`${API_HOST}/api/chainups`, data);
+}
+
+export function updateChainUp(uuid, data) {
+  return patch(`${API_HOST}/api/chainups/${uuid}`, data);
+}
+
+export function deleteChainUp(uuid) {
+  return deleteRequest(`${API_HOST}/api/chainups/${uuid}`, {});
+}
+
+export function restoreChainUp(uuid) {
+  return post(`${API_HOST}/api/chainups/${uuid}/restore`, {});
 }
 
 export function getInitialChainUp() {

@@ -212,7 +212,7 @@ export default function Preview({ event, dispatch, mapRef, segments, onComputed 
         {isChainup && event.chainup &&
           <div>
             <h3 className="direction">
-              {event.name}
+              {event.name || event.chainup.name}
             </h3>
 
             <div className="preview__group">

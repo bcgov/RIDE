@@ -4,7 +4,7 @@ import uuid
 from dictdiffer import diff
 
 from django.conf import settings
-from django.db import models, transaction
+from django.db import connection, models, transaction
 from django.db.models.signals import pre_delete
 from django.utils import timezone
 
@@ -336,6 +336,12 @@ class VersionedModel(models.Model):
                 return False
 
         return True
+
+    @classmethod
+    def lock_ids(cls):
+        ''' Serialize new-id picks for this model until the transaction ends; call inside atomic. '''
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT pg_advisory_xact_lock(hashtext(%s))', [cls._meta.db_table])
 
     def get_current(self):
         return self if self.latest else type(self).current.get(id=self.id)

@@ -247,6 +247,9 @@ export default function PinsLayer({ event, dispatch }) {
     if (!map) { return; }
 
     if (!map.get('pins')) {
+      // clear pins from previous map
+      layer.getSource().clear();
+
       map.addLayer(layer);
       map.pins = layer;
       map.set('pins', layer);

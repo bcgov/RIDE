@@ -40,9 +40,9 @@ export default class RideFeature extends Feature {
   updateStyles() {
     const event = this.get('raw');
     ['static', 'hover', 'active'].forEach((state) => {
-      const [icon, stroke2] = getIconAndStroke(event, state);
+      const [icon, stroke2, scale] = getIconAndStroke(event, state);
       if (state === 'static') { state = 'normal'; }
-      this[state] = new Style({ image: new Icon({ src: icon }), ...stroke2 });
+      this[state] = new Style({ image: new Icon({ src: icon, scale }), ...stroke2 });
     });
   }
 

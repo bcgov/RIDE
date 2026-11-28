@@ -9,16 +9,15 @@ import { MapContext } from '../../../contexts';
 import { ll2g } from '../helpers.js';
 import RideFeature from '../feature.js';
 import { getChainUps } from '../../../shared/data/chainups';
+import { CHAINUP_ICON_SCALE, getChainupDirectionIcon } from '../../../events/icons';
 
-import chainupStatic from '../../../events/icons/chainup-default-static.svg';
-import chainupHover from '../../../events/icons/chainup-default-hover.svg';
-import chainupActive from '../../../events/icons/chainup-default-active.svg';
-
-const styles = {
-  static: new Style({ image: new Icon({ src: chainupStatic }) }),
-  hover: new Style({ image: new Icon({ src: chainupHover }) }),
-  active: new Style({ image: new Icon({ src: chainupActive }) }),
-};
+const styles = Object.fromEntries(['BOTH', 'NORTHBOUND', 'SOUTHBOUND', 'EASTBOUND', 'WESTBOUND'].map((dir) => [
+  dir,
+  Object.fromEntries(['static', 'hover', 'active'].map((state) => [
+    state,
+    new Style({ image: new Icon({ scale: CHAINUP_ICON_SCALE, src: getChainupDirectionIcon(dir, state) }) }),
+  ])),
+]));
 
 function layerStyle(feature) {
   if (!feature.get('visible')) { return null; }
@@ -29,6 +28,14 @@ function layerStyle(feature) {
 function applyFilter(map, filter) {
   map?.get('chainups')?.getSource().getFeatures().forEach((feature) => {
     feature.set('visible', !filter || filter(feature.get('raw')));
+  });
+}
+
+export function chainupFeature(cu) {
+  return new RideFeature({
+    styles: styles[cu.direction] || styles.BOTH,
+    geometry: new Point(ll2g(cu.primary_point.coordinates)),
+    raw: cu,
   });
 }
 
@@ -46,16 +53,15 @@ export default function SetupChainUpsLayer({ filter, visible = true }) {
       source,
       style: layerStyle,
     });
+
     layer.listenForHover = true;
+    layer.canDragFeatures = true;
+
     map.addLayer(layer);
     map.set('chainups', layer);
 
     getChainUps().then((chainups) => {
-      source.addFeatures(chainups.map((cu) => new RideFeature({
-        styles,
-        geometry: new Point(ll2g(cu.primary_point.coordinates)),
-        raw: cu,
-      })));
+      source.addFeatures(chainups.map(chainupFeature));
       applyFilter(map, filterRef.current);
     });
   }, [map]);

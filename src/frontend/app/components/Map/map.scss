@@ -81,6 +81,8 @@
         margin-right: 0.5rem;
         min-width: 1.5rem;
         text-align: center;
+
+        img { max-height: 35px; } // chain-up PNGs are 96px
       }
 
       .option-label {

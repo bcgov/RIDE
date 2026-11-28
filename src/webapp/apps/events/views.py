@@ -72,6 +72,10 @@ class Events(viewsets.ModelViewSet):
 
         return [AllowAny()]
 
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
     @action(detail=False, methods=['post'], url_path='description')
     def preview_description(self, request):
         # Builds preview description / IVR from an unsaved form payload
@@ -437,6 +441,10 @@ class Notes(viewsets.ModelViewSet):
     serializer_class = NoteSerializer
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
     def _check_note_event_permission(self, user, creator_user_id):
         if user.is_superuser or user.is_approver:

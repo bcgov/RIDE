@@ -48,7 +48,7 @@ export function EventCardLocation({ event }) {
     <div className='event-card-place'>
       <div className='location'>
         <div className='location-name'>
-          {event.location.start?.name}
+          {event.location.start?.name || event.chainup?.name}
           {event.location.start?.useAlias && event.location.start.alias && <>&nbsp;({event.location.start.alias})</>}
         </div>
 
